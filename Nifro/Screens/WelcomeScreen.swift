@@ -16,7 +16,7 @@ extension AppState {
 
 				Use “Browsing Mode” when you need to log into a site or interact with it. Everything you do there is remembered, so you only have to sign in once.
 
-				Not sure what to put up there? “More › Site Gallery” has a list of pages that work well as wallpapers, each with the settings that make it work.
+				Not sure what to put up there? “Site Gallery…” in the same menu lists pages that work well as wallpapers, each with the settings that make it work.
 				""",
 			buttonTitles: [
 				"Continue"

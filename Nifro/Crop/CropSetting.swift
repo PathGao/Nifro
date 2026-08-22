@@ -3,7 +3,7 @@ import SwiftUI
 /**
 Editor for a website's crop region.
 
-Numbers are page pixels measured from the top-left of the page. The four of them are one setting, not four, so the form treats them that way: cropping is either off or fully specified, and a half-filled crop never reaches the model.
+Numbers are page pixels measured from the top-left of the page. All four move together as one setting. Cropping is either off or fully specified, so a half-filled crop never reaches the model.
 */
 struct CropSetting: View {
 	@Binding var crop: CGRect?
@@ -16,13 +16,13 @@ struct CropSetting: View {
 	}
 
 	/**
-	A starting region small enough to be obviously a crop, placed away from the corner so it does not look like a mistake.
+	A starting region small enough that the crop is visibly doing something.
 	*/
 	private static let defaultCrop = CGRect(x: 0, y: 0, width: 600, height: 400)
 
 	var body: some View {
 		Toggle("Crop to a region", isOn: isEnabled)
-			.help("Shows only part of the page, cutting away navigation bars, borders and anything else around the part worth looking at. The window shrinks to the cropped region, so the rest of your desktop stays usable.")
+			.help("Shows only part of the page, cutting away navigation bars, borders and whatever else surrounds it. The window shrinks to the cropped region, so the rest of your desktop stays usable.")
 
 		if crop != nil {
 			HStack {
@@ -54,7 +54,7 @@ struct CropSetting: View {
 					return
 				}
 
-				// A zero or negative extent would produce a window macOS cannot show, and the user is mid-typing, not asking for that.
+				// A zero or negative extent would produce a window macOS cannot show. The user is mid-typing, not asking for that.
 				crop[keyPath: keyPath] = max(0, CGFloat(newValue))
 				self.crop = crop.standardized
 			}
@@ -65,7 +65,7 @@ struct CropSetting: View {
 /**
 Which display a website appears on.
 
-Only offered when there is more than one display: on a single-display Mac the choice does not exist, and the answer to "show a different page on each screen" — the most-asked-for thing upstream (Plash#2) — is that the display belongs to the website, not to the app.
+Only offered when there is more than one display. Showing a different page on each screen is the most-asked-for thing upstream (Plash#2), and it needs the display to belong to the website rather than to the app.
 */
 struct WebsiteDisplaySetting: View {
 	@Binding var display: Display?
@@ -88,7 +88,7 @@ struct WebsiteDisplaySetting: View {
 /**
 The hours a website is allowed to be showing.
 
-Off by default: most wallpapers should just be up. When it is on, both ends are needed — a window with only one end set is not a window, and a half-filled schedule should never reach the model.
+Off by default, because most wallpapers should just stay up. When it is on, both ends are required. One end alone gives no window, so a half-filled schedule never reaches the model.
 */
 struct WebsiteScheduleSetting: View {
 	@Binding var startHour: Int?
@@ -106,7 +106,7 @@ struct WebsiteScheduleSetting: View {
 
 	var body: some View {
 		Toggle("Only show at certain hours", isOn: isEnabled)
-			.help("Useful with rotation: a news page in the morning, something calmer at night. A window that runs past midnight — 22 to 6 — works.")
+			.help("Useful with rotation. A news page in the morning, something calmer at night. A window that runs past midnight, 22 to 6, works.")
 
 		if startHour != nil, endHour != nil {
 			HStack {
@@ -129,7 +129,7 @@ struct WebsiteScheduleSetting: View {
 /**
 Whether a website keeps a browser running or gets photographed periodically.
 
-Per website rather than a global switch, because the answer is a property of the page: a clock is the same picture for a minute at a time, a screensaver is not.
+Per website rather than a global switch, because the answer belongs to the page. A clock is the same picture for a minute at a time. A screensaver is not.
 */
 struct WebsiteRenderingSetting: View {
 	@Binding var rendering: Website.Rendering
@@ -152,6 +152,6 @@ struct WebsiteInteractionSetting: View {
 
 	var body: some View {
 		Toggle("Clickable on the desktop", isOn: $allowsInteraction)
-			.help("Lets you use the page without switching to Browsing Mode. In exchange the window stops letting clicks through, so your desktop icons are behind it, and the page has to keep rendering.")
+			.help("Lets you use the page without switching to Browsing Mode. The window then stops letting clicks through, so your desktop icons sit behind it, and the page has to keep rendering.")
 	}
 }

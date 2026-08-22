@@ -102,7 +102,7 @@ final class SSWebView: WKWebView {
 				}
 			}
 
-			menuItem.toolTip = "Updates the URL for the stored website in Nifro to the current URL"
+			menuItem.toolTip = "Points the stored website at the URL currently loaded"
 		}
 
 		menu.addSeparator()
@@ -123,7 +123,7 @@ final class SSWebView: WKWebView {
 	}
 
 	func toggleBrowsingModeClass() {
-		// `plash-is-browsing-mode` is kept alongside ours so the custom CSS people wrote for Plash over the past five years keeps working.
+		// `plash-is-browsing-mode` stays alongside ours so the custom CSS people wrote for Plash keeps working.
 		let method = Defaults[.isBrowsingMode] ? "add" : "remove"
 
 		// The async variant hands back `Any`, which cannot cross an actor boundary under Swift 6. Nothing here needs the result.

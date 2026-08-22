@@ -2,11 +2,11 @@ import AppKit
 @preconcurrency import Combine
 
 /**
-Tells whether the desktop window is *effectively* hidden — covered by other windows to the point where rendering a live web page is wasted work.
+Tells whether other windows cover the desktop window enough that rendering a live web page is wasted work.
 
-`NSWindow.occlusionState` cannot answer this. The system calls a window visible if any sliver of it shows through, and two slivers essentially always show: the menu bar strip, and the Dock, which is translucent and therefore keeps the wallpaper behind it rendering. A maximized window leaves the desktop window `.visible` forever, so anything keyed off `occlusionState` never fires.
+`NSWindow.occlusionState` cannot answer this. The system calls a window visible if any sliver of it shows through, and two slivers almost always show. One is the menu bar strip. The other is the Dock, which is translucent, so the wallpaper behind it keeps rendering. A maximized window leaves the desktop window `.visible` forever, so anything keyed off `occlusionState` never fires.
 
-We compute the uncovered area ourselves instead. `NSScreen.visibleFrame` is already the screen minus the menu bar and minus the Dock, which is exactly the region where the wallpaper is worth anything, so those two are excluded by construction rather than by special-casing.
+We measure the uncovered area ourselves instead, over the whole screen frame. Those two strips are where the wallpaper survives when everything else is covered, so they count as visible rather than being excluded.
 */
 @MainActor
 final class OcclusionMonitor {
@@ -22,7 +22,7 @@ final class OcclusionMonitor {
 	/**
 	Windows that do not hide the wallpaper, either because they paint nothing or because you can see straight through them.
 
-	The Dock is the interesting one. Its window is fully opaque as far as the window server is concerned, but what it draws is translucent, so the page carries on showing through it — which is exactly the sliver people notice and like. Counting it as coverage would throw that away.
+	The Dock is the interesting one. Its window is fully opaque as far as the window server is concerned, but what it draws is translucent, so the page carries on showing through it. Counting it as coverage would throw that sliver away.
 	*/
 	private static let ignoredOwners: Set<String> = [
 		"Window Server", // Menu bar, and various full-screen scaffolding.
@@ -38,7 +38,7 @@ final class OcclusionMonitor {
 	private var cancellables = Set<AnyCancellable>()
 
 	/**
-	Held only to keep the timer alive — nothing reads it. A repeating `Timer` that nobody retains stops firing.
+	Held only to keep the timer alive. Nothing reads it. A repeating `Timer` that nobody retains stops firing.
 	*/
 	private var timer: Timer?
 
@@ -87,10 +87,10 @@ final class OcclusionMonitor {
 		update()
 	}
 
-	// No `deinit` invalidating the timer: this object lives as long as the app does, and a nonisolated deinit cannot touch a `Timer` under Swift 6 anyway. The timer block holds `self` weakly, so nothing is kept alive by it.
+	// No `deinit` invalidating the timer. This object lives as long as the app does, and a nonisolated deinit cannot touch a `Timer` under Swift 6 anyway. The timer block holds `self` weakly, so it keeps nothing alive.
 
 	/**
-	Force a re-check. Cheap: one window-list snapshot and a grid fill.
+	Force a re-check. Costs one window-list snapshot and a grid fill.
 	*/
 	func update() {
 		guard let screen = screen ?? .main else {
@@ -129,7 +129,7 @@ final class OcclusionMonitor {
 		for window in windowList {
 			guard
 				let layer = window[kCGWindowLayer as String] as? Int,
-				// Below zero is the desktop, the desktop icons, and the wallpaper itself — none of which hide us.
+				// Below zero is the desktop, the desktop icons, and the wallpaper itself. None of those hide us.
 				layer >= 0,
 				let alpha = window[kCGWindowAlpha as String] as? Double,
 				alpha > 0.9,

@@ -1,9 +1,9 @@
 import AppKit
 
 /**
-Running the "choose a region" mode: take over the wallpaper window, let the user drag, turn what they drew into the website's crop.
+Runs the "choose a region" mode. Takes over the wallpaper window, lets the user drag, turns what they drew into the website's crop.
 
-Selection always happens against the whole page. If the website is already cropped, the crop comes off for the duration — otherwise you would be choosing a region of a region, and the numbers you got back would mean something different from the numbers you set.
+Selection always happens against the whole page. If the website is already cropped, the crop comes off for the duration. Otherwise you would be choosing a region of a region, and the numbers coming back would not match the numbers you set.
 */
 extension AppState {
 	var isSelectingCrop: Bool { cropSelectionView != nil }
@@ -25,7 +25,7 @@ extension AppState {
 			}
 		}
 
-		// The window is normally click-through and behind everything; neither is any use while aiming a rectangle at it.
+		// The window is normally click-through and behind everything. Neither helps while the user aims a rectangle at it.
 		desktopWindow.isInteractive = true
 		desktopWindow.level = .floating
 		desktopWindow.alphaValue = 1

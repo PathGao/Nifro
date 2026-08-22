@@ -84,7 +84,7 @@ private struct FreezeWhenCoveredSetting: View {
 			"Only render what is on show",
 			key: .freezeWhenCovered
 		)
-		.help("When other windows cover most of the wallpaper, Nifro shrinks the window to whatever is still visible — the strip behind the Dock, for instance — and keeps rendering only that. When nothing is visible at all it holds the last frame. Turn this off to keep drawing the whole page regardless.")
+		.help("When other windows cover most of the wallpaper, Nifro shrinks the window to whatever is still visible, such as the strip behind the Dock, and keeps rendering only that. When nothing is visible it holds the last frame. Turn this off to keep drawing the whole page.")
 	}
 }
 
@@ -97,7 +97,7 @@ private struct SolidColorUnderMenuBarSetting: View {
 			key: .solidColorUnderMenuBar
 		)
 		.disabled(!extendBelowMenuBar)
-		.help("The menu bar tints itself from whatever is behind it, so extending the wallpaper up there is the only way to make it match — but then the page's own text and edges show through as clutter. This fills that strip with the page's average colour instead: same tint, no content.")
+		.help("The menu bar tints itself from whatever is behind it, so extending the wallpaper up there is the only way to make it match. The page's own text and edges then show through. This fills that strip with the page's average colour instead, which keeps the tint without the content.")
 	}
 }
 
@@ -106,7 +106,7 @@ private struct ContentRulesSetting: View {
 
 	var body: some View {
 		TextField("Content blocking rules", text: $url.withDefaultValue(""), prompt: Text("URL to a rule list"))
-			.help("Points at a WebKit content-blocking rule list somebody else maintains — for hiding cookie banners and ads. Nifro keeps no rules of its own: blocklists rot within weeks and keeping one working is a full-time job.")
+			.help("Points at a WebKit content-blocking rule list somebody else maintains, for hiding cookie banners and ads. Nifro keeps no rules of its own, because blocklists go stale within weeks and keeping one working is a full-time job.")
 	}
 }
 

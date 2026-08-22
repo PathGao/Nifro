@@ -55,7 +55,7 @@ final class AppState: ObservableObject {
 				scene.resetTimer()
 			}
 
-			// Making the window key is not enough when the app is an accessory: the window comes forward but keystrokes still go to whatever was active, so the page cannot be typed into. Plash#114.
+			// Making the window key is not enough when the app is an accessory. The window comes forward, but keystrokes still go to whatever was active before, so nobody can type into the page. Plash#114.
 			if isBrowsingMode {
 				SSApp.forceActivate()
 			}
@@ -90,7 +90,7 @@ final class AppState: ObservableObject {
 	}
 
 	/**
-	The overlay shown while the user is dragging out a crop region, and the crop that was in place before they started.
+	The overlay the user drags a crop region on, plus the crop that was in place before they started.
 	*/
 	var cropSelectionView: CropSelectionView?
 	var cropSelectionPreviousCrop: CGRect?
@@ -159,7 +159,7 @@ final class AppState: ObservableObject {
 	/**
 	Create one scene per display that should show a wallpaper, reusing the ones that already match.
 
-	Called whenever the set of displays or the assignment of websites to them changes. Scenes for displays that went away are torn down; the rest keep their web views and whatever they had loaded.
+	Call this whenever the displays change or a website moves to another display. Scenes for displays that went away get torn down. The rest keep their web views and whatever they had loaded.
 	*/
 	func rebuildScenes() {
 		let wanted = WebsitesController.shared.displaysInUse

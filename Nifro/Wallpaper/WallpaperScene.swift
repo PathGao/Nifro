@@ -2,9 +2,9 @@ import AppKit
 import Combine
 
 /**
-One wallpaper: a window on one display, the web view inside it, and everything that decides what that web view is doing.
+One wallpaper. A window on one display, the web view inside it, and everything that decides what that web view is doing.
 
-Until now all of this was a set of singletons on `AppState` — one window, one web view, one current website — and every feature that needs more than one of anything ran into that. Showing a different page per display is the most-asked-for thing in the upstream tracker and could not be built at all; a playlist could not run two pages at once; the snapshot backend needs a second, offscreen renderer alongside the live one.
+All of this used to be singletons on `AppState`, one window and one web view and one current website, which blocked every feature that needs more than one of anything. A different page per display, the most-asked-for thing in the upstream tracker, could not be built at all. A playlist could not run two pages at once. The snapshot backend needs a second, offscreen renderer alongside the live one.
 
 So the unit is the scene, and the app owns a list of them. A single-display setup has exactly one and behaves as before.
 */
@@ -156,7 +156,7 @@ final class WallpaperScene {
 
 		captureScrollPosition()
 
-		// Always the URL the user specified rather than the current one: it may be a redirect that resolves differently each time.
+		// Always the URL the user specified rather than the current one. It may be a redirect that resolves differently each time.
 		loadBySwapping(website?.url)
 	}
 
@@ -179,7 +179,7 @@ final class WallpaperScene {
 
 		webViewController.loadURL(url)
 
-		// The web view starts hidden so the first frame is not a flash of white. Unhide the web view itself rather than whatever view happens to be installed a second from now: by then the visibility policy may have swapped in a still or a crop container, and unhiding that would leave the real web view hidden for the rest of the session — a blank wallpaper with no way back.
+		// The web view starts hidden so the first frame is not a flash of white. Unhide the web view itself, not whatever view happens to be installed a second from now. By then the visibility policy may have swapped in a still or a crop container, and unhiding that would leave the real web view hidden for the rest of the session. That is a blank wallpaper with no way back.
 		delay(.seconds(1)) { [weak self] in
 			guard let self else {
 				return

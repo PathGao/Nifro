@@ -187,7 +187,7 @@ final class WebsitesController {
 	/**
 	Record a title observed in the live web view, if we do not already have one.
 
-	`LPMetadataProvider` fetches the raw HTML with subresources turned off and gives up after a few seconds, so it comes back empty for anything that sets its title from JavaScript or takes its time — which is a large share of the sites people actually use as wallpapers. The web view has already loaded and run the page, so its title is both more accurate and free.
+	`LPMetadataProvider` fetches the raw HTML with subresources turned off and gives up after a few seconds. It comes back empty for anything that sets its title from JavaScript or loads slowly, which covers a lot of the sites people use as wallpapers. The web view has already run the page, so its title is more accurate and costs nothing.
 	*/
 	func recordObservedTitle(_ title: String, for url: URL?) {
 		guard

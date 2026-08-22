@@ -4,9 +4,9 @@ import WebKit
 /**
 Decides how much of the wallpaper is worth rendering right now.
 
-The first version of this froze the whole wallpaper the moment other windows covered it. On a real desktop that turns out to be both too blunt and almost never correct, for one reason: **the wallpaper is hardly ever completely hidden.** The Dock is translucent and the menu bar samples what is behind it, so with a window maximized you still see the page moving along whichever edge the Dock lives on. That sliver is not an accident — it is one of the nicer things about running a live page as a wallpaper, and freezing it away to save power is a bad trade.
+The first version froze the whole wallpaper the moment other windows covered it. That is wrong on a real desktop, because the wallpaper is hardly ever completely hidden. The Dock is translucent and the menu bar samples what is behind it, so with a window maximized you still see the page moving along whichever edge the Dock lives on. Freezing that sliver away to save power is a bad trade.
 
-So the rule is not "visible or not", it is "how much, and where":
+So the question is how much is on show, and where:
 
 ```
 largest patch of wallpaper still on show
@@ -15,7 +15,7 @@ largest patch of wallpaper still on show
   └─ nothing at all       → freeze on the last frame
 ```
 
-The middle case is the one that matters in practice. The web view keeps its full-screen layout — the page must still believe it has the whole screen or it reflows and the strip shows different content — and only the part on show gets painted. WebKit paints by tile against the exposed rectangle, so a window the width of the Dock paints a fraction of what a full-screen one does.
+The middle case is the one that matters in practice. The web view keeps its full-screen layout, since the page has to believe it has the whole screen or it reflows and the strip shows different content. Only the part on show gets painted. WebKit paints by tile against the exposed rectangle, so a window the width of the Dock paints a fraction of what a full-screen one does.
 */
 extension WallpaperScene {
 	/**
@@ -26,7 +26,7 @@ extension WallpaperScene {
 	private static let fullRenderFraction = 0.6
 
 	/**
-	How big a patch has to be, in square points, to be worth rendering at all — roughly 200×200pt.
+	How big a patch has to be, in square points, to be worth rendering at all, roughly 200×200pt.
 	*/
 	private static let minimumMeaningfulPatchArea = 40_000.0
 
@@ -85,7 +85,7 @@ extension WallpaperScene {
 		window.cropRect = nil
 		installContentView()
 
-		// Belt and braces: the launch-time hide is cleared on a timer, and this path can run before that timer fires.
+		// The launch-time hide is cleared on a timer, and this path can run before that timer fires.
 		if webViewController.webView.url != nil {
 			webViewController.webView.isHidden = false
 		}
@@ -113,7 +113,7 @@ extension WallpaperScene {
 			pageSize: screen.frame.size
 		)
 
-		// Still playing, still animating — just in a smaller window.
+		// Still playing, still animating, just in a smaller window.
 		webViewController.webView.setAllMediaPlaybackSuspended(false) {}
 		settlePendingReload()
 	}
@@ -127,7 +127,7 @@ extension WallpaperScene {
 
 		guard
 			webView.window != nil,
-			// Before the first load there is nothing to hold on to; a still taken now is a blank one, and installing it takes the web view out of the window in the middle of its first load.
+			// Before the first load there is nothing to hold on to. A still taken now would be blank, and installing it would pull the web view out of the window mid-load.
 			webView.url != nil
 		else {
 			return
@@ -146,7 +146,7 @@ extension WallpaperScene {
 				return
 			}
 
-			// Installed even when the snapshot came back empty. Nothing of the wallpaper is on show, so there is nothing to look wrong — and not installing it would leave the web view in the window painting frames nobody sees, which is the whole thing we are trying to avoid.
+			// Installed even when the snapshot came back empty. Nothing of the wallpaper is on show, so nothing can look wrong. Skipping it would leave the web view in the window painting frames nobody sees, which is what this avoids.
 			installFrozenView(showing: image)
 		}
 

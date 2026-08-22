@@ -2512,7 +2512,7 @@ extension WKWebView {
 	/**
 	A Safari user agent whose version number tracks the system instead of being frozen at build time.
 
-	A hardcoded version rots: sites that gate on it start showing "your browser is out of date" a year or two after release, which is exactly what happened upstream (Plash#169 — Google Calendar, four people, two years). Safari's marketing version has tracked the macOS major version since macOS 26, so deriving it from the running system keeps this honest for free.
+	A hardcoded version goes stale. Sites that gate on it start showing "your browser is out of date" a year or two after release, which is what happened upstream (Plash#169, Google Calendar, four people, two years). Safari's marketing version has tracked the macOS major version since macOS 26, so deriving it from the running system costs nothing and keeps up.
 	*/
 	static let safariUserAgent: String = {
 		let major = ProcessInfo.processInfo.operatingSystemVersion.majorVersion
@@ -2537,7 +2537,7 @@ extension WKWebView {
 	static nonisolated func createCSSInjectScript(_ css: String) -> String {
 		let textContent = css.addingPercentEncoding(withAllowedCharacters: .letters) ?? css
 
-		// Injected at document start, so the style element gets appended to a document the page has not finished building. Frameworks that swap out `documentElement` or clear `head` on mount take our style with them, and the user's CSS silently stops applying — the failure people report as "my CSS works in Safari but not here" (Plash#173).
+		// Injected at document start, so the style element gets appended to a document the page has not finished building. Frameworks that swap out `documentElement` or clear `head` on mount take our style with them, and the user's CSS stops applying. People report this as "my CSS works in Safari but not here" (Plash#173).
 		//
 		// Re-appending on mutation is the fix. The observer is cheap because it only watches childList on the root, and re-appending the same element is a move, not a duplicate.
 		return

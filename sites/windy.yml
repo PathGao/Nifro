@@ -1,6 +1,6 @@
 name: Windy
 url: https://www.windy.com/
-description: A live weather map — wind, rain, temperature and pressure layers over the whole globe.
+description: A live weather map. wind, rain, temperature and pressure layers over the whole globe.
 tags: [weather, map, data]
 backend: snapshot
 backendNote: >-

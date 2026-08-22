@@ -54,7 +54,7 @@ struct SiteGalleryScreen: View {
 	}
 
 	/**
-	The catalogue lives in the repository and that is where submissions arrive, so both routes are one click away rather than buried.
+	The catalogue lives in the repository and submissions arrive there too, so both links sit in the footer.
 	*/
 	private var footer: some View {
 		HStack(spacing: 12) {
@@ -110,7 +110,7 @@ struct SiteGalleryScreen: View {
 						.fontWeight(.medium)
 
 					if entry.isLive {
-						badge("live", help: "Keeps rendering continuously. Costs more than a page that is only re-drawn every so often.")
+						badge("live", help: "Keeps rendering. Costs more than a page re-drawn every so often.")
 					}
 
 					if entry.requiresLogin {

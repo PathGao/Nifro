@@ -25,7 +25,7 @@ final class DesktopWindow: NSWindow {
 	/**
 	Whether the website wants clicks while the wallpaper is just a wallpaper.
 
-	Separate from `isInteractive`, which is Browsing Mode: that brings the window forward and takes focus, this only stops the window from letting clicks fall through to the desktop.
+	Separate from `isInteractive`, which is Browsing Mode. That brings the window forward and takes focus. This only stops clicks from falling through to the desktop.
 	*/
 	var allowsPassiveInteraction = false {
 		didSet {

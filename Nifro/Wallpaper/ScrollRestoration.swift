@@ -4,11 +4,11 @@ import WebKit
 /**
 Puts the page back where it was after a reload.
 
-A wallpaper often shows one region of a long page — a particular day in a calendar, a section of a dashboard — and every automatic reload used to throw that away and drop the user back at the top. Upstream tracked this for six years without landing it (Plash#39).
+A wallpaper often shows one region of a long page, a particular day in a calendar or a section of a dashboard, and every automatic reload used to drop the user back at the top. Upstream tracked this for six years without landing it (Plash#39).
 
-The position is captured just before a reload rather than polled, so nothing runs in the background to support it. That covers the reload case, which is the one people actually hit; a hard quit loses at most the last scroll.
+The position is captured just before a reload rather than polled, so nothing runs in the background to support it. That covers the reload case, which is the one people hit. A hard quit loses at most the last scroll.
 
-`WKWebView.interactionState` would restore history, form state and scroll in one property and is the fuller answer. It is not used here because applying it drives a navigation, and a stale or rejected blob leaves a blank wallpaper with no obvious way back — a failure this could not be tested against before shipping. Scrolling fails safe: if it does not work, the page is merely at the top.
+`WKWebView.interactionState` would restore history, form state and scroll in one property, and it is the fuller answer. It goes unused here because applying it drives a navigation, and a stale or rejected blob leaves a blank wallpaper with no obvious way back. Scrolling fails safe. If it does not work, the page is merely at the top.
 */
 extension WallpaperScene {
 	private static let scrollPositionKeyPrefix = "scrollPosition_"

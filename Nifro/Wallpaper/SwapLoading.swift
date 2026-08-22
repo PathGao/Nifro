@@ -10,9 +10,9 @@ Loading in place has three failure modes that upstream tracked as five separate 
 - a load that fails leaves the desktop showing nothing, most visibly when the Mac wakes before the network does (Plash#41, Plash#11)
 - switching between images cuts rather than fades (Plash#47, Plash#9)
 
-Loading into a second web view fixes all three at once: the current page stays up, untouched, until the replacement has actually finished. A failure is then a non-event — the old page simply stays, and the error goes to the menu bar tooltip instead of the desktop.
+Loading into a second web view fixes all three at once. The current page stays up, untouched, until the replacement has finished. A failure then changes nothing on screen. The old page stays, and the error goes to the menu bar tooltip instead of the desktop.
 
-Deliberately scoped to *replacing* a page. The first load of the session still goes straight into the window, because there is nothing to protect yet and no reason to put the one path that has to work behind new machinery.
+Scoped to replacing a page. The first load of the session still goes straight into the window, because there is nothing to protect yet and no reason to put the one path that has to work behind new machinery.
 */
 extension WallpaperScene {
 	/**
@@ -113,7 +113,7 @@ extension SSWebView {
 			load(request)
 		}
 
-		// Polling rather than racing the navigation delegate against a timer: the delegate belongs to the shared controller and reports for whichever web view is live, so a replacement loading out of sight cannot rely on it. `isLoading` flips false on both success and failure, and the URL check below is what tells them apart.
+		// Polling rather than racing the navigation delegate against a timer. The delegate belongs to the shared controller and reports for whichever web view is live, so a replacement loading out of sight cannot use it. `isLoading` flips false on both success and failure, and the URL check below tells them apart.
 		let step = Duration.milliseconds(100)
 		var waited = Duration.zero
 

@@ -14,14 +14,14 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	/**
 	The region of the page to show, in page coordinates with the origin at the top-left. `nil` shows the whole page.
 
-	Used to cut away a site's navigation, borders and surrounding furniture and keep only the part worth looking at.
+	Used to cut away a site's navigation and borders and keep only the part the user wants on the desktop.
 	*/
 	var crop: CGRect?
 
 	/**
 	Which display to show this website on. `nil` follows the display chosen in Settings.
 
-	The single most-asked-for thing upstream was not "show the same page on every screen" but "show a different page on each" — a calendar on one, a dashboard on the other (Plash#2, 47 reactions). That needs the display to be a property of the website rather than a single app-wide setting.
+	The most-asked-for thing upstream was a different page on each screen, a calendar on one and a dashboard on the other (Plash#2, 47 reactions). That needs the display to be a property of the website rather than one app-wide setting.
 	*/
 	var display: Display?
 
@@ -41,7 +41,7 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	/**
 	Whether this website can be clicked without turning on Browsing Mode.
 
-	Asked for repeatedly upstream (Plash#50 over ten comments, Plash#16). It is off by default and per website because it takes something away: a window that accepts clicks is a window your desktop icons are behind. It also keeps the page awake — a page tracking the pointer cannot be frozen or drawn from stills.
+	Asked for repeatedly upstream (Plash#50 over ten comments, Plash#16). Off by default and per website, because it costs something. A window that accepts clicks puts your desktop icons behind it, and it keeps the page awake. A page tracking the pointer cannot be frozen or drawn from stills.
 	*/
 	@DecodableDefault.False var allowsInteraction
 
@@ -75,7 +75,7 @@ extension Website {
 	/**
 	What a new website's CSS field starts out as.
 
-	Every line is a comment, so it changes nothing until someone edits it — but it puts the two things people always end up asking for, and the hooks this app provides, in front of them at the moment they need them. The alternative is a tips page somewhere else, which is a worse version of the same information.
+	Every line is a comment, so it changes nothing until someone edits it. What it does is put the two things people always ask for, plus the classes this app adds, in front of them while they are editing. A tips page elsewhere carries the same information further from where it is used.
 	*/
 	static let starterCSS = """
 		/* Anything you write here is applied to the page.

@@ -1,6 +1,6 @@
 name: Gyroscope
 url: https://gyrosco.pe/
-description: A personal life dashboard — steps, sleep, heart rate, time tracking — on one page.
+description: A personal life dashboard. steps, sleep, heart rate, time tracking. on one page.
 tags: [dashboard, personal, data]
 backend: snapshot
 reloadInterval: 900

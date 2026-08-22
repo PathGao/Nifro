@@ -70,7 +70,7 @@ extension AppState {
 					}
 				}
 
-				menuItem.toolTip = "Updates the URL for the stored website in Nifro to the current URL"
+				menuItem.toolTip = "Points the stored website at the URL currently loaded"
 			}
 
 			menu.addCallbackItem(
@@ -138,7 +138,7 @@ extension AppState {
 	/**
 	Which display to show the wallpaper on, one level down from the menu bar icon.
 
-	Only shown when there is more than one display: on a single-display Mac the choice does not exist, and a menu item that always says the same thing is noise. Buried in Settings it is a chore for anyone who docks and undocks a laptop several times a day (Plash#195).
+	Only shown when there is more than one display. A single-display Mac has no choice to make, so the item would always say the same thing. Settings is the wrong place for it, because people who dock and undock a laptop change this several times a day (Plash#195).
 	*/
 	private func addDisplayItemIfNeeded() {
 		let displays = Display.all
@@ -191,7 +191,7 @@ extension AppState {
 
 		menu.addSeparator()
 
-		// Right under the on/off switch: this is where someone who has nothing set up yet, or wants something new up there, is actually headed. Opens in the app — the whole value of the catalogue is the settings that come with each entry, and sending people to a web page to copy those by hand would be asking them to redo work somebody already did.
+		// Right under the on/off switch, where someone with nothing set up yet looks first. It opens in the app rather than the browser because each catalogue entry carries the settings that make the page work. A web page would leave people copying those in by hand.
 		menu.addCallbackItem("Site Gallery…") {
 			Constants.openSiteGalleryWindow()
 		}
@@ -204,7 +204,7 @@ extension AppState {
 			menu.addDisabled("Deactivated While on Battery")
 		}
 
-		// Adding and managing websites has nothing to do with whether the wallpaper is currently showing. Leaving them out while disabled meant the app offered no way to set anything up until you turned it back on.
+		// Adding and managing websites works whether or not the wallpaper is showing. Leaving these out while disabled left the app with no way to set anything up until you turned it back on.
 		menu.addSeparator()
 
 		menu.addCallbackItem("Add Website…") {

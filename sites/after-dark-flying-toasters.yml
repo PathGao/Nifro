@@ -6,4 +6,4 @@ backend: live
 backendNote: A screensaver. The animation is the entire content.
 source: >-
   sindresorhus in upstream discussion #136 (linking the After Dark CSS collection index).
-  The index page also has Fish, Globe, Warp, Rainstorm and others — swap the last path segment.
+  The index page also has Fish, Globe, Warp, Rainstorm and others. swap the last path segment.

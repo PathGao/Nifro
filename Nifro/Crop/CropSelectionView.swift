@@ -3,7 +3,7 @@ import AppKit
 /**
 Drag a rectangle over the wallpaper to choose what to keep.
 
-The request this answers asked for exactly this and got a snippet of JavaScript instead: "I wish there was a way to visually select (by specifying the pixel range) and show only that part of the website" (Plash#138). Typing four numbers works, but nobody knows where the interesting part of a page is in page pixels — you know it when you see it.
+Asked for upstream and answered with a snippet of JavaScript instead (Plash#138). Typing four numbers into the crop fields works, but nobody knows where the part they want sits in page pixels.
 */
 final class CropSelectionView: NSView {
 	/**
@@ -121,7 +121,7 @@ final class CropSelectionView: NSView {
 			selection.width >= Self.minimumSide,
 			selection.height >= Self.minimumSide
 		else {
-			// Treat a stray click as "carry on selecting" rather than a cancel: cancelling on a mis-click would be infuriating.
+			// A stray click means carry on selecting, not cancel. Losing the drag to a mis-click is worse than making the user press Escape.
 			self.selection = nil
 			needsDisplay = true
 			return

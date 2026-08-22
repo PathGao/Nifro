@@ -3,14 +3,14 @@ import SwiftUI
 /**
 The About tab.
 
-Everything here used to live in a "More" submenu hanging off the status item. Three items is not enough to justify a submenu — it made people click twice to reach things they were already looking for, and left the status menu with a dead end in the middle of it. A settings tab is where a Mac app without a menu bar of its own puts this.
+Everything here used to live in a "More" submenu hanging off the status item. Three items do not justify a submenu, and it cost two clicks to reach any of them. A settings tab is where a Mac app without a menu bar of its own puts this.
 */
 struct AboutSettings: View {
 	var body: some View {
 		Form {
 			Section {
 				HStack(spacing: 12) {
-					// Not `SSApp.icon`: that force-unwraps, and the icon slot is deliberately empty until this fork has artwork of its own.
+					// Not `SSApp.icon`. That force-unwraps, and the icon slot stays empty until this fork has artwork of its own.
 					if let icon = NSApp.applicationIconImage {
 						Image(nsImage: icon)
 							.resizable()
@@ -41,7 +41,7 @@ struct AboutSettings: View {
 				}
 				Link("GitHub Repository", destination: Constants.repositoryURL)
 			} footer: {
-				Text("The site gallery is a list of pages that work well as wallpapers, each with the settings that make it work. Adding one is a single file — no Swift, no Xcode.")
+				Text("The site gallery is a list of pages that work well as wallpapers, each with the settings that make it work. Adding one takes a single file, no Swift and no Xcode.")
 					.foregroundStyle(.secondary)
 			}
 

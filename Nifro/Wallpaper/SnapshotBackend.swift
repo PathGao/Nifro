@@ -4,11 +4,11 @@ import WebKit
 /**
 Draws a website by taking a picture of it every so often, instead of keeping a browser running behind it.
 
-Most pages people use as wallpapers change on a timer, not continuously: a clock ticks once a minute, a calendar changes when you change it, a dashboard refreshes every quarter of an hour. Rendering those live means a WebContent process, its memory and its compositing sit there all day to produce a picture that was already correct.
+Most pages people use as wallpapers change on a timer rather than continuously. A clock ticks once a minute. A dashboard refreshes every quarter of an hour. Rendering those live keeps a WebContent process, its memory and its compositing running all day to produce a picture that was already correct.
 
-So: put the web view in a window nobody can see, load the page, wait for it to settle, take one snapshot, show that, and let the web view go. The process exits with it. Between refreshes the wallpaper costs an image view.
+So the web view goes into a window nobody can see. Load the page, wait for it to settle, take one snapshot, show that, and drop the web view. The process exits with it. Between refreshes the wallpaper costs an image view.
 
-The cost is that nothing moves and nothing can be clicked, which is why this is per-website and not a global switch. The curated site list already carries the judgement for each entry — `backend: snapshot` there means exactly this.
+The cost is that nothing moves and nothing can be clicked, which is why this is per-website and not a global switch. The curated site list already carries the call for each entry, where `backend: snapshot` means exactly this.
 */
 extension WallpaperScene {
 	/**
@@ -119,7 +119,7 @@ extension WallpaperScene {
 	/**
 	Stop drawing from stills and hand the window back to the live web view.
 
-	Does not load anything — the caller is on its way to doing that. Loading here as well would mean this and `loadWebsite` call each other, which happens to terminate today only because of a guard, and would stop terminating the moment someone moved that guard.
+	Does not load anything, because the caller is on its way to doing that. Loading here too would make this and `loadWebsite` call each other. That terminates today only because of a guard, and would stop terminating the moment someone moved it.
 	*/
 	func stopSnapshotRendering() {
 		snapshotTask?.cancel()

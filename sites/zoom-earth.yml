@@ -6,4 +6,4 @@ backend: snapshot
 reloadInterval: 900
 source: >-
   debernardis in upstream discussion #136, including the labels:off / lines:off overlay
-  settings. The view coordinates in the URL point at Rome — edit them for your own region.
+  settings. The view coordinates in the URL point at Rome. edit them for your own region.

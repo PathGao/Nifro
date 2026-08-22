@@ -73,7 +73,7 @@ final class WebViewController: NSViewController {
 				webView.mediaType = "print"
 			}
 
-			// An untouched starter template is all comments; injecting it would add an empty style element to every page for nothing.
+			// An untouched starter template is all comments. Injecting it would add an empty style element to every page for nothing.
 			if
 				!website.css.trimmed.isEmpty,
 				website.css != Website.starterCSS
@@ -176,7 +176,7 @@ final class WebViewController: NSViewController {
 
 extension WebViewController: WKNavigationDelegate {
 	func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
-		// Holding Command or Option sends a link to the default browser whatever the settings say. Matches what the same chord does in every other Mac app that embeds a web view, and it is the only way to get at a same-site link without changing a setting first. Plash#140.
+		// Holding Command or Option sends a link to the default browser whatever the settings say. That matches other Mac apps with an embedded web view, and it is the only way to open a same-site link externally without changing a setting first. Plash#140.
 		if
 			navigationAction.navigationType == .linkActivated,
 			!NSEvent.modifiers.intersection([.command, .option]).isEmpty,
@@ -245,7 +245,7 @@ extension WebViewController: WKNavigationDelegate {
 	/**
 	Fill in a missing website title from the page that just loaded.
 
-	Also worth doing on later title changes, not just here: single-page apps routinely load with an empty or placeholder title and set the real one from script a moment later.
+	Also worth doing on later title changes. Single-page apps often load with an empty or placeholder title and set the real one from script a moment later.
 	*/
 	private func recordTitleIfNeeded(from webView: WKWebView) {
 		WebsitesController.shared.recordObservedTitle(webView.title ?? "", for: webView.url)

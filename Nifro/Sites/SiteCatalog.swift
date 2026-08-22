@@ -3,7 +3,7 @@ import SwiftUI
 /**
 The curated list of pages that work well as wallpapers, compiled into the app.
 
-Shipping it rather than linking to it is the point: finding a good page, working out that it needs a 15-minute reload and three lines of CSS to hide its navigation, and typing all that in, is the work — and it is work somebody has already done. Sending people to a web page to copy settings by hand would be asking them to redo it.
+Shipping it beats linking to it. The work is finding a good page, working out that it needs a 15-minute reload and three lines of CSS to hide its navigation, then typing all that in. Somebody has already done that work once. A web page to copy settings from by hand would make each person redo it.
 
 The bundled copy is generated from the YAML files under `sites` by `scripts/generate-site-catalog.py`. It is a snapshot taken at release time; the live list is fetched from GitHub when the gallery opens, so entries contributed between releases show up without an app update.
 */
@@ -17,7 +17,7 @@ enum SiteCatalog {
 		/**
 		Whether the page needs to keep rendering, as opposed to being re-drawn every so often.
 
-		Shown to the user because it is the difference between a page that costs nothing to leave up and one that does not.
+		Shown to the user, because a live page keeps a browser process running and a snapshot page does not.
 		*/
 		let isLive: Bool
 
@@ -81,7 +81,7 @@ extension SiteCatalog.Entry {
 		binding.wrappedValue.crop = crop
 		binding.wrappedValue.rendering = isLive ? .live : .snapshot
 
-		// A per-site reload interval is not something the app models yet, so the catalogue's value is applied to the global setting only when nothing has been chosen. Better than silently ignoring it, and better than overriding a choice the user made.
+		// The app has no per-site reload interval yet, so the catalogue's value goes to the global setting only when nothing has been chosen. That beats ignoring it, and beats overriding a choice the user made.
 		if let reloadInterval, Defaults[.reloadInterval] == nil {
 			Defaults[.reloadInterval] = reloadInterval
 		}

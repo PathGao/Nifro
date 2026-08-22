@@ -5,9 +5,9 @@ import WebKit
 /**
 An opaque band filling the strip of the wallpaper that sits behind the menu bar.
 
-macOS tints the menu bar from whatever is behind it, so extending the wallpaper up there is the only way to get a menu bar that matches. The catch is that it tints from the *content*: text, borders and whatever else happens to be along the top edge of the page show through as visual noise.
+macOS tints the menu bar from whatever is behind it, so extending the wallpaper up there is the only way to get a menu bar that matches. It tints from the content, so text and borders along the top edge of the page show through as well.
 
-The band keeps the tint and drops the noise. It is filled with the average colour of the strip it covers, so the menu bar picks up the same colour it would have picked up anyway, and the page underneath stops showing through.
+The band keeps the tint and drops the rest. It is filled with the average colour of the strip it covers, so the menu bar picks up the same colour it would have anyway, and the page underneath stops showing through.
 */
 final class MenuBarBandView: NSView {
 	var color: NSColor = .clear {
@@ -81,7 +81,7 @@ extension WallpaperScene {
 	/**
 	Sample the top strip of the page and paint the band with its average colour.
 
-	Re-sampled on every load rather than once: the whole point is that the menu bar keeps matching the wallpaper, and the wallpaper changes.
+	Re-sampled on every load rather than once, because the wallpaper changes and the menu bar has to keep matching it.
 	*/
 	func refreshMenuBarBandColor() {
 		guard

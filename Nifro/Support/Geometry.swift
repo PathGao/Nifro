@@ -3,12 +3,12 @@ import CoreGraphics
 /**
 The geometry behind cropping and coverage detection.
 
-Kept free of AppKit so it can be exercised directly. Everything here is a pure function of rectangles; the views and windows that call it only supply the numbers.
+Kept free of AppKit so the tests can call it directly. Everything here is a pure function of rectangles. The views and windows that call it only supply the numbers.
 */
 
 extension CGRect {
 	/**
-	Where a page has to sit inside a crop window so that `self` — a region in page coordinates, origin top-left — is what shows.
+	Where a page has to sit inside a crop window so that `self` is what shows. `self` is a region in page coordinates with the origin at the top-left.
 
 	Page coordinates run down from the top and view coordinates run up from the bottom, so the vertical offset is the distance from the bottom of the crop to the bottom of the page.
 	*/
@@ -22,7 +22,7 @@ extension CGRect {
 	}
 
 	/**
-	Where this page-coordinate crop lands on a screen, so the framed region stays where it was and everything around it simply disappears.
+	Where this page-coordinate crop lands on a screen, so the framed region stays where it was and everything around it disappears.
 	*/
 	func screenFrame(inScreen screenFrame: CGRect) -> CGRect {
 		CGRect(
@@ -36,7 +36,7 @@ extension CGRect {
 
 extension CGRect {
 	/**
-	The inverse of `screenFrame(inScreen:)`: where a screen rectangle falls in page coordinates.
+	Where a screen rectangle falls in page coordinates, the inverse of `screenFrame(inScreen:)`.
 
 	Only valid while the page lays out at the size of that screen, which is the arrangement the wallpaper always uses.
 	*/
@@ -53,7 +53,7 @@ extension CGRect {
 /**
 The bounding rectangle of the largest single uncovered patch of `region`, plus its area.
 
-The area is what a threshold looks at; the rectangle is what you shrink the window to when you want to keep rendering only the part still on show.
+The area is what a threshold looks at. The rectangle is what you shrink the window to when only that part is still on show.
 */
 func largestUncoveredRegion(
 	of region: CGRect,
