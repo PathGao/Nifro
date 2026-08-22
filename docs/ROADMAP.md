@@ -158,14 +158,14 @@ NSScreen.visibleFrame 未被覆盖的比例 < 2%  →  判定全遮挡
 | **F4** | 静态模式 | [#15](https://github.com/sindresorhus/Plash/issues/15) | 等价于 P5 |
 | **F5** | 播放列表 | [#4](https://github.com/sindresorhus/Plash/issues/4) | 待做，需 R1。评论里还要求**按时间排班**（早晚不同页面） |
 | **F6** | 站点图库 | — | ✅ 已实现。GitHub 是权威来源与提交入口，app 内运行时拉取 `sites/index.json`，编进包里的那份只在没网时兜底 |
-| **F7** | 保留**会话状态**：URL + 滚动位置 + 缩放，`WKWebView.interactionState` 一次拿下；配「唤醒时重新加载」开关 | [#39](https://github.com/sindresorhus/Plash/issues/39) [#127](https://github.com/sindresorhus/Plash/issues/127) [#154](https://github.com/sindresorhus/Plash/issues/154) | 待做，S–M |
-| **F8** | 显示器选择进主菜单 | [#195](https://github.com/sindresorhus/Plash/issues/195) | 待做，S。F3 落地后菜单形态要改，二选一别做一半 |
+| **F7** | 保留**会话状态**：URL + 滚动位置 + 缩放，`WKWebView.interactionState` 一次拿下；配「唤醒时重新加载」开关 | [#39](https://github.com/sindresorhus/Plash/issues/39) [#127](https://github.com/sindresorhus/Plash/issues/127) [#154](https://github.com/sindresorhus/Plash/issues/154) | ✅ 已实现，但**用的是滚动位置而不是 `interactionState`**。后者靠驱动一次导航生效，数据过期就是白壁纸，交付前测不了；滚动是安全失败的。等能实测再换 |
+| **F8** | 显示器选择进主菜单 | [#195](https://github.com/sindresorhus/Plash/issues/195) | ✅ 已实现。只在多于一块屏时出现 |
 | **F9** | 桌面失焦时变暗 / 去色 | [#177](https://github.com/sindresorhus/Plash/issues/177) | 待做，S。挂在 P1 的判定上，别另造一套 |
-| **F10** | 自定义 CSS 注入健壮性：SPA 改写 documentElement 后重新注入 | [#173](https://github.com/sindresorhus/Plash/issues/173) | 待做，S–M。**真 bug**，命中 Google 日历、zoom.earth |
-| **F11** | 用户代理策略：别再钉死 `Version/18.3` | [#169](https://github.com/sindresorhus/Plash/issues/169) | 待做，S。写死的版本号让 Google 日历常年报「浏览器过旧」 |
-| **F12** | 双 webview 交换加载：成功才淡入，失败保留旧内容 | [#9](https://github.com/sindresorhus/Plash/issues/9) [#11](https://github.com/sindresorhus/Plash/issues/11) [#21](https://github.com/sindresorhus/Plash/issues/21) [#41](https://github.com/sindresorhus/Plash/issues/41) [#47](https://github.com/sindresorhus/Plash/issues/47) | 待做，M。**一个机制关掉 5 条**，作者五年前写好方案没做 |
-| **F13** | 修饰键点击时在默认浏览器打开链接 | [#140](https://github.com/sindresorhus/Plash/issues/140) | 待做，S。约十行 |
-| **F14** | 进入浏览模式时真正取得键盘焦点 | [#114](https://github.com/sindresorhus/Plash/issues/114) | 待做，S。缺的是 `SSApp.forceActivate()` |
+| **F10** | 自定义 CSS 注入健壮性：SPA 改写 documentElement 后重新注入 | [#173](https://github.com/sindresorhus/Plash/issues/173) | ✅ 已实现。MutationObserver 在文档被改写后重新挂回样式 |
+| **F11** | 用户代理策略：别再钉死 `Version/18.3` | [#169](https://github.com/sindresorhus/Plash/issues/169) | ✅ 已实现。版本号从运行时系统推导 |
+| **F12** | 双 webview 交换加载：成功才淡入，失败保留旧内容 | [#9](https://github.com/sindresorhus/Plash/issues/9) [#11](https://github.com/sindresorhus/Plash/issues/11) [#21](https://github.com/sindresorhus/Plash/issues/21) [#41](https://github.com/sindresorhus/Plash/issues/41) [#47](https://github.com/sindresorhus/Plash/issues/47) | ✅ 已实现。**只覆盖「替换页面」**，会话内首次加载仍直接进窗口 —— 没理由把必须能工作的路径放到新机制后面 |
+| **F13** | 修饰键点击时在默认浏览器打开链接 | [#140](https://github.com/sindresorhus/Plash/issues/140) | ✅ 已实现 |
+| **F14** | 进入浏览模式时真正取得键盘焦点 | [#114](https://github.com/sindresorhus/Plash/issues/114) | ✅ 已实现。缺的就是 `SSApp.forceActivate()` |
 | **F15** | 桌面层有限交互（点击 / 鼠标移动），按站点开 | [#50](https://github.com/sindresorhus/Plash/issues/50) [#16](https://github.com/sindresorhus/Plash/issues/16) | 待做，L。功耗代价必须写进文档 |
 | **F16** | 内容规则加载入口（cookie 横幅 / 广告），不自维护规则源 | [#37](https://github.com/sindresorhus/Plash/issues/37) | 待做，M |
 
