@@ -16,6 +16,9 @@
 		E32421562384F09D00D28A91 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E32421552384F09D00D28A91 /* Constants.swift */; };
 		E32421582384F0E600D28A91 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = E32421572384F0E600D28A91 /* Utilities.swift */; };
 		E324215A2384FBE500D28A91 /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E32421592384FBE500D28A91 /* WebViewController.swift */; };
+		B853A2BA513E772BD737AD44 /* CropSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A087FD8A47F189760F0AB306 /* CropSelection.swift */; };
+		32D5714C709DBD76A2370D13 /* CropSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F816F6528ECE2649BA82D438 /* CropSelectionView.swift */; };
+		09AD36F5F7945DFEE7B4A938 /* DimWhenUnfocused.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2E55F44121887A577509380 /* DimWhenUnfocused.swift */; };
 		90372F4A56E2E0453B651FEE /* AboutSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6ECFB57E09E3EAEAFA81C47 /* AboutSettings.swift */; };
 		3A6D23E265F2D846E64E08F3 /* SwapLoading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A22FF14B425D5D7E6F2A3D /* SwapLoading.swift */; };
 		17E64A773B2907C884AD5849 /* ScrollRestoration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB5B9537B30041D469CE55C /* ScrollRestoration.swift */; };
@@ -81,6 +84,9 @@
 		E32421552384F09D00D28A91 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Constants.swift; sourceTree = "<group>"; usesTabs = 1; };
 		E32421572384F0E600D28A91 /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Utilities.swift; sourceTree = "<group>"; usesTabs = 1; };
 		E32421592384FBE500D28A91 /* WebViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = WebViewController.swift; sourceTree = "<group>"; usesTabs = 1; };
+		A087FD8A47F189760F0AB306 /* CropSelection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CropSelection.swift; sourceTree = "<group>"; usesTabs = 1; };
+		F816F6528ECE2649BA82D438 /* CropSelectionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CropSelectionView.swift; sourceTree = "<group>"; usesTabs = 1; };
+		E2E55F44121887A577509380 /* DimWhenUnfocused.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = DimWhenUnfocused.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A6ECFB57E09E3EAEAFA81C47 /* AboutSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = AboutSettings.swift; sourceTree = "<group>"; usesTabs = 1; };
 		37A22FF14B425D5D7E6F2A3D /* SwapLoading.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = SwapLoading.swift; sourceTree = "<group>"; usesTabs = 1; };
 		8BB5B9537B30041D469CE55C /* ScrollRestoration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ScrollRestoration.swift; sourceTree = "<group>"; usesTabs = 1; };
@@ -164,6 +170,9 @@
 				E32421462384EB4E00D28A91 /* DesktopWindow.swift */,
 				E30FD88823C4515200C716E9 /* SSWebView.swift */,
 				E32421592384FBE500D28A91 /* WebViewController.swift */,
+				A087FD8A47F189760F0AB306 /* CropSelection.swift */,
+				F816F6528ECE2649BA82D438 /* CropSelectionView.swift */,
+				E2E55F44121887A577509380 /* DimWhenUnfocused.swift */,
 				A6ECFB57E09E3EAEAFA81C47 /* AboutSettings.swift */,
 				37A22FF14B425D5D7E6F2A3D /* SwapLoading.swift */,
 				8BB5B9537B30041D469CE55C /* ScrollRestoration.swift */,
@@ -358,6 +367,9 @@
 				E384F28024C3B37E002FD21B /* Events.swift in Sources */,
 				E384F28224C3B3CD002FD21B /* Menus.swift in Sources */,
 				E324215A2384FBE500D28A91 /* WebViewController.swift in Sources */,
+				B853A2BA513E772BD737AD44 /* CropSelection.swift in Sources */,
+				32D5714C709DBD76A2370D13 /* CropSelectionView.swift in Sources */,
+				09AD36F5F7945DFEE7B4A938 /* DimWhenUnfocused.swift in Sources */,
 				90372F4A56E2E0453B651FEE /* AboutSettings.swift in Sources */,
 				3A6D23E265F2D846E64E08F3 /* SwapLoading.swift in Sources */,
 				17E64A773B2907C884AD5849 /* ScrollRestoration.swift in Sources */,

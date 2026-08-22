@@ -37,6 +37,8 @@ extension Defaults.Keys {
 	static let solidColorUnderMenuBar = Key<Bool>("solidColorUnderMenuBar", default: false)
 	static let restoreScrollPosition = Key<Bool>("restoreScrollPosition", default: true)
 	static let reloadOnWake = Key<Bool>("reloadOnWake", default: true)
+	static let dimWhenUnfocused = Key<Bool>("dimWhenUnfocused", default: false)
+	static let dimmedOpacityFactor = Key<Double>("dimmedOpacityFactor", default: 0.5)
 }
 
 extension KeyboardShortcuts.Name {

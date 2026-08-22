@@ -59,6 +59,24 @@ struct CropGeometryTests {
 		#expect(placed.size == crop.size)
 	}
 
+	@Test("Page and screen coordinates are exact inverses")
+	func roundTrip() {
+		// What the drag-to-select mode relies on: you draw on screen, it stores page pixels,
+		// and putting the window back has to land on the same rectangle you drew.
+		let screen = CGRect(x: 1600, y: 200, width: 1600, height: 1000)
+
+		for crop in [
+			CGRect(x: 0, y: 0, width: 100, height: 100),
+			CGRect(x: 250, y: 700, width: 400, height: 300),
+			CGRect(x: 0, y: 900, width: 1600, height: 100)
+		] {
+			let there = crop.screenFrame(inScreen: screen)
+			let back = there.pageFrame(inScreen: screen)
+
+			#expect(back == crop)
+		}
+	}
+
 	@Test("Placement follows a screen that is not at the global origin")
 	func screenPlacementOnSecondaryDisplay() {
 		let screen = CGRect(x: 1600, y: 200, width: 1600, height: 1000)

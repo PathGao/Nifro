@@ -115,6 +115,16 @@ final class WebViewController: NSViewController {
 		view = replacement
 	}
 
+	/**
+	Drop the live page and the process behind it.
+
+	Upstream left a TODO here and settled for `about:blank` plus hiding the window, which keeps a WebContent process and its memory alive for as long as the app runs. Replacing the web view with a fresh, unloaded one releases the last reference to the old one, and its process exits with it.
+	*/
+	func releaseWebView() {
+		view = NSView()
+		webView = createWebView()
+	}
+
 	func recreateWebView() {
 		webView = createWebView()
 		view = webView

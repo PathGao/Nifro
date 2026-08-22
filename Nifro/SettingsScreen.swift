@@ -62,6 +62,7 @@ private struct AdvancedSettings: View {
 				SolidColorUnderMenuBarSetting()
 				Defaults.Toggle("Restore scroll position after reload", key: .restoreScrollPosition)
 				Defaults.Toggle("Reload when the Mac wakes", key: .reloadOnWake)
+				DimWhenUnfocusedSetting()
 				OpenExternalLinksInBrowserSetting()
 				HideMenuBarIconSetting()
 				Defaults.Toggle("Mute audio", key: .muteAudio)
@@ -95,6 +96,26 @@ private struct SolidColorUnderMenuBarSetting: View {
 		)
 		.disabled(!extendBelowMenuBar)
 		.help("The menu bar tints itself from whatever is behind it, so extending the wallpaper up there is the only way to make it match — but then the page's own text and edges show through as clutter. This fills that strip with the page's average colour instead: same tint, no content.")
+	}
+}
+
+private struct DimWhenUnfocusedSetting: View {
+	@Default(.dimWhenUnfocused) private var isEnabled
+	@Default(.dimmedOpacityFactor) private var factor
+
+	var body: some View {
+		Defaults.Toggle("Dim while another app is in front", key: .dimWhenUnfocused)
+			.help("Fades the wallpaper back while you work elsewhere, and brings it up again when you click the desktop. A page bright enough to enjoy when you look at it is often too loud behind a document you are reading.")
+
+		if isEnabled {
+			Slider(
+				value: $factor,
+				in: 0.1...0.9,
+				step: 0.1
+			) {
+				Text("Dimmed to")
+			}
+		}
 	}
 }
 

@@ -99,8 +99,26 @@ extension AppState {
 			.store(in: &cancellables)
 
 		Defaults.publisher(.opacity)
-			.sink { [self] change in
-				desktopWindow.alphaValue = isBrowsingMode ? 1 : change.newValue
+			.sink { [self] _ in
+				applyOpacity()
+			}
+			.store(in: &cancellables)
+
+		Defaults.publisher(.dimWhenUnfocused, options: [])
+			.sink { [self] _ in
+				applyOpacity()
+			}
+			.store(in: &cancellables)
+
+		Defaults.publisher(.dimmedOpacityFactor, options: [])
+			.sink { [self] _ in
+				applyOpacity()
+			}
+			.store(in: &cancellables)
+
+		NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didActivateApplicationNotification)
+			.sink { [self] _ in
+				applyOpacity()
 			}
 			.store(in: &cancellables)
 

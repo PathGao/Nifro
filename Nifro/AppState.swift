@@ -33,7 +33,7 @@ final class AppState: ObservableObject {
 			}
 
 			desktopWindow.isInteractive = isBrowsingMode
-			desktopWindow.alphaValue = isBrowsingMode ? 1 : Defaults[.opacity]
+			applyOpacity()
 
 			// Making the window key is not enough when the app is an accessory: the window comes forward but keystrokes still go to whatever was active, so the page cannot be typed into. Plash#114.
 			if isBrowsingMode {
@@ -54,9 +54,14 @@ final class AppState: ObservableObject {
 				loadUserURL()
 				desktopWindow.makeKeyAndOrderFront(self)
 			} else {
-				// TODO: Properly unload the web view instead of just clearing and hiding it.
 				desktopWindow.orderOut(self)
-				loadURL("about:blank")
+				frozenView = nil
+				renderedRegion = nil
+				desktopWindow.cropRect = nil
+				pendingLoad?.cancel()
+				pendingWebView = nil
+				webViewController.releaseWebView()
+				desktopWindow.contentView = webViewController.webView
 			}
 		}
 	}
@@ -93,6 +98,12 @@ final class AppState: ObservableObject {
 	*/
 	var pendingWebView: SSWebView?
 	var pendingLoad: Task<Void, Never>?
+
+	/**
+	The overlay shown while the user is dragging out a crop region, and the crop that was in place before they started.
+	*/
+	var cropSelectionView: CropSelectionView?
+	var cropSelectionPreviousCrop: CGRect?
 
 	/**
 	A reload came due while frozen and still has to happen.
