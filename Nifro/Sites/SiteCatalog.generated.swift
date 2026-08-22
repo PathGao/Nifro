@@ -20,6 +20,19 @@ extension SiteCatalog {
 			playsSound: false
 		),
 		.init(
+			name: "Bilibili Live",
+			url: "https://live.bilibili.com",
+			description: "Bilibili's live directory. Replace the path with a room number to pin one stream.",
+			tags: ["live", "gaming"],
+			isLive: true,
+			reloadInterval: nil,
+			crop: nil,
+			css: "#chat-items, .aside-area, .head-info-section { display: none !important; }\n",
+			javaScript: nil,
+			requiresLogin: false,
+			playsSound: false
+		),
+		.init(
 			name: "Bing Photo of the Day",
 			url: "https://bing-photo-of-the-day.netlify.app",
 			description: "Bing's daily featured photograph, aspect-filled to the screen.",
@@ -41,6 +54,32 @@ extension SiteCatalog {
 			reloadInterval: 86400,
 			crop: nil,
 			css: nil,
+			javaScript: nil,
+			requiresLogin: false,
+			playsSound: false
+		),
+		.init(
+			name: "Douyu",
+			url: "https://www.douyu.com",
+			description: "Douyu's live directory. Replace the path with a room number to pin one stream.",
+			tags: ["live", "gaming"],
+			isLive: true,
+			reloadInterval: nil,
+			crop: nil,
+			css: ".layout-Player-barrage, .Header, .Aside { display: none !important; }\n",
+			javaScript: nil,
+			requiresLogin: false,
+			playsSound: false
+		),
+		.init(
+			name: "Explore.org Live Cams",
+			url: "https://explore.org/livecams",
+			description: "A wall of live nature cameras. Bears, puffins, reefs, aurora, running around the clock.",
+			tags: ["ambient", "nature", "live"],
+			isLive: true,
+			reloadInterval: nil,
+			crop: nil,
+			css: "header, footer, nav, .subscribe-banner { display: none !important; }\n",
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false
@@ -241,6 +280,19 @@ extension SiteCatalog {
 			playsSound: false
 		),
 		.init(
+			name: "Twitch",
+			url: "https://www.twitch.tv/directory",
+			description: "Twitch's live directory. Replace the path with a channel name to pin one stream.",
+			tags: ["live", "gaming"],
+			isLive: true,
+			reloadInterval: nil,
+			crop: nil,
+			css: ".top-nav, .side-nav, .channel-info-content { display: none !important; }\n",
+			javaScript: nil,
+			requiresLogin: false,
+			playsSound: false
+		),
+		.init(
 			name: "WeatherStar 4000+",
 			url: "https://weatherstar.netbymatt.com/?kiosk=true",
 			description: "A faithful emulation of the 1990s Weather Channel local forecast, US locations only.",
@@ -301,6 +353,45 @@ extension SiteCatalog {
 			reloadInterval: 1800,
 			crop: nil,
 			css: nil,
+			javaScript: nil,
+			requiresLogin: false,
+			playsSound: false
+		),
+		.init(
+			name: "Monterey Bay Aquarium",
+			url: "https://www.youtube.com/@MontereyBayAquarium/live",
+			description: "Kelp forest and jellyfish cameras from the aquarium, streaming through the day.",
+			tags: ["ambient", "nature", "live"],
+			isLive: true,
+			reloadInterval: nil,
+			crop: CGRect(x: 0, y: 120, width: 1280, height: 720),
+			css: "#masthead-container, #secondary, #comments { display: none !important; }\n",
+			javaScript: nil,
+			requiresLogin: false,
+			playsSound: false
+		),
+		.init(
+			name: "Lofi Girl",
+			url: "https://www.youtube.com/@LofiGirl/live",
+			description: "The long-running lofi radio stream. The one entry here that is arguably better with sound.",
+			tags: ["ambient", "music", "live"],
+			isLive: true,
+			reloadInterval: nil,
+			crop: CGRect(x: 0, y: 120, width: 1280, height: 720),
+			css: "#masthead-container, #secondary, #comments { display: none !important; }\n",
+			javaScript: nil,
+			requiresLogin: false,
+			playsSound: true
+		),
+		.init(
+			name: "NASA Live",
+			url: "https://www.youtube.com/@NASA/live",
+			description: "Whatever NASA is streaming right now, usually the view down from the Space Station.",
+			tags: ["ambient", "live", "space"],
+			isLive: true,
+			reloadInterval: nil,
+			crop: CGRect(x: 0, y: 120, width: 1280, height: 720),
+			css: "#masthead-container, #secondary, #comments, ytd-merch-shelf-renderer { display: none !important; }\n",
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false

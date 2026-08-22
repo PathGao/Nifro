@@ -1,0 +1,12 @@
+name: NASA Live
+url: https://www.youtube.com/@NASA/live
+description: Whatever NASA is streaming right now, usually the view down from the Space Station.
+tags: [ambient, live, space]
+backend: live
+audio: muted
+crop: {x: 0, y: 120, width: 1280, height: 720}
+css: |
+  #masthead-container, #secondary, #comments, ytd-merch-shelf-renderer { display: none !important; }
+source: >-
+  A channel /live URL rather than a video id. Video ids for round-the-clock streams get retired and
+  replaced; the channel URL follows whatever is live now. Swap the handle for any channel you follow.

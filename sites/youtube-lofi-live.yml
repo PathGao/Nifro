@@ -1,0 +1,12 @@
+name: Lofi Girl
+url: https://www.youtube.com/@LofiGirl/live
+description: The long-running lofi radio stream. The one entry here that is arguably better with sound.
+tags: [ambient, music, live]
+backend: live
+audio: unmuted
+crop: {x: 0, y: 120, width: 1280, height: 720}
+css: |
+  #masthead-container, #secondary, #comments { display: none !important; }
+source: >-
+  Set to play sound, which is the exception in this list. Everything else is muted because a
+  wallpaper that talks at you is a wallpaper you turn off.

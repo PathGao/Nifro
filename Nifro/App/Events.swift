@@ -178,6 +178,8 @@ extension AppState {
 			}
 			.store(in: &cancellables)
 
+		holdToInteract.install()
+
 		KeyboardShortcuts.onKeyUp(for: .toggleBrowsingMode) {
 			Defaults[.isBrowsingMode].toggle()
 		}

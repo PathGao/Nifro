@@ -1,0 +1,12 @@
+name: Monterey Bay Aquarium
+url: https://www.youtube.com/@MontereyBayAquarium/live
+description: Kelp forest and jellyfish cameras from the aquarium, streaming through the day.
+tags: [ambient, nature, live]
+backend: live
+audio: muted
+crop: {x: 0, y: 120, width: 1280, height: 720}
+css: |
+  #masthead-container, #secondary, #comments { display: none !important; }
+source: >-
+  Same channel /live pattern as the NASA entry. The cameras follow the aquarium's opening hours, so
+  expect a still frame overnight.

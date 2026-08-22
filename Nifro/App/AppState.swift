@@ -7,6 +7,7 @@ final class AppState: ObservableObject {
 	var cancellables = Set<AnyCancellable>()
 
 	let menu = SSMenu()
+	let holdToInteract = HoldToInteract()
 	let powerSourceWatcher = PowerSourceWatcher()
 
 	private(set) lazy var statusItem = with(NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)) {

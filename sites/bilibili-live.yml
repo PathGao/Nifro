@@ -1,0 +1,13 @@
+name: Bilibili Live
+url: https://live.bilibili.com
+description: Bilibili's live directory. Replace the path with a room number to pin one stream.
+tags: [live, gaming]
+backend: live
+audio: muted
+requiresLogin: false
+css: |
+  #chat-items, .aside-area, .head-info-section { display: none !important; }
+source: >-
+  Watching does not need an account, and the room URL is just the room number, which makes it the
+  cleanest of the Chinese platforms to pin. Hiding the chat panel also stops the mute script from
+  rescanning on every new message.

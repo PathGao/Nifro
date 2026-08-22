@@ -19,6 +19,22 @@
  {
   "audio": "muted",
   "crop": null,
+  "css": "#chat-items, .aside-area, .head-info-section { display: none !important; }\n",
+  "description": "Bilibili's live directory. Replace the path with a room number to pin one stream.",
+  "isLive": true,
+  "javaScript": null,
+  "name": "Bilibili Live",
+  "reloadInterval": null,
+  "requiresLogin": false,
+  "tags": [
+   "live",
+   "gaming"
+  ],
+  "url": "https://live.bilibili.com"
+ },
+ {
+  "audio": "muted",
+  "crop": null,
   "css": null,
   "description": "Bing's daily featured photograph, aspect-filled to the screen.",
   "isLive": false,
@@ -47,6 +63,39 @@
    "art"
   ],
   "url": "https://informationisbeautiful.net/visualizations/cocktails-interactive/"
+ },
+ {
+  "audio": "muted",
+  "crop": null,
+  "css": ".layout-Player-barrage, .Header, .Aside { display: none !important; }\n",
+  "description": "Douyu's live directory. Replace the path with a room number to pin one stream.",
+  "isLive": true,
+  "javaScript": null,
+  "name": "Douyu",
+  "reloadInterval": null,
+  "requiresLogin": false,
+  "tags": [
+   "live",
+   "gaming"
+  ],
+  "url": "https://www.douyu.com"
+ },
+ {
+  "audio": "muted",
+  "crop": null,
+  "css": "header, footer, nav, .subscribe-banner { display: none !important; }\n",
+  "description": "A wall of live nature cameras. Bears, puffins, reefs, aurora, running around the clock.",
+  "isLive": true,
+  "javaScript": null,
+  "name": "Explore.org Live Cams",
+  "reloadInterval": null,
+  "requiresLogin": false,
+  "tags": [
+   "ambient",
+   "nature",
+   "live"
+  ],
+  "url": "https://explore.org/livecams"
  },
  {
   "audio": "muted",
@@ -300,6 +349,22 @@
  {
   "audio": "muted",
   "crop": null,
+  "css": ".top-nav, .side-nav, .channel-info-content { display: none !important; }\n",
+  "description": "Twitch's live directory. Replace the path with a channel name to pin one stream.",
+  "isLive": true,
+  "javaScript": null,
+  "name": "Twitch",
+  "reloadInterval": null,
+  "requiresLogin": false,
+  "tags": [
+   "live",
+   "gaming"
+  ],
+  "url": "https://www.twitch.tv/directory"
+ },
+ {
+  "audio": "muted",
+  "crop": null,
   "css": null,
   "description": "A faithful emulation of the 1990s Weather Channel local forecast, US locations only.",
   "isLive": true,
@@ -380,6 +445,72 @@
    "data"
   ],
   "url": "https://www.windy.com/"
+ },
+ {
+  "audio": "muted",
+  "crop": {
+   "height": 720,
+   "width": 1280,
+   "x": 0,
+   "y": 120
+  },
+  "css": "#masthead-container, #secondary, #comments { display: none !important; }\n",
+  "description": "Kelp forest and jellyfish cameras from the aquarium, streaming through the day.",
+  "isLive": true,
+  "javaScript": null,
+  "name": "Monterey Bay Aquarium",
+  "reloadInterval": null,
+  "requiresLogin": false,
+  "tags": [
+   "ambient",
+   "nature",
+   "live"
+  ],
+  "url": "https://www.youtube.com/@MontereyBayAquarium/live"
+ },
+ {
+  "audio": "unmuted",
+  "crop": {
+   "height": 720,
+   "width": 1280,
+   "x": 0,
+   "y": 120
+  },
+  "css": "#masthead-container, #secondary, #comments { display: none !important; }\n",
+  "description": "The long-running lofi radio stream. The one entry here that is arguably better with sound.",
+  "isLive": true,
+  "javaScript": null,
+  "name": "Lofi Girl",
+  "reloadInterval": null,
+  "requiresLogin": false,
+  "tags": [
+   "ambient",
+   "music",
+   "live"
+  ],
+  "url": "https://www.youtube.com/@LofiGirl/live"
+ },
+ {
+  "audio": "muted",
+  "crop": {
+   "height": 720,
+   "width": 1280,
+   "x": 0,
+   "y": 120
+  },
+  "css": "#masthead-container, #secondary, #comments, ytd-merch-shelf-renderer { display: none !important; }\n",
+  "description": "Whatever NASA is streaming right now, usually the view down from the Space Station.",
+  "isLive": true,
+  "javaScript": null,
+  "name": "NASA Live",
+  "reloadInterval": null,
+  "requiresLogin": false,
+  "tags": [
+   "ambient",
+   "live",
+   "space"
+  ],
+  "url": "https://www.youtube.com/@NASA/live"
  },
  {
   "audio": "muted",

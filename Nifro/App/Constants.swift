@@ -46,6 +46,7 @@ extension Defaults.Keys {
 
 extension KeyboardShortcuts.Name {
 	static let toggleBrowsingMode = Self("toggleBrowsingMode")
+	static let holdToInteract = Self("holdToInteract")
 	static let toggleEnabled = Self("toggleEnabled")
 	static let reload = Self("reload")
 	static let nextWebsite = Self("nextWebsite")

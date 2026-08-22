@@ -1,0 +1,11 @@
+name: Twitch
+url: https://www.twitch.tv/directory
+description: Twitch's live directory. Replace the path with a channel name to pin one stream.
+tags: [live, gaming]
+backend: live
+audio: muted
+css: |
+  .top-nav, .side-nav, .channel-info-content { display: none !important; }
+source: >-
+  The full page rather than player.twitch.tv, whose embed requires a `parent` domain parameter that
+  an app with no web origin cannot satisfy.

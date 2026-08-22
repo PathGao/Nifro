@@ -39,19 +39,24 @@
       "items": {
         "type": "string",
         "enum": [
-          "clock",
-          "weather",
-          "dashboard",
-          "art",
-          "data",
-          "calendar",
+          "3d",
           "ambient",
-          "photo",
+          "art",
+          "calendar",
+          "clock",
+          "dashboard",
+          "data",
+          "gaming",
+          "live",
           "map",
-          "screensaver",
+          "music",
+          "nature",
           "news",
           "personal",
-          "3d"
+          "photo",
+          "screensaver",
+          "space",
+          "weather"
         ]
       }
     },

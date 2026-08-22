@@ -126,3 +126,8 @@ python3 scripts/generate-site-catalog.py
 ```
 
 CI fails if the YAML and the generated files disagree.
+
+## Platforms we left out
+
+`NOT-INCLUDED.md` records the live platforms that were considered and rejected, with the reason
+for each. Popularity is not the filter; working in a plain web view without an account is.
