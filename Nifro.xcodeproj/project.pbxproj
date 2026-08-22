@@ -18,6 +18,7 @@
 		5DCA857FF83FED5BA64A646B /* SiteGalleryScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 907A9EFAA3D92EE2E782D1EE /* SiteGalleryScreen.swift */; };
 		3CD7FE6C914BB819BD0B846A /* SiteCatalog.generated.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE550ECBADBF01976B63976D /* SiteCatalog.generated.swift */; };
 		6A7C9A751E80818D883AA349 /* SiteCatalog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 144C837DC38F0A9C8BB73A61 /* SiteCatalog.swift */; };
+		6D7BDBFF34F7B4D3478AFF38 /* Playlist.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15BE7EAB516E7079A6E1272D /* Playlist.swift */; };
 		B853A2BA513E772BD737AD44 /* CropSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A087FD8A47F189760F0AB306 /* CropSelection.swift */; };
 		32D5714C709DBD76A2370D13 /* CropSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F816F6528ECE2649BA82D438 /* CropSelectionView.swift */; };
 		09AD36F5F7945DFEE7B4A938 /* DimWhenUnfocused.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2E55F44121887A577509380 /* DimWhenUnfocused.swift */; };
@@ -28,6 +29,7 @@
 		F7CEB84C882E8730A2C4B649 /* MenuBarBand.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB494D7D82CDA92E0D71731F /* MenuBarBand.swift */; };
 		BDFCFA72BA731BAB9380DAC9 /* VisibilityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7D1774A2E51E303343371E8 /* VisibilityPolicy.swift */; };
 		2304ABCA5B85D50BF749039D /* Geometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A081BCFF6DF8B8B2FB4CB31B /* Geometry.swift */; };
+		3188AB74960C1A115F1F09B8 /* Schedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B4B73021E1104C03600DEFE /* Schedule.swift */; };
 		5D03B00441481AA32BEF388F /* MenuSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84336098C3DBE55C6CA62CE /* MenuSupport.swift */; };
 		DD3CC9A78917D05BF2C0B573 /* Display.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF3B75EF61B0B424DBE27645 /* Display.swift */; };
 		B908EAF815B4DAB91DF7F3CA /* SystemEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 348C6589BF6FF0DC7E0FC30E /* SystemEvents.swift */; };
@@ -94,6 +96,7 @@
 		907A9EFAA3D92EE2E782D1EE /* SiteGalleryScreen.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = SiteGalleryScreen.swift; sourceTree = "<group>"; usesTabs = 1; };
 		BE550ECBADBF01976B63976D /* SiteCatalog.generated.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = SiteCatalog.generated.swift; sourceTree = "<group>"; usesTabs = 1; };
 		144C837DC38F0A9C8BB73A61 /* SiteCatalog.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = SiteCatalog.swift; sourceTree = "<group>"; usesTabs = 1; };
+		15BE7EAB516E7079A6E1272D /* Playlist.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Playlist.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A087FD8A47F189760F0AB306 /* CropSelection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CropSelection.swift; sourceTree = "<group>"; usesTabs = 1; };
 		F816F6528ECE2649BA82D438 /* CropSelectionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CropSelectionView.swift; sourceTree = "<group>"; usesTabs = 1; };
 		E2E55F44121887A577509380 /* DimWhenUnfocused.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = DimWhenUnfocused.swift; sourceTree = "<group>"; usesTabs = 1; };
@@ -104,6 +107,7 @@
 		DB494D7D82CDA92E0D71731F /* MenuBarBand.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = MenuBarBand.swift; sourceTree = "<group>"; usesTabs = 1; };
 		E7D1774A2E51E303343371E8 /* VisibilityPolicy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = VisibilityPolicy.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A081BCFF6DF8B8B2FB4CB31B /* Geometry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Geometry.swift; sourceTree = "<group>"; usesTabs = 1; };
+		0B4B73021E1104C03600DEFE /* Schedule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Schedule.swift; sourceTree = "<group>"; usesTabs = 1; };
 		E84336098C3DBE55C6CA62CE /* MenuSupport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = MenuSupport.swift; sourceTree = "<group>"; usesTabs = 1; };
 		FF3B75EF61B0B424DBE27645 /* Display.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Display.swift; sourceTree = "<group>"; usesTabs = 1; };
 		348C6589BF6FF0DC7E0FC30E /* SystemEvents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = SystemEvents.swift; sourceTree = "<group>"; usesTabs = 1; };
@@ -275,6 +279,7 @@
 				E3FAF814264333D300CF7963 /* Website.swift */,
 				BE550ECBADBF01976B63976D /* SiteCatalog.generated.swift */,
 				144C837DC38F0A9C8BB73A61 /* SiteCatalog.swift */,
+				15BE7EAB516E7079A6E1272D /* Playlist.swift */,
 			);
 			path = Sites;
 			sourceTree = "<group>";
@@ -296,6 +301,7 @@
 			isa = PBXGroup;
 			children = (
 				A081BCFF6DF8B8B2FB4CB31B /* Geometry.swift */,
+				0B4B73021E1104C03600DEFE /* Schedule.swift */,
 				E84336098C3DBE55C6CA62CE /* MenuSupport.swift */,
 				FF3B75EF61B0B424DBE27645 /* Display.swift */,
 				348C6589BF6FF0DC7E0FC30E /* SystemEvents.swift */,
@@ -450,6 +456,7 @@
 				5DCA857FF83FED5BA64A646B /* SiteGalleryScreen.swift in Sources */,
 				3CD7FE6C914BB819BD0B846A /* SiteCatalog.generated.swift in Sources */,
 				6A7C9A751E80818D883AA349 /* SiteCatalog.swift in Sources */,
+				6D7BDBFF34F7B4D3478AFF38 /* Playlist.swift in Sources */,
 				B853A2BA513E772BD737AD44 /* CropSelection.swift in Sources */,
 				32D5714C709DBD76A2370D13 /* CropSelectionView.swift in Sources */,
 				09AD36F5F7945DFEE7B4A938 /* DimWhenUnfocused.swift in Sources */,
@@ -460,6 +467,7 @@
 				F7CEB84C882E8730A2C4B649 /* MenuBarBand.swift in Sources */,
 				BDFCFA72BA731BAB9380DAC9 /* VisibilityPolicy.swift in Sources */,
 				2304ABCA5B85D50BF749039D /* Geometry.swift in Sources */,
+				3188AB74960C1A115F1F09B8 /* Schedule.swift in Sources */,
 				5D03B00441481AA32BEF388F /* MenuSupport.swift in Sources */,
 				DD3CC9A78917D05BF2C0B573 /* Display.swift in Sources */,
 				B908EAF815B4DAB91DF7F3CA /* SystemEvents.swift in Sources */,

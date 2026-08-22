@@ -187,3 +187,37 @@ struct CoverageTests {
 		#expect(flipped.maxY == 1000)
 	}
 }
+
+/**
+Daily schedule windows. The wrap-around case is the whole reason this is a function
+rather than a comparison written inline at the call site.
+*/
+@Suite("Schedule windows")
+struct ScheduleTests {
+	@Test("A normal window covers its hours and nothing else")
+	func daytime() {
+		#expect(isHour(9, within: 8, until: 18))
+		#expect(isHour(8, within: 8, until: 18))
+		#expect(!isHour(18, within: 8, until: 18))
+		#expect(!isHour(7, within: 8, until: 18))
+		#expect(!isHour(23, within: 8, until: 18))
+	}
+
+	@Test("A window that wraps midnight covers both sides of it")
+	func overnight() {
+		// The case a single comparison gets wrong: written as `hour >= 22 && hour < 6`
+		// this matches nothing at all, and the website silently never appears.
+		#expect(isHour(23, within: 22, until: 6))
+		#expect(isHour(2, within: 22, until: 6))
+		#expect(isHour(22, within: 22, until: 6))
+		#expect(!isHour(6, within: 22, until: 6))
+		#expect(!isHour(12, within: 22, until: 6))
+	}
+
+	@Test("A window whose ends meet is always open")
+	func degenerate() {
+		for hour in 0..<24 {
+			#expect(isHour(hour, within: 5, until: 5))
+		}
+	}
+}

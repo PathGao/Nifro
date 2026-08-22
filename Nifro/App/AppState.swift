@@ -76,6 +76,7 @@ final class AppState: ObservableObject {
 				}
 
 				scene.resetTimer()
+				scene.resetPlaylistTimer()
 			}
 		}
 	}
@@ -184,12 +185,14 @@ final class AppState: ObservableObject {
 			scene.installContentView()
 			scene.window.isInteractive = isBrowsingMode
 			scene.applyOpacity(animated: false)
+			scene.resetPlaylistTimer()
 		}
 	}
 
 	func resetTimer() {
 		for scene in scenes {
 			scene.resetTimer()
+			scene.resetPlaylistTimer()
 		}
 	}
 

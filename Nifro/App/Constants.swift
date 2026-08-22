@@ -41,6 +41,7 @@ extension Defaults.Keys {
 	static let reloadOnWake = Key<Bool>("reloadOnWake", default: true)
 	static let dimWhenUnfocused = Key<Bool>("dimWhenUnfocused", default: false)
 	static let dimmedOpacityFactor = Key<Double>("dimmedOpacityFactor", default: 0.5)
+	static let playlistInterval = Key<Double?>("playlistInterval")
 }
 
 extension KeyboardShortcuts.Name {

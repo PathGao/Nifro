@@ -84,3 +84,44 @@ struct WebsiteDisplaySetting: View {
 		}
 	}
 }
+
+/**
+The hours a website is allowed to be showing.
+
+Off by default: most wallpapers should just be up. When it is on, both ends are needed — a window with only one end set is not a window, and a half-filled schedule should never reach the model.
+*/
+struct WebsiteScheduleSetting: View {
+	@Binding var startHour: Int?
+	@Binding var endHour: Int?
+
+	private var isEnabled: Binding<Bool> {
+		.init(
+			get: { startHour != nil && endHour != nil },
+			set: { on in
+				startHour = on ? 8 : nil
+				endHour = on ? 18 : nil
+			}
+		)
+	}
+
+	var body: some View {
+		Toggle("Only show at certain hours", isOn: isEnabled)
+			.help("Useful with rotation: a news page in the morning, something calmer at night. A window that runs past midnight — 22 to 6 — works.")
+
+		if startHour != nil, endHour != nil {
+			HStack {
+				hourPicker("From", selection: $startHour)
+				hourPicker("Until", selection: $endHour)
+			}
+		}
+	}
+
+	private func hourPicker(_ label: String, selection: Binding<Int?>) -> some View {
+		Picker(label, selection: selection) {
+			ForEach(0..<24, id: \.self) { hour in
+				Text(String(format: "%02d:00", hour)).tag(hour as Int?)
+			}
+		}
+		.frame(maxWidth: 140)
+	}
+}

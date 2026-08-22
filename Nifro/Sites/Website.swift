@@ -26,6 +26,14 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	var display: Display?
 
 	/**
+	The hours of the day this website is allowed to be showing, if it should not always be.
+
+	Stored as two hours rather than a range so it survives round-tripping through JSON without a custom coder, and so a range that wraps midnight (22 to 6) is expressible.
+	*/
+	var startHour: Int?
+	var endHour: Int?
+
+	/**
 	The display this website actually appears on.
 	*/
 	@MainActor

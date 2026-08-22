@@ -60,6 +60,7 @@ private struct AdvancedSettings: View {
 				Defaults.Toggle("Deactivate while on battery", key: .deactivateOnBattery)
 				FreezeWhenCoveredSetting()
 				SolidColorUnderMenuBarSetting()
+				PlaylistIntervalSetting()
 				Defaults.Toggle("Restore scroll position after reload", key: .restoreScrollPosition)
 				Defaults.Toggle("Reload when the Mac wakes", key: .reloadOnWake)
 				DimWhenUnfocusedSetting()
@@ -96,6 +97,26 @@ private struct SolidColorUnderMenuBarSetting: View {
 		)
 		.disabled(!extendBelowMenuBar)
 		.help("The menu bar tints itself from whatever is behind it, so extending the wallpaper up there is the only way to make it match — but then the page's own text and edges show through as clutter. This fills that strip with the page's average colour instead: same tint, no content.")
+	}
+}
+
+private struct PlaylistIntervalSetting: View {
+	@Default(.playlistInterval) private var interval
+
+	private static let defaultInterval = 60.0 * 30
+
+	var body: some View {
+		Toggle("Rotate between websites every", isOn: $interval.isNotNil(trueSetValue: Self.defaultInterval))
+			.help("Moves to the next website on each display in turn. Websites with hours set are skipped outside them.")
+
+		if interval != nil {
+			Stepper(
+				"\(Int((interval ?? Self.defaultInterval) / 60)) minutes",
+				value: $interval.withDefaultValue(Self.defaultInterval).secondsToMinutes,
+				in: 1...(60 * 24),
+				step: 1
+			)
+		}
 	}
 }
 

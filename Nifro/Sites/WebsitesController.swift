@@ -75,7 +75,7 @@ final class WebsitesController {
 	/**
 	Make a website the current one.
 	*/
-	private func makeCurrent(_ website: Website) {
+	func makeCurrent(_ website: Website) {
 		all = all.modifying {
 			$0.isCurrent = $0.id == website.id
 		}

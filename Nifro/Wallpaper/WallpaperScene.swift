@@ -52,6 +52,7 @@ final class WallpaperScene {
 	var isReloadPending = false
 
 	var reloadTimer: Timer?
+	var playlistTimer: Timer?
 
 	let occlusionMonitor: OcclusionMonitor
 
@@ -238,6 +239,7 @@ final class WallpaperScene {
 
 	func tearDown() {
 		reloadTimer?.invalidate()
+		playlistTimer?.invalidate()
 		pendingLoad?.cancel()
 		window.orderOut(nil)
 		window.contentView = nil
