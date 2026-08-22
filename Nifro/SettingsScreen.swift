@@ -15,7 +15,7 @@ struct SettingsScreen: View {
 		.formStyle(.grouped)
 		.frame(width: 400)
 		.fixedSize()
-		.windowLevel(.floating + 1) // To ensure it's always above the Nefro browser window.
+		.windowLevel(.floating + 1) // To ensure it's always above the Nifro browser window.
 	}
 }
 
@@ -76,7 +76,7 @@ private struct FreezeWhenCoveredSetting: View {
 			"Pause rendering while covered",
 			key: .freezeWhenCovered
 		)
-		.help("While other windows cover the wallpaper, Nefro shows the last rendered frame instead of continuing to draw one nobody can see. Turn this off if you need the page to keep animating out of sight.")
+		.help("While other windows cover the wallpaper, Nifro shows the last rendered frame instead of continuing to draw one nobody can see. Turn this off if you need the page to keep animating out of sight.")
 	}
 }
 
@@ -86,7 +86,7 @@ private struct ShowOnAllSpacesSetting: View {
 			"Show on all spaces",
 			key: .showOnAllSpaces
 		)
-		.help("While disabled, Nefro will display the website on the space that is active at launch.")
+		.help("While disabled, Nifro will display the website on the space that is active at launch.")
 	}
 }
 
@@ -107,7 +107,7 @@ private struct OpenExternalLinksInBrowserSetting: View {
 			"Open external links in default browser",
 			key: .openExternalLinksInBrowser
 		)
-		.help("If a website requires login, you should disable this setting while logging in as the website might require you to navigate to a different page, and you don't want that to open in a browser instead of Nefro.")
+		.help("If a website requires login, you should disable this setting while logging in as the website might require you to navigate to a different page, and you don't want that to open in a browser instead of Nifro.")
 	}
 }
 
@@ -189,7 +189,7 @@ private struct HideMenuBarIconSetting: View {
 				isShowingAlert = $0
 			}
 			.alert2(
-				"If you need to access the Nefro menu, launch the app again to reveal the menu bar icon for 5 seconds.",
+				"If you need to access the Nifro menu, launch the app again to reveal the menu bar icon for 5 seconds.",
 				isPresented: $isShowingAlert
 			)
 	}
@@ -213,7 +213,7 @@ private struct DisplaySetting: View {
 			}
 		} label: {
 			Text("Show on")
-			Link("Multi-display support ›", destination: "https://github.com/PathGao/nefro/issues/2")
+			Link("Multi-display support ›", destination: "https://github.com/PathGao/nifro/issues/2")
 		}
 		.task(id: chosenDisplay) {
 			guard chosenDisplay == nil else {

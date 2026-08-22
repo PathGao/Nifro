@@ -1,7 +1,8 @@
 excluded:
   # 构建产物：SwiftLint 不该去管第三方包的源码风格
   - .xcode-build
-  - .typecheck
+  - .build
+  - .venv
 
 only_rules:
   - accessibility_trait_for_button

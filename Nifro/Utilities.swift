@@ -443,7 +443,7 @@ enum SSApp {
 			"body": "\n\n---\n\n\(debugInfo)"
 		]
 
-		URL("https://github.com/PathGao/nefro/issues/new")
+		URL("https://github.com/PathGao/nifro/issues/new")
 			.addingDictionaryAsQuery(query)
 			.open()
 	}

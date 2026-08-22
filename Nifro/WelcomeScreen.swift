@@ -9,10 +9,10 @@ extension AppState {
 		SSApp.forceActivate()
 
 		NSAlert.showModal(
-			title: "Welcome to Nefro!",
+			title: "Welcome to Nifro!",
 			message:
 				"""
-				Nefro lives in the menu bar (droplet icon at the top-right of the screen). Click it and then select “Add Website…” to get started.
+				Nifro lives in the menu bar (droplet icon at the top-right of the screen). Click it and then select “Add Website…” to get started.
 
 				Use “Browsing Mode” if you need to log into a website or interact with it in some way.
 
@@ -31,7 +31,7 @@ extension AppState {
 				If you have any feedback, bug reports, or feature requests, use the feedback button in the app. I quickly respond to all submissions.
 				""",
 			buttonTitles: [
-				"Get Started with Nefro"
+				"Get Started with Nifro"
 			]
 		)
 

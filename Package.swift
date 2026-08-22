@@ -10,18 +10,18 @@
 import PackageDescription
 
 let package = Package(
-	name: "NefroGeometry",
+	name: "NifroGeometry",
 	platforms: [.macOS(.v15)],
 	targets: [
 		.target(
-			name: "NefroGeometry",
-			path: "Nefro",
+			name: "NifroGeometry",
+			path: "Nifro",
 			sources: ["Geometry.swift"]
 		),
 		.testTarget(
-			name: "NefroGeometryTests",
-			dependencies: ["NefroGeometry"],
-			path: "Tests/NefroGeometryTests"
+			name: "NifroGeometryTests",
+			dependencies: ["NifroGeometry"],
+			path: "Tests/NifroGeometryTests"
 		)
 	]
 )

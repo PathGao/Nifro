@@ -1,6 +1,6 @@
-# Contributing to Nefro
+# Contributing to Nifro
 
-Nefro exists because the app it forked from had five years of users and no
+Nifro exists because the app it forked from had five years of users and no
 external contributors. That is a fixable problem, and most of the fix is
 lowering the cost of a first contribution rather than asking for more effort
 from contributors. So: small pull requests are welcome, half-finished ideas in
@@ -17,7 +17,7 @@ dismiss a banner.
 Adding one needs no Xcode, no Swift and no build. Two routes, both equally
 welcome:
 
-- Open a [Site submission issue](https://github.com/PathGao/nefro/issues/new?template=site_submission.yml)
+- Open a [Site submission issue](https://github.com/PathGao/nifro/issues/new?template=site_submission.yml)
   and fill in the URL and your settings. Someone else will land it.
 - Or open a pull request against `sites/` directly. Copy an existing entry,
   change the values, done.
@@ -28,7 +28,7 @@ other people will paste into their own machine.
 
 ## Reporting a bug
 
-Use the [bug report form](https://github.com/PathGao/nefro/issues/new?template=bug_report.yml).
+Use the [bug report form](https://github.com/PathGao/nifro/issues/new?template=bug_report.yml).
 The two fields people most often leave out are the URL it happens on and
 whether custom CSS or JavaScript is set on that site — those two answers
 resolve a large share of reports on their own, which is why the form asks for
@@ -43,8 +43,8 @@ You need Xcode. Nothing else is required to build — dependencies come in
 through Swift Package Manager and Xcode resolves them on first open.
 
 ```
-git clone https://github.com/PathGao/nefro.git
-open nefro/Plash.xcodeproj
+git clone https://github.com/PathGao/nifro.git
+open nifro/Plash.xcodeproj
 ```
 
 Then build and run the `Plash` scheme. (The Xcode project, its targets and the
@@ -94,7 +94,7 @@ request that does one thing gets reviewed; one that does four gets postponed.
 
 ## Relationship to Plash
 
-Nefro is an independent fork of [Plash](https://github.com/sindresorhus/Plash)
+Nifro is an independent fork of [Plash](https://github.com/sindresorhus/Plash)
 by Sindre Sorhus, taken from the last MIT-licensed release (v2.16.0) before
 Plash went closed source in October 2025. The fork exists because the MIT
 licence permits it, and it stands on years of someone else's work. We are
@@ -102,15 +102,15 @@ grateful for that work and we are not competing with it.
 
 What follows from that:
 
-- **Nefro is not Plash and must never claim to be.** Contributions that
+- **Nifro is not Plash and must never claim to be.** Contributions that
   reintroduce the Plash name, icon, artwork, App Store identity or website as
-  Nefro's own will be rejected. This is not negotiable, and it applies to
+  Nifro's own will be rejected. This is not negotiable, and it applies to
   passing details — a stray "Plash" in user-visible strings, a screenshot of
   the upstream app in our README — as much as to the obvious cases. The
   internal target and directory names are the one exception, and are being
   renamed on their own schedule.
 - **Don't file our bugs upstream, and don't file upstream's bugs here.**
-  Report bugs you see in Nefro here. Post-2.16.0 Plash is a different program
+  Report bugs you see in Nifro here. Post-2.16.0 Plash is a different program
   and we can't fix it.
 - **Code from closed-source Plash releases is not acceptable**, in any form,
   including reimplementations written while reading it. Anything after
@@ -122,5 +122,5 @@ What follows from that:
 
 ## Licence
 
-Contributions are made under the repository's MIT licence, the same one Nefro
+Contributions are made under the repository's MIT licence, the same one Nifro
 inherited. There is no CLA and no bot to sign.

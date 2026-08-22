@@ -3,10 +3,10 @@
 A curated list of websites that work well as a desktop wallpaper.
 
 Each `*.yml` file in this directory describes one website: where it lives, what it looks like, and
-the settings Nefro should use for it. The app reads this registry to build its built-in gallery, so
-adding a good site here is a one-click win for everyone who installs Nefro.
+the settings Nifro should use for it. The app reads this registry to build its built-in gallery, so
+adding a good site here is a one-click win for everyone who installs Nifro.
 
-**This is the lowest-effort way to contribute to Nefro.** You do not need Swift, Xcode, or a Mac
+**This is the lowest-effort way to contribute to Nifro.** You do not need Swift, Xcode, or a Mac
 build. You need a text editor and a website you like looking at.
 
 The seed entries come from five years of people sharing their setups in
@@ -19,7 +19,7 @@ entry's `source` field.
 | Field | Type | Required | Meaning |
 | --- | --- | --- | --- |
 | `name` | string | yes | Display name in the gallery. |
-| `url` | string | yes | What Nefro loads. Include query parameters that are part of the setup (kiosk mode, transparent background, colours). |
+| `url` | string | yes | What Nifro loads. Include query parameters that are part of the setup (kiosk mode, transparent background, colours). |
 | `description` | string | yes | One sentence describing what the user ends up staring at. |
 | `tags` | string[] | yes | One or more of: `clock`, `weather`, `dashboard`, `art`, `data`, `calendar`, `ambient`, `photo`, `map`, `screensaver`, `news`, `personal`, `3d`. |
 | `backend` | `snapshot` \| `live` | yes | See below. This is the field that matters most. |
@@ -34,7 +34,7 @@ entry's `source` field.
 
 ### `backend`: the power switch
 
-- **`snapshot`** — the page changes slowly. Nefro renders it, takes a picture, and suspends the web
+- **`snapshot`** — the page changes slowly. Nifro renders it, takes a picture, and suspends the web
   process. Between reloads the wallpaper costs about as much as a JPEG. Clocks, weather, calendars,
   dashboards, charts, photo feeds: all snapshot.
 - **`live`** — the page has to keep rendering, because animation or interaction *is* the content.
@@ -84,7 +84,7 @@ source: >-
 
 ## Contributing an entry
 
-1. **Try it first.** Put the URL in Nefro, live with it for a bit, and work out the settings — the
+1. **Try it first.** Put the URL in Nifro, live with it for a bit, and work out the settings — the
    query parameters, the CSS that hides the nav bar, the reload interval that is often enough
    without being wasteful. An entry nobody has actually used is worse than no entry.
 2. **Write the file.** One site per file, named in kebab-case after `name`

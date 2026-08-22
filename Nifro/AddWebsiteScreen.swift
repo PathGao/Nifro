@@ -127,7 +127,7 @@ struct AddWebsiteScreen: View {
 					.buttonStyle(.link)
 				}
 				Spacer()
-				Link("More ideas", destination: "https://github.com/PathGao/nefro/discussions/136")
+				Link("More ideas", destination: "https://github.com/PathGao/nifro/discussions/136")
 					.buttonStyle(.link)
 			}
 		}

@@ -43,7 +43,7 @@ final class WebViewController: NSViewController {
 		webView.customUserAgent = SSWebView.safariUserAgent
 		webView.drawsBackground = false
 
-		userContentController.addJavaScript("document.documentElement.classList.add('is-nefro-app', 'is-plash-app')")
+		userContentController.addJavaScript("document.documentElement.classList.add('is-nifro-app', 'is-plash-app')")
 
 		if let website = WebsitesController.shared.current {
 			if website.invertColors2 != .never {
@@ -142,7 +142,7 @@ extension WebViewController: WKNavigationDelegate {
 			let newURL = navigationAction.request.url,
 			originalURL.host != newURL.host
 		{
-			// Hide Nefro if it's in front of everything.
+			// Hide Nifro if it's in front of everything.
 			if Defaults[.isBrowsingMode], Defaults[.bringBrowsingModeToFront] {
 				Defaults[.isBrowsingMode] = false
 			}

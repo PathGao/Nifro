@@ -1,5 +1,5 @@
 name: Question
-description: Ask how to do something in Nefro
+description: Ask how to do something in Nifro
 labels: ["question"]
 body:
   - type: markdown
@@ -17,7 +17,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: macOS and Nefro version
-      placeholder: "macOS 26.1 · Nefro 2.16.0"
+      label: macOS and Nifro version
+      placeholder: "macOS 26.1 · Nifro 2.16.0"
     validations:
       required: true

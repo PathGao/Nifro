@@ -102,7 +102,7 @@ final class SSWebView: WKWebView {
 				}
 			}
 
-			menuItem.toolTip = "Updates the URL for the stored website in Nefro to the current URL"
+			menuItem.toolTip = "Updates the URL for the stored website in Nifro to the current URL"
 		}
 
 		menu.addSeparator()
@@ -130,7 +130,7 @@ final class SSWebView: WKWebView {
 		evaluateJavaScript(
 			"""
 			const list = document.documentElement.classList;
-			list.\(method)("nefro-is-browsing-mode");
+			list.\(method)("nifro-is-browsing-mode");
 			list.\(method)("plash-is-browsing-mode");
 			""",
 			in: nil,

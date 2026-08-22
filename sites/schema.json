@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://github.com/PathGao/nefro/blob/main/sites/schema.json",
-  "title": "Nefro site entry",
+  "$id": "https://github.com/PathGao/nifro/blob/main/sites/schema.json",
+  "title": "Nifro site entry",
   "description": "One curated website that works well as a desktop wallpaper. One YAML file per site in sites/.",
   "type": "object",
   "required": ["name", "url", "description", "tags", "backend", "source"],
@@ -17,7 +17,7 @@
       "type": "string",
       "format": "uri",
       "pattern": "^https?://",
-      "description": "The URL Nefro loads. Include any query parameters that are part of the recommended setup (kiosk mode, transparent background, etc.)."
+      "description": "The URL Nifro loads. Include any query parameters that are part of the recommended setup (kiosk mode, transparent background, etc.)."
     },
     "description": {
       "type": "string",
@@ -51,7 +51,7 @@
     "backend": {
       "type": "string",
       "enum": ["snapshot", "live"],
-      "description": "snapshot: the page changes slowly, so Nefro can screenshot it periodically and suspend the web process — power cost near zero. live: the page animates or is meant to be interacted with, so it must keep rendering. Default to snapshot; only use live when animation or interaction is the point."
+      "description": "snapshot: the page changes slowly, so Nifro can screenshot it periodically and suspend the web process — power cost near zero. live: the page animates or is meant to be interacted with, so it must keep rendering. Default to snapshot; only use live when animation or interaction is the point."
     },
     "backendNote": {
       "type": "string",

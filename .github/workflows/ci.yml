@@ -23,15 +23,15 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .xcode-build/SourcePackages
-          key: spm-${{ hashFiles('Nefro.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+          key: spm-${{ hashFiles('Nifro.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
           restore-keys: spm-
 
       # Signing needs a certificate we deliberately do not put in CI. Release signing lives in release.yml.
       - name: Build
         run: |
           xcodebuild build \
-            -project Nefro.xcodeproj \
-            -scheme Nefro \
+            -project Nifro.xcodeproj \
+            -scheme Nifro \
             -configuration Debug \
             -destination 'platform=macOS' \
             -derivedDataPath .xcode-build \

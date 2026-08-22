@@ -1,13 +1,13 @@
 # 发布手册
 
-Nefro 不上 Mac App Store，分发走 **GitHub Release + Homebrew cask**。
+Nifro 不上 Mac App Store，分发走 **GitHub Release + Homebrew cask**。
 
 涉及文件：
 
 | 文件 | 作用 |
 | --- | --- |
 | `.github/workflows/release.yml` | 打 `v*` tag 触发，构建 → 签名 →（公证）→ 打包 → 建 Release → 回写 cask |
-| `Casks/nefro.rb` | cask 定义，`version` / `sha256` 由流水线自动更新 |
+| `Casks/nifro.rb` | cask 定义，`version` / `sha256` 由流水线自动更新 |
 | `Config.xcconfig` | `MARKETING_VERSION`，必须和 tag 对得上，流水线会校验 |
 
 ---
@@ -34,11 +34,11 @@ ditto -c -k --keepParent  →  notarize.zip
    ↓
 xcrun notarytool submit --wait      （Apple 扫一遍，通常 1~10 分钟）
    ↓
-xcrun stapler staple Nefro.app      （把公证票据钉进 app，用户离线也能过）
+xcrun stapler staple Nifro.app      （把公证票据钉进 app，用户离线也能过）
    ↓
 spctl -a -vvv --type exec           （门禁自检，不过就 fail，不发坏包）
    ↓
-Nefro-x.y.z.zip  →  GitHub Release  →  cask 回写 version/sha256
+Nifro-x.y.z.zip  →  GitHub Release  →  cask 回写 version/sha256
 ```
 
 ### 路径 B：没有付费账号
@@ -46,7 +46,7 @@ Nefro-x.y.z.zip  →  GitHub Release  →  cask 回写 version/sha256
 ```
 xcodebuild (CODE_SIGN_IDENTITY="-")   ← ad-hoc，无身份，但沙盒 entitlements 照样生效
    ↓
-Nefro-x.y.z.zip  →  GitHub Release  →  cask 回写 version/sha256
+Nifro-x.y.z.zip  →  GitHub Release  →  cask 回写 version/sha256
                                         cask 的 postflight 去掉 com.apple.quarantine
 ```
 
@@ -97,19 +97,19 @@ base64 -i AuthKey_XXXXXXXX.p8   | pbcopy   # 贴进 NOTARY_KEY_P8
 - **A3** appstoreconnect.apple.com → Users and Access → Integrations → Keys → 生成一个
   **Developer Access / App Manager** 权限的 API Key，下载 `.p8`（**只能下载一次**）。
 - **A4** 把上表 6 个 secret 填进仓库。
-- **A5** 第一次发布成功后，把 `Casks/nefro.rb` 里的整个 `postflight` 块删掉（公证之后不需要
+- **A5** 第一次发布成功后，把 `Casks/nifro.rb` 里的整个 `postflight` 块删掉（公证之后不需要
   再去隔离属性，留着反而是负面信号）。
 
 **两条路径都要做：**
 
 - **B1** 创建 tap 仓库 `PathGao/homebrew-tap`，或者直接让用户 tap 本仓库
-  （`brew tap PathGao/tap https://github.com/PathGao/nefro`，cask 就在本仓库 `Casks/` 下，
+  （`brew tap PathGao/tap https://github.com/PathGao/nifro`，cask 就在本仓库 `Casks/` 下，
   不用维护第二个仓库 —— 这是更省事的做法）。
 - **B2** 确认 `main` 分支保护规则允许 `github-actions[bot]` 推送，否则流水线最后一步
   「回写 cask」会失败（只是告警，Release 本身不受影响，可以手动改 cask）。
 - **B3** 首次发布前，把 `.github/workflows/release.yml` 顶部的 `XCODE_SCHEME` / `BUILT_APP_NAME`
   和工程实际情况对齐。**当前工程的 scheme 和 target 还叫 `Plash`**，所以默认值就是 `Plash`
-  / `Plash.app`；等 target 改名成 Nefro 之后，把这两个值改掉即可，其余不用动。
+  / `Plash.app`；等 target 改名成 Nifro 之后，把这两个值改掉即可，其余不用动。
 
 ---
 
@@ -126,7 +126,7 @@ git commit -am "0.2.0" && git push
 git tag -a v0.2.0 -m "v0.2.0" && git push origin v0.2.0
 ```
 
-剩下的流水线全包：构建、签名、公证、打包、建 Release、回写 `Casks/nefro.rb`。
+剩下的流水线全包：构建、签名、公证、打包、建 Release、回写 `Casks/nifro.rb`。
 
 失败时先看 Actions 里的 `xcodebuild-log` artifact。
 
@@ -138,20 +138,20 @@ git tag -a v0.2.0 -m "v0.2.0" && git push origin v0.2.0
 
 | 安装方式 | 用户体验 |
 | --- | --- |
-| `brew install --cask PathGao/tap/nefro` | 装完直接能开，无提示 |
-| 下载 zip 双击 | 首次弹「Nefro 是从互联网下载的，确定要打开吗？」→ 点「打开」→ 结束 |
+| `brew install --cask PathGao/tap/nifro` | 装完直接能开，无提示 |
+| 下载 zip 双击 | 首次弹「Nifro 是从互联网下载的，确定要打开吗？」→ 点「打开」→ 结束 |
 
 ### 路径 B（ad-hoc，未公证）
 
 | 安装方式 | 用户体验 |
 | --- | --- |
-| `brew install --cask PathGao/tap/nefro` | 装完直接能开，无提示（cask 的 `postflight` 已去掉隔离属性） |
-| 下载 zip 双击 | **被拦**：「无法打开 Nefro，因为 Apple 无法检查其是否包含恶意软件」，只有「移到废纸篓 / 取消」两个按钮 |
+| `brew install --cask PathGao/tap/nifro` | 装完直接能开，无提示（cask 的 `postflight` 已去掉隔离属性） |
+| 下载 zip 双击 | **被拦**：「无法打开 Nifro，因为 Apple 无法检查其是否包含恶意软件」，只有「移到废纸篓 / 取消」两个按钮 |
 
 路径 B 下直接下载 zip 的用户需要额外一步。放进 README 安装章节的说明：
 
-> 首次打开时 macOS 会提示「无法打开 Nefro，因为 Apple 无法检查其是否包含恶意软件」。
-> 这是因为 Nefro 没有经过 Apple 公证（公证需要 99 美元/年的开发者账号）。
+> 首次打开时 macOS 会提示「无法打开 Nifro，因为 Apple 无法检查其是否包含恶意软件」。
+> 这是因为 Nifro 没有经过 Apple 公证（公证需要 99 美元/年的开发者账号）。
 > 用 Homebrew 安装不会遇到这个提示。
 >
 > 手动放行，二选一：
@@ -159,7 +159,7 @@ git tag -a v0.2.0 -m "v0.2.0" && git push origin v0.2.0
 > 1. 打开一次被拦的 app → 「系统设置 → 隐私与安全性」→ 拉到底 → 点「仍要打开」。
 > 2. 或者在终端里执行：
 >    ```bash
->    xattr -dr com.apple.quarantine /Applications/Nefro.app
+>    xattr -dr com.apple.quarantine /Applications/Nifro.app
 >    ```
 
 **别让用户去关 SIP 或 `spctl --master-disable`**，那是降低整机安全等级，不是解决这个问题的办法。
@@ -181,16 +181,16 @@ git tag -a v0.2.0 -m "v0.2.0" && git push origin v0.2.0
   `script/build-brew-cask.sh` 生成后 `cp` 过去。没有 livecheck，`version` 是写死的字面量。
   靠 `postflight` 里的 `xattr -d com.apple.quarantine` 让 brew 用户绕过 Gatekeeper。
 
-Nefro 的偏离：
+Nifro 的偏离：
 
-| 项 | AeroSpace | Nefro | 原因 |
+| 项 | AeroSpace | Nifro | 原因 |
 | --- | --- | --- | --- |
 | 发布触发 | 本机脚本 + 手动上传 | tag 触发 GitHub Actions | 本机发版要求维护者机器状态正确，且不可复现 |
 | 签名 | 自签名证书（本机） | Developer ID（有账号）/ ad-hoc（没有） | 自签名证书对 Gatekeeper 和 ad-hoc 等价，白多一步；不如直接留出公证位 |
-| 公证 | 不做 | 有账号就做 | Nefro 是沙盒 GUI app，用户群不像 tiling WM 用户那样习惯敲 `xattr` |
+| 公证 | 不做 | 有账号就做 | Nifro 是沙盒 GUI app，用户群不像 tiling WM 用户那样习惯敲 `xattr` |
 | cask 版本 | 手动生成后 cp | CI `sed` 回写本仓库 `Casks/` | 少维护一个 tap 仓库，少一步人工 |
 | livecheck | 无 | 有 | 4 行，让 `brew livecheck` 能自查，将来若上游到 homebrew-cask 也用得上 |
-| CLI / manpage / shell completion | 有 | 无 | Nefro 只有 GUI app + ShareExtension |
+| CLI / manpage / shell completion | 有 | 无 | Nifro 只有 GUI app + ShareExtension |
 
 沿用 AeroSpace 的部分：不用 fastlane，只用 `xcodebuild` + `codesign` + `notarytool` + 少量 shell；
 cask 的 `postflight` 去隔离属性；zip（而不是 dmg）分发。

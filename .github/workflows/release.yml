@@ -2,7 +2,7 @@
 #
 # ⚠️ 占位变量：Xcode 工程内部的 target / scheme 目前仍叫 "Plash"（还没重命名）。
 #    下面 env 里的 XCODE_PROJECT / XCODE_SCHEME / BUILT_APP_NAME 就是为此准备的占位符。
-#    等 target 改名为 Nefro 之后，把这三个值改成 Nefro.xcodeproj / Nefro / Nefro.app 即可，
+#    等 target 改名为 Nifro 之后，把这三个值改成 Nifro.xcodeproj / Nifro / Nifro.app 即可，
 #    其余步骤不用动（重命名 .app 目录的那步会自动变成 no-op）。
 #
 # 两条路径，靠 secrets 是否存在自动选择：
@@ -28,8 +28,8 @@ env:
   XCODE_SCHEME: Plash
   BUILT_APP_NAME: Plash.app
   # —— 对外的产品名，不随 target 名变化 ——
-  APP_NAME: Nefro
-  BUNDLE_ID: com.pathgao.nefro
+  APP_NAME: Nifro
+  BUNDLE_ID: com.pathgao.nifro
 
 jobs:
   release:
@@ -135,7 +135,7 @@ jobs:
           test -d "$src" || { echo "::error::没找到 $src"; exit 1; }
           rm -rf ".release/$APP_NAME.app"
           # 重命名 .app 目录不会破坏签名（签名覆盖的是包内容，不是目录名）。
-          # target 改名之后 BUILT_APP_NAME 就等于 Nefro.app，这一步自然变成 no-op。
+          # target 改名之后 BUILT_APP_NAME 就等于 Nifro.app，这一步自然变成 no-op。
           cp -R "$src" ".release/$APP_NAME.app"
 
       - name: 公证并 staple
@@ -210,7 +210,7 @@ jobs:
           cat > "$RUNNER_TEMP/notes.md" <<EOF
           $note
 
-          安装：\`brew install --cask PathGao/tap/nefro\`
+          安装：\`brew install --cask PathGao/tap/nifro\`
 
           \`\`\`
           sha256  ${{ steps.package.outputs.sha }}
@@ -225,7 +225,7 @@ jobs:
 
       # cask 里的 version / sha256 每次发布都要改，交给 CI 写回 main，省掉一次人工操作。
       # 如果 main 开了分支保护导致 push 失败，这步会告警但不影响 release 本身。
-      - name: 回写 Casks/nefro.rb
+      - name: 回写 Casks/nifro.rb
         continue-on-error: true
         run: |
           set -euo pipefail
@@ -234,14 +234,14 @@ jobs:
 
           git fetch origin main
           git checkout -B main origin/main
-          sed -i '' -E "s/^  version \".*\"$/  version \"$version\"/" Casks/nefro.rb
-          sed -i '' -E "s/^  sha256 \".*\"$/  sha256 \"$sha\"/" Casks/nefro.rb
+          sed -i '' -E "s/^  version \".*\"$/  version \"$version\"/" Casks/nifro.rb
+          sed -i '' -E "s/^  sha256 \".*\"$/  sha256 \"$sha\"/" Casks/nifro.rb
 
-          if git diff --quiet -- Casks/nefro.rb; then
+          if git diff --quiet -- Casks/nifro.rb; then
             echo "cask 没有变化，跳过"
             exit 0
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "cask: bump to $version" -- Casks/nefro.rb
+          git commit -m "cask: bump to $version" -- Casks/nifro.rb
           git push origin main

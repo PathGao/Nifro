@@ -59,7 +59,7 @@ final class DesktopWindow: NSWindow {
 		self.collectionBehavior = [
 			.stationary,
 			.ignoresCycle,
-			.fullScreenNone // This ensures that if Nefro is launched while an app is fullscreen (fullscreen is a separate space), it will not show behind that app and instead show in the primary space.
+			.fullScreenNone // This ensures that if Nifro is launched while an app is fullscreen (fullscreen is a separate space), it will not show behind that app and instead show in the primary space.
 		]
 
 		disableSnapshotRestoration()
