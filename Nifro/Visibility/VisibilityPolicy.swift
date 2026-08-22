@@ -15,7 +15,7 @@ largest patch of wallpaper still on show
   └─ nothing at all       → freeze on the last frame
 ```
 
-The middle case is the one that matters in practice. The web view keeps its full-screen layout, since the page has to believe it has the whole screen or it reflows and the strip shows different content. Only the part on show gets painted. WebKit paints by tile against the exposed rectangle, so a window the width of the Dock paints a fraction of what a full-screen one does.
+The middle case is the one that matters in practice. The web view keeps the layout it has uncropped, since the page has to believe it still has the whole window or it reflows and the strip shows different content. Only the part on show gets painted. WebKit paints by tile against the exposed rectangle, so a window the width of the Dock paints a fraction of what a full-screen one does.
 */
 extension WallpaperScene {
 	/**
@@ -30,22 +30,9 @@ extension WallpaperScene {
 	*/
 	private static let minimumMeaningfulPatchArea = 40_000.0
 
-	var isVisibilityManagementEnabled: Bool {
-		Defaults[.freezeWhenCovered]
-			// A website drawn from stills is already costing nothing between refreshes.
-			&& !usesSnapshotRendering
-			// A page that accepts clicks has to be there to accept them.
-			&& !(website?.allowsInteraction ?? false)
-			&& AppState.shared.isEnabled
-			&& !AppState.shared.isBrowsingMode
-			&& website != nil
-			// A website with its own crop already decides what is shown and how big the window is. Two things moving the same window would fight.
-			&& website?.crop == nil
-	}
-
 	func applyVisibilityState() {
 		guard
-			isVisibilityManagementEnabled,
+			renderingMode == .managed,
 			let screen
 		else {
 			restoreFullRendering()
@@ -76,13 +63,13 @@ extension WallpaperScene {
 	// MARK: - The three states
 
 	private func restoreFullRendering() {
-		guard frozenView != nil || renderedRegion != nil else {
+		switch content {
+		case .reduced, .frozen:
+			break
+		default:
 			return
 		}
 
-		frozenView = nil
-		renderedRegion = nil
-		window.cropRect = nil
 		installContentView()
 
 		// The launch-time hide is cleared on a timer, and this path can run before that timer fires.
@@ -95,23 +82,13 @@ extension WallpaperScene {
 
 	private func renderOnly(_ region: CGRect, on screen: NSScreen) {
 		// Snapping to whole points keeps a one-pixel jitter in the coverage grid from rebuilding the view every poll.
-		let snapped = region.integral
+		let pageRegion = region.integral.pageFrame(inScreen: screen.frame)
 
-		guard snapped != renderedRegion else {
+		if case .reduced(let current) = content, current == pageRegion {
 			return
 		}
 
-		renderedRegion = snapped
-		frozenView = nil
-
-		let pageRegion = snapped.pageFrame(inScreen: screen.frame)
-
-		window.cropRect = pageRegion
-		window.contentView = CropView(
-			content: webViewController.webView,
-			crop: pageRegion,
-			pageSize: screen.frame.size
-		)
+		content = .reduced(to: pageRegion)
 
 		// Still playing, still animating, just in a smaller window.
 		webViewController.webView.setAllMediaPlaybackSuspended(false) {}
@@ -119,7 +96,7 @@ extension WallpaperScene {
 	}
 
 	private func freeze() {
-		guard frozenView == nil else {
+		guard !isFrozen else {
 			return
 		}
 
@@ -139,30 +116,18 @@ extension WallpaperScene {
 		webView.takeSnapshot(with: nil) { [weak self] image, _ in
 			guard
 				let self,
-				isVisibilityManagementEnabled,
+				renderingMode == .managed,
 				occlusionMonitor.largestVisibleRegion.area < Self.minimumMeaningfulPatchArea,
-				frozenView == nil
+				!isFrozen
 			else {
 				return
 			}
 
-			// Installed even when the snapshot came back empty. Nothing of the wallpaper is on show, so nothing can look wrong. Skipping it would leave the web view in the window painting frames nobody sees, which is what this avoids.
-			installFrozenView(showing: image)
+			// Held even when the snapshot came back empty. Nothing of the wallpaper is on show, so nothing can look wrong. Skipping it would leave the web view in the window painting frames nobody sees, which is what this avoids.
+			content = .frozen(image)
 		}
 
 		resetTimer()
-	}
-
-	private func installFrozenView(showing image: NSImage?) {
-		let view = NSImageView(frame: window.contentLayoutRect)
-		view.imageScaling = .scaleAxesIndependently
-		view.image = image
-		view.autoresizingMask = [.width, .height]
-
-		renderedRegion = nil
-		frozenView = view
-		window.cropRect = nil
-		window.contentView = view
 	}
 
 	private func settlePendingReload() {

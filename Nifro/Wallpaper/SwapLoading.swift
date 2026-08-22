@@ -29,7 +29,7 @@ extension WallpaperScene {
 		guard
 			let url,
 			webViewController.webView.url != nil,
-			frozenView == nil
+			!isFrozen
 		else {
 			load(url)
 			return

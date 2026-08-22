@@ -18,19 +18,12 @@ extension WallpaperScene {
 	*/
 	private static let settleDelay = Duration.seconds(2)
 
-	var usesSnapshotRendering: Bool {
-		website?.rendering == .snapshot
-			&& !AppState.shared.isBrowsingMode
-			// A still cannot be clicked, so the two settings cannot both win.
-			&& !(website?.allowsInteraction ?? false)
-	}
-
 	/**
 	Refresh the still. Loads the page out of sight, photographs it, and drops the renderer.
 	*/
 	func refreshSnapshot() {
 		guard
-			usesSnapshotRendering,
+			renderingMode == .snapshot,
 			let url = website?.url,
 			snapshotTask == nil
 		else {
@@ -44,7 +37,8 @@ extension WallpaperScene {
 				return
 			}
 
-			let size = screen?.frameWithoutStatusBar.size ?? CGSize(width: 1920, height: 1080)
+			// The same layout size the live page gets, because the crop below is a rectangle of that layout.
+			let size = pageLayoutSize ?? CGSize(width: 1920, height: 1080)
 			let renderer = makeOffscreenRenderer(size: size)
 
 			defer { renderer.close() }
@@ -78,7 +72,7 @@ extension WallpaperScene {
 				return
 			}
 
-			showSnapshot(image)
+			content = .snapshot(image, crop: website?.crop)
 		}
 	}
 
@@ -102,20 +96,6 @@ extension WallpaperScene {
 		return window
 	}
 
-	private func showSnapshot(_ image: NSImage) {
-		let view = NSImageView(frame: window.contentLayoutRect)
-		view.imageScaling = .scaleAxesIndependently
-		view.image = image
-		view.autoresizingMask = [.width, .height]
-
-		snapshotView = view
-		frozenView = nil
-		renderedRegion = nil
-		window.cropRect = website?.crop
-		window.contentView = view
-		installMenuBarBandIfNeeded()
-	}
-
 	/**
 	Stop drawing from stills and hand the window back to the live web view.
 
@@ -125,11 +105,10 @@ extension WallpaperScene {
 		snapshotTask?.cancel()
 		snapshotTask = nil
 
-		guard snapshotView != nil else {
+		guard case .snapshot = content else {
 			return
 		}
 
-		snapshotView = nil
 		installContentView()
 	}
 }

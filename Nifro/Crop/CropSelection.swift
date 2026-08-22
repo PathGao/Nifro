@@ -25,6 +25,11 @@ extension AppState {
 			}
 		}
 
+		// Put the live page back before the overlay goes on. The wallpaper may currently be a frozen
+		// still or a shrunk region, and framing a rectangle against a stale picture would record a
+		// crop of something the page no longer shows.
+		primaryScene.content = .live(crop: nil)
+
 		// The window is normally click-through and behind everything. Neither helps while the user aims a rectangle at it.
 		desktopWindow.isInteractive = true
 		desktopWindow.level = .floating
