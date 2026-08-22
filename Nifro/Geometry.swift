@@ -34,31 +34,45 @@ extension CGRect {
 	}
 }
 
+extension CGRect {
+	/**
+	The inverse of `screenFrame(inScreen:)`: where a screen rectangle falls in page coordinates.
+
+	Only valid while the page lays out at the size of that screen, which is the arrangement the wallpaper always uses.
+	*/
+	func pageFrame(inScreen screenFrame: CGRect) -> CGRect {
+		CGRect(
+			x: minX - screenFrame.minX,
+			y: screenFrame.maxY - maxY,
+			width: width,
+			height: height
+		)
+	}
+}
+
 /**
-The fraction of `region` that no rectangle in `covering` overlaps.
+The bounding rectangle of the largest single uncovered patch of `region`, plus its area.
 
-Rasterized onto a grid rather than solved as an exact rectangle union: the answer feeds a 2% threshold, and a 64×40 grid resolves 0.04% per cell — an order of magnitude finer than the question being asked.
-
-- Returns: 1 when nothing covers the region, 0 when it is completely covered.
+The area is what a threshold looks at; the rectangle is what you shrink the window to when you want to keep rendering only the part still on show.
 */
-func uncoveredFraction(
+func largestUncoveredRegion(
 	of region: CGRect,
 	covering: [CGRect],
 	columns: Int = 64,
 	rows: Int = 40
-) -> Double {
+) -> (rect: CGRect, area: Double) {
 	guard
 		region.width > 0,
 		region.height > 0,
 		columns > 0,
 		rows > 0
 	else {
-		return 1
+		return (.zero, 0)
 	}
 
-	var grid = [Bool](repeating: false, count: columns * rows)
 	let cellWidth = region.width / Double(columns)
 	let cellHeight = region.height / Double(rows)
+	var isCovered = [Bool](repeating: false, count: columns * rows)
 
 	for rect in covering {
 		let overlap = rect.intersection(region)
@@ -78,13 +92,86 @@ func uncoveredFraction(
 
 		for row in firstRow...lastRow {
 			for column in firstColumn...lastColumn {
-				grid[row * columns + column] = true
+				isCovered[row * columns + column] = true
 			}
 		}
 	}
 
-	let coveredCells = grid.count { $0 }
-	return 1 - (Double(coveredCells) / Double(grid.count))
+	var isVisited = [Bool](repeating: false, count: columns * rows)
+	var best = (cells: 0, minColumn: 0, maxColumn: 0, minRow: 0, maxRow: 0)
+	var stack = [Int]()
+
+	for start in 0..<(columns * rows) where !isCovered[start] && !isVisited[start] {
+		isVisited[start] = true
+		stack.append(start)
+
+		var cells = 0
+		var minColumn = columns
+		var maxColumn = 0
+		var minRow = rows
+		var maxRow = 0
+
+		while let index = stack.popLast() {
+			cells += 1
+
+			let column = index % columns
+			let row = index / columns
+			minColumn = min(minColumn, column)
+			maxColumn = max(maxColumn, column)
+			minRow = min(minRow, row)
+			maxRow = max(maxRow, row)
+
+			// Four-way connectivity: two patches touching only at a corner are two patches.
+			var neighbours = [Int]()
+
+			if column > 0 { neighbours.append(index - 1) }
+			if column < columns - 1 { neighbours.append(index + 1) }
+			if row > 0 { neighbours.append(index - columns) }
+			if row < rows - 1 { neighbours.append(index + columns) }
+
+			for neighbour in neighbours where !isCovered[neighbour] && !isVisited[neighbour] {
+				isVisited[neighbour] = true
+				stack.append(neighbour)
+			}
+		}
+
+		if cells > best.cells {
+			best = (cells, minColumn, maxColumn, minRow, maxRow)
+		}
+	}
+
+	guard best.cells > 0 else {
+		return (.zero, 0)
+	}
+
+	let rect = CGRect(
+		x: region.minX + Double(best.minColumn) * cellWidth,
+		y: region.minY + Double(best.minRow) * cellHeight,
+		width: Double(best.maxColumn - best.minColumn + 1) * cellWidth,
+		height: Double(best.maxRow - best.minRow + 1) * cellHeight
+	)
+
+	return (rect, Double(best.cells) * cellWidth * cellHeight)
+}
+
+/**
+The area, in square points, of the largest single uncovered patch of `region`.
+
+Not the total uncovered area, and not a percentage. Both of those answer the wrong question.
+
+A percentage is not screen-independent: 2% of a 6K display is a block you would notice, 2% of a laptop screen is a sliver. And a total ignores shape — four thin margins around a nearly-maximized window can add up to a respectable number while showing nothing anybody would call a wallpaper. What matters is whether one contiguous piece is big enough to see, so that is what gets measured.
+
+Rasterized onto a grid rather than solved exactly: the answer feeds a "is this big enough to bother rendering for" decision, and a 64×40 grid resolves a patch to well under the size that decision cares about.
+
+- Returns: the area of `region` when nothing covers it, and 0 when it is completely covered.
+*/
+func largestUncoveredPatch(
+	of region: CGRect,
+	covering: [CGRect],
+	columns: Int = 64,
+	rows: Int = 40
+) -> Double {
+	largestUncoveredRegion(of: region, covering: covering, columns: columns, rows: rows).area
 }
 
 /**

@@ -71,26 +71,32 @@ struct CropGeometryTests {
 }
 
 /**
-Coverage detection. The threshold it feeds is 2%, so what matters is that "completely covered" and "a sliver showing" land on opposite sides of it.
+Coverage detection. What it has to get right is the difference between "one patch you would actually notice" and "slivers that add up to a number".
 */
 @Suite("Coverage detection")
 struct CoverageTests {
 	private let screen = CGRect(x: 0, y: 0, width: 1600, height: 1000)
 
-	@Test("Nothing on screen means nothing is covered")
+	/// Roughly 200×200pt, matching `OcclusionMonitor.minimumMeaningfulPatchArea`.
+	private let meaningful = 40_000.0
+
+	@Test("Nothing on screen leaves the whole screen visible")
 	func noWindows() {
-		#expect(uncoveredFraction(of: screen, covering: []) == 1)
+		#expect(largestUncoveredPatch(of: screen, covering: []) == 1600 * 1000)
 	}
 
-	@Test("A window filling the screen covers all of it")
+	@Test("A window filling the screen leaves nothing")
 	func fullCover() {
-		#expect(uncoveredFraction(of: screen, covering: [screen]) == 0)
+		#expect(largestUncoveredPatch(of: screen, covering: [screen]) == 0)
 	}
 
-	@Test("A window covering half the screen leaves half")
+	@Test("A window covering half the screen leaves the other half")
 	func halfCover() {
 		let half = CGRect(x: 0, y: 0, width: 800, height: 1000)
-		#expect(abs(uncoveredFraction(of: screen, covering: [half]) - 0.5) < 0.01)
+		let patch = largestUncoveredPatch(of: screen, covering: [half])
+
+		#expect(abs(patch - 800 * 1000) < 1000)
+		#expect(patch > meaningful)
 	}
 
 	@Test("Overlapping windows are not double counted")
@@ -98,37 +104,59 @@ struct CoverageTests {
 		let left = CGRect(x: 0, y: 0, width: 1000, height: 1000)
 		let right = CGRect(x: 600, y: 0, width: 1000, height: 1000)
 
-		#expect(uncoveredFraction(of: screen, covering: [left, right]) == 0)
+		#expect(largestUncoveredPatch(of: screen, covering: [left, right]) == 0)
 	}
 
 	@Test("A window off to the side covers nothing")
 	func windowOnAnotherDisplay() {
 		let elsewhere = CGRect(x: 2000, y: 0, width: 800, height: 600)
-		#expect(uncoveredFraction(of: screen, covering: [elsewhere]) == 1)
+		#expect(largestUncoveredPatch(of: screen, covering: [elsewhere]) == 1600 * 1000)
 	}
 
 	@Test("The case this whole mechanism exists for: everything covered but a thin strip")
 	func onlyAStripShowing() {
-		// What the user sees when one maximized window sits on the desktop: the wallpaper survives
-		// only where the Dock and menu bar are, and that has to read as covered.
+		// One maximized window on the desktop. What survives is a band too shallow to read as wallpaper.
 		let almostEverything = CGRect(x: 0, y: 0, width: 1600, height: 985)
 
-		let uncovered = uncoveredFraction(of: screen, covering: [almostEverything])
+		#expect(largestUncoveredPatch(of: screen, covering: [almostEverything]) < meaningful)
+	}
 
-		#expect(uncovered < 0.02)
+	@Test("Thin margins on all four sides do not add up to something visible")
+	func scatteredSlivers() {
+		// The case a percentage rule gets wrong: four 10pt margins are 3.6% of the screen,
+		// comfortably past a 2% threshold, while showing nothing anybody would call a wallpaper.
+		let window = CGRect(x: 10, y: 10, width: 1580, height: 980)
+
+		let totalUncovered = (1600.0 * 1000) - (1580.0 * 980)
+		#expect(totalUncovered / (1600 * 1000) > 0.02)
+
+		// Each margin is its own patch, and every one of them is too thin to matter.
+		#expect(largestUncoveredPatch(of: screen, covering: [window]) < meaningful)
 	}
 
 	@Test("A genuinely visible desktop stays above the threshold")
 	func visibleDesktop() {
-		// A normal window on an otherwise clear desktop.
 		let window = CGRect(x: 200, y: 200, width: 900, height: 600)
 
-		#expect(uncoveredFraction(of: screen, covering: [window]) > 0.02)
+		#expect(largestUncoveredPatch(of: screen, covering: [window]) > meaningful)
 	}
 
-	@Test("A degenerate region reports visible rather than dividing by zero")
+	@Test("Two patches touching only at a corner are two patches")
+	func diagonalPatchesDoNotJoin() {
+		// Windows meeting at the centre leave four quadrants that touch only at one point.
+		let vertical = CGRect(x: 700, y: 0, width: 200, height: 1000)
+		let horizontal = CGRect(x: 0, y: 400, width: 1600, height: 200)
+
+		let patch = largestUncoveredPatch(of: screen, covering: [vertical, horizontal])
+
+		// One quadrant, not the sum of four.
+		#expect(patch < 1600 * 1000 / 2)
+		#expect(patch > meaningful)
+	}
+
+	@Test("A degenerate region reports nothing visible rather than dividing by zero")
 	func emptyRegion() {
-		#expect(uncoveredFraction(of: .zero, covering: [screen]) == 1)
+		#expect(largestUncoveredPatch(of: .zero, covering: [screen]) == 0)
 	}
 
 	@Test("Window-server rectangles flip into AppKit coordinates")

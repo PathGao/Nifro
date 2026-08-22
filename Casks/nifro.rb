@@ -4,11 +4,17 @@
 #   brew install --cask PathGao/tap/nifro
 #
 # version 和 sha256 由 .github/workflows/release.yml 在每次发布后自动回写，不要手改。
+#
+# 两个架构各发一份瘦二进制，不做通用包 —— 通用包等于让每个用户下载一份
+# 自己永远用不到的另一半。brew 会按机器自己选。
 cask "nifro" do
-  version "0.1.0"
-  sha256 "0000000000000000000000000000000000000000000000000000000000000000"
+  arch arm: "arm64", intel: "x86_64"
 
-  url "https://github.com/PathGao/nifro/releases/download/v#{version}/Nifro-#{version}.zip",
+  version "0.1.0"
+  sha256 arm:   "0000000000000000000000000000000000000000000000000000000000000000",
+         intel: "0000000000000000000000000000000000000000000000000000000000000000"
+
+  url "https://github.com/PathGao/nifro/releases/download/v#{version}/Nifro-#{version}-#{arch}.zip",
       verified: "github.com/PathGao/nifro/"
   name "Nifro"
   desc "Web page as your desktop wallpaper"
@@ -19,7 +25,7 @@ cask "nifro" do
     strategy :github_latest
   end
 
-  # 工程的 MACOSX_DEPLOYMENT_TARGET = 15.2
+  # 工程的 MACOSX_DEPLOYMENT_TARGET = 15.0
   depends_on macos: ">= :sequoia"
 
   app "Nifro.app"

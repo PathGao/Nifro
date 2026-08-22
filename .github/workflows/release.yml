@@ -1,9 +1,7 @@
 # 打 tag 触发的发布流水线。
 #
-# ⚠️ 占位变量：Xcode 工程内部的 target / scheme 目前仍叫 "Plash"（还没重命名）。
-#    下面 env 里的 XCODE_PROJECT / XCODE_SCHEME / BUILT_APP_NAME 就是为此准备的占位符。
-#    等 target 改名为 Nifro 之后，把这三个值改成 Nifro.xcodeproj / Nifro / Nifro.app 即可，
-#    其余步骤不用动（重命名 .app 目录的那步会自动变成 no-op）。
+# 每个架构单独出一份产物，不做通用二进制：一份 arm64、一份 x86_64。
+# 通用包等于让每个用户下载一份自己永远用不到的另一半。
 #
 # 两条路径，靠 secrets 是否存在自动选择：
 #   有 MACOS_CERTIFICATE_P12  → Developer ID 签名 + 公证 + staple（用户双击直接开）
@@ -23,11 +21,9 @@ on:
         required: true
 
 env:
-  # —— 占位变量，target 改名后同步修改 ——
-  XCODE_PROJECT: Plash.xcodeproj
-  XCODE_SCHEME: Plash
-  BUILT_APP_NAME: Plash.app
-  # —— 对外的产品名，不随 target 名变化 ——
+  XCODE_PROJECT: Nifro.xcodeproj
+  XCODE_SCHEME: Nifro
+  BUILT_APP_NAME: Nifro.app
   APP_NAME: Nifro
   BUNDLE_ID: com.pathgao.nifro
 
@@ -90,11 +86,16 @@ jobs:
           rm -f "$RUNNER_TEMP/cert.p12"
           security find-identity -v -p codesigning "$keychain"
 
-      - name: 构建（Release）
+      - name: 逐架构构建、公证、打包
+        id: package
         env:
           TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
+          NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
+          NOTARY_KEY_P8: ${{ secrets.NOTARY_KEY_P8 }}
         run: |
           set -euo pipefail
+          version="${{ steps.version.outputs.version }}"
           mkdir -p .release
 
           # 工程里默认写死了 CODE_SIGN_STYLE=Automatic / "Apple Development" / 上游的
@@ -118,80 +119,73 @@ jobs:
             )
           fi
 
-          xcodebuild -version
-          xcodebuild clean build \
-            -project "$XCODE_PROJECT" \
-            -scheme "$XCODE_SCHEME" \
-            -configuration Release \
-            -destination "generic/platform=macOS" \
-            -derivedDataPath .xcode-build \
-            "${signing_args[@]}" \
-            | tee .release/xcodebuild.log | grep -E '^(\*\*|CompileSwift|CodeSign|error:|warning:)' || true
-
-      - name: 归集产物
-        run: |
-          set -euo pipefail
-          src=".xcode-build/Build/Products/Release/$BUILT_APP_NAME"
-          test -d "$src" || { echo "::error::没找到 $src"; exit 1; }
-          rm -rf ".release/$APP_NAME.app"
-          # 重命名 .app 目录不会破坏签名（签名覆盖的是包内容，不是目录名）。
-          # target 改名之后 BUILT_APP_NAME 就等于 Nifro.app，这一步自然变成 no-op。
-          cp -R "$src" ".release/$APP_NAME.app"
-
-      - name: 公证并 staple
-        if: steps.caps.outputs.sign == 'true' && steps.caps.outputs.notarize == 'true'
-        env:
-          NOTARY_KEY_P8: ${{ secrets.NOTARY_KEY_P8 }}
-          NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
-          NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
-        run: |
-          set -euo pipefail
-          echo "$NOTARY_KEY_P8" | base64 --decode > "$RUNNER_TEMP/notary.p8"
-
-          # notarytool 只吃 zip/pkg/dmg，必须用 ditto 打包（保留符号链接和扩展属性）
-          ditto -c -k --keepParent ".release/$APP_NAME.app" "$RUNNER_TEMP/notarize.zip"
-
-          xcrun notarytool submit "$RUNNER_TEMP/notarize.zip" \
-            --key "$RUNNER_TEMP/notary.p8" \
-            --key-id "$NOTARY_KEY_ID" \
-            --issuer "$NOTARY_ISSUER_ID" \
-            --wait --timeout 30m
-
-          # staple 打在 .app 上，之后再重新压包，用户离线也能通过 Gatekeeper
-          xcrun stapler staple ".release/$APP_NAME.app"
-          rm -f "$RUNNER_TEMP/notary.p8"
-
-      - name: 打包与校验
-        id: package
-        run: |
-          set -euo pipefail
-          version="${{ steps.version.outputs.version }}"
-          zip=".release/$APP_NAME-$version.zip"
-
-          codesign --verify --deep --strict --verbose=2 ".release/$APP_NAME.app"
-          codesign -dvv ".release/$APP_NAME.app" 2>&1 | sed -n '1,12p'
-
-          if [ "${{ steps.caps.outputs.notarize }}" = "true" ] && [ "${{ steps.caps.outputs.sign }}" = "true" ]; then
-            # 只有公证过的包才可能通过 spctl，没过就直接失败，别把坏包发出去
-            spctl -a -vvv --type exec ".release/$APP_NAME.app"
-            xcrun stapler validate ".release/$APP_NAME.app"
-          else
-            echo "::warning::本次为 ad-hoc 签名、未公证。用户首次打开会被 Gatekeeper 拦截，"
-            echo "::warning::brew 安装的用户由 cask 的 postflight 去掉隔离属性，直接下载 zip 的用户需按 README 手动放行。"
+          if [ "${{ steps.caps.outputs.notarize }}" = "true" ]; then
+            printf '%s' "$NOTARY_KEY_P8" | base64 --decode > "$RUNNER_TEMP/notary.p8"
           fi
 
-          ditto -c -k --keepParent ".release/$APP_NAME.app" "$zip"
-          sha="$(shasum -a 256 "$zip" | awk '{print $1}')"
-          echo "zip=$zip"  >> "$GITHUB_OUTPUT"
-          echo "sha=$sha"  >> "$GITHUB_OUTPUT"
-          echo "sha256: $sha"
+          xcodebuild -version
+
+          for arch in arm64 x86_64; do
+            echo "::group::构建 $arch"
+            rm -rf .xcode-build/Build/Products
+
+            # ONLY_ACTIVE_ARCH=NO 加单一 ARCHS：产出只含这一个架构的瘦二进制。
+            xcodebuild clean build \
+              -project "$XCODE_PROJECT" \
+              -scheme "$XCODE_SCHEME" \
+              -configuration Release \
+              -destination "generic/platform=macOS" \
+              -derivedDataPath .xcode-build \
+              ARCHS="$arch" \
+              ONLY_ACTIVE_ARCH=NO \
+              "${signing_args[@]}" \
+              | tee ".release/xcodebuild-$arch.log" | grep -E '^(\*\*|CodeSign|error:)' || true
+
+            src=".xcode-build/Build/Products/Release/$BUILT_APP_NAME"
+            test -d "$src" || { echo "::error::$arch 没找到 $src"; exit 1; }
+
+            staged=".release/$arch/$APP_NAME.app"
+            rm -rf ".release/$arch"
+            mkdir -p ".release/$arch"
+            cp -R "$src" "$staged"
+
+            # 证明产物真的只含这一个架构。通用包混进来会在这里挂掉。
+            actual="$(lipo -archs "$staged/Contents/MacOS/$APP_NAME" | tr -s ' ')"
+            if [ "$actual" != "$arch" ]; then
+              echo "::error::$arch 的产物实际包含 [$actual]"
+              exit 1
+            fi
+
+            if [ "${{ steps.caps.outputs.notarize }}" = "true" ]; then
+              # notarytool 只吃 zip/pkg/dmg，必须用 ditto 打包（保留符号链接和扩展属性）
+              ditto -c -k --keepParent "$staged" "$RUNNER_TEMP/notarize-$arch.zip"
+              xcrun notarytool submit "$RUNNER_TEMP/notarize-$arch.zip" \
+                --key "$RUNNER_TEMP/notary.p8" \
+                --key-id "$NOTARY_KEY_ID" \
+                --issuer "$NOTARY_ISSUER_ID" \
+                --wait
+              xcrun stapler staple "$staged"
+            else
+              echo "::warning::$arch 为 ad-hoc 签名、未公证。brew 用户由 cask 的 postflight 去掉隔离属性；直接下 zip 的用户需手动放行。"
+            fi
+
+            zip=".release/$APP_NAME-$version-$arch.zip"
+            ditto -c -k --keepParent "$staged" "$zip"
+            sha="$(shasum -a 256 "$zip" | awk '{print $1}')"
+            echo "zip_$arch=$zip" >> "$GITHUB_OUTPUT"
+            echo "sha_$arch=$sha" >> "$GITHUB_OUTPUT"
+            echo "$arch  sha256 $sha"
+            echo "::endgroup::"
+          done
+
+          rm -f "$RUNNER_TEMP/notary.p8"
 
       - name: 上传构建日志
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: xcodebuild-log
-          path: .release/xcodebuild.log
+          name: xcodebuild-logs
+          path: .release/xcodebuild-*.log
           if-no-files-found: ignore
 
       - name: 创建 GitHub Release
@@ -213,11 +207,12 @@ jobs:
           安装：\`brew install --cask PathGao/tap/nifro\`
 
           \`\`\`
-          sha256  ${{ steps.package.outputs.sha }}
+          Apple silicon  Nifro-$version-arm64.zip   sha256 ${{ steps.package.outputs.sha_arm64 }}
+          Intel          Nifro-$version-x86_64.zip  sha256 ${{ steps.package.outputs.sha_x86_64 }}
           \`\`\`
           EOF
 
-          gh release create "$tag" "${{ steps.package.outputs.zip }}" \
+          gh release create "$tag" ""${{ steps.package.outputs.zip_arm64 }}" "${{ steps.package.outputs.zip_x86_64 }}"" \
             --repo "$GITHUB_REPOSITORY" \
             --title "$tag" \
             --generate-notes \
@@ -230,12 +225,13 @@ jobs:
         run: |
           set -euo pipefail
           version="${{ steps.version.outputs.version }}"
-          sha="${{ steps.package.outputs.sha }}"
+          sha_arm="${{ steps.package.outputs.sha_arm64 }}"
+          sha_intel="${{ steps.package.outputs.sha_x86_64 }}"
 
           git fetch origin main
           git checkout -B main origin/main
           sed -i '' -E "s/^  version \".*\"$/  version \"$version\"/" Casks/nifro.rb
-          sed -i '' -E "s/^  sha256 \".*\"$/  sha256 \"$sha\"/" Casks/nifro.rb
+          sed -i '' -E "s/^    sha256 arm:   \".*\", intel: \".*\"$/    sha256 arm:   \"$sha_arm\", intel: \"$sha_intel\"/" Casks/nifro.rb
 
           if git diff --quiet -- Casks/nifro.rb; then
             echo "cask 没有变化，跳过"

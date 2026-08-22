@@ -57,6 +57,7 @@ private struct AdvancedSettings: View {
 				BringBrowsingModeToFrontSetting()
 				Defaults.Toggle("Deactivate while on battery", key: .deactivateOnBattery)
 				FreezeWhenCoveredSetting()
+				SolidColorUnderMenuBarSetting()
 				OpenExternalLinksInBrowserSetting()
 				HideMenuBarIconSetting()
 				Defaults.Toggle("Mute audio", key: .muteAudio)
@@ -73,10 +74,23 @@ private struct AdvancedSettings: View {
 private struct FreezeWhenCoveredSetting: View {
 	var body: some View {
 		Defaults.Toggle(
-			"Pause rendering while covered",
+			"Only render what is on show",
 			key: .freezeWhenCovered
 		)
-		.help("While other windows cover the wallpaper, Nifro shows the last rendered frame instead of continuing to draw one nobody can see. Turn this off if you need the page to keep animating out of sight.")
+		.help("When other windows cover most of the wallpaper, Nifro shrinks the window to whatever is still visible — the strip behind the Dock, for instance — and keeps rendering only that. When nothing is visible at all it holds the last frame. Turn this off to keep drawing the whole page regardless.")
+	}
+}
+
+private struct SolidColorUnderMenuBarSetting: View {
+	@Default(.extendBelowMenuBar) private var extendBelowMenuBar
+
+	var body: some View {
+		Defaults.Toggle(
+			"Solid colour behind the menu bar",
+			key: .solidColorUnderMenuBar
+		)
+		.disabled(!extendBelowMenuBar)
+		.help("The menu bar tints itself from whatever is behind it, so extending the wallpaper up there is the only way to make it match — but then the page's own text and edges show through as clutter. This fills that strip with the page's average colour instead: same tint, no content.")
 	}
 }
 

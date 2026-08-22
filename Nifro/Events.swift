@@ -36,15 +36,21 @@ extension AppState {
 			}
 			.store(in: &cancellables)
 
-		occlusionMonitor.isHiddenPublisher
-			.sink { [self] in
-				isCovered = $0
+		occlusionMonitor.visibleRegionPublisher
+			.sink { [self] _ in
+				applyVisibilityState()
+			}
+			.store(in: &cancellables)
+
+		Defaults.publisher(.solidColorUnderMenuBar, options: [])
+			.sink { [self] _ in
+				installMenuBarBandIfNeeded()
 			}
 			.store(in: &cancellables)
 
 		Defaults.publisher(.freezeWhenCovered, options: [])
 			.sink { [self] _ in
-				applyFreezeState()
+				applyVisibilityState()
 			}
 			.store(in: &cancellables)
 

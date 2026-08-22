@@ -10,10 +10,6 @@ We compute the uncovered area ourselves instead. `NSScreen.visibleFrame` is alre
 */
 @MainActor
 final class OcclusionMonitor {
-	/**
-	Fraction of the usable screen that must stay uncovered for the wallpaper to be worth rendering live.
-	*/
-	private static let visibleFractionThreshold = 0.02
 
 	// ponytail: coverage by grid rasterization instead of exact rectangle union. 64×40 cells is ~0.04% of the screen per cell, an order of magnitude finer than the threshold it feeds. Swap in a sweep-line union if this ever shows up in a profile.
 	private static let gridColumns = 64
@@ -27,28 +23,30 @@ final class OcclusionMonitor {
 	private static let pollInterval = 2.0
 
 	/**
-	Windows that span the screen without painting anything, and would otherwise read as full coverage.
+	Windows that do not hide the wallpaper, either because they paint nothing or because you can see straight through them.
+
+	The Dock is the interesting one. Its window is fully opaque as far as the window server is concerned, but what it draws is translucent, so the page carries on showing through it — which is exactly the sliver people notice and like. Counting it as coverage would throw that away.
 	*/
 	private static let ignoredOwners: Set<String> = [
 		"Window Server", // Menu bar, and various full-screen scaffolding.
+		"Dock",
 		"WallpaperAgent",
 		"Notification Center",
 		"Control Center",
 		"Spotlight"
 	]
 
-	private let subject = CurrentValueSubject<Bool, Never>(false)
+	private let subject = CurrentValueSubject<CGRect, Never>(.zero)
+	private(set) var largestVisibleRegion: (rect: CGRect, area: Double) = (.zero, 0)
 	private var cancellables = Set<AnyCancellable>()
 	private var timer: Timer?
 
 	/**
-	Publishes `true` when the wallpaper is effectively hidden.
+	Publishes the largest patch of wallpaper still on show, whenever it changes.
 	*/
-	var isHiddenPublisher: AnyPublisher<Bool, Never> {
+	var visibleRegionPublisher: AnyPublisher<CGRect, Never> {
 		subject.removeDuplicates().eraseToAnyPublisher()
 	}
-
-	var isHidden: Bool { subject.value }
 
 	/**
 	The screen to judge. `nil` means the main screen.
@@ -94,34 +92,32 @@ final class OcclusionMonitor {
 	Force a re-check. Cheap: one window-list snapshot and a grid fill.
 	*/
 	func update() {
-		subject.send(computeIsHidden())
-	}
-
-	private func computeIsHidden() -> Bool {
 		guard let screen = screen ?? .main else {
-			return false
+			return
 		}
 
-		let region = screen.visibleFrame
+		// The whole screen, not `visibleFrame`. The strips behind the Dock and the menu bar are where the wallpaper survives when everything else is covered, and they are worth rendering for.
+		let region = screen.frame
 
 		guard region.width > 0, region.height > 0 else {
-			return false
+			return
 		}
 
-		return currentUncoveredFraction(of: region) < Self.visibleFractionThreshold
+		largestVisibleRegion = currentLargestRegion(of: region)
+		subject.send(largestVisibleRegion.rect)
 	}
 
 	/**
-	Fraction of `region` not covered by any opaque window sitting above the desktop.
+	The largest patch of `region` that no opaque window above the desktop covers.
 
 	`region` is in AppKit screen coordinates (origin bottom-left); the window list reports Core Graphics coordinates (origin top-left), so the windows get flipped before they are compared.
 	*/
-	private func currentUncoveredFraction(of region: CGRect) -> Double {
+	private func currentLargestRegion(of region: CGRect) -> (rect: CGRect, area: Double) {
 		guard
 			let windowList = CGWindowListCopyWindowInfo([.optionOnScreenOnly], kCGNullWindowID) as? [[String: Any]]
 		else {
-			// If we cannot tell, assume visible. Rendering a wallpaper nobody sees is cheaper than blanking one somebody does.
-			return 1
+			// If we cannot tell, assume fully visible. Rendering a wallpaper nobody sees is cheaper than freezing one somebody is looking at.
+			return (region, region.width * region.height)
 		}
 
 		let ownPID = ProcessInfo.processInfo.processIdentifier
@@ -149,6 +145,6 @@ final class OcclusionMonitor {
 			coveringRects.append(flippingFromWindowServer(cgBounds, arrangementHeight: arrangementHeight))
 		}
 
-		return uncoveredFraction(of: region, covering: coveringRects)
+		return largestUncoveredRegion(of: region, covering: coveringRects)
 	}
 }

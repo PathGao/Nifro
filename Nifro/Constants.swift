@@ -31,6 +31,7 @@ extension Defaults.Keys {
 
 	static let extendBelowMenuBar = Key<Bool>("extendBelowMenuBar", default: false)
 	static let freezeWhenCovered = Key<Bool>("freezeWhenCovered", default: true)
+	static let solidColorUnderMenuBar = Key<Bool>("solidColorUnderMenuBar", default: false)
 }
 
 extension KeyboardShortcuts.Name {

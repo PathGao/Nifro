@@ -36,6 +36,17 @@ final class WebViewController: NSViewController {
 		configuration.preferences = preferences
 
 		let webView = SSWebView(frame: .zero, configuration: configuration)
+
+		webView.publisher(for: \.title)
+			.sink { [weak webView] title in
+				guard let webView else {
+					return
+				}
+
+				WebsitesController.shared.recordObservedTitle(title ?? "", for: webView.url)
+			}
+			.store(forTheLifetimeOf: webView)
+
 		webView.navigationDelegate = self
 		webView.uiDelegate = self
 		webView.allowsBackForwardNavigationGestures = true
@@ -179,7 +190,19 @@ extension WebViewController: WKNavigationDelegate {
 	func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
 		webView.centerAndAspectFillImage(mimeType: response?.mimeType)
 
+		recordTitleIfNeeded(from: webView)
+		AppState.shared.refreshMenuBarBandColor()
+
 		internalOnLoaded(nil)
+	}
+
+	/**
+	Fill in a missing website title from the page that just loaded.
+
+	Also worth doing on later title changes, not just here: single-page apps routinely load with an empty or placeholder title and set the real one from script a moment later.
+	*/
+	private func recordTitleIfNeeded(from webView: WKWebView) {
+		WebsitesController.shared.recordObservedTitle(webView.title ?? "", for: webView.url)
 	}
 
 	func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {

@@ -34,7 +34,7 @@ final class AppState: ObservableObject {
 
 			desktopWindow.isInteractive = isBrowsingMode
 			desktopWindow.alphaValue = isBrowsingMode ? 1 : Defaults[.opacity]
-			applyFreezeState()
+			applyVisibilityState()
 			resetTimer()
 		}
 	}
@@ -68,18 +68,19 @@ final class AppState: ObservableObject {
 	let occlusionMonitor = OcclusionMonitor()
 
 	/**
-	Whether other windows cover the wallpaper to the point where rendering it is wasted work.
-	*/
-	var isCovered = false {
-		didSet {
-			applyFreezeState()
-		}
-	}
-
-	/**
 	The last rendered frame, standing in for the web view while frozen.
 	*/
 	var frozenView: NSImageView?
+
+	/**
+	The screen region currently being rendered, when the window has been shrunk to what is still on show.
+	*/
+	var renderedRegion: CGRect?
+
+	/**
+	Opaque band covering the strip of wallpaper behind the menu bar, when the user asked for colour without content.
+	*/
+	var menuBarBand: MenuBarBandView?
 
 	/**
 	A reload came due while frozen and still has to happen.
@@ -160,8 +161,8 @@ final class AppState: ObservableObject {
 			return
 		}
 
-		// While frozen there is nothing to reload into. Remember that one came due so the unfreeze can settle it.
-		guard !shouldFreeze else {
+		// While frozen there is nothing to reload into. Remember that one came due so the thaw can settle it.
+		guard frozenView == nil else {
 			isReloadPending = true
 			return
 		}
@@ -192,6 +193,7 @@ final class AppState: ObservableObject {
 		else {
 			desktopWindow.cropRect = nil
 			desktopWindow.contentView = webView
+			installMenuBarBandIfNeeded()
 			return
 		}
 
@@ -201,6 +203,7 @@ final class AppState: ObservableObject {
 			crop: crop,
 			pageSize: screen.frameWithoutStatusBar.size
 		)
+		installMenuBarBandIfNeeded()
 	}
 
 	func recreateWebViewAndReload() {
