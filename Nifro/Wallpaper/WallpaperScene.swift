@@ -119,10 +119,6 @@ final class WallpaperScene {
 		installContentView()
 	}
 
-	func adoptWebView(_ replacement: SSWebView) {
-		webViewController.adopt(replacement)
-	}
-
 	/**
 	Drop the page and the process behind it.
 	*/

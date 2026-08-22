@@ -1,16 +1,11 @@
-import IOKit.ps
-import IOKit.pwr_mgt
 @preconcurrency import WebKit
+@preconcurrency import LinkPresentation
 import SwiftUI
 import Combine
-import Network
-import SystemConfiguration
 import CryptoKit
-import StoreKit
 import UniformTypeIdentifiers
-@preconcurrency import LinkPresentation
-import Defaults
 import os
+import Defaults
 
 typealias Defaults = _Defaults
 typealias Default = _Default
@@ -461,8 +456,6 @@ extension Collection where Index == Int, Element: Equatable {
 		moving(element, to: endIndex - 1)
 	}
 }
-extension Collection {
-}
 extension Collection where Element: Equatable {
 }
 extension Collection where Element: Identifiable {
@@ -598,8 +591,6 @@ extension Collection where Element: Identifiable {
 }
 
 // MARK: - Data
-extension Data {
-}
 extension Data {
 	struct HexEncodingOptions: OptionSet {
 		let rawValue: Int
@@ -889,8 +880,6 @@ extension Error {
 }
 
 // MARK: - Font
-extension Font {
-}
 
 // MARK: - InfoPopoverButton
 extension InfoPopoverButton<Text> {
@@ -901,8 +890,6 @@ extension InfoPopoverButton<Text> {
 }
 
 // MARK: - KeyedDecodingContainer
-extension KeyedDecodingContainer {
-}
 
 // MARK: - LPLinkMetadata
 extension LPLinkMetadata: @retroactive @unchecked Sendable {}
@@ -1316,8 +1303,6 @@ final class ObjectAssociation<Value: Any> {
 		}
 	}
 }
-extension ObjectAssociation {
-}
 
 // MARK: - OnDoubleClick
 private struct OnDoubleClick<Content>: View where Content: View {
@@ -1405,8 +1390,6 @@ extension RangeReplaceableCollection where Element: Equatable {
 		move(from: fromIndex, to: toIndex)
 	}
 }
-extension RangeReplaceableCollection {
-}
 
 // MARK: - Sequence
 extension Sequence {
@@ -1469,8 +1452,6 @@ protocol SimpleImageCacheKeyable: Hashable {
 }
 
 // MARK: - String
-extension String {
-}
 extension String {
 	var toNSAttributedString: NSAttributedString { .init(string: self) }
 }
@@ -1601,8 +1582,6 @@ extension StringProtocol {
 }
 
 // MARK: - Timer
-extension Timer {
-}
 
 // MARK: - URL
 extension URL {
@@ -1624,8 +1603,6 @@ extension URL: @retroactive ExpressibleByStringLiteral {
 	public init(stringLiteral value: StaticString) {
 		self.init(string: "\(value)")!
 	}
-}
-extension URL {
 }
 extension URL {
 	func addingDictionaryAsQuery(_ dict: [String: String]) -> Self {
@@ -1994,8 +1971,6 @@ extension URLComponents {
 }
 
 // MARK: - UUID
-extension UUID {
-}
 extension UUID: @retroactive Identifiable {
 	public var id: Self { self }
 }
@@ -2023,8 +1998,6 @@ extension View {
 	}
 }
 extension View {
-}
-extension View {
 
 	/**
 	This overload makes it possible to preserve the type. For example, doing an `if` in a chain of `Text`-only modifiers.
@@ -2046,8 +2019,6 @@ extension View {
 }
 extension View {
 
-}
-extension View {
 }
 extension View {
 	/**
@@ -2204,8 +2175,6 @@ extension View {
 	}
 }
 extension View {
-}
-extension View {
 	@ViewBuilder
 	func ifLet<Value>(
 		_ value: Value?,
@@ -2235,8 +2204,6 @@ extension View {
 	}
 }
 extension View {
-}
-extension View {
 	/**
 	Bind the native backing-window of a SwiftUI window to a property.
 	*/
@@ -2260,8 +2227,6 @@ extension View {
 			$0?.level = level
 		}
 	}
-}
-extension View {
 }
 extension View {
 	/**
@@ -3042,11 +3007,6 @@ struct ScrollableTextView: NSViewRepresentable {
 /**
 A view that doesn't accept any mouse events.
 */
-class NonInteractiveView: NSView { // swiftlint:disable:this final_class
-	override var mouseDownCanMoveWindow: Bool { true }
-	override func acceptsFirstMouse(for event: NSEvent?) -> Bool { false }
-	override func hitTest(_ point: CGPoint) -> NSView? { nil }
-}
 // TODO: I plan to extract this into a Swift Package when it's been battle-tested.
 /**
 This always requests the permission to a directory. If you give it file URL, it will ask for permission to the parent directory.

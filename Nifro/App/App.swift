@@ -63,7 +63,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
 	// This is only run when the app is started when it's already running.
 	func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-		AppState.shared.handleAppReopen()
+		AppState.shared.handleMenuBarIcon()
 		return false
 	}
 }

@@ -78,7 +78,7 @@ extension WallpaperScene {
 	*/
 	private func adopt(_ replacement: SSWebView) {
 		replacement.isHidden = false
-		adoptWebView(replacement)
+		webViewController.adopt(replacement)
 		installContentView()
 
 		guard let contentView = window.contentView else {

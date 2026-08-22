@@ -48,7 +48,9 @@ extension AppState {
 
 		desktopWindow.level = .desktop
 		desktopWindow.isInteractive = Defaults[.isBrowsingMode]
-		applyOpacity(animated: false)
+		for scene in scenes {
+			scene.applyOpacity(animated: false)
+		}
 
 		guard
 			let selection,

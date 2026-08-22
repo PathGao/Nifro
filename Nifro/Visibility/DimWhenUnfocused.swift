@@ -34,21 +34,4 @@ extension AppState {
 		return base * Defaults[.dimmedOpacityFactor]
 	}
 
-	func applyOpacity(animated: Bool = true) {
-		let target = targetOpacity
-
-		guard desktopWindow.alphaValue != target else {
-			return
-		}
-
-		guard animated else {
-			desktopWindow.alphaValue = target
-			return
-		}
-
-		NSAnimationContext.runAnimationGroup {
-			$0.duration = 0.25
-			desktopWindow.animator().alphaValue = target
-		}
-	}
 }

@@ -67,7 +67,7 @@ sites/ 里 24 条真实条目已经按这个维度分好类：18 条 snapshot，
 ```
 本轮 commit 数        24
 构建状态              BUILD SUCCEEDED（Swift 6 语言模式，macOS 15.0，Debug/Release）
-测试                  15 条几何断言，swift test 全绿，变异验证过确实守得住
+测试                  21 条断言（几何 + 排班），swift test 全绿，两批都做过变异验证
 上游 issue 分诊       35 条 → DO 17 / LATER 13 / REJECT 1 / OBSOLETE 4
                       详见 UPSTREAM-ISSUES.md。35 条其实只压成 8 个机制
 阻塞项                1（S1 需要改一次桌面壁纸，等你在场）
@@ -211,7 +211,7 @@ AppState.shared                        AppState
 | **E4** | 清掉上游作者的 `DEVELOPMENT_TEAM` | ✅ |
 | **E5** | 改名 Plash → Nifro | ✅ target / 目录 / 工程 / scheme / bundle id |
 | **E6** | 拆 `Utilities.swift` | ✅ 已实现。拆成 Extensions / MenuSupport / Display / SystemEvents / AppInfo，参照 Ice 与 Rectangle 的形状 |
-| **E7** | 测试 | ✅ 几何部分 18 条，做过变异验证。其余仍是 0 |
+| **E7** | 测试 | ✅ 21 条：几何 18 条 + 排班 3 条，两批都做过变异验证。其余仍是 0 |
 | **E8** | CI | ✅ build / test / lint / sites 四个 job，外加生成物新鲜度检查 |
 | **E9** | release 流水线与签名 | ✅ 逐架构构建，`lipo` 校验产物只含一个架构 |
 | **E10** | Homebrew cask | ✅ 按架构分发 |

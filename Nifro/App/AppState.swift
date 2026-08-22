@@ -148,10 +148,6 @@ final class AppState: ObservableObject {
 		}
 	}
 
-	func handleAppReopen() {
-		handleMenuBarIcon()
-	}
-
 	func setEnabledStatus() {
 		isEnabled = !isManuallyDisabled && !isScreenLocked && !(Defaults[.deactivateOnBattery] && powerSourceWatcher?.powerSource.isUsingBattery == true)
 	}
