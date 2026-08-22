@@ -31,6 +31,7 @@
 		F7CEB84C882E8730A2C4B649 /* MenuBarBand.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB494D7D82CDA92E0D71731F /* MenuBarBand.swift */; };
 		BDFCFA72BA731BAB9380DAC9 /* VisibilityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7D1774A2E51E303343371E8 /* VisibilityPolicy.swift */; };
 		2304ABCA5B85D50BF749039D /* Geometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A081BCFF6DF8B8B2FB4CB31B /* Geometry.swift */; };
+		D01E670AD9D65C111C3E3E3F /* VideoEmbed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47F1A73D88562E6E93A3A692 /* VideoEmbed.swift */; };
 		3188AB74960C1A115F1F09B8 /* Schedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B4B73021E1104C03600DEFE /* Schedule.swift */; };
 		5D03B00441481AA32BEF388F /* MenuSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84336098C3DBE55C6CA62CE /* MenuSupport.swift */; };
 		DD3CC9A78917D05BF2C0B573 /* Display.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF3B75EF61B0B424DBE27645 /* Display.swift */; };
@@ -112,6 +113,7 @@
 		DB494D7D82CDA92E0D71731F /* MenuBarBand.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = MenuBarBand.swift; sourceTree = "<group>"; usesTabs = 1; };
 		E7D1774A2E51E303343371E8 /* VisibilityPolicy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = VisibilityPolicy.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A081BCFF6DF8B8B2FB4CB31B /* Geometry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Geometry.swift; sourceTree = "<group>"; usesTabs = 1; };
+		47F1A73D88562E6E93A3A692 /* VideoEmbed.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = VideoEmbed.swift; sourceTree = "<group>"; usesTabs = 1; };
 		0B4B73021E1104C03600DEFE /* Schedule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Schedule.swift; sourceTree = "<group>"; usesTabs = 1; };
 		E84336098C3DBE55C6CA62CE /* MenuSupport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = MenuSupport.swift; sourceTree = "<group>"; usesTabs = 1; };
 		FF3B75EF61B0B424DBE27645 /* Display.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Display.swift; sourceTree = "<group>"; usesTabs = 1; };
@@ -310,6 +312,7 @@
 			isa = PBXGroup;
 			children = (
 				A081BCFF6DF8B8B2FB4CB31B /* Geometry.swift */,
+				47F1A73D88562E6E93A3A692 /* VideoEmbed.swift */,
 				0B4B73021E1104C03600DEFE /* Schedule.swift */,
 				E84336098C3DBE55C6CA62CE /* MenuSupport.swift */,
 				FF3B75EF61B0B424DBE27645 /* Display.swift */,
@@ -479,6 +482,7 @@
 				F7CEB84C882E8730A2C4B649 /* MenuBarBand.swift in Sources */,
 				BDFCFA72BA731BAB9380DAC9 /* VisibilityPolicy.swift in Sources */,
 				2304ABCA5B85D50BF749039D /* Geometry.swift in Sources */,
+				D01E670AD9D65C111C3E3E3F /* VideoEmbed.swift in Sources */,
 				3188AB74960C1A115F1F09B8 /* Schedule.swift in Sources */,
 				5D03B00441481AA32BEF388F /* MenuSupport.swift in Sources */,
 				DD3CC9A78917D05BF2C0B573 /* Display.swift in Sources */,

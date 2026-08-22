@@ -179,6 +179,17 @@ struct AddWebsiteScreen: View {
 				.debouncingTask(id: website.wrappedValue.url, interval: .seconds(0.5)) {
 					await fetchTitle()
 				}
+
+			// Offered rather than applied. Rewriting what somebody just typed is rude, and the point
+			// of showing the rewritten URL in the field is that they can see it and undo it.
+			if let player = VideoEmbed.playerURL(for: website.wrappedValue.url) {
+				Button("Use the player-only page") {
+					urlString = player.absoluteString
+					website.wrappedValue.url = player
+				}
+				.help("A video page is mostly navigation, recommendations and comments. This is the address of the player on its own, so the video fills the wallpaper without cropping or hiding anything.")
+			}
+
 			TextField("Title", text: website.title)
 				.lineLimit(1)
 				.disabled(isFetchingTitle)

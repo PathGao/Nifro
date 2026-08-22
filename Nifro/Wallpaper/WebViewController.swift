@@ -22,6 +22,10 @@ final class WebViewController: NSViewController {
 	private func createWebView() -> SSWebView {
 		let configuration = WKWebViewConfiguration()
 		configuration.allowsAirPlayForMediaPlayback = false
+
+		// A wallpaper has nobody to click play. The macOS default happens to allow this, but the
+		// header documents no default, and this is now load-bearing for the embedded players.
+		configuration.mediaTypesRequiringUserActionForPlayback = []
 		configuration.applicationNameForUserAgent = "\(SSApp.name)/\(SSApp.version)"
 
 		// TODO: Enable this again when https://github.com/sindresorhus/Plash/issues/9 is fixed.

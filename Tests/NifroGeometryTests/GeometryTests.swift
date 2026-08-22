@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 import Testing
 
 @testable import NifroGeometry
@@ -238,5 +239,72 @@ struct ScheduleTests {
 		for hour in 0..<24 {
 			#expect(isHour(hour, within: 5, until: 5))
 		}
+	}
+}
+
+/**
+Turning a video page into its player-only address. The parsing has to reject as confidently as it
+accepts: a wrong rewrite sends the wallpaper to a page that does not exist, and the failure looks
+like the site being down.
+*/
+@Suite("Video embedding")
+struct VideoEmbedTests {
+	@Test("YouTube watch URLs give up their video id")
+	func youTubeWatch() throws {
+		let url = try #require(URL(string: "https://www.youtube.com/watch?v=jNQXAC9IVRw&t=42"))
+		let player = try #require(VideoEmbed.playerURL(for: url))
+
+		#expect(player.absoluteString.hasPrefix("https://www.youtube.com/embed/jNQXAC9IVRw"))
+		#expect(player.absoluteString.contains("autoplay=1"))
+		#expect(player.absoluteString.contains("mute=1"))
+	}
+
+	@Test("Short links and shorts work too")
+	func youTubeShortForms() throws {
+		for source in [
+			"https://youtu.be/jNQXAC9IVRw",
+			"https://www.youtube.com/shorts/jNQXAC9IVRw"
+		] {
+			let url = try #require(URL(string: source))
+			let player = try #require(VideoEmbed.playerURL(for: url))
+			#expect(player.absoluteString.contains("/embed/jNQXAC9IVRw"))
+		}
+	}
+
+	@Test("An embed URL is left alone")
+	func alreadyEmbedded() throws {
+		// Rewriting it would append a second query string and break the player.
+		let url = try #require(URL(string: "https://www.youtube.com/embed/jNQXAC9IVRw?autoplay=1"))
+		#expect(VideoEmbed.playerURL(for: url) == nil)
+	}
+
+	@Test("Bilibili video pages give up their BV id")
+	func bilibili() throws {
+		let url = try #require(URL(string: "https://www.bilibili.com/video/BV1xx411c7mD?p=2"))
+		let player = try #require(VideoEmbed.playerURL(for: url))
+
+		#expect(player.absoluteString.hasPrefix("https://player.bilibili.com/player.html?bvid=BV1xx411c7mD"))
+		#expect(player.absoluteString.contains("danmaku=0"))
+	}
+
+	@Test("Pages that are not a single video are left alone")
+	func notVideos() throws {
+		for source in [
+			"https://www.youtube.com/@NASA/live",
+			"https://www.youtube.com",
+			"https://live.bilibili.com/1234",
+			"https://player.bilibili.com/player.html?bvid=BV1xx411c7mD",
+			"https://example.com/watch?v=jNQXAC9IVRw"
+		] {
+			let url = try #require(URL(string: source))
+			#expect(VideoEmbed.playerURL(for: url) == nil, "should not rewrite \(source)")
+		}
+	}
+
+	@Test("Anything that is not a bare id is refused")
+	func rejectsSmuggledInput() throws {
+		// The id goes straight into a URL we build, so it has to be an id and nothing else.
+		let url = try #require(URL(string: "https://www.youtube.com/watch?v=abc%26evil%3D1"))
+		#expect(VideoEmbed.playerURL(for: url) == nil)
 	}
 }
