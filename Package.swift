@@ -16,7 +16,7 @@ let package = Package(
 		.target(
 			name: "NifroGeometry",
 			path: "Nifro",
-			sources: ["Geometry.swift"]
+			sources: ["Support/Geometry.swift"]
 		),
 		.testTarget(
 			name: "NifroGeometryTests",

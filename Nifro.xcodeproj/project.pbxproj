@@ -166,38 +166,13 @@
 		E32421322384E9D700D28A91 /* Nifro */ = {
 			isa = PBXGroup;
 			children = (
-				E34FCBCD264D32150022BDD3 /* App.swift */,
-				E32421552384F09D00D28A91 /* Constants.swift */,
-				E32421332384E9D700D28A91 /* AppState.swift */,
-				E384F27F24C3B37E002FD21B /* Events.swift */,
-				E384F28124C3B3CD002FD21B /* Menus.swift */,
-				E354443B2607505100CA060F /* WebsitesController.swift */,
-				E3FAF814264333D300CF7963 /* Website.swift */,
-				E32421462384EB4E00D28A91 /* DesktopWindow.swift */,
-				E30FD88823C4515200C716E9 /* SSWebView.swift */,
-				E32421592384FBE500D28A91 /* WebViewController.swift */,
-				907A9EFAA3D92EE2E782D1EE /* SiteGalleryScreen.swift */,
-				BE550ECBADBF01976B63976D /* SiteCatalog.generated.swift */,
-				144C837DC38F0A9C8BB73A61 /* SiteCatalog.swift */,
-				A087FD8A47F189760F0AB306 /* CropSelection.swift */,
-				F816F6528ECE2649BA82D438 /* CropSelectionView.swift */,
-				E2E55F44121887A577509380 /* DimWhenUnfocused.swift */,
-				A6ECFB57E09E3EAEAFA81C47 /* AboutSettings.swift */,
-				37A22FF14B425D5D7E6F2A3D /* SwapLoading.swift */,
-				8BB5B9537B30041D469CE55C /* ScrollRestoration.swift */,
-				DB494D7D82CDA92E0D71731F /* MenuBarBand.swift */,
-				E7D1774A2E51E303343371E8 /* VisibilityPolicy.swift */,
-				A081BCFF6DF8B8B2FB4CB31B /* Geometry.swift */,
-				375CB4FD5AF2291C2B0D99D0 /* CropSetting.swift */,
-				868FFECC725D3D54F254BEF5 /* CropView.swift */,
-				2BA31C0FAF40DE6D9B9300FD /* OcclusionMonitor.swift */,
-				E354442E26062D6300CA060F /* WebsitesScreen.swift */,
-				E32421352384E9D700D28A91 /* AddWebsiteScreen.swift */,
-				E333EB1A2385244E005FCE44 /* SettingsScreen.swift */,
-				E3EC5A85250D7A0C00ABE1A1 /* WelcomeScreen.swift */,
-				E3369A99265E344300BAC78B /* URLCommands.swift */,
-				E3494C1A297D38CC00983648 /* Intents.swift */,
-				E32421572384F0E600D28A91 /* Utilities.swift */,
+				EE1AB06D18301CB4D87D01AC /* App */,
+				0C6280DE3D2F52650DA0DACB /* Wallpaper */,
+				7A668003D19FD174C1D570F8 /* Visibility */,
+				8CFB69EBB1C2D3D6E31D56FD /* Crop */,
+				3E99625DC06040A102DC7314 /* Sites */,
+				56260C7010D9CCF5536E7C56 /* Screens */,
+				7964C184AA1CBE4499C98410 /* Support */,
 				E32421372384E9D900D28A91 /* Assets.xcassets */,
 				E3EF205F24C0D1A100A5F802 /* Other */,
 				E32421392384E9D900D28A91 /* Preview Content */,
@@ -232,6 +207,87 @@
 				E3FA21AC23C74E6B00059E43 /* InternetAccessPolicy.json */,
 			);
 			name = Other;
+			sourceTree = "<group>";
+		};
+		EE1AB06D18301CB4D87D01AC /* App */ = {
+			isa = PBXGroup;
+			children = (
+				E34FCBCD264D32150022BDD3 /* App.swift */,
+				E32421552384F09D00D28A91 /* Constants.swift */,
+				E32421332384E9D700D28A91 /* AppState.swift */,
+				E384F27F24C3B37E002FD21B /* Events.swift */,
+				E384F28124C3B3CD002FD21B /* Menus.swift */,
+				E3369A99265E344300BAC78B /* URLCommands.swift */,
+				E3494C1A297D38CC00983648 /* Intents.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		0C6280DE3D2F52650DA0DACB /* Wallpaper */ = {
+			isa = PBXGroup;
+			children = (
+				E32421462384EB4E00D28A91 /* DesktopWindow.swift */,
+				E30FD88823C4515200C716E9 /* SSWebView.swift */,
+				E32421592384FBE500D28A91 /* WebViewController.swift */,
+				37A22FF14B425D5D7E6F2A3D /* SwapLoading.swift */,
+				8BB5B9537B30041D469CE55C /* ScrollRestoration.swift */,
+			);
+			path = Wallpaper;
+			sourceTree = "<group>";
+		};
+		7A668003D19FD174C1D570F8 /* Visibility */ = {
+			isa = PBXGroup;
+			children = (
+				E2E55F44121887A577509380 /* DimWhenUnfocused.swift */,
+				DB494D7D82CDA92E0D71731F /* MenuBarBand.swift */,
+				E7D1774A2E51E303343371E8 /* VisibilityPolicy.swift */,
+				2BA31C0FAF40DE6D9B9300FD /* OcclusionMonitor.swift */,
+			);
+			path = Visibility;
+			sourceTree = "<group>";
+		};
+		8CFB69EBB1C2D3D6E31D56FD /* Crop */ = {
+			isa = PBXGroup;
+			children = (
+				A087FD8A47F189760F0AB306 /* CropSelection.swift */,
+				F816F6528ECE2649BA82D438 /* CropSelectionView.swift */,
+				375CB4FD5AF2291C2B0D99D0 /* CropSetting.swift */,
+				868FFECC725D3D54F254BEF5 /* CropView.swift */,
+			);
+			path = Crop;
+			sourceTree = "<group>";
+		};
+		3E99625DC06040A102DC7314 /* Sites */ = {
+			isa = PBXGroup;
+			children = (
+				E354443B2607505100CA060F /* WebsitesController.swift */,
+				E3FAF814264333D300CF7963 /* Website.swift */,
+				BE550ECBADBF01976B63976D /* SiteCatalog.generated.swift */,
+				144C837DC38F0A9C8BB73A61 /* SiteCatalog.swift */,
+			);
+			path = Sites;
+			sourceTree = "<group>";
+		};
+		56260C7010D9CCF5536E7C56 /* Screens */ = {
+			isa = PBXGroup;
+			children = (
+				907A9EFAA3D92EE2E782D1EE /* SiteGalleryScreen.swift */,
+				A6ECFB57E09E3EAEAFA81C47 /* AboutSettings.swift */,
+				E354442E26062D6300CA060F /* WebsitesScreen.swift */,
+				E32421352384E9D700D28A91 /* AddWebsiteScreen.swift */,
+				E333EB1A2385244E005FCE44 /* SettingsScreen.swift */,
+				E3EC5A85250D7A0C00ABE1A1 /* WelcomeScreen.swift */,
+			);
+			path = Screens;
+			sourceTree = "<group>";
+		};
+		7964C184AA1CBE4499C98410 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				A081BCFF6DF8B8B2FB4CB31B /* Geometry.swift */,
+				E32421572384F0E600D28A91 /* Utilities.swift */,
+			);
+			path = Support;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

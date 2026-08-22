@@ -114,7 +114,7 @@ source: >-
 
 ## Generated files
 
-`index.json` and `../Nifro/SiteCatalog.generated.swift` are produced from the YAML
+`index.json` and `../Nifro/Sites/SiteCatalog.generated.swift` are produced from the YAML
 files here by `scripts/generate-site-catalog.py`. Do not edit them by hand.
 
 The app reads `index.json` straight from this branch, so an entry merged here shows

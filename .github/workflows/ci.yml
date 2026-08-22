@@ -107,8 +107,8 @@ jobs:
       - name: Check the generated catalogue is current
         run: |
           python3 scripts/generate-site-catalog.py
-          if ! git diff --quiet -- sites/index.json Nifro/SiteCatalog.generated.swift; then
+          if ! git diff --quiet -- sites/index.json Nifro/Sites/SiteCatalog.generated.swift; then
             echo "::error::sites/ changed without regenerating. Run scripts/generate-site-catalog.py and commit the result."
-            git diff --stat -- sites/index.json Nifro/SiteCatalog.generated.swift
+            git diff --stat -- sites/index.json Nifro/Sites/SiteCatalog.generated.swift
             exit 1
           fi
