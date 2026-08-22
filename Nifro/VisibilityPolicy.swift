@@ -80,6 +80,11 @@ extension AppState {
 		renderedRegion = nil
 		desktopWindow.cropRect = nil
 		installContentView()
+
+		// Belt and braces: the launch-time hide is cleared on a timer, and this path can run before that timer fires.
+		if webViewController.webView.url != nil {
+			webViewController.webView.isHidden = false
+		}
 		webViewController.webView.setAllMediaPlaybackSuspended(false) {}
 		settlePendingReload()
 	}
@@ -116,7 +121,11 @@ extension AppState {
 
 		let webView = webViewController.webView
 
-		guard webView.window != nil else {
+		guard
+			webView.window != nil,
+			// Before the first load there is nothing to hold on to; a still taken now is a blank one, and installing it takes the web view out of the window in the middle of its first load.
+			webView.url != nil
+		else {
 			return
 		}
 

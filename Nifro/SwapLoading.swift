@@ -77,6 +77,7 @@ extension AppState {
 	Put the finished replacement on screen, fading it in over the page it replaces.
 	*/
 	private func adopt(_ replacement: SSWebView) {
+		replacement.isHidden = false
 		webViewController.adopt(replacement)
 		installContentView()
 

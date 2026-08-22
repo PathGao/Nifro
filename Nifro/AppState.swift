@@ -257,9 +257,11 @@ final class AppState: ObservableObject {
 
 		webViewController.loadURL(url)
 
+		// The web view starts hidden so the first frame is not a flash of white. Unhide the web view itself rather than whatever view happens to be installed a second from now: by then the visibility policy may have swapped in a still or a crop container, and unhiding that would leave the real web view hidden for the rest of the session — a blank wallpaper with no way back.
+		//
 		// TODO: Add a callback to `loadURL` when it's done loading instead.
-		// TODO: Fade in the web view.
 		delay(.seconds(1)) { [self] in
+			webViewController.webView.isHidden = false
 			desktopWindow.contentView?.isHidden = false
 		}
 	}
