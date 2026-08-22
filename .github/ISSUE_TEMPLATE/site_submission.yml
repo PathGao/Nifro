@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        This is the easiest way to contribute to Oriel, and it is a real contribution: the `sites/` directory is how people find something worth putting on their desktop. You need no Swift, no Xcode and no build — just a URL and the settings you use.
+        This is the easiest way to contribute to Noren, and it is a real contribution: the `sites/` directory is how people find something worth putting on their desktop. You need no Swift, no Xcode and no build — just a URL and the settings you use.
 
         **You can also skip this form and open a pull request against `sites/` directly.** Copy an existing entry, change the values, done. Either route is equally welcome; the form exists so you are not obliged to touch git.
 
@@ -15,7 +15,7 @@ body:
     id: url
     attributes:
       label: Website URL
-      description: The exact URL you put in Oriel, including any query parameters. If you use the `[[screenWidth]]` / `[[screenHeight]]` placeholders, leave them in.
+      description: The exact URL you put in Noren, including any query parameters. If you use the `[[screenWidth]]` / `[[screenHeight]]` placeholders, leave them in.
       placeholder: "https://example.com/live?theme=dark"
     validations:
       required: true

@@ -88,7 +88,7 @@ sites/ 里 24 条真实条目已经按这个维度分好类：18 条 snapshot，
 | ✅ E9 | release workflow + 签名方案 | 参照 AeroSpace。见第八节 |
 | ✅ E10 | Homebrew cask | 仓库内 `Casks/`，CI 回写版本与 sha256，带 livecheck |
 
-兼容性决定：注入的 CSS 类名**新旧并存** —— `is-noren-app` + `is-plash-app`，`oriel-is-browsing-mode` + `plash-is-browsing-mode`。社区五年攒下的 Plash 自定义样式片段可以直接用，这是我们最不该丢的资产。
+兼容性决定：注入的 CSS 类名**新旧并存** —— `is-noren-app` + `is-plash-app`，`noren-is-browsing-mode` + `plash-is-browsing-mode`。社区五年攒下的 Plash 自定义样式片段可以直接用，这是我们最不该丢的资产。
 
 ---
 

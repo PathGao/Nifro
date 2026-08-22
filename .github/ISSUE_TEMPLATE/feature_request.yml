@@ -1,11 +1,11 @@
 name: Feature request
-description: Suggest something Oriel should do
+description: Suggest something Noren should do
 labels: ["enhancement"]
 body:
   - type: markdown
     attributes:
       value: |
-        Oriel is a fork of Plash, so a request may already have an answer upstream. A quick search of this repository's issues first is appreciated, but a duplicate is not a problem — it gets closed with a link, and that costs nobody anything.
+        Noren is a fork of Plash, so a request may already have an answer upstream. A quick search of this repository's issues first is appreciated, but a duplicate is not a problem — it gets closed with a link, and that costs nobody anything.
 
   - type: textarea
     id: problem
@@ -45,6 +45,6 @@ body:
   - type: input
     id: version
     attributes:
-      label: Your Oriel and macOS version
+      label: Your Noren and macOS version
       description: Skip only if the request has nothing to do with your setup.
       placeholder: "2.16.0 · macOS 26.1"

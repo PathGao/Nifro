@@ -3,3 +3,4 @@ xcuserdata/
 .typecheck/.swiftpm/
 .xcode-build/
 .release/
+.venv/

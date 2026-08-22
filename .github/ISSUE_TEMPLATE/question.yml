@@ -1,5 +1,5 @@
 name: Question
-description: Ask how to do something in Oriel
+description: Ask how to do something in Noren
 labels: ["question"]
 body:
   - type: markdown
@@ -17,7 +17,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: macOS and Oriel version
-      placeholder: "macOS 26.1 · Oriel 2.16.0"
+      label: macOS and Noren version
+      placeholder: "macOS 26.1 · Noren 2.16.0"
     validations:
       required: true
