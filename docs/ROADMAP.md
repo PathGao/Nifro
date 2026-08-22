@@ -160,7 +160,7 @@ NSScreen.visibleFrame 未被覆盖的比例 < 2%  →  判定全遮挡
 | **F6** | 站点图库 | — | ✅ 已实现。GitHub 是权威来源与提交入口，app 内运行时拉取 `sites/index.json`，编进包里的那份只在没网时兜底 |
 | **F7** | 保留**会话状态**：URL + 滚动位置 + 缩放，`WKWebView.interactionState` 一次拿下；配「唤醒时重新加载」开关 | [#39](https://github.com/sindresorhus/Plash/issues/39) [#127](https://github.com/sindresorhus/Plash/issues/127) [#154](https://github.com/sindresorhus/Plash/issues/154) | ✅ 已实现，但**用的是滚动位置而不是 `interactionState`**。后者靠驱动一次导航生效，数据过期就是白壁纸，交付前测不了；滚动是安全失败的。等能实测再换 |
 | **F8** | 显示器选择进主菜单 | [#195](https://github.com/sindresorhus/Plash/issues/195) | ✅ 已实现。只在多于一块屏时出现 |
-| **F9** | 桌面失焦时变暗 / 去色 | [#177](https://github.com/sindresorhus/Plash/issues/177) | 待做，S。挂在 P1 的判定上，别另造一套 |
+| **F9** | 桌面失焦时变暗 | [#177](https://github.com/sindresorhus/Plash/issues/177) | ✅ 已实现。「聚焦」定义为 Finder 在最前 —— 点桌面就是这个效果；暗到多少可调 |
 | **F10** | 自定义 CSS 注入健壮性：SPA 改写 documentElement 后重新注入 | [#173](https://github.com/sindresorhus/Plash/issues/173) | ✅ 已实现。MutationObserver 在文档被改写后重新挂回样式 |
 | **F11** | 用户代理策略：别再钉死 `Version/18.3` | [#169](https://github.com/sindresorhus/Plash/issues/169) | ✅ 已实现。版本号从运行时系统推导 |
 | **F12** | 双 webview 交换加载：成功才淡入，失败保留旧内容 | [#9](https://github.com/sindresorhus/Plash/issues/9) [#11](https://github.com/sindresorhus/Plash/issues/11) [#21](https://github.com/sindresorhus/Plash/issues/21) [#41](https://github.com/sindresorhus/Plash/issues/41) [#47](https://github.com/sindresorhus/Plash/issues/47) | ✅ 已实现。**只覆盖「替换页面」**，会话内首次加载仍直接进窗口 —— 没理由把必须能工作的路径放到新机制后面 |
@@ -205,14 +205,19 @@ AppState.shared                        AppState
 
 | | 事项 | 状态 |
 |---|---|---|
-| **E1** | Swift 6 语言模式 | pbxproj 已改 `SWIFT_VERSION = 6.0`，**迁移错误还没清** |
-| **E2** | 部署目标 macOS 26.0 | 已改（上游是 15.2） |
-| **E4** | 清掉 `DEVELOPMENT_TEAM = YG56YK5RN5` | 待做。那是上游作者的 team id |
-| **E5** | target / 目录 / xcodeproj 改名 Plash → Nifro | 待做 |
-| **E6** | 拆 `Utilities.swift` | 待做。5745 行，全文只有 2 个 `// MARK`。这是新贡献者最大的一堵墙 |
-| **E7** | 测试 target | 待做。上游 0 个 |
-| **E8** | CI build workflow | 待做 |
-| **E11** | `.gitignore` 补 `.release/`、`.xcode-build/` | 待做 |
+| **E1** | Swift 6 语言模式 | ✅ 14 处并发错误逐条按语义修，不是塞 `nonisolated(unsafe)` |
+| **E2** | 部署目标 | ✅ macOS 15.0。**量出来的**：编译器可用性报错在 26.0 和 15.0 都是 0，14.0 / 13.0 各 1 条且是同一条（`App.swift` 的 `.defaultLaunchBehavior`）。所有 M 系列 Mac 都能升到 macOS 26，所以硬件覆盖跟部署目标无关，15.0 只是多接住不升级系统的人 |
+| **E3** | 移除 Sentry | ✅ 调用点 + helper + SPM 依赖 |
+| **E4** | 清掉上游作者的 `DEVELOPMENT_TEAM` | ✅ |
+| **E5** | 改名 Plash → Nifro | ✅ target / 目录 / 工程 / scheme / bundle id |
+| **E6** | 拆 `Utilities.swift` | **待做**。5745 行，全文只有 2 个 `// MARK`。这是新贡献者最大的一堵墙 |
+| **E7** | 测试 | ✅ 几何部分 18 条，做过变异验证。其余仍是 0 |
+| **E8** | CI | ✅ build / test / lint / sites 四个 job，外加生成物新鲜度检查 |
+| **E9** | release 流水线与签名 | ✅ 逐架构构建，`lipo` 校验产物只含一个架构 |
+| **E10** | Homebrew cask | ✅ 按架构分发 |
+| **E11** | `.gitignore` | ✅ |
+| **E15** | 首启引导重写 | ✅ |
+| ~~E16~~ | ~~通用二进制~~ | **不做**（你定的）。改成逐架构各出一份瘦包 |
 
 E6 和 E7 的优先级不低于任何功能。上游 5 年零贡献不是社区不来，是 5745 行的单文件 + 没有测试 + 没有 CI 把人劝退了。我们要反过来做。
 
