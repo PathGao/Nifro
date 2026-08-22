@@ -111,3 +111,18 @@ source: >-
 - `backend` is honest. If you marked it `live`, `backendNote` says why.
 - No login walls without `requiresLogin: true`, and nothing that needs an API key pasted into the URL.
 - No ads, no trackers you would not want running for eight hours a day, no autoplaying audio.
+
+## Generated files
+
+`index.json` and `../Nifro/SiteCatalog.generated.swift` are produced from the YAML
+files here by `scripts/generate-site-catalog.py`. Do not edit them by hand.
+
+The app reads `index.json` straight from this branch, so an entry merged here shows
+up in the in-app gallery without waiting for a release. The Swift file is the copy
+compiled into the app, used when there is no network.
+
+```sh
+python3 scripts/generate-site-catalog.py
+```
+
+CI fails if the YAML and the generated files disagree.

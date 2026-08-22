@@ -178,8 +178,10 @@ extension AppState {
 
 		menu.addSeparator()
 
-		// Right under the on/off switch: this is where someone who has nothing set up yet, or wants something new up there, is actually headed.
-		menu.addLinkItem("Site Gallery", destination: Constants.siteGalleryURL)
+		// Right under the on/off switch: this is where someone who has nothing set up yet, or wants something new up there, is actually headed. Opens in the app — the whole value of the catalogue is the settings that come with each entry, and sending people to a web page to copy those by hand would be asking them to redo work somebody already did.
+		menu.addCallbackItem("Site Gallery…") {
+			Constants.openSiteGalleryWindow()
+		}
 
 		menu.addSeparator()
 

@@ -1,0 +1,377 @@
+[
+ {
+  "crop": null,
+  "css": null,
+  "description": "The After Dark flying toasters screensaver, rebuilt in pure CSS.",
+  "isLive": true,
+  "javaScript": null,
+  "name": "Flying Toasters",
+  "reloadInterval": null,
+  "requiresLogin": false,
+  "tags": [
+   "screensaver",
+   "art",
+   "ambient"
+  ],
+  "url": "https://www.bryanbraun.com/after-dark-css/all/flying-toasters.html"
+ },
+ {
+  "crop": null,
+  "css": null,
+  "description": "Bing's daily featured photograph, aspect-filled to the screen.",
+  "isLive": false,
+  "javaScript": null,
+  "name": "Bing Photo of the Day",
+  "reloadInterval": 21600,
+  "requiresLogin": false,
+  "tags": [
+   "photo",
+   "ambient"
+  ],
+  "url": "https://bing-photo-of-the-day.netlify.app"
+ },
+ {
+  "crop": null,
+  "css": null,
+  "description": "Information Is Beautiful's chart of what actually goes into every classic cocktail.",
+  "isLive": false,
+  "javaScript": null,
+  "name": "Cocktail Chart",
+  "reloadInterval": 86400,
+  "requiresLogin": false,
+  "tags": [
+   "data",
+   "art"
+  ],
+  "url": "https://informationisbeautiful.net/visualizations/cocktails-interactive/"
+ },
+ {
+  "crop": null,
+  "css": null,
+  "description": "A GitHub user's recent public activity as a card feed. Replace the username in the URL with your own.",
+  "isLive": false,
+  "javaScript": null,
+  "name": "Gitstalk",
+  "reloadInterval": 1800,
+  "requiresLogin": false,
+  "tags": [
+   "dashboard",
+   "personal",
+   "data"
+  ],
+  "url": "https://gitstalk.netlify.app/sindresorhus"
+ },
+ {
+  "crop": null,
+  "css": "* {\n  background-color: transparent !important;\n  color: white !important;\n}\n\n.QQYuzf,\n.gboEAb,\nheader.NkK3Fc,\n.Hrn1mc {\n  display: none !important;\n}\n\n[role=\"grid\"] * {\n  border-color: rgba(255, 255, 255, 0.3) !important;\n}\n\n.tNDBE:not(.Wyo4Qe),\n.SGWAac,\n.QIadxc:last-child {\n  border: none !important;\n}\n\n[data-chips-dialog] {\n  background-color: rgba(0 0 0 / 80%) !important;\n}\n",
+  "description": "Your week laid over the desktop, with all of Google's chrome stripped away.",
+  "isLive": false,
+  "javaScript": null,
+  "name": "Google Calendar",
+  "reloadInterval": 900,
+  "requiresLogin": true,
+  "tags": [
+   "calendar",
+   "dashboard"
+  ],
+  "url": "https://calendar.google.com/"
+ },
+ {
+  "crop": null,
+  "css": null,
+  "description": "What the world is searching for right now, as a self-updating tile wall.",
+  "isLive": false,
+  "javaScript": null,
+  "name": "Google Trends",
+  "reloadInterval": 1800,
+  "requiresLogin": false,
+  "tags": [
+   "data",
+   "news",
+   "dashboard"
+  ],
+  "url": "https://trends.google.com/tv/"
+ },
+ {
+  "crop": null,
+  "css": null,
+  "description": "A personal life dashboard — steps, sleep, heart rate, time tracking — on one page.",
+  "isLive": false,
+  "javaScript": null,
+  "name": "Gyroscope",
+  "reloadInterval": 900,
+  "requiresLogin": true,
+  "tags": [
+   "dashboard",
+   "personal",
+   "data"
+  ],
+  "url": "https://gyrosco.pe/"
+ },
+ {
+  "crop": null,
+  "css": "body.day, body.night {\n  background-color: transparent;\n  color: white\n}\n\ndiv.screen {\n  margin: 4%;\n  font-size: 100px !important;\n  bottom: 0;\n  top: auto;\n}\n\n#colophon { display: none }\n",
+  "description": "A Helvetica word clock that spells out the time in prose.",
+  "isLive": false,
+  "javaScript": null,
+  "name": "Helvetictoc",
+  "reloadInterval": 60,
+  "requiresLogin": false,
+  "tags": [
+   "clock"
+  ],
+  "url": "http://www.helvetictoc.com/"
+ },
+ {
+  "crop": null,
+  "css": null,
+  "description": "A crowdsourced, opinionated map of who actually lives in each part of a city.",
+  "isLive": false,
+  "javaScript": null,
+  "name": "Hoodmaps",
+  "reloadInterval": 86400,
+  "requiresLogin": false,
+  "tags": [
+   "map",
+   "data",
+   "art"
+  ],
+  "url": "https://hoodmaps.com/new-york-city-neighborhood-map"
+ },
+ {
+  "crop": null,
+  "css": "#about-button {\n  display: none;\n}\n",
+  "description": "An endlessly scrolling low-poly town with cars and trees, seen from above.",
+  "isLive": true,
+  "javaScript": null,
+  "name": "Infinitown",
+  "reloadInterval": null,
+  "requiresLogin": false,
+  "tags": [
+   "art",
+   "ambient",
+   "3d",
+   "screensaver"
+  ],
+  "url": "https://demos.littleworkshop.fr/infinitown"
+ },
+ {
+  "crop": null,
+  "css": null,
+  "description": "A translucent jellyfish drifting through dark water.",
+  "isLive": true,
+  "javaScript": null,
+  "name": "Jellyfish",
+  "reloadInterval": null,
+  "requiresLogin": false,
+  "tags": [
+   "art",
+   "ambient",
+   "3d",
+   "screensaver"
+  ],
+  "url": "https://akirodic.com/p/jellyfish/"
+ },
+ {
+  "crop": null,
+  "css": null,
+  "description": "Artificial Analysis's ranking of language models by speed, price and quality.",
+  "isLive": false,
+  "javaScript": null,
+  "name": "LLM Performance Leaderboard",
+  "reloadInterval": 21600,
+  "requiresLogin": false,
+  "tags": [
+   "data",
+   "dashboard"
+  ],
+  "url": "https://huggingface.co/spaces/ArtificialAnalysis/LLM-Performance-Leaderboard"
+ },
+ {
+  "crop": null,
+  "css": null,
+  "description": "Slow volumetric clouds drifting across a blue sky.",
+  "isLive": true,
+  "javaScript": null,
+  "name": "Clouds",
+  "reloadInterval": null,
+  "requiresLogin": false,
+  "tags": [
+   "art",
+   "ambient",
+   "screensaver",
+   "3d"
+  ],
+  "url": "https://mrdoob.com/lab/javascript/webgl/clouds/"
+ },
+ {
+  "crop": null,
+  "css": null,
+  "description": "A plain monospace clock on a transparent background, so the wallpaper underneath shows through.",
+  "isLive": false,
+  "javaScript": null,
+  "name": "Minimal Clock",
+  "reloadInterval": 60,
+  "requiresLogin": false,
+  "tags": [
+   "clock"
+  ],
+  "url": "https://time.pablopunk.com/?fg=white&bg=transparent&font=SFMono-Regular,Consolas,%27Liberation%20Mono%27,Menlo,monospace"
+ },
+ {
+  "crop": null,
+  "css": null,
+  "description": "The latest frame from a Panomax panoramic outdoor webcam, served as a plain image.",
+  "isLive": false,
+  "javaScript": null,
+  "name": "Panomax Webcam",
+  "reloadInterval": 600,
+  "requiresLogin": false,
+  "tags": [
+   "photo",
+   "ambient"
+  ],
+  "url": "https://panodata.panomax.com/cams/879/recent_full.jpg"
+ },
+ {
+  "crop": null,
+  "css": null,
+  "description": "A rotating full-bleed photograph pulled from Pexels.",
+  "isLive": false,
+  "javaScript": null,
+  "name": "Pexels Wallpaper",
+  "reloadInterval": 3600,
+  "requiresLogin": false,
+  "tags": [
+   "photo",
+   "ambient"
+  ],
+  "url": "https://geert.github.io/pexel-wallpaper/"
+ },
+ {
+  "crop": null,
+  "css": null,
+  "description": "A recreation of the clock that opened Polish state television broadcasts.",
+  "isLive": false,
+  "javaScript": null,
+  "name": "Polish TV Clock",
+  "reloadInterval": 60,
+  "requiresLogin": false,
+  "tags": [
+   "clock",
+   "art"
+  ],
+  "url": "https://aresluna.org/polish-tv-clock/"
+ },
+ {
+  "crop": null,
+  "css": null,
+  "description": "A random Google Street View panorama from somewhere on Earth, new one on every reload.",
+  "isLive": false,
+  "javaScript": null,
+  "name": "Random Street View",
+  "reloadInterval": 600,
+  "requiresLogin": false,
+  "tags": [
+   "photo",
+   "map",
+   "ambient"
+  ],
+  "url": "https://randomstreetview.com/#slideshow"
+ },
+ {
+  "crop": null,
+  "css": null,
+  "description": "A faithful emulation of the 1990s Weather Channel local forecast, US locations only.",
+  "isLive": true,
+  "javaScript": null,
+  "name": "WeatherStar 4000+",
+  "reloadInterval": null,
+  "requiresLogin": false,
+  "tags": [
+   "weather",
+   "ambient",
+   "data"
+  ],
+  "url": "https://weatherstar.netbymatt.com/?kiosk=true"
+ },
+ {
+  "crop": null,
+  "css": null,
+  "description": "The WeatherStar 4000+ presentation, rebuilt for locations outside the United States.",
+  "isLive": true,
+  "javaScript": null,
+  "name": "WeatherStar International",
+  "reloadInterval": null,
+  "requiresLogin": false,
+  "tags": [
+   "weather",
+   "ambient",
+   "data"
+  ],
+  "url": "https://mwood77.github.io/ws4kp-international/?kiosk=true"
+ },
+ {
+  "crop": null,
+  "css": null,
+  "description": "A large full-screen digital clock with the date.",
+  "isLive": false,
+  "javaScript": null,
+  "name": "WebClock",
+  "reloadInterval": 60,
+  "requiresLogin": false,
+  "tags": [
+   "clock"
+  ],
+  "url": "https://findtreasureisland.github.io/clock/index.html"
+ },
+ {
+  "crop": null,
+  "css": null,
+  "description": "Coloured fluid that swirls across the screen and reacts to the pointer in browsing mode.",
+  "isLive": true,
+  "javaScript": null,
+  "name": "WebGL Fluid Simulation",
+  "reloadInterval": null,
+  "requiresLogin": false,
+  "tags": [
+   "art",
+   "ambient",
+   "screensaver",
+   "3d"
+  ],
+  "url": "https://paveldogreat.github.io/WebGL-Fluid-Simulation/"
+ },
+ {
+  "crop": null,
+  "css": null,
+  "description": "A live weather map — wind, rain, temperature and pressure layers over the whole globe.",
+  "isLive": false,
+  "javaScript": null,
+  "name": "Windy",
+  "reloadInterval": 1800,
+  "requiresLogin": false,
+  "tags": [
+   "weather",
+   "map",
+   "data"
+  ],
+  "url": "https://www.windy.com/"
+ },
+ {
+  "crop": null,
+  "css": null,
+  "description": "Near-live satellite imagery with a rain-radar overlay and all labels turned off.",
+  "isLive": false,
+  "javaScript": null,
+  "name": "Zoom Earth",
+  "reloadInterval": 900,
+  "requiresLogin": false,
+  "tags": [
+   "weather",
+   "map",
+   "photo"
+  ],
+  "url": "https://zoom.earth/maps/satellite/#view=41.989,12.766,6.23z/beta=mtg/overlays=radar,labels:off,lines:off"
+ }
+]

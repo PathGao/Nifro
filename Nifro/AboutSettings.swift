@@ -36,7 +36,9 @@ struct AboutSettings: View {
 				Button("Report a Problem or Request a Feature…") {
 					SSApp.openSendFeedbackPage()
 				}
-				Link("Site Gallery", destination: Constants.siteGalleryURL)
+				Button("Site Gallery…") {
+					Constants.openSiteGalleryWindow()
+				}
 				Link("GitHub Repository", destination: Constants.repositoryURL)
 			} footer: {
 				Text("The site gallery is a list of pages that work well as wallpapers, each with the settings that make it work. Adding one is a single file — no Swift, no Xcode.")

@@ -4,10 +4,17 @@ import KeyboardShortcuts
 enum Constants {
 	static let repositoryURL = URL("https://github.com/PathGao/nifro")
 	static let siteGalleryURL = URL("https://github.com/PathGao/nifro/tree/main/sites")
+	static let siteSubmissionURL = URL("https://github.com/PathGao/nifro/issues/new?template=site_submission.yml")
 
 	@MainActor
 	static var websitesWindow: NSWindow? {
 		NSApp.windows.first { $0.identifier?.rawValue == "websites" }
+	}
+
+	@MainActor
+	static func openSiteGalleryWindow() {
+		SSApp.forceActivate()
+		EnvironmentValues().openWindow(id: "site-gallery")
 	}
 
 	@MainActor

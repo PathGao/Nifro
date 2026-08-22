@@ -27,6 +27,14 @@ struct AppMain: App {
 		.windowResizability(.contentSize)
 		.defaultPosition(.center)
 		.defaultLaunchBehavior(.suppressed)
+		Window("Site Gallery", id: "site-gallery") {
+			SiteGalleryScreen()
+				.environmentObject(appState)
+		}
+		.windowResizability(.contentSize)
+		.defaultPosition(.center)
+		.defaultLaunchBehavior(.suppressed)
+
 		Settings {
 			SettingsScreen()
 				.environmentObject(appState)
