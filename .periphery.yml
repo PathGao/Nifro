@@ -1,0 +1,44 @@
+# Unused-code scan. Run it before adding anything to `retain_*` below.
+#
+#   periphery scan
+#
+# The scanner is a good signal and a bad judge. It reads the code and nothing
+# else, so anything the runtime reaches without naming — a selector, an App
+# Intent, a property whose whole job is to hold a reference — comes back as
+# unused. Deleting those compiles fine and breaks at runtime, which is the worst
+# way to find out.
+#
+# Every entry below is therefore a claim that has to be argued, not a way to
+# quiet the tool. If the reason stops being true, the entry should fail.
+
+project: Nifro.xcodeproj
+schemes:
+  - Nifro
+targets:
+  - Nifro
+
+# Selector targets and anything else Objective-C can reach by name at runtime.
+retain_objc_accessible: true
+
+retain_public: true
+
+report_exclude:
+  # App Intents. The system finds and runs these; no Swift code names them.
+  # Deleting one silently removes a Shortcuts action.
+  - "**/Intents.swift"
+
+# Named retentions, each with the reason it is not really dead.
+retain_files: []
+
+# Known findings we keep, and why. Re-check these when the code around them changes.
+#
+#   OcclusionMonitor.timer          Holding it is the entire point — a repeating
+#                                   Timer nobody retains stops firing. Nothing reads it.
+#
+#   ActionTrampoline.action
+#   ActionTrampoline.handleAction   Reached through #selector. Deleting them compiles
+#   CallbackMenuItem.action         and breaks every menu and control callback.
+#   SSEvents…handleEvent
+#
+#   `sender` / `replyEvent`         Parameters required by the selector signatures above.
+#   parameters                      They are unused by name and cannot be removed.

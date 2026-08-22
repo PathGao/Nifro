@@ -5,7 +5,6 @@ struct WebsitesScreen: View {
 //	@State private var selection: Website.ID? // We need two states as selection must be independent from actually opening the editing because of keyboard navigation and accessibility.
 	@State private var editedWebsite: Website.ID?
 	@State private var isAddWebsiteDialogPresented = false
-	@Namespace private var bottomScrollID
 
 	var body: some View {
 		Form {
@@ -26,7 +25,6 @@ struct WebsitesScreen: View {
 				}
 
 				withAnimation {
-//					scrollViewProxy.scrollTo(bottomScrollID, anchor: .top)
 				}
 			}
 			.overlay {

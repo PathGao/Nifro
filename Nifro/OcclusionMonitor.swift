@@ -11,9 +11,6 @@ We compute the uncovered area ourselves instead. `NSScreen.visibleFrame` is alre
 @MainActor
 final class OcclusionMonitor {
 
-	// ponytail: coverage by grid rasterization instead of exact rectangle union. 64×40 cells is ~0.04% of the screen per cell, an order of magnitude finer than the threshold it feeds. Swap in a sweep-line union if this ever shows up in a profile.
-	private static let gridColumns = 64
-	private static let gridRows = 40
 
 	/**
 	How often we re-check while the app is running.
@@ -39,6 +36,10 @@ final class OcclusionMonitor {
 	private let subject = CurrentValueSubject<CGRect, Never>(.zero)
 	private(set) var largestVisibleRegion: (rect: CGRect, area: Double) = (.zero, 0)
 	private var cancellables = Set<AnyCancellable>()
+
+	/**
+	Held only to keep the timer alive — nothing reads it. A repeating `Timer` that nobody retains stops firing.
+	*/
 	private var timer: Timer?
 
 	/**

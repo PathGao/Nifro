@@ -155,26 +155,6 @@ func largestUncoveredRegion(
 }
 
 /**
-The area, in square points, of the largest single uncovered patch of `region`.
-
-Not the total uncovered area, and not a percentage. Both of those answer the wrong question.
-
-A percentage is not screen-independent: 2% of a 6K display is a block you would notice, 2% of a laptop screen is a sliver. And a total ignores shape — four thin margins around a nearly-maximized window can add up to a respectable number while showing nothing anybody would call a wallpaper. What matters is whether one contiguous piece is big enough to see, so that is what gets measured.
-
-Rasterized onto a grid rather than solved exactly: the answer feeds a "is this big enough to bother rendering for" decision, and a 64×40 grid resolves a patch to well under the size that decision cares about.
-
-- Returns: the area of `region` when nothing covers it, and 0 when it is completely covered.
-*/
-func largestUncoveredPatch(
-	of region: CGRect,
-	covering: [CGRect],
-	columns: Int = 64,
-	rows: Int = 40
-) -> Double {
-	largestUncoveredRegion(of: region, covering: covering, columns: columns, rows: rows).area
-}
-
-/**
 Converts a rectangle reported by the window server, which measures down from the top of the whole display arrangement, into AppKit coordinates, which measure up from the bottom.
 */
 func flippingFromWindowServer(_ rect: CGRect, arrangementHeight: CGFloat) -> CGRect {

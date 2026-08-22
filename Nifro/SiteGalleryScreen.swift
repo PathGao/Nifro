@@ -4,7 +4,6 @@ import SwiftUI
 Browse the built-in catalogue and add a site with the settings that make it work.
 */
 struct SiteGalleryScreen: View {
-	@Environment(\.dismiss) private var dismiss
 	@State private var search = ""
 	@State private var selectedTag: String?
 	@State private var added = Set<String>()

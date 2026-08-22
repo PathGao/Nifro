@@ -100,18 +100,18 @@ struct CoverageTests {
 
 	@Test("Nothing on screen leaves the whole screen visible")
 	func noWindows() {
-		#expect(largestUncoveredPatch(of: screen, covering: []) == 1600 * 1000)
+		#expect(largestUncoveredRegion(of: screen, covering: []).area == 1600 * 1000)
 	}
 
 	@Test("A window filling the screen leaves nothing")
 	func fullCover() {
-		#expect(largestUncoveredPatch(of: screen, covering: [screen]) == 0)
+		#expect(largestUncoveredRegion(of: screen, covering: [screen]).area == 0)
 	}
 
 	@Test("A window covering half the screen leaves the other half")
 	func halfCover() {
 		let half = CGRect(x: 0, y: 0, width: 800, height: 1000)
-		let patch = largestUncoveredPatch(of: screen, covering: [half])
+		let patch = largestUncoveredRegion(of: screen, covering: [half]).area
 
 		#expect(abs(patch - 800 * 1000) < 1000)
 		#expect(patch > meaningful)
@@ -122,13 +122,13 @@ struct CoverageTests {
 		let left = CGRect(x: 0, y: 0, width: 1000, height: 1000)
 		let right = CGRect(x: 600, y: 0, width: 1000, height: 1000)
 
-		#expect(largestUncoveredPatch(of: screen, covering: [left, right]) == 0)
+		#expect(largestUncoveredRegion(of: screen, covering: [left, right]).area == 0)
 	}
 
 	@Test("A window off to the side covers nothing")
 	func windowOnAnotherDisplay() {
 		let elsewhere = CGRect(x: 2000, y: 0, width: 800, height: 600)
-		#expect(largestUncoveredPatch(of: screen, covering: [elsewhere]) == 1600 * 1000)
+		#expect(largestUncoveredRegion(of: screen, covering: [elsewhere]).area == 1600 * 1000)
 	}
 
 	@Test("The case this whole mechanism exists for: everything covered but a thin strip")
@@ -136,7 +136,7 @@ struct CoverageTests {
 		// One maximized window on the desktop. What survives is a band too shallow to read as wallpaper.
 		let almostEverything = CGRect(x: 0, y: 0, width: 1600, height: 985)
 
-		#expect(largestUncoveredPatch(of: screen, covering: [almostEverything]) < meaningful)
+		#expect(largestUncoveredRegion(of: screen, covering: [almostEverything]).area < meaningful)
 	}
 
 	@Test("Thin margins on all four sides do not add up to something visible")
@@ -149,14 +149,14 @@ struct CoverageTests {
 		#expect(totalUncovered / (1600 * 1000) > 0.02)
 
 		// Each margin is its own patch, and every one of them is too thin to matter.
-		#expect(largestUncoveredPatch(of: screen, covering: [window]) < meaningful)
+		#expect(largestUncoveredRegion(of: screen, covering: [window]).area < meaningful)
 	}
 
 	@Test("A genuinely visible desktop stays above the threshold")
 	func visibleDesktop() {
 		let window = CGRect(x: 200, y: 200, width: 900, height: 600)
 
-		#expect(largestUncoveredPatch(of: screen, covering: [window]) > meaningful)
+		#expect(largestUncoveredRegion(of: screen, covering: [window]).area > meaningful)
 	}
 
 	@Test("Two patches touching only at a corner are two patches")
@@ -165,7 +165,7 @@ struct CoverageTests {
 		let vertical = CGRect(x: 700, y: 0, width: 200, height: 1000)
 		let horizontal = CGRect(x: 0, y: 400, width: 1600, height: 200)
 
-		let patch = largestUncoveredPatch(of: screen, covering: [vertical, horizontal])
+		let patch = largestUncoveredRegion(of: screen, covering: [vertical, horizontal]).area
 
 		// One quadrant, not the sum of four.
 		#expect(patch < 1600 * 1000 / 2)
@@ -174,7 +174,7 @@ struct CoverageTests {
 
 	@Test("A degenerate region reports nothing visible rather than dividing by zero")
 	func emptyRegion() {
-		#expect(largestUncoveredPatch(of: .zero, covering: [screen]) == 0)
+		#expect(largestUncoveredRegion(of: .zero, covering: [screen]).area == 0)
 	}
 
 	@Test("Window-server rectangles flip into AppKit coordinates")

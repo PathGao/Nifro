@@ -62,16 +62,7 @@ extension NSWindow.Level {
 
 	static let desktop = level(for: .desktopWindow)
 	static let desktopIcon = level(for: .desktopIconWindow)
-	static let backstopMenu = level(for: .backstopMenu)
-	static let dragging = level(for: .draggingWindow)
-	static let overlay = level(for: .overlayWindow)
-	static let help = level(for: .helpWindow)
-	static let utility = level(for: .utilityWindow)
-	static let assistiveTechHigh = level(for: .assistiveTechHighWindow)
-	static let cursor = level(for: .cursorWindow)
 
-	static let minimum = level(for: .minimumWindow)
-	static let maximum = level(for: .maximumWindow)
 }
 
 
@@ -106,10 +97,7 @@ final class SSMenu: NSMenu, NSMenuDelegate {
 
 
 struct FatalReason: CustomStringConvertible {
-	static let unreachable = Self("Should never be reached during execution.")
 	static let notYetImplemented = Self("Not yet implemented.")
-	static let subtypeMustOverride = Self("Must be overridden in subtype.")
-	static let mustNotBeCalled = Self("Should never be called.")
 
 	let reason: String
 
@@ -133,10 +121,6 @@ func fatalError(
 final class CallbackMenuItem: NSMenuItem {
 	@MainActor private static var validateCallback: ((NSMenuItem) -> Bool)?
 
-	@MainActor
-	static func validate(_ callback: @escaping (NSMenuItem) -> Bool) {
-		validateCallback = callback
-	}
 
 	private let callback: () -> Void
 
@@ -166,6 +150,10 @@ final class CallbackMenuItem: NSMenuItem {
 		fatalError(because: .notYetImplemented)
 	}
 
+}
+
+extension CallbackMenuItem {
+	// Reached through `#selector` in the initialiser above; nothing references it by name.
 	@objc
 	private func action(_ sender: NSMenuItem) {
 		callback()
@@ -231,11 +219,6 @@ extension NSMenu {
 		addItem(.separator())
 	}
 
-	@discardableResult
-	func add(_ menuItem: NSMenuItem) -> NSMenuItem {
-		addItem(menuItem)
-		return menuItem
-	}
 
 	@discardableResult
 	func addDisabled(_ title: String) -> NSMenuItem {
@@ -274,26 +257,6 @@ extension NSMenu {
 		return menuItem
 	}
 
-	@discardableResult
-	func addItem(
-		_ attributedTitle: NSAttributedString,
-		key: String = "",
-		keyModifiers: NSEvent.ModifierFlags? = nil,
-		isEnabled: Bool = true,
-		isChecked: Bool = false,
-		isHidden: Bool = false
-	) -> NSMenuItem {
-		let menuItem = NSMenuItem(
-			attributedTitle,
-			key: key,
-			keyModifiers: keyModifiers,
-			isEnabled: isEnabled,
-			isChecked: isChecked,
-			isHidden: isHidden
-		)
-		addItem(menuItem)
-		return menuItem
-	}
 
 	@discardableResult
 	func addCallbackItem(
@@ -318,29 +281,6 @@ extension NSMenu {
 		return menuItem
 	}
 
-	@discardableResult
-	func addCallbackItem(
-		_ title: NSAttributedString,
-		key: String = "",
-		keyModifiers: NSEvent.ModifierFlags? = nil,
-		isEnabled: Bool = true,
-		isChecked: Bool = false,
-		isHidden: Bool = false,
-		action: @escaping () -> Void
-	) -> NSMenuItem {
-		let menuItem = CallbackMenuItem(
-			"",
-			key: key,
-			keyModifiers: keyModifiers,
-			isEnabled: isEnabled,
-			isChecked: isChecked,
-			isHidden: isHidden,
-			action: action
-		)
-		menuItem.attributedTitle = title
-		addItem(menuItem)
-		return menuItem
-	}
 
 	@MainActor
 	@discardableResult
@@ -350,38 +290,9 @@ extension NSMenu {
 		}
 	}
 
-	@discardableResult
-	func addLinkItem(_ title: String, destination: URL) -> NSMenuItem {
-		addCallbackItem(title) {
-			destination.open()
-		}
-	}
 
-	@discardableResult
-	func addLinkItem(_ title: NSAttributedString, destination: URL) -> NSMenuItem {
-		addCallbackItem(title) {
-			destination.open()
-		}
-	}
 
-	@discardableResult
-	func addMoreAppsItem() -> NSMenuItem {
-		addLinkItem(
-			"More Apps By Me",
-			destination: "macappstore://apps.apple.com/developer/id328077650"
-		)
-	}
 
-	@discardableResult
-	func addAboutItem() -> NSMenuItem {
-		addCallbackItem("About") {
-			Task { @MainActor in // TODO: Remove this when NSMenu is annotated as main actor.
-				SSApp.activateIfAccessory()
-			}
-
-			NSApp.orderFrontStandardAboutPanel(nil)
-		}
-	}
 
 	@MainActor
 	@discardableResult
@@ -411,7 +322,6 @@ enum SSApp {
 	static let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
 	static let build = Bundle.main.object(forInfoDictionaryKey: kCFBundleVersionKey as String) as! String
 	static let versionWithBuild = "\(version) (\(build))"
-	@MainActor static let icon = NSApp.applicationIconImage!
 	static let url = Bundle.main.bundleURL
 
 	@MainActor
@@ -511,13 +421,6 @@ extension SSApp {
 
 
 extension NSMenuItem {
-	func performAction() {
-		guard let menu else {
-			return
-		}
-
-		menu.performActionForItem(at: menu.index(of: self))
-	}
 }
 
 
@@ -531,14 +434,6 @@ extension URL {
 }
 
 extension String {
-	/*
-	```
-	"https://sindresorhus.com".openURL()
-	```
-	*/
-	func openURL() {
-		URL(string: self)?.open()
-	}
 }
 
 
@@ -556,16 +451,6 @@ extension URL: @retroactive ExpressibleByStringLiteral {
 }
 
 extension URL {
-	/**
-	Example:
-
-	```
-	URL("https://sindresorhus.com")
-	```
-	*/
-	init(_ staticString: StaticString) {
-		self.init(string: "\(staticString)")!
-	}
 }
 
 
@@ -586,38 +471,7 @@ enum Device {
 
 
 extension Sequence {
-	/**
-	Convert a sequence to a dictionary by mapping over the values and using the returned key as the key and the current sequence element as value.
 
-	```
-	[1, 2, 3].toDictionary { $0 }
-	//=> [1: 1, 2: 2, 3: 3]
-	```
-	*/
-	func toDictionary<Key: Hashable>(withKey pickKey: (Element) -> Key) -> [Key: Element] {
-		var dictionary = [Key: Element]()
-		for element in self {
-			dictionary[pickKey(element)] = element
-		}
-		return dictionary
-	}
-
-	/**
-	Convert a sequence to a dictionary by mapping over the elements and returning a key/value tuple representing the new dictionary element.
-
-	```
-	[(1, "a"), (2, "b")].toDictionary { ($1, $0) }
-	//=> ["a": 1, "b": 2]
-	```
-	*/
-	func toDictionary<Key: Hashable, Value>(withKey pickKeyValue: (Element) -> (Key, Value)) -> [Key: Value] {
-		var dictionary = [Key: Value]()
-		for element in self {
-			let newElement = pickKeyValue(element)
-			dictionary[newElement.0] = newElement.1
-		}
-		return dictionary
-	}
 
 	/**
 	Same as the above but supports returning optional values.
@@ -768,6 +622,7 @@ private final class ActionTrampoline {
 		self.action = action
 	}
 
+	// Reached through `#selector`, which no static analysis can see. Deleting it compiles fine and breaks every control callback at runtime.
 	@objc
 	fileprivate func handleAction(_ sender: AnyObject) {
 		action(NSApp.currentEvent!)
@@ -831,17 +686,6 @@ struct CocoaButton: NSViewRepresentable {
 		self.action = action
 	}
 
-	init(
-		_ attributedTitle: NSAttributedString,
-		keyEquivalent: KeyEquivalent? = nil,
-		bezelStyle: NSButton.BezelStyle = .rounded,
-		action: @escaping () -> Void
-	) {
-		self.attributedTitle = attributedTitle
-		self.keyEquivalent = keyEquivalent
-		self.bezelStyle = bezelStyle
-		self.action = action
-	}
 
 	func makeNSView(context: Context) -> NSViewType {
 		let nsView = NSButton(title: "", target: nil, action: nil)
@@ -973,31 +817,6 @@ extension Binding {
 
 
 extension Binding {
-	/**
-	Convert a binding with an optional value to a binding with a boolean value representing whether the original binding value is `nil`.
-
-	- Parameter falseSetValue: The value used when the binding value is set to `false`.
-
-	```
-	struct ContentView: View {
-		private static let defaultInterval = 60.0
-
-		private var doesNotHaveInterval: Binding<Bool> {
-			$optionalInterval.isNil(falseSetValue: Self.defaultInterval)
-		}
-
-		var body: some View {}
-	}
-	```
-	*/
-	func isNil<T>(falseSetValue: T) -> Binding<Bool> where Value == T? {
-		.init(
-			get: { wrappedValue == nil },
-			set: {
-				wrappedValue = $0 ? nil : falseSetValue
-			}
-		)
-	}
 
 	/**
 	Convert a binding with an optional value to a binding with a boolean value representing whether the original binding value is not `nil`.
@@ -1117,23 +936,6 @@ extension Binding {
 		)
 	}
 
-	/**
-	Transform the value on `set`.
-
-	```
-	$foo.setMap { $0.uppercased() }
-	```
-	*/
-	func setMap(
-		_ set: @escaping (Value) -> Value
-	) -> Self {
-		.init(
-			get: { wrappedValue },
-			set: { newValue in
-				wrappedValue = set(newValue)
-			}
-		)
-	}
 
 	/**
 	Transform the value on `get`.
@@ -1376,29 +1178,6 @@ extension NSEvent {
 			.subtracting([.capsLock, .numericPad, .function])
 	}
 
-	/**
-	Real modifiers.
-
-	- Note: Prefer this over `.modifierFlags`.
-
-	```
-	// Check if Command is one of possible more modifiers keys
-	event.modifiers.contains(.command)
-
-	// Check if Command is the only modifier key
-	event.modifiers == .command
-
-	// Check if Command and Shift are the only modifiers
-	event.modifiers == [.command, .shift]
-	```
-	*/
-	var modifiers: ModifierFlags {
-		modifierFlags
-			.intersection(.deviceIndependentFlagsMask)
-			// We remove capsLock as it shouldn't affect the modifiers.
-			// We remove numericPad/function as arrow keys trigger it, use `event.specialKeys` instead.
-			.subtracting([.capsLock, .numericPad, .function])
-	}
 }
 
 
@@ -1412,40 +1191,7 @@ extension WKWebView {
 		let major = ProcessInfo.processInfo.operatingSystemVersion.majorVersion
 		return "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/\(major).0 Safari/605.1.15"
 	}()
-	static let chromeUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
 
-	/**
-	Evaluate JavaScript synchronously.
-
-	- Important: This will block the main thread. Don't use it for anything that takes a long time.
-	*/
-	@discardableResult
-	func evaluateSync(script: String) throws -> Any? {
-		var isFinished = false
-		var returnResult: Any?
-		var returnError: Error?
-
-		evaluateJavaScript(script, in: nil, in: .defaultClient) { result in
-			switch result {
-			case .success(let data):
-				returnResult = data
-			case .failure(let error):
-				returnError = error
-			}
-
-			isFinished = true
-		}
-
-		while !isFinished {
-			RunLoop.current.run(mode: .default, before: .distantFuture)
-		}
-
-		if let returnError {
-			throw returnError
-		}
-
-		return returnResult
-	}
 
 	// https://github.com/feedback-assistant/reports/issues/81
 	/**
@@ -1491,14 +1237,6 @@ extension WebViewController: WKUIDelegate {
 ```
 */
 extension WKWebView {
-	/**
-	Default handler for JavaScript `alert()` to be used in `WKDelegate`.
-	*/
-	func defaultAlertHandler(message: String) async {
-		let alert = NSAlert()
-		alert.messageText = message
-		await alert.run()
-	}
 
 	/**
 	Default handler for JavaScript `confirm()` to be used in `WKDelegate`.
@@ -1935,12 +1673,6 @@ final class ObservableValue<Value>: ObservableObject {
 		)
 	}
 
-	/**
-	Manually trigger an update.
-	*/
-	func update() {
-		objectWillChange.send()
-	}
 }
 
 
@@ -1973,30 +1705,6 @@ extension CFUUID {
 
 
 extension UUID {
-	var toCFUUID: CFUUID {
-		let bytes = uuid
-
-		let newBytes = CFUUIDBytes(
-			byte0: bytes.0,
-			byte1: bytes.1,
-			byte2: bytes.2,
-			byte3: bytes.3,
-			byte4: bytes.4,
-			byte5: bytes.5,
-			byte6: bytes.6,
-			byte7: bytes.7,
-			byte8: bytes.8,
-			byte9: bytes.9,
-			byte10: bytes.10,
-			byte11: bytes.11,
-			byte12: bytes.12,
-			byte13: bytes.13,
-			byte14: bytes.14,
-			byte15: bytes.15
-		)
-
-		return CFUUIDCreateFromUUIDBytes(nil, newBytes)
-	}
 }
 
 
@@ -2017,19 +1725,6 @@ extension NSScreen {
 		return cfUUID?.toUUID
 	}
 
-	/**
-	Convert a transient display ID to a persistent one.
-	*/
-	static func idFromUUID(_ uuid: UUID) -> CGDirectDisplayID? {
-		let id = CGDisplayGetDisplayIDFromUUID(uuid.toCFUUID)
-
-		// `CGDisplayGetDisplayIDFromUUID` returns `0` if the UUID is not found. We also prevent any potential negative values.
-		guard id > 0 else {
-			return nil
-		}
-
-		return id
-	}
 
 	/**
 	The persistent identifier of the screen.
@@ -2040,9 +1735,6 @@ extension NSScreen {
 }
 
 extension NSScreen {
-	static func from(cgDirectDisplayID id: CGDirectDisplayID) -> NSScreen? {
-		screens.first { $0.id == id }
-	}
 
 	/**
 	Returns a publisher that sends updates when anything related to screens change.
@@ -2069,10 +1761,6 @@ extension NSScreen {
 		Self.screens.contains { $0.id == id }
 	}
 
-	/**
-	Get the main screen if the current screen is not connected.
-	*/
-	var withFallbackToMain: NSScreen? { isConnected ? self : .main }
 
 	/**
 	Whether the screen shows a status bar.
@@ -2149,10 +1837,6 @@ struct Display: Hashable, Codable, Identifiable {
 	*/
 	let id: UUID
 
-	/**
-	The transient ID of the display.
-	*/
-	var transientID: CGDirectDisplayID? { NSScreen.idFromUUID(id) }
 
 	/**
 	The `NSScreen` for the display.
@@ -2290,16 +1974,6 @@ extension NSWorkspace {
 		return height
 	}
 
-	/**
-	Whether the user has "Turn Hiding On" enabled in the Dock settings.
-	*/
-	var isDockAutomaticallyToggled: Bool {
-		guard NSScreen.primary != nil else {
-			return false
-		}
-
-		return dockHeight == nil
-	}
 }
 
 
@@ -2437,10 +2111,6 @@ extension View {
 
 
 extension View {
-	@inlinable
-	func backgroundColor(_ color: Color) -> some View {
-		background(color)
-	}
 }
 
 
@@ -2450,7 +2120,6 @@ final class PowerSourceWatcher {
 		case externalUnlimited
 		case externalUPS
 
-		var isUsingPowerAdapter: Bool { self == .externalUnlimited || self == .externalUPS }
 		var isUsingBattery: Bool { self == .internalBattery }
 
 		fileprivate init(identifier: String) {
@@ -2514,16 +2183,6 @@ class NonInteractiveView: NSView { // swiftlint:disable:this final_class
 
 
 extension SetAlgebra {
-	/**
-	Insert the `value` if it doesn't exist, otherwise remove it.
-	*/
-	mutating func toggleExistence(_ value: Element) {
-		if contains(value) {
-			remove(value)
-		} else {
-			insert(value)
-		}
-	}
 
 	/**
 	Insert the `value` if `shouldExist` is true, otherwise remove it.
@@ -2604,28 +2263,6 @@ extension Collection {
 
 
 extension Timer {
-	/**
-	Creates a repeating timer that runs for the given `duration`.
-	*/
-	@discardableResult
-	static func scheduledRepeatingTimer(
-		withTimeInterval interval: Duration,
-		totalDuration: Duration,
-		onRepeat: ((Timer) -> Void)? = nil,
-		onFinish: (() -> Void)? = nil
-	) -> Timer {
-		let startDate = Date()
-
-		return scheduledTimer(withTimeInterval: interval.toTimeInterval, repeats: true) { timer in
-			guard Date() <= startDate.addingTimeInterval(totalDuration.toTimeInterval) else {
-				timer.invalidate()
-				onFinish?()
-				return
-			}
-
-			onRepeat?(timer)
-		}
-	}
 }
 
 
@@ -2889,41 +2526,7 @@ enum SecurityScopedBookmarkManager {
 		return securityScopedURL
 	}
 
-	/**
-	Access the URL in the given closure and have the access cleaned up afterwards.
 
-	The closure receives a boolean of whether the URL is accessible.
-	*/
-	static func accessURL(_ url: URL, accessHandler: () throws -> Void) rethrows {
-		_ = url.startAccessingSecurityScopedResource()
-
-		defer {
-			url.stopAccessingSecurityScopedResource()
-		}
-
-		try accessHandler()
-	}
-
-	/**
-	Accepts a file URL to a directory or file. If it's a file, it will prompt for permissions to its containing directory.
-
-	It handles cleaning up the access to the URL for you.
-	*/
-	@MainActor
-	static func accessURLByPromptingIfNeeded(_ url: URL, accessHandler: () throws -> Void) {
-		let directoryURL = url.directoryURL
-
-		guard let securityScopedURL = loadBookmark(for: directoryURL) ?? promptUserForPermission(atDirectory: directoryURL) else {
-			return
-		}
-
-		do {
-			try accessURL(securityScopedURL, accessHandler: accessHandler)
-		} catch {
-			error.presentAsModal()
-			return
-		}
-	}
 
 	/**
 	Accepts a file URL to a directory or file. If it's a file, it will prompt for permissions to its containing directory.
@@ -2948,15 +2551,6 @@ enum SecurityScopedBookmarkManager {
 }
 
 extension URL {
-	/**
-	Accepts a file URL to a directory or file. If it's a file, it will prompt for permissions to its containing directory.
-
-	It handles cleaning up the access to the URL for you.
-	*/
-	@MainActor
-	func accessSandboxedURLByPromptingIfNeeded(accessHandler: () throws -> Void) {
-		SecurityScopedBookmarkManager.accessURLByPromptingIfNeeded(self, accessHandler: accessHandler)
-	}
 
 	/**
 	Accepts a file URL to a directory or file. If it's a file, it will prompt for permissions to its containing directory.
@@ -3162,32 +2756,6 @@ extension Error {
 		}
 	}
 
-	/**
-	Present the error as a blocking modal sheet on the given window.
-
-	If the window is nil, the error will be presented in an app-level modal dialog.
-
-	- Important: Prefer `.presentAsSheet()` whenever possible.
-
-	Thread-safe.
-	*/
-	func presentAsModalSheet(for window: NSWindow?) {
-		guard let window else {
-			presentAsModalLegacy()
-			return
-		}
-
-		DispatchQueue.main.async {
-			NSApp.presentErrorAsSheet(self, for: window) {
-				NSApp.stopModal()
-			}
-
-			// This is requried as otherwise `NSApp.runModal` somtimes causes exceptions.
-			DispatchQueue.main.async {
-				NSApp.runModal(for: window)
-			}
-		}
-	}
 
 	/**
 	Present the error as a blocking app-level modal dialog.
@@ -3306,9 +2874,6 @@ final class ObjectAssociation<Value: Any> {
 }
 
 extension ObjectAssociation {
-	convenience init<T>(policy: AssociationPolicy = .retainNonatomic) where Value == T? {
-		self.init(defaultValue: nil, policy: policy)
-	}
 }
 
 
@@ -3443,38 +3008,6 @@ extension AnyCancellable {
 
 
 extension View {
-	/**
-	Conditionally modify the view. For example, apply modifiers, wrap the view, etc.
-
-	```
-	Text("Foo")
-		.padding()
-		.if(someCondition) {
-			$0.foregroundColor(.pink)
-		}
-	```
-
-	```
-	VStack() {
-		Text("Line 1")
-		Text("Line 2")
-	}
-		.if(someCondition) { content in
-			ScrollView(.vertical) { content }
-		}
-	```
-	*/
-	@ViewBuilder
-	func `if`(
-		_ condition: @autoclosure () -> Bool,
-		modify: (Self) -> some View
-	) -> some View {
-		if condition() {
-			modify(self)
-		} else {
-			self
-		}
-	}
 
 	/**
 	This overload makes it possible to preserve the type. For example, doing an `if` in a chain of `Text`-only modifiers.
@@ -3497,56 +3030,10 @@ extension View {
 
 
 extension View {
-	/**
-	Conditionally modify the view. For example, apply modifiers, wrap the view, etc.
-	*/
-	@ViewBuilder
-	func `if`(
-		_ condition: @autoclosure () -> Bool,
-		if modifyIf: (Self) -> some View,
-		else modifyElse: (Self) -> some View
-	) -> some View {
-		if condition() {
-			modifyIf(self)
-		} else {
-			modifyElse(self)
-		}
-	}
 
-	/**
-	Conditionally modify the view. For example, apply modifiers, wrap the view, etc.
-
-	This overload makes it possible to preserve the type. For example, doing an `if` in a chain of `Text`-only modifiers.
-	*/
-	func `if`(
-		_ condition: @autoclosure () -> Bool,
-		if modifyIf: (Self) -> Self,
-		else modifyElse: (Self) -> Self
-	) -> Self {
-		condition() ? modifyIf(self) : modifyElse(self)
-	}
 }
 
 extension Font {
-	/**
-	Conditionally modify the font. For example, apply modifiers.
-
-	```
-	Text("Foo")
-		.font(
-			Font.system(size: 10, weight: .regular)
-				.if(someBool) {
-					$0.monospacedDigit()
-				}
-		)
-	```
-	*/
-	func `if`(
-		_ condition: @autoclosure () -> Bool,
-		modify: (Self) -> Self
-	) -> Self {
-		condition() ? modify(self) : self
-	}
 }
 
 
@@ -3566,9 +3053,6 @@ extension Sequence where Element: Equatable {
 
 
 extension View {
-	func eraseToAnyView() -> AnyView {
-		AnyView(self)
-	}
 }
 
 
@@ -3629,26 +3113,6 @@ extension View {
 		)
 	}
 
-	/**
-	This allows multiple alerts on a single view, which `.alert()` doesn't.
-	*/
-	func alert2(
-		_ title: Text,
-		message: String? = nil,
-		isPresented: Binding<Bool>,
-		@ViewBuilder actions: () -> some View
-	) -> some View {
-		alert2(
-			title,
-			isPresented: isPresented,
-			actions: actions,
-			message: { // swiftlint:disable:this trailing_closure
-				if let message {
-					Text(message)
-				}
-			}
-		)
-	}
 
 	// This is a convenience method and does not exist natively.
 	/**
@@ -3672,21 +3136,6 @@ extension View {
 		)
 	}
 
-	/**
-	This allows multiple alerts on a single view, which `.alert()` doesn't.
-	*/
-	func alert2(
-		_ title: Text,
-		message: String? = nil,
-		isPresented: Binding<Bool>
-	) -> some View {
-		alert2(
-			title,
-			message: message,
-			isPresented: isPresented,
-			actions: {} // swiftlint:disable:this trailing_closure
-		)
-	}
 
 	// This is a convenience method and does not exist natively.
 	/**
@@ -3776,62 +3225,17 @@ extension View {
 
 
 extension View {
-	/**
-	This allows multiple popovers on a single view, which `.popover()` doesn't.
-	*/
-	func popover2(
-		isPresented: Binding<Bool>,
-		attachmentAnchor: PopoverAttachmentAnchor = .rect(.bounds),
-		arrowEdge: Edge = .top,
-		@ViewBuilder content: @escaping () -> some View
-	) -> some View {
-		background(
-			EmptyView().popover(
-				isPresented: isPresented,
-				attachmentAnchor: attachmentAnchor,
-				arrowEdge: arrowEdge,
-				content: content
-			)
-		)
-	}
 }
 
 
 extension Sequence where Element: Equatable {
-	/**
-	Returns a new sequence with the elements in the sequence that equals the given element replaced by the element in the `with` parameter.
-
-	```
-	[1, 2, 1, 2].replacingAll(2, with: 3)
-	//=> [1, 3, 1, 3]
-	```
-	*/
-	func replacingAll(_ element: Element, with newElement: Element) -> [Element] {
-		map { $0 == element ? newElement : $0 }
-	}
 }
 
 
 extension Collection {
-	/**
-	Copies the collection and moves all the elements at the specified offsets to the specified destination offset, preserving ordering.
-	*/
-	func moving(fromOffsets source: IndexSet, toOffset destination: Int) -> [Element] {
-		var copy = Array(self)
-		copy.move(fromOffsets: source, toOffset: destination)
-		return copy
-	}
 }
 
 extension RangeReplaceableCollection {
-	/**
-	Copies the collection and removes all the elements at the specified offsets from the collection.
-	*/
-	func removing(atOffsets offsets: IndexSet) -> [Element] {
-		var copy = Array(self)
-		copy.remove(atOffsets: offsets)
-		return copy
-	}
 }
 
 
@@ -3859,19 +3263,6 @@ extension NSItemProvider {
 		.value
 	}
 
-	func loadObject<T>(ofClass: T.Type) async throws -> T? where T: _ObjectiveCBridgeable, T._ObjectiveCType: NSItemProviderReading {
-		try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Transfer<T?>, Error>) in
-			_ = loadObject(ofClass: ofClass) { data, error in
-				if let error {
-					continuation.resume(throwing: error)
-					return
-				}
-
-				continuation.resume(returning: Transfer(value: data))
-			}
-		}
-		.value
-	}
 }
 
 
@@ -3911,7 +3302,6 @@ extension String {
 }
 
 extension Data {
-	var toString: String? { String(data: self, encoding: .utf8) }
 }
 
 
@@ -3945,9 +3335,6 @@ extension Data {
 		Data(SHA256.hash(data: self))
 	}
 
-	func sha512() -> Self {
-		Data(SHA512.hash(data: self))
-	}
 }
 
 extension String {
@@ -3961,9 +3348,6 @@ extension String {
 		toData.sha256().hexEncodedString()
 	}
 
-	func sha512() -> Self {
-		toData.sha512().hexEncodedString()
-	}
 }
 
 
@@ -4253,46 +3637,6 @@ final class SimpleImageCache<Key: SimpleImageCacheKeyable> {
 
 
 extension Collection where Element: Equatable {
-	/**
-	Returns an array where each element in the collection equal to the given `target` element is modified.
-
-	```
-	struct Person: Equatable {
-		var name: String
-	}
-
-	var people = [
-		Person(name: "John"),
-		Person(name: "Daniel"),
-		Person(name: "John")
-	]
-
-	// …
-
-	let personToRename = Person(name: "John")
-
-	people = people.modifying(personToRename) {
-		$0.name = "Johnny"
-	}
-
-	print(people)
-	//=> [{name "Johnny"}, {name "Daniel"}, {name "Johnny"}]
-	```
-	*/
-	func modifying(
-		_ target: Element,
-		update: (inout Element) throws -> Void
-	) rethrows -> [Element] {
-		try map { element in
-			guard element == target else {
-				return element
-			}
-
-			var copy = element
-			try update(&copy)
-			return copy
-		}
-	}
 }
 
 extension Collection where Element: Identifiable {
@@ -4455,76 +3799,11 @@ extension NSMenuItem {
 		return self
 	}
 
-	/**
-	The menu is only created when it's enabled.
-
-	```
-	menu
-		.addItem("Foo")
-		.withSubmenu { menu in
-
-		}
-	```
-	*/
-	@discardableResult
-	func withSubmenu(_ menuBuilder: (SSMenu) -> NSMenu) -> Self {
-		withSubmenu(menuBuilder(SSMenu()))
-	}
 }
 
 
-enum OperatingSystem {
-	case macOS
-	case iOS
-	case tvOS
-	case watchOS
 
-	#if os(macOS)
-	static let current = macOS
-	#elseif os(iOS)
-	static let current = iOS
-	#elseif os(tvOS)
-	static let current = tvOS
-	#elseif os(watchOS)
-	static let current = watchOS
-	#else
-	#error("Unsupported platform")
-	#endif
-}
 
-extension OperatingSystem {
-	/**
-	- Note: Only use this when you cannot use an `if #available` check. For example, inline in function calls.
-	*/
-	static let isMacOS17OrLater: Bool = {
-		#if os(macOS)
-		if #available(macOS 17, *) {
-			return true
-		}
-
-		return false
-		#else
-		false
-		#endif
-	}()
-
-	/**
-	- Note: Only use this when you cannot use an `if #available` check. For example, inline in function calls.
-	*/
-	static let isMacOS16OrLater: Bool = {
-		#if os(macOS)
-		if #available(macOS 16, *) {
-			return true
-		}
-
-		return false
-		#else
-		false
-		#endif
-	}()
-}
-
-typealias OS = OperatingSystem
 
 
 extension View {
@@ -4834,89 +4113,20 @@ extension WebsiteIconFetcher: WKNavigationDelegate {
 
 
 extension View {
-	/**
-	Corner radius with a custom corner style.
-	*/
-	func cornerRadius(_ radius: Double, style: RoundedCornerStyle) -> some View {
-		clipShape(.rect(cornerRadius: radius, style: style))
-	}
 
-	/**
-	Draws a border inside the view.
-	*/
-	@_disfavoredOverload
-	func border(
-		_ content: some ShapeStyle,
-		width lineWidth: Double = 1,
-		cornerRadius: Double,
-		cornerStyle: RoundedCornerStyle = .circular
-	) -> some View {
-		self.cornerRadius(cornerRadius, style: cornerStyle)
-			.overlay {
-				RoundedRectangle(cornerRadius: cornerRadius, style: cornerStyle)
-					.strokeBorder(content, lineWidth: lineWidth)
-			}
-	}
 
-	/**
-	Draws a border inside the view.
-	*/
-	func border(
-		_ color: Color,
-		width lineWidth: Double = 1,
-		cornerRadius: Double,
-		cornerStyle: RoundedCornerStyle = .circular
-	) -> some View {
-		self.cornerRadius(cornerRadius, style: cornerStyle)
-			.overlay {
-				RoundedRectangle(cornerRadius: cornerRadius, style: cornerStyle)
-					.strokeBorder(color, lineWidth: lineWidth)
-			}
-	}
 }
 
 
 extension Numeric {
-	mutating func increment(by value: Self = 1) -> Self {
-		self += value
-		return self
-	}
 
-	mutating func decrement(by value: Self = 1) -> Self {
-		self -= value
-		return self
-	}
 
-	func incremented(by value: Self = 1) -> Self {
-		self + value
-	}
 
-	func decremented(by value: Self = 1) -> Self {
-		self - value
-	}
 }
 
 
 extension SSApp {
-	private static let key = Defaults.Key("SSApp_requestReview", default: 0)
 
-	/**
-	Requests a review only after this method has been called the given amount of times.
-	*/
-	@MainActor
-	static func requestReviewAfterBeingCalledThisManyTimes(
-		_ counts: [Int],
-		_ requestReview: RequestReviewAction
-	) {
-		guard
-			!isFirstLaunch,
-			counts.contains(Defaults[key].increment())
-		else {
-			return
-		}
-
-		requestReview()
-	}
 }
 
 
@@ -4943,12 +4153,6 @@ extension DecodableDefault.Wrapper: Decodable {
 }
 
 extension KeyedDecodingContainer {
-	func decode<T>(
-		_ type: DecodableDefault.Wrapper<T>.Type,
-		forKey key: Key
-	) throws -> DecodableDefault.Wrapper<T> {
-		try decodeIfPresent(type, forKey: key) ?? .init()
-	}
 }
 
 extension DecodableDefault {
@@ -5031,19 +4235,6 @@ extension View {
 
 
 extension View {
-	/**
-	Fills the frame.
-	*/
-	func fillFrame(
-		_ axis: Axis.Set = [.horizontal, .vertical],
-		alignment: Alignment = .center
-	) -> some View {
-		frame(
-			maxWidth: axis.contains(.horizontal) ? .infinity : nil,
-			maxHeight: axis.contains(.vertical) ? .infinity : nil,
-			alignment: alignment
-		)
-	}
 }
 
 
@@ -5300,6 +4491,7 @@ extension SSEvents {
 
 			private var handlers = [UUID: Handler]()
 
+			// Installed with `NSAppleEventManager.setEventHandler`, which takes a selector. Nothing references it by name.
 			@objc
 			private func handleEvent(_ event: NSAppleEventDescriptor, withReplyEvent replyEvent: NSAppleEventDescriptor) {
 				guard
@@ -5313,6 +4505,7 @@ extension SSEvents {
 					handler(urlComponents)
 				}
 			}
+
 
 			func add(_ handler: @escaping Handler) -> UUID {
 				if handlers.isEmpty {
@@ -5491,106 +4684,15 @@ extension EnumPicker where Label == Text {
 }
 
 
-/**
-A view, which when set to hidden, will never show again.
-
-This can be useful for info boxes that the user can close and should not see again.
-*/
-struct PersistentlyHideableView<Content: View>: View {
-	static func key(id: String, idPrefix: String? = nil) -> Defaults.Key<Bool> {
-		.init("SS__\(idPrefix ?? "PersistentlyHideableView")__\(id)", default: false)
-	}
-
-	@Default private var isHidden: Bool
-	private let content: Content
-
-	init(
-		id: String,
-		idPrefix: String? = nil,
-		@ViewBuilder content: (@escaping () -> Void) -> Content
-	) {
-		self._isHidden = Default(Self.key(id: id, idPrefix: idPrefix))
-
-		var selfWorkaround: Self?
-		self.content = content {
-			withAnimation(.spring()) {
-				selfWorkaround?.isHidden = true
-			}
-		}
-		selfWorkaround = self
-	}
-
-	var body: some View {
-		if !isHidden {
-			content
-		}
-	}
-}
 
 
-/**
-Info box that is only shown until the user clicks the hide button, and then never again.
-*/
-struct HideableInfoBox: View {
-	let id: String
-	let message: String
-
-	var body: some View {
-		PersistentlyHideableView(id: id, idPrefix: "HideableInfoBox") { hide in
-			HStack {
-				CloseOrClearButton("Hide") {
-					hide()
-				}
-				Text(message)
-					.font(.system(size: NSFont.smallSystemFontSize))
-					.multilineTextAlignment(.leading)
-					.foregroundStyle(.secondary)
-			}
-			.padding(.vertical, 6)
-			.padding(.horizontal, 8)
-			.backgroundColor(.primary.opacity(0.05))
-			.clipShape(.rect(cornerRadius: 8))
-		}
-	}
-}
 
 
 extension View {
-	/**
-	Make `Button` and `Menu` be borderless and only show the icon.
-	*/
-	func iconButtonStyle() -> some View {
-		modifier(IconButtonStyle())
-	}
-}
-
-private struct IconButtonStyle: ViewModifier {
-	func body(content: Content) -> some View {
-		content
-			.buttonStyle(.borderless)
-			.menuStyle(.borderlessButton)
-			.labelStyle(.iconOnly)
-	}
 }
 
 
-/**
-An icon button used for closing or clearing something.
-*/
-struct CloseOrClearButton: View {
-	private let title: String
-	private let action: () -> Void
 
-	init(_ title: String, action: @escaping () -> Void) {
-		self.title = title
-		self.action = action
-	}
-
-	var body: some View {
-		Button(title, systemImage: "xmark.circle.fill", action: action)
-			.iconButtonStyle()
-	}
-}
 
 
 extension NSWorkspace {
@@ -5681,34 +4783,7 @@ extension View {
 
 
 extension View {
-	/**
-	Add a keyboard shortcut to a view, not a button.
-	*/
-	func onKeyboardShortcut(
-		_ shortcut: KeyboardShortcut?,
-		perform action: @escaping () -> Void
-	) -> some View {
-		overlay {
-			Button("", action: action)
-				.labelsHidden()
-				.opacity(0)
-				.frame(width: 0, height: 0)
-				.keyboardShortcut(shortcut)
-				.accessibilityHidden(true)
-		}
-	}
 
-	/**
-	Add a keyboard shortcut to a view, not a button.
-	*/
-	func onKeyboardShortcut(
-		_ key: KeyEquivalent,
-		modifiers: SwiftUI.EventModifiers = .command,
-		isEnabled: Bool = true,
-		perform action: @escaping () -> Void
-	) -> some View {
-		onKeyboardShortcut(isEnabled ? .init(key, modifiers: modifiers) : nil, perform: action)
-	}
 }
 
 

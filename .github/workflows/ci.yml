@@ -66,6 +66,24 @@ jobs:
       - name: Lint
         run: swiftlint lint --strict --reporter github-actions-logging
 
+  unused:
+    name: Unused code
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_26.app
+
+      - name: Install Periphery
+        run: brew install peripheryapp/periphery/periphery
+
+      # Config, retentions and the reasoning behind each one live in .periphery.yml.
+      # This inherited a 5,700-line utilities file copied wholesale from another
+      # project; without a gate it grows back.
+      - name: Scan
+        run: periphery scan --strict
+
   sites:
     name: Site registry
     runs-on: ubuntu-latest
