@@ -91,6 +91,8 @@ final class WallpaperScene {
 	The page lays out at full screen size even when cropped. Letting it lay out at the crop size instead would change the site's own layout, and the region the user framed would no longer be the region they get.
 	*/
 	func installContentView() {
+		window.allowsPassiveInteraction = website?.allowsInteraction ?? false
+
 		let webView = webViewController.webView
 
 		guard

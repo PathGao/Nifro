@@ -58,6 +58,7 @@ private struct AdvancedSettings: View {
 			Section {
 				BringBrowsingModeToFrontSetting()
 				Defaults.Toggle("Deactivate while on battery", key: .deactivateOnBattery)
+				ContentRulesSetting()
 				FreezeWhenCoveredSetting()
 				SolidColorUnderMenuBarSetting()
 				PlaylistIntervalSetting()
@@ -97,6 +98,15 @@ private struct SolidColorUnderMenuBarSetting: View {
 		)
 		.disabled(!extendBelowMenuBar)
 		.help("The menu bar tints itself from whatever is behind it, so extending the wallpaper up there is the only way to make it match — but then the page's own text and edges show through as clutter. This fills that strip with the page's average colour instead: same tint, no content.")
+	}
+}
+
+private struct ContentRulesSetting: View {
+	@Default(.contentRulesURL) private var url
+
+	var body: some View {
+		TextField("Content blocking rules", text: $url.withDefaultValue(""), prompt: Text("URL to a rule list"))
+			.help("Points at a WebKit content-blocking rule list somebody else maintains — for hiding cookie banners and ads. Nifro keeps no rules of its own: blocklists rot within weeks and keeping one working is a full-time job.")
 	}
 }
 

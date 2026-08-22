@@ -22,6 +22,21 @@ final class DesktopWindow: NSWindow {
 		}
 	}
 
+	/**
+	Whether the website wants clicks while the wallpaper is just a wallpaper.
+
+	Separate from `isInteractive`, which is Browsing Mode: that brings the window forward and takes focus, this only stops the window from letting clicks fall through to the desktop.
+	*/
+	var allowsPassiveInteraction = false {
+		didSet {
+			guard !isInteractive else {
+				return
+			}
+
+			ignoresMouseEvents = !allowsPassiveInteraction
+		}
+	}
+
 	var isInteractive = false {
 		didSet {
 			if isInteractive {
@@ -33,7 +48,7 @@ final class DesktopWindow: NSWindow {
 				orderBack(self)
 
 				// Even though the window is on `.desktop` level, the user would be able to interact if they hide desktop icons.
-				ignoresMouseEvents = true
+				ignoresMouseEvents = !allowsPassiveInteraction
 			}
 		}
 	}

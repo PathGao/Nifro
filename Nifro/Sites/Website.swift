@@ -39,6 +39,13 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	@DecodableDefault.Custom<Rendering> var rendering
 
 	/**
+	Whether this website can be clicked without turning on Browsing Mode.
+
+	Asked for repeatedly upstream (Plash#50 over ten comments, Plash#16). It is off by default and per website because it takes something away: a window that accepts clicks is a window your desktop icons are behind. It also keeps the page awake — a page tracking the pointer cannot be frozen or drawn from stills.
+	*/
+	@DecodableDefault.False var allowsInteraction
+
+	/**
 	The display this website actually appears on.
 	*/
 	@MainActor

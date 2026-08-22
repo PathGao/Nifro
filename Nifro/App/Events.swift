@@ -59,6 +59,15 @@ extension AppState {
 			}
 			.store(in: &cancellables)
 
+		Defaults.publisher(.contentRulesURL)
+			.sink { [self] _ in
+				Task {
+					await ContentRules.refresh()
+					recreateWebViewAndReload()
+				}
+			}
+			.store(in: &cancellables)
+
 		SSEvents.deviceDidWake
 			.sink { [self] in
 				// Some pages hold state that a reload throws away — a signed-in dashboard mid-view, a page that took a while to settle. Plash#127.

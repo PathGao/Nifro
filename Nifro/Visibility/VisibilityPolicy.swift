@@ -34,6 +34,8 @@ extension WallpaperScene {
 		Defaults[.freezeWhenCovered]
 			// A website drawn from stills is already costing nothing between refreshes.
 			&& !usesSnapshotRendering
+			// A page that accepts clicks has to be there to accept them.
+			&& !(website?.allowsInteraction ?? false)
 			&& AppState.shared.isEnabled
 			&& !AppState.shared.isBrowsingMode
 			&& website != nil

@@ -143,3 +143,15 @@ struct WebsiteRenderingSetting: View {
 		.help(rendering.explanation)
 	}
 }
+
+/**
+Whether a website can be clicked without turning on Browsing Mode.
+*/
+struct WebsiteInteractionSetting: View {
+	@Binding var allowsInteraction: Bool
+
+	var body: some View {
+		Toggle("Clickable on the desktop", isOn: $allowsInteraction)
+			.help("Lets you use the page without switching to Browsing Mode. In exchange the window stops letting clicks through, so your desktop icons are behind it, and the page has to keep rendering.")
+	}
+}

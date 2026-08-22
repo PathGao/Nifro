@@ -257,6 +257,7 @@ struct AddWebsiteScreen: View {
 		}
 		Section {
 			WebsiteRenderingSetting(rendering: website.rendering)
+			WebsiteInteractionSetting(allowsInteraction: website.allowsInteraction)
 			WebsiteDisplaySetting(display: website.display)
 			WebsiteScheduleSetting(startHour: website.startHour, endHour: website.endHour)
 			CropSetting(crop: website.crop)

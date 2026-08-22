@@ -29,6 +29,7 @@ final class WebViewController: NSViewController {
 
 		let userContentController = WKUserContentController()
 		configuration.userContentController = userContentController
+		configuration.applyContentRules()
 
 		if Defaults[.muteAudio] {
 			userContentController.muteAudio()

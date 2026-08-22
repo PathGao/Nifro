@@ -19,7 +19,10 @@ extension WallpaperScene {
 	private static let settleDelay = Duration.seconds(2)
 
 	var usesSnapshotRendering: Bool {
-		website?.rendering == .snapshot && !AppState.shared.isBrowsingMode
+		website?.rendering == .snapshot
+			&& !AppState.shared.isBrowsingMode
+			// A still cannot be clicked, so the two settings cannot both win.
+			&& !(website?.allowsInteraction ?? false)
 	}
 
 	/**
@@ -115,6 +118,8 @@ extension WallpaperScene {
 
 	/**
 	Stop drawing from stills and hand the window back to the live web view.
+
+	Does not load anything — the caller is on its way to doing that. Loading here as well would mean this and `loadWebsite` call each other, which happens to terminate today only because of a guard, and would stop terminating the moment someone moved that guard.
 	*/
 	func stopSnapshotRendering() {
 		snapshotTask?.cancel()
@@ -126,7 +131,6 @@ extension WallpaperScene {
 
 		snapshotView = nil
 		installContentView()
-		loadWebsite()
 	}
 }
 
