@@ -16,6 +16,8 @@
 		E32421562384F09D00D28A91 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E32421552384F09D00D28A91 /* Constants.swift */; };
 		E32421582384F0E600D28A91 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = E32421572384F0E600D28A91 /* Utilities.swift */; };
 		E324215A2384FBE500D28A91 /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E32421592384FBE500D28A91 /* WebViewController.swift */; };
+		4BA49C1538F7FCF45D0FC315 /* CropSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375CB4FD5AF2291C2B0D99D0 /* CropSetting.swift */; };
+		FC11C05F76D3F4DD4871E11A /* CropView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868FFECC725D3D54F254BEF5 /* CropView.swift */; };
 		7CE160D74AA8D87C9C377DCB /* FreezeWhenCovered.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FA09B9ADE2E7AF784105D7 /* FreezeWhenCovered.swift */; };
 		66A8D44DC83A0DDD8B0E89D7 /* OcclusionMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA31C0FAF40DE6D9B9300FD /* OcclusionMonitor.swift */; };
 		E3294F7E255783A800D4172F /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = E3294F7D255783A800D4172F /* Defaults */; };
@@ -74,6 +76,8 @@
 		E32421552384F09D00D28A91 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Constants.swift; sourceTree = "<group>"; usesTabs = 1; };
 		E32421572384F0E600D28A91 /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Utilities.swift; sourceTree = "<group>"; usesTabs = 1; };
 		E32421592384FBE500D28A91 /* WebViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = WebViewController.swift; sourceTree = "<group>"; usesTabs = 1; };
+		375CB4FD5AF2291C2B0D99D0 /* CropSetting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CropSetting.swift; sourceTree = "<group>"; usesTabs = 1; };
+		868FFECC725D3D54F254BEF5 /* CropView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = CropView.swift; sourceTree = "<group>"; usesTabs = 1; };
 		43FA09B9ADE2E7AF784105D7 /* FreezeWhenCovered.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = FreezeWhenCovered.swift; sourceTree = "<group>"; usesTabs = 1; };
 		2BA31C0FAF40DE6D9B9300FD /* OcclusionMonitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = OcclusionMonitor.swift; sourceTree = "<group>"; usesTabs = 1; };
 		E32AD6A926D2718B0008D900 /* Share Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Share Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -150,6 +154,8 @@
 				E32421462384EB4E00D28A91 /* DesktopWindow.swift */,
 				E30FD88823C4515200C716E9 /* SSWebView.swift */,
 				E32421592384FBE500D28A91 /* WebViewController.swift */,
+				375CB4FD5AF2291C2B0D99D0 /* CropSetting.swift */,
+				868FFECC725D3D54F254BEF5 /* CropView.swift */,
 				43FA09B9ADE2E7AF784105D7 /* FreezeWhenCovered.swift */,
 				2BA31C0FAF40DE6D9B9300FD /* OcclusionMonitor.swift */,
 				E354442E26062D6300CA060F /* WebsitesScreen.swift */,
@@ -337,6 +343,8 @@
 				E384F28024C3B37E002FD21B /* Events.swift in Sources */,
 				E384F28224C3B3CD002FD21B /* Menus.swift in Sources */,
 				E324215A2384FBE500D28A91 /* WebViewController.swift in Sources */,
+				4BA49C1538F7FCF45D0FC315 /* CropSetting.swift in Sources */,
+				FC11C05F76D3F4DD4871E11A /* CropView.swift in Sources */,
 				7CE160D74AA8D87C9C377DCB /* FreezeWhenCovered.swift in Sources */,
 				66A8D44DC83A0DDD8B0E89D7 /* OcclusionMonitor.swift in Sources */,
 				E3494C26297D38CC00983648 /* Intents.swift in Sources */,

@@ -118,6 +118,7 @@ final class AppState: ObservableObject {
 	private func didLaunch() {
 		_ = statusItemButton
 		_ = desktopWindow
+		installContentView()
 		setUpEvents()
 		showWelcomeScreenIfNeeded()
 
@@ -174,7 +175,32 @@ final class AppState: ObservableObject {
 
 	func recreateWebView() {
 		webViewController.recreateWebView()
-		desktopWindow.contentView = webViewController.webView
+		installContentView()
+	}
+
+	/**
+	Puts the web view into the window, wrapped in a crop when the current website has one.
+
+	The page lays out at full screen size even when cropped. Letting it lay out at the crop size instead would change the site's own layout, and the region the user framed would no longer be the region they get.
+	*/
+	func installContentView() {
+		let webView = webViewController.webView
+
+		guard
+			let crop = WebsitesController.shared.current?.crop,
+			let screen = desktopWindow.targetDisplay?.screen ?? .main
+		else {
+			desktopWindow.cropRect = nil
+			desktopWindow.contentView = webView
+			return
+		}
+
+		desktopWindow.cropRect = crop
+		desktopWindow.contentView = CropView(
+			content: webView,
+			crop: crop,
+			pageSize: screen.frameWithoutStatusBar.size
+		)
 	}
 
 	func recreateWebViewAndReload() {

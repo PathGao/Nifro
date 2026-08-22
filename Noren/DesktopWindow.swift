@@ -13,6 +13,15 @@ final class DesktopWindow: NSWindow {
 		}
 	}
 
+	/**
+	The region of the page being shown, if the current website is cropped.
+	*/
+	var cropRect: CGRect? {
+		didSet {
+			setFrame()
+		}
+	}
+
 	var isInteractive = false {
 		didSet {
 			if isInteractive {
@@ -72,6 +81,12 @@ final class DesktopWindow: NSWindow {
 	private func setFrame() {
 		// Ensure the screen still exists.
 		guard let screen = targetDisplay?.screen ?? .main else {
+			return
+		}
+
+		// A cropped website gets a window the size of its crop. Anything larger would keep covering the desktop it was supposed to give back.
+		if let cropRect {
+			setFrame(cropRect.screenFrame(on: screen), display: true)
 			return
 		}
 

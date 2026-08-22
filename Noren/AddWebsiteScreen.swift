@@ -253,6 +253,9 @@ struct AddWebsiteScreen: View {
 			.accessibilityLabel("JavaScript")
 			.accessibilityHint(Text(javaScriptHelpText))
 		}
+		Section {
+			CropSetting(crop: website.crop)
+		}
 		Section("Advanced") {
 			Toggle("Allow self-signed certificate", isOn: website.allowSelfSignedCertificate)
 		}

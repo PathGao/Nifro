@@ -11,6 +11,13 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	var javaScript = ""
 	@DecodableDefault.False var allowSelfSignedCertificate
 
+	/**
+	The region of the page to show, in page coordinates with the origin at the top-left. `nil` shows the whole page.
+
+	Used to cut away a site's navigation, borders and surrounding furniture and keep only the part worth looking at.
+	*/
+	var crop: CGRect?
+
 	var subtitle: String { url.humanString }
 
 	var menuTitle: String { title.isEmpty ? subtitle : title }

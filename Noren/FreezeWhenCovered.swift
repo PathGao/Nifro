@@ -1,4 +1,5 @@
 import AppKit
+import WebKit
 
 /**
 Stops rendering the wallpaper while other windows cover it.
@@ -42,7 +43,14 @@ extension AppState {
 		// Suspending is not the same as muting. Muted video still decodes every frame.
 		webView.setAllMediaPlaybackSuspended(true) {}
 
-		webView.takeSnapshot(with: nil) { [weak self] image, _ in
+		// Snapshot only what is on screen. For a cropped website the rest of the page is not being shown and would just cost memory.
+		let configuration = WKSnapshotConfiguration()
+
+		if let crop = WebsitesController.shared.current?.crop {
+			configuration.rect = crop
+		}
+
+		webView.takeSnapshot(with: configuration) { [weak self] image, _ in
 			guard let self else {
 				return
 			}
@@ -74,7 +82,7 @@ extension AppState {
 		}
 
 		frozenView = nil
-		desktopWindow.contentView = webViewController.webView
+		installContentView()
 		webViewController.webView.setAllMediaPlaybackSuspended(false) {}
 
 		if isReloadPending {
