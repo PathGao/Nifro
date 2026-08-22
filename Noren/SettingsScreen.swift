@@ -56,6 +56,7 @@ private struct AdvancedSettings: View {
 			Section {
 				BringBrowsingModeToFrontSetting()
 				Defaults.Toggle("Deactivate while on battery", key: .deactivateOnBattery)
+				FreezeWhenCoveredSetting()
 				OpenExternalLinksInBrowserSetting()
 				HideMenuBarIconSetting()
 				Defaults.Toggle("Mute audio", key: .muteAudio)
@@ -66,6 +67,16 @@ private struct AdvancedSettings: View {
 					.controlSize(.small)
 			}
 		}
+	}
+}
+
+private struct FreezeWhenCoveredSetting: View {
+	var body: some View {
+		Defaults.Toggle(
+			"Pause rendering while covered",
+			key: .freezeWhenCovered
+		)
+		.help("While other windows cover the wallpaper, Noren shows the last rendered frame instead of continuing to draw one nobody can see. Turn this off if you need the page to keep animating out of sight.")
 	}
 }
 

@@ -24,7 +24,7 @@ final class OcclusionMonitor {
 
 	Window moves and resizes by *other* apps post no notification we can observe without the Accessibility API, so the notifications below cannot be the only trigger.
 	*/
-	private static let pollInterval = 5.0
+	private static let pollInterval = 2.0
 
 	/**
 	Windows that span the screen without painting anything, and would otherwise read as full coverage.
@@ -88,9 +88,7 @@ final class OcclusionMonitor {
 		update()
 	}
 
-	deinit {
-		timer?.invalidate()
-	}
+	// No `deinit` invalidating the timer: this object lives as long as the app does, and a nonisolated deinit cannot touch a `Timer` under Swift 6 anyway. The timer block holds `self` weakly, so nothing is kept alive by it.
 
 	/**
 	Force a re-check. Cheap: one window-list snapshot and a grid fill.

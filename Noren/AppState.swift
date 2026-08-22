@@ -34,6 +34,7 @@ final class AppState: ObservableObject {
 
 			desktopWindow.isInteractive = isBrowsingMode
 			desktopWindow.alphaValue = isBrowsingMode ? 1 : Defaults[.opacity]
+			applyFreezeState()
 			resetTimer()
 		}
 	}
@@ -63,6 +64,27 @@ final class AppState: ObservableObject {
 	}
 
 	var reloadTimer: Timer?
+
+	let occlusionMonitor = OcclusionMonitor()
+
+	/**
+	Whether other windows cover the wallpaper to the point where rendering it is wasted work.
+	*/
+	var isCovered = false {
+		didSet {
+			applyFreezeState()
+		}
+	}
+
+	/**
+	The last rendered frame, standing in for the web view while frozen.
+	*/
+	var frozenView: NSImageView?
+
+	/**
+	A reload came due while frozen and still has to happen.
+	*/
+	var isReloadPending = false
 
 	var webViewError: Error? {
 		didSet {
@@ -134,6 +156,12 @@ final class AppState: ObservableObject {
 			!isBrowsingMode,
 			let reloadInterval = Defaults[.reloadInterval]
 		else {
+			return
+		}
+
+		// While frozen there is nothing to reload into. Remember that one came due so the unfreeze can settle it.
+		guard !shouldFreeze else {
+			isReloadPending = true
 			return
 		}
 

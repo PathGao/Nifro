@@ -16,6 +16,8 @@
 		E32421562384F09D00D28A91 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E32421552384F09D00D28A91 /* Constants.swift */; };
 		E32421582384F0E600D28A91 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = E32421572384F0E600D28A91 /* Utilities.swift */; };
 		E324215A2384FBE500D28A91 /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E32421592384FBE500D28A91 /* WebViewController.swift */; };
+		7CE160D74AA8D87C9C377DCB /* FreezeWhenCovered.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43FA09B9ADE2E7AF784105D7 /* FreezeWhenCovered.swift */; };
+		66A8D44DC83A0DDD8B0E89D7 /* OcclusionMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA31C0FAF40DE6D9B9300FD /* OcclusionMonitor.swift */; };
 		E3294F7E255783A800D4172F /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = E3294F7D255783A800D4172F /* Defaults */; };
 		E32AD6AE26D2718B0008D900 /* ShareController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E32AD6AD26D2718B0008D900 /* ShareController.swift */; };
 		E32AD6B626D2718B0008D900 /* Share Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E32AD6A926D2718B0008D900 /* Share Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -72,6 +74,8 @@
 		E32421552384F09D00D28A91 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Constants.swift; sourceTree = "<group>"; usesTabs = 1; };
 		E32421572384F0E600D28A91 /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Utilities.swift; sourceTree = "<group>"; usesTabs = 1; };
 		E32421592384FBE500D28A91 /* WebViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = WebViewController.swift; sourceTree = "<group>"; usesTabs = 1; };
+		43FA09B9ADE2E7AF784105D7 /* FreezeWhenCovered.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = FreezeWhenCovered.swift; sourceTree = "<group>"; usesTabs = 1; };
+		2BA31C0FAF40DE6D9B9300FD /* OcclusionMonitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = OcclusionMonitor.swift; sourceTree = "<group>"; usesTabs = 1; };
 		E32AD6A926D2718B0008D900 /* Share Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Share Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E32AD6AD26D2718B0008D900 /* ShareController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareController.swift; sourceTree = "<group>"; };
 		E32AD6B226D2718B0008D900 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -146,6 +150,8 @@
 				E32421462384EB4E00D28A91 /* DesktopWindow.swift */,
 				E30FD88823C4515200C716E9 /* SSWebView.swift */,
 				E32421592384FBE500D28A91 /* WebViewController.swift */,
+				43FA09B9ADE2E7AF784105D7 /* FreezeWhenCovered.swift */,
+				2BA31C0FAF40DE6D9B9300FD /* OcclusionMonitor.swift */,
 				E354442E26062D6300CA060F /* WebsitesScreen.swift */,
 				E32421352384E9D700D28A91 /* AddWebsiteScreen.swift */,
 				E333EB1A2385244E005FCE44 /* SettingsScreen.swift */,
@@ -331,6 +337,8 @@
 				E384F28024C3B37E002FD21B /* Events.swift in Sources */,
 				E384F28224C3B3CD002FD21B /* Menus.swift in Sources */,
 				E324215A2384FBE500D28A91 /* WebViewController.swift in Sources */,
+				7CE160D74AA8D87C9C377DCB /* FreezeWhenCovered.swift in Sources */,
+				66A8D44DC83A0DDD8B0E89D7 /* OcclusionMonitor.swift in Sources */,
 				E3494C26297D38CC00983648 /* Intents.swift in Sources */,
 				E32421342384E9D700D28A91 /* AppState.swift in Sources */,
 				E32421472384EB4E00D28A91 /* DesktopWindow.swift in Sources */,

@@ -36,6 +36,18 @@ extension AppState {
 			}
 			.store(in: &cancellables)
 
+		occlusionMonitor.isHiddenPublisher
+			.sink { [self] in
+				isCovered = $0
+			}
+			.store(in: &cancellables)
+
+		Defaults.publisher(.freezeWhenCovered, options: [])
+			.sink { [self] _ in
+				applyFreezeState()
+			}
+			.store(in: &cancellables)
+
 		SSEvents.deviceDidWake
 			.sink { [self] in
 				reloadWebsite()

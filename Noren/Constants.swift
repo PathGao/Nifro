@@ -30,6 +30,7 @@ extension Defaults.Keys {
 	static let muteAudio = Key<Bool>("muteAudio", default: true)
 
 	static let extendBelowMenuBar = Key<Bool>("extendBelowMenuBar", default: false)
+	static let freezeWhenCovered = Key<Bool>("freezeWhenCovered", default: true)
 }
 
 extension KeyboardShortcuts.Name {
