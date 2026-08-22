@@ -1,0 +1,101 @@
+name: Bug report
+description: Something in Oriel is broken or behaves unexpectedly
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Fill in what you can — a partial report is genuinely useful, and only a few fields below are required.
+
+        **One problem per issue, please.** If you have hit several, open one issue for each: problems added to the end of an existing report tend to get lost in the thread while the first one is being discussed.
+
+        If the page renders wrong but the same URL looks fine in Safari, that is still a bug worth reporting — Oriel runs the page in a `WKWebView` with a different configuration, and the difference is usually the cause.
+
+  - type: input
+    id: app-version
+    attributes:
+      label: Oriel version
+      description: Shown in the menu bar icon → About, or `Oriel → About Oriel`.
+      placeholder: "2.16.0"
+    validations:
+      required: true
+
+  - type: input
+    id: os-version
+    attributes:
+      label: macOS version
+      description: Apple menu → About This Mac. Add the chip (Apple silicon or Intel) if you know it — some `WKWebView` and display bugs only appear on one.
+      placeholder: "macOS 26.1 · M2"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install-method
+    attributes:
+      label: How did you install it?
+      description: A cask install and a build from source can fail in different ways — code signing, sandbox entitlements and screen recording permission all differ.
+      options:
+        - "Homebrew cask (brew install --cask oriel)"
+        - "DMG from GitHub Releases"
+        - "Built from source in Xcode"
+        - "Not sure"
+    validations:
+      required: true
+
+  - type: input
+    id: site-url
+    attributes:
+      label: The website URL it happens on
+      description: Paste the actual URL, not a description of it. Most rendering, reload and memory bugs are specific to one page, and the first thing anyone does is open that page. If the URL is private or local, say what kind of page it is and whether a public page reproduces it.
+      placeholder: "https://example.com/dashboard"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: custom-code
+    attributes:
+      label: Do you have custom CSS or JavaScript on that website?
+      description: Injected code is the single most common cause of "the page is blank" and "it broke after a reload". Answering this first saves a round trip.
+      options:
+        - "No, neither"
+        - "Custom CSS only"
+        - "Custom JavaScript only"
+        - "Both"
+    validations:
+      required: true
+
+  - type: textarea
+    id: custom-code-body
+    attributes:
+      label: Paste that CSS/JavaScript here
+      description: Skip if you answered "No, neither". Paste the smallest version that still reproduces it — the trimming usually finds the culprit on its own.
+      render: text
+
+  - type: textarea
+    id: what-happens
+    attributes:
+      label: What happens, and what you expected instead
+      placeholder: Paste any error text from a dialog or from Console.app here too — it is often the fastest route to the cause.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Add website …
+        2. Enable …
+        3. See …
+
+  - type: textarea
+    id: setup
+    attributes:
+      label: Anything unusual about your display setup?
+      description: Multiple displays, mixed scaling, an external monitor that sleeps, Stage Manager, a virtual desktop tool, Spaces switching. Wallpaper-window bugs are almost always about one of these.
+
+  - type: textarea
+    id: extras
+    attributes:
+      label: Screenshots, and anything else
+      description: Drag images straight into this box.

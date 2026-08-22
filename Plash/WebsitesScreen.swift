@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct WebsitesScreen: View {
-	@Environment(\.requestReview) private var requestReview
 	@Default(.websites) private var websites
 //	@State private var selection: Website.ID? // We need two states as selection must be independent from actually opening the editing because of keyboard navigation and accessibility.
 	@State private var editedWebsite: Website.ID?
@@ -70,7 +69,6 @@ struct WebsitesScreen: View {
 			.keyboardShortcut("+")
 		}
 		.onAppear {
-			SSApp.requestReviewAfterBeingCalledThisManyTimes([3, 50, 500], requestReview)
 		}
 		.windowMinimizeBehavior(.disabled)
 		.windowLevel(.floating)

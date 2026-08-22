@@ -15,7 +15,7 @@ struct SettingsScreen: View {
 		.formStyle(.grouped)
 		.frame(width: 400)
 		.fixedSize()
-		.windowLevel(.floating + 1) // To ensure it's always above the Plash browser window.
+		.windowLevel(.floating + 1) // To ensure it's always above the Noren browser window.
 	}
 }
 
@@ -75,7 +75,7 @@ private struct ShowOnAllSpacesSetting: View {
 			"Show on all spaces",
 			key: .showOnAllSpaces
 		)
-		.help("While disabled, Plash will display the website on the space that is active at launch.")
+		.help("While disabled, Noren will display the website on the space that is active at launch.")
 	}
 }
 
@@ -96,7 +96,7 @@ private struct OpenExternalLinksInBrowserSetting: View {
 			"Open external links in default browser",
 			key: .openExternalLinksInBrowser
 		)
-		.help("If a website requires login, you should disable this setting while logging in as the website might require you to navigate to a different page, and you don't want that to open in a browser instead of Plash.")
+		.help("If a website requires login, you should disable this setting while logging in as the website might require you to navigate to a different page, and you don't want that to open in a browser instead of Noren.")
 	}
 }
 
@@ -178,7 +178,7 @@ private struct HideMenuBarIconSetting: View {
 				isShowingAlert = $0
 			}
 			.alert2(
-				"If you need to access the Plash menu, launch the app again to reveal the menu bar icon for 5 seconds.",
+				"If you need to access the Noren menu, launch the app again to reveal the menu bar icon for 5 seconds.",
 				isPresented: $isShowingAlert
 			)
 	}
@@ -202,7 +202,7 @@ private struct DisplaySetting: View {
 			}
 		} label: {
 			Text("Show on")
-			Link("Multi-display support ›", destination: "https://github.com/sindresorhus/Plash/issues/2")
+			Link("Multi-display support ›", destination: "https://github.com/PathGao/noren/issues/2")
 		}
 		.task(id: chosenDisplay) {
 			guard chosenDisplay == nil else {

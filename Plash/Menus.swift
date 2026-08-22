@@ -52,21 +52,15 @@ extension AppState {
 
 		menu.addSeparator()
 
-		menu.addLinkItem("Examples", destination: "https://github.com/sindresorhus/Plash/discussions/136")
+		menu.addLinkItem("Site Gallery", destination: "https://github.com/PathGao/noren/tree/main/sites")
 
-		menu.addLinkItem("Tips", destination: "https://github.com/sindresorhus/Plash#tips")
+		menu.addLinkItem("Tips", destination: "https://github.com/PathGao/noren#tips")
 
-		menu.addLinkItem("FAQ", destination: "https://github.com/sindresorhus/Plash#faq")
+		menu.addLinkItem("FAQ", destination: "https://github.com/PathGao/noren#faq")
 
-		menu.addLinkItem("Scripting", destination: "https://github.com/sindresorhus/Plash#scripting")
+		menu.addLinkItem("Scripting", destination: "https://github.com/PathGao/noren#scripting")
 
-		menu.addLinkItem("Website", destination: "https://sindresorhus.com/plash")
-
-		menu.addSeparator()
-
-		menu.addLinkItem("Rate App", destination: "macappstore://apps.apple.com/app/id1494023538?action=write-review")
-
-		menu.addMoreAppsItem()
+		menu.addLinkItem("Website", destination: "https://github.com/PathGao/noren")
 
 		return menu
 	}
@@ -102,7 +96,7 @@ extension AppState {
 					}
 				}
 
-				menuItem.toolTip = "Updates the URL for the stored website in Plash to the current URL"
+				menuItem.toolTip = "Updates the URL for the stored website in Noren to the current URL"
 			}
 
 			menu.addCallbackItem(

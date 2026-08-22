@@ -1,0 +1,79 @@
+name: Site submission
+description: Suggest a website that works well as a wallpaper, for the sites/ directory
+labels: ["site-submission"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This is the easiest way to contribute to Oriel, and it is a real contribution: the `sites/` directory is how people find something worth putting on their desktop. You need no Swift, no Xcode and no build — just a URL and the settings you use.
+
+        **You can also skip this form and open a pull request against `sites/` directly.** Copy an existing entry, change the values, done. Either route is equally welcome; the form exists so you are not obliged to touch git.
+
+        One site per issue, please.
+
+  - type: input
+    id: url
+    attributes:
+      label: Website URL
+      description: The exact URL you put in Oriel, including any query parameters. If you use the `[[screenWidth]]` / `[[screenHeight]]` placeholders, leave them in.
+      placeholder: "https://example.com/live?theme=dark"
+    validations:
+      required: true
+
+  - type: textarea
+    id: why
+    attributes:
+      label: What does it look like, and why does it work as a wallpaper?
+      description: One or two sentences. What it shows, and what makes it survive being stared at all day — no autoplay noise, no cookie banner, readable behind desktop icons, changes over time.
+    validations:
+      required: true
+
+  - type: input
+    id: reload-interval
+    attributes:
+      label: Reload interval
+      description: What you set it to, or "none" if the page updates itself. Say why if it matters — an API quota, or content that only changes daily.
+      placeholder: "30 minutes"
+
+  - type: textarea
+    id: crop
+    attributes:
+      label: Cropping and positioning
+      description: How you got the interesting part of the page onto the screen — the CSS you used to hide chrome, shift the content, or restrict it to part of the display. Say "none needed" if the page fills the screen as-is.
+      placeholder: |
+        :root {
+            margin-left: 50% !important;
+        }
+      render: css
+
+  - type: textarea
+    id: custom-css
+    attributes:
+      label: Custom CSS
+      description: Anything beyond the cropping above — hiding a header, forcing a dark theme, enlarging a number. Leave empty if none.
+      render: css
+
+  - type: textarea
+    id: custom-js
+    attributes:
+      label: Custom JavaScript
+      description: Scroll position, dismissing a banner, clicking into a view. Leave empty if none. Please do not submit scripts that log in, carry a token, or send data anywhere — those cannot go in a shared list.
+      render: javascript
+
+  - type: dropdown
+    id: account
+    attributes:
+      label: Does it need an account or an API key?
+      description: Sites that need one are still welcome — they just get labelled so nobody is surprised.
+      options:
+        - "No, works for anyone"
+        - "Needs a free account"
+        - "Needs a paid account or an API key"
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: Screenshot of it running as your wallpaper
+      description: Drag the image straight into this box. Crop out anything private first.

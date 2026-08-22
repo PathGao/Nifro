@@ -4,7 +4,7 @@ import SwiftUI
 TODO macOS 16:
 - Use `MenuBarExtra` and afterwards switch to `@Observable`.
 - Remove `Combine` and `Defaults.publisher` usage.
-- Remove `ensureRunning()` from some intents that don't require Plash to stay open.
+- Remove `ensureRunning()` from some intents that don't require Noren to stay open.
 - Focus filter support.
 - Use SwiftUI for the desktop window and the web view.
 */
@@ -38,7 +38,6 @@ struct AppMain: App {
 			"NSApplicationCrashOnExceptions": true
 		])
 
-		SSApp.initSentry("https://4ad446a4961b44ff8dc808a08379914e@o844094.ingest.sentry.io/6140750")
 		SSApp.setUpExternalEventListeners()
 		ProcessInfo.processInfo.disableAutomaticTermination("")
 		ProcessInfo.processInfo.disableSuddenTermination()
@@ -46,7 +45,7 @@ struct AppMain: App {
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
-	// Without this, Plash quits when the screen is locked. (macOS 13.2)
+	// Without this, Noren quits when the screen is locked. (macOS 13.2)
 	func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
 
 	func applicationWillFinishLaunching(_ notification: Notification) {

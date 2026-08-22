@@ -1,0 +1,50 @@
+name: Feature request
+description: Suggest something Oriel should do
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Oriel is a fork of Plash, so a request may already have an answer upstream. A quick search of this repository's issues first is appreciated, but a duplicate is not a problem — it gets closed with a link, and that costs nobody anything.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      placeholder: What you were trying to display, or trying to stop it from doing, when you wanted this — and any workaround you settled for.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like?
+
+  - type: textarea
+    id: reference
+    attributes:
+      label: Has another app got this right?
+      description: A screenshot of it, or just a name, is the single most useful thing you can add. Requests that point at something concrete get answered against that thing; requests that describe it in prose get answered against a guess at what you meant.
+      placeholder: Drag screenshots straight into this box.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Which part of the app is this about?
+      options:
+        - "Website list and switching"
+        - "Rendering — CSS/JS injection, opacity, colour inversion, zoom"
+        - "Displays and Spaces"
+        - "Browsing mode"
+        - "Automation — URL scheme, Shortcuts, share extension"
+        - "Menu bar and settings UI"
+        - "Something else / not sure"
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Your Oriel and macOS version
+      description: Skip only if the request has nothing to do with your setup.
+      placeholder: "2.16.0 · macOS 26.1"

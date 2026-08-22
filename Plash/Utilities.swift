@@ -9,7 +9,6 @@ import CryptoKit
 import StoreKit
 import UniformTypeIdentifiers
 @preconcurrency import LinkPresentation
-import Sentry
 import Defaults
 import os
 
@@ -438,11 +437,11 @@ enum SSApp {
 
 	static func openSendFeedbackPage() {
 		let query: [String: String] = [
-			"product": name,
-			"metadata": debugInfo
+			"labels": "bug",
+			"body": "\n\n---\n\n\(debugInfo)"
 		]
 
-		URL("https://sindresorhus.com/feedback")
+		URL("https://github.com/PathGao/noren/issues/new")
 			.addingDictionaryAsQuery(query)
 			.open()
 	}
@@ -474,22 +473,6 @@ extension SSApp {
 			SSApp.activateIfAccessory()
 			EnvironmentValues().openSettings()
 		}
-	}
-}
-
-
-extension SSApp {
-	/**
-	Initialize Sentry.
-	*/
-	static func initSentry(_ dsn: String) {
-		#if !DEBUG && canImport(Sentry)
-		SentrySDK.start {
-			$0.dsn = dsn
-			$0.enableSwizzling = false
-			$0.enableAppHangTracking = false // https://github.com/getsentry/sentry-cocoa/issues/2643
-		}
-		#endif
 	}
 }
 

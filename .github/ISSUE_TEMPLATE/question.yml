@@ -1,0 +1,23 @@
+name: Question
+description: Ask how to do something in Oriel
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: Discussions are not enabled on this repository, so questions belong here as issues.
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: What are you trying to do, and what have you tried?
+      description: If it is about a specific website, include the URL and any CSS or JavaScript you have set on it.
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: macOS and Oriel version
+      placeholder: "macOS 26.1 · Oriel 2.16.0"
+    validations:
+      required: true
