@@ -8,10 +8,10 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.pathgao.noren</string>
+			<string>com.pathgao.nefro</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>noren</string>
+				<string>nefro</string>
 			</array>
 		</dict>
 	</array>

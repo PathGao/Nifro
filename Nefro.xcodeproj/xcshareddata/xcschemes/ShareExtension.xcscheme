@@ -18,7 +18,7 @@
                BlueprintIdentifier = "E32AD6A826D2718B0008D900"
                BuildableName = "Share Extension.appex"
                BlueprintName = "Share Extension"
-               ReferencedContainer = "container:Noren.xcodeproj">
+               ReferencedContainer = "container:Nefro.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -30,9 +30,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "E324212F2384E9D700D28A91"
-               BuildableName = "Noren.app"
-               BlueprintName = "Noren"
-               ReferencedContainer = "container:Noren.xcodeproj">
+               BuildableName = "Nefro.app"
+               BlueprintName = "Nefro"
+               ReferencedContainer = "container:Nefro.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -62,9 +62,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E324212F2384E9D700D28A91"
-            BuildableName = "Noren.app"
-            BlueprintName = "Noren"
-            ReferencedContainer = "container:Noren.xcodeproj">
+            BuildableName = "Nefro.app"
+            BlueprintName = "Nefro"
+            ReferencedContainer = "container:Nefro.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -81,9 +81,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "E324212F2384E9D700D28A91"
-            BuildableName = "Noren.app"
-            BlueprintName = "Noren"
-            ReferencedContainer = "container:Noren.xcodeproj">
+            BuildableName = "Nefro.app"
+            BlueprintName = "Nefro"
+            ReferencedContainer = "container:Nefro.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

@@ -10,7 +10,7 @@ extension AppState {
 	}
 
 	private func handleURLCommands(_ urlComponents: URLComponents) {
-		guard urlComponents.scheme == "noren" else {
+		guard urlComponents.scheme == "nefro" else {
 			return
 		}
 

@@ -52,15 +52,15 @@ extension AppState {
 
 		menu.addSeparator()
 
-		menu.addLinkItem("Site Gallery", destination: "https://github.com/PathGao/noren/tree/main/sites")
+		menu.addLinkItem("Site Gallery", destination: "https://github.com/PathGao/nefro/tree/main/sites")
 
-		menu.addLinkItem("Tips", destination: "https://github.com/PathGao/noren#tips")
+		menu.addLinkItem("Tips", destination: "https://github.com/PathGao/nefro#tips")
 
-		menu.addLinkItem("FAQ", destination: "https://github.com/PathGao/noren#faq")
+		menu.addLinkItem("FAQ", destination: "https://github.com/PathGao/nefro#faq")
 
-		menu.addLinkItem("Scripting", destination: "https://github.com/PathGao/noren#scripting")
+		menu.addLinkItem("Scripting", destination: "https://github.com/PathGao/nefro#scripting")
 
-		menu.addLinkItem("Website", destination: "https://github.com/PathGao/noren")
+		menu.addLinkItem("Website", destination: "https://github.com/PathGao/nefro")
 
 		return menu
 	}
@@ -96,7 +96,7 @@ extension AppState {
 					}
 				}
 
-				menuItem.toolTip = "Updates the URL for the stored website in Noren to the current URL"
+				menuItem.toolTip = "Updates the URL for the stored website in Nefro to the current URL"
 			}
 
 			menu.addCallbackItem(

@@ -6,7 +6,7 @@ struct AddWebsiteIntent: AppIntent {
 
 	static let description = IntentDescription(
 		"""
-		Adds a website to Noren.
+		Adds a website to Nefro.
 
 		Returns the added website.
 		""",
@@ -20,7 +20,7 @@ struct AddWebsiteIntent: AppIntent {
 	var title: String?
 
 	static var parameterSummary: some ParameterSummary {
-		Summary("Add \(\.$url) to Noren") {
+		Summary("Add \(\.$url) to Nefro") {
 			\.$title
 		}
 	}
@@ -36,7 +36,7 @@ struct AddWebsiteIntent: AppIntent {
 struct RemoveWebsitesIntent: AppIntent {
 	static let title: LocalizedStringResource = "Remove Websites"
 
-	static let description = IntentDescription("Removes the given websites from Noren.")
+	static let description = IntentDescription("Removes the given websites from Nefro.")
 
 	@Parameter(title: "Websites")
 	var websites: [WebsiteAppEntity]
@@ -64,7 +64,7 @@ struct RemoveWebsitesIntent: AppIntent {
 struct SetEnabledStateIntent: AppIntent {
 	static let title: LocalizedStringResource = "Set Enabled State"
 
-	static let description = IntentDescription("Sets the enabled state of Noren.")
+	static let description = IntentDescription("Sets the enabled state of Nefro.")
 
 	@Parameter(
 		title: "Action",
@@ -77,9 +77,9 @@ struct SetEnabledStateIntent: AppIntent {
 
 	static var parameterSummary: some ParameterSummary {
 		When(\.$shouldToggle, .equalTo, true) {
-			Summary("\(\.$shouldToggle) Noren")
+			Summary("\(\.$shouldToggle) Nefro")
 		} otherwise: {
-			Summary("\(\.$shouldToggle) Noren \(\.$isEnabled)")
+			Summary("\(\.$shouldToggle) Nefro \(\.$isEnabled)")
 		}
 	}
 
@@ -101,12 +101,12 @@ struct GetEnabledStateIntent: AppIntent {
 	static let title: LocalizedStringResource = "Get Enabled State"
 
 	static let description = IntentDescription(
-		"Returns whether Noren is currently enabled.",
+		"Returns whether Nefro is currently enabled.",
 		resultValueName: "Enabled State"
 	)
 
 	static var parameterSummary: some ParameterSummary {
-		Summary("Get the current enabled state of Noren")
+		Summary("Get the current enabled state of Nefro")
 	}
 
 	@MainActor
@@ -119,7 +119,7 @@ struct GetCurrentWebsiteIntent: AppIntent {
 	static let title: LocalizedStringResource = "Get Current Website"
 
 	static let description = IntentDescription(
-		"Returns the current website in Noren.",
+		"Returns the current website in Nefro.",
 		resultValueName: "Current Website"
 	)
 
@@ -133,7 +133,7 @@ struct GetCurrentWebsiteIntent: AppIntent {
 struct SetCurrentWebsiteIntent: AppIntent {
 	static let title: LocalizedStringResource = "Set Current Website"
 
-	static let description = IntentDescription("Sets the current website in Noren to the given website.")
+	static let description = IntentDescription("Sets the current website in Nefro to the given website.")
 
 	@Parameter(title: "Website")
 	var website: WebsiteAppEntity
@@ -153,7 +153,7 @@ struct SetCurrentWebsiteIntent: AppIntent {
 struct ReloadWebsiteIntent: AppIntent {
 	static let title: LocalizedStringResource = "Reload Website"
 
-	static let description = IntentDescription("Reloads the current website in Noren.")
+	static let description = IntentDescription("Reloads the current website in Nefro.")
 
 	@MainActor
 	func perform() async throws -> some IntentResult {
@@ -166,7 +166,7 @@ struct ReloadWebsiteIntent: AppIntent {
 struct NextWebsiteIntent: AppIntent {
 	static let title: LocalizedStringResource = "Switch to Next Website"
 
-	static let description = IntentDescription("Switches Noren to the next website in the list.")
+	static let description = IntentDescription("Switches Nefro to the next website in the list.")
 
 	@MainActor
 	func perform() async throws -> some IntentResult {
@@ -179,7 +179,7 @@ struct NextWebsiteIntent: AppIntent {
 struct PreviousWebsiteIntent: AppIntent {
 	static let title: LocalizedStringResource = "Switch to Previous Website"
 
-	static let description = IntentDescription("Switches Noren to the previous website in the list.")
+	static let description = IntentDescription("Switches Nefro to the previous website in the list.")
 
 	@MainActor
 	func perform() async throws -> some IntentResult {
@@ -192,7 +192,7 @@ struct PreviousWebsiteIntent: AppIntent {
 struct RandomWebsiteIntent: AppIntent {
 	static let title: LocalizedStringResource = "Switch to Random Website"
 
-	static let description = IntentDescription("Switches Noren to a random website in the list.")
+	static let description = IntentDescription("Switches Nefro to a random website in the list.")
 
 	@MainActor
 	func perform() async throws -> some IntentResult {
@@ -205,7 +205,7 @@ struct RandomWebsiteIntent: AppIntent {
 struct ToggleBrowsingModeIntent: AppIntent {
 	static let title: LocalizedStringResource = "Toggle Browsing Mode"
 
-	static let description = IntentDescription("Toggles “Browsing Mode” for Noren.")
+	static let description = IntentDescription("Toggles “Browsing Mode” for Nefro.")
 
 	@MainActor
 	func perform() async throws -> some IntentResult {
@@ -263,7 +263,7 @@ extension WebsiteAppEntity {
 extension WebsiteAppEntity {
 	struct Query: EnumerableEntityQuery, EntityStringQuery {
 		static let findIntentDescription = IntentDescription(
-			"Returns the websites in Noren.",
+			"Returns the websites in Nefro.",
 			resultValueName: "Websites"
 		)
 

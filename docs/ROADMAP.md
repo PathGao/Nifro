@@ -1,4 +1,4 @@
-# Noren 路线图与工作台账
+# Nefro 路线图与工作台账
 
 > 这份文件是这个项目的事实来源。改了范围就改这里，不要在别处并列一份。
 > 面向社区的英文版说明另写在 README，这份是我们自己的工作文档。
@@ -7,7 +7,7 @@
 
 ## 一、这是什么
 
-Noren 是 [sindresorhus/Plash](https://github.com/sindresorhus/Plash) 的开源分支。
+Nefro 是 [sindresorhus/Plash](https://github.com/sindresorhus/Plash) 的开源分支。
 
 ```
 2020-01  Plash 开源（MIT），把任意网页显示成 macOS 桌面壁纸
@@ -19,7 +19,7 @@ Noren 是 [sindresorhus/Plash](https://github.com/sindresorhus/Plash) 的开源�
    │
 2026-05-05  App Store v2.17.2，闭源状态下继续更新
    │
-2026-08     我们从 fork 里捞出闭源前最后一版 MIT 快照，分出 Noren
+2026-08     我们从 fork 里捞出闭源前最后一版 MIT 快照，分出 Nefro
 ```
 
 **基线**：`mattdanielbrown/Plash` @ `364f3e1`（2025-06-10，v2.16.0），MIT license 完整。这是上游闭源前的最终状态。
@@ -81,14 +81,14 @@ sites/ 里 24 条真实条目已经按这个维度分好类：18 条 snapshot，
 | ✅ E3 | 移除 Sentry | 原作者的 DSN，本分支不该上报。调用点 + helper + import 全清 |
 | ✅ E12 | 移除 App Store 评分弹窗与商店链接 | 不上 MAS，`id1494023538` 是原作者的 app id |
 | ✅ E13 | 移除原作者美术资产 | 图标 PNG、sketch 源文件、商店截图与文案。MIT 不覆盖美术资产。菜单栏图标换成原创占位（飘窗轮廓单色模板图） |
-| ✅ E14 | 标识符归零 | bundle id `com.pathgao.noren`，URL scheme `noren://`，版本 0.1.0，反馈入口指向本仓库 issues |
+| ✅ E14 | 标识符归零 | bundle id `com.pathgao.nefro`，URL scheme `nefro://`，版本 0.1.0，反馈入口指向本仓库 issues |
 | ✅ C1 | issue forms + PR 模板 | 参照 Markpad：全 `.yml` forms，英文，每个字段解释为什么问。含 **site submission** 类型 |
 | ✅ C2 | CONTRIBUTING | 含与上游 Plash 关系的说明：独立分支，不接受任何冒充 Plash 或复用其商标图标的贡献 |
 | ✅ C3 | sites/ 清单 | 24 条真实条目 + JSON Schema + 贡献说明。数据来自上游 discussion #136 五年积累 |
 | ✅ E9 | release workflow + 签名方案 | 参照 AeroSpace。见第八节 |
 | ✅ E10 | Homebrew cask | 仓库内 `Casks/`，CI 回写版本与 sha256，带 livecheck |
 
-兼容性决定：注入的 CSS 类名**新旧并存** —— `is-noren-app` + `is-plash-app`，`noren-is-browsing-mode` + `plash-is-browsing-mode`。社区五年攒下的 Plash 自定义样式片段可以直接用，这是我们最不该丢的资产。
+兼容性决定：注入的 CSS 类名**新旧并存** —— `is-nefro-app` + `is-plash-app`，`nefro-is-browsing-mode` + `plash-is-browsing-mode`。社区五年攒下的 Plash 自定义样式片段可以直接用，这是我们最不该丢的资产。
 
 ---
 
@@ -185,7 +185,7 @@ AppState.shared                        AppState
 | **E1** | Swift 6 语言模式 | pbxproj 已改 `SWIFT_VERSION = 6.0`，**迁移错误还没清** |
 | **E2** | 部署目标 macOS 26.0 | 已改（上游是 15.2） |
 | **E4** | 清掉 `DEVELOPMENT_TEAM = YG56YK5RN5` | 待做。那是上游作者的 team id |
-| **E5** | target / 目录 / xcodeproj 改名 Plash → Noren | 待做 |
+| **E5** | target / 目录 / xcodeproj 改名 Plash → Nefro | 待做 |
 | **E6** | 拆 `Utilities.swift` | 待做。5745 行，全文只有 2 个 `// MARK`。这是新贡献者最大的一堵墙 |
 | **E7** | 测试 target | 待做。上游 0 个 |
 | **E8** | CI build workflow | 待做 |
@@ -199,10 +199,10 @@ E6 和 E7 的优先级不低于任何功能。上游 5 年零贡献不是社区�
 
 参照 [AeroSpace](https://github.com/nikitabobko/AeroSpace) 的实际做法调查结果：
 
-| | AeroSpace | Noren | 理由 |
+| | AeroSpace | Nefro | 理由 |
 |---|---|---|---|
 | 签名 | 本机自签名证书 | Developer ID / ad-hoc | 自签名对 Gatekeeper 和 ad-hoc 完全等价，白搭一步 |
-| 公证 | 不做 | 有账号就做 | Noren 是沙盒 GUI app，用户不像平铺 WM 用户那样习惯敲 `xattr` |
+| 公证 | 不做 | 有账号就做 | Nefro 是沙盒 GUI app，用户不像平铺 WM 用户那样习惯敲 `xattr` |
 | 发布 | 本机脚本 + 人工拖 zip | tag 触发 Actions | 本机发版不可复现 |
 | cask | 单独 tap 仓库 | 本仓库 `Casks/`，CI 回写 | 少维护一个仓库 |
 | livecheck | 无 | 有 | 将来投 homebrew-cask 主仓也用得上 |

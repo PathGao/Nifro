@@ -108,15 +108,15 @@ final class OcclusionMonitor {
 			return false
 		}
 
-		return uncoveredFraction(of: region) < Self.visibleFractionThreshold
+		return currentUncoveredFraction(of: region) < Self.visibleFractionThreshold
 	}
 
 	/**
 	Fraction of `region` not covered by any opaque window sitting above the desktop.
 
-	`region` is in AppKit screen coordinates (origin bottom-left); the window list reports Core Graphics coordinates (origin top-left), so one of them has to be flipped. We flip the windows.
+	`region` is in AppKit screen coordinates (origin bottom-left); the window list reports Core Graphics coordinates (origin top-left), so the windows get flipped before they are compared.
 	*/
-	private func uncoveredFraction(of region: CGRect) -> Double {
+	private func currentUncoveredFraction(of region: CGRect) -> Double {
 		guard
 			let windowList = CGWindowListCopyWindowInfo([.optionOnScreenOnly], kCGNullWindowID) as? [[String: Any]]
 		else {
@@ -125,11 +125,9 @@ final class OcclusionMonitor {
 		}
 
 		let ownPID = ProcessInfo.processInfo.processIdentifier
-		let globalHeight = CGRect(coordinates: NSScreen.screens.map(\.frame)).maxY
+		let arrangementHeight = NSScreen.screens.map(\.frame).reduce(CGRect.null) { $0.union($1) }.maxY
 
-		var grid = [Bool](repeating: false, count: Self.gridColumns * Self.gridRows)
-		let cellWidth = region.width / Double(Self.gridColumns)
-		let cellHeight = region.height / Double(Self.gridRows)
+		var coveringRects = [CGRect]()
 
 		for window in windowList {
 			guard
@@ -148,46 +146,9 @@ final class OcclusionMonitor {
 				continue
 			}
 
-			// Core Graphics measures down from the top of the global display arrangement; AppKit measures up.
-			let flipped = CGRect(
-				x: cgBounds.minX,
-				y: globalHeight - cgBounds.maxY,
-				width: cgBounds.width,
-				height: cgBounds.height
-			)
-
-			let overlap = flipped.intersection(region)
-
-			guard !overlap.isNull, !overlap.isEmpty else {
-				continue
-			}
-
-			let firstColumn = max(0, Int(((overlap.minX - region.minX) / cellWidth).rounded(.down)))
-			let lastColumn = min(Self.gridColumns - 1, Int(((overlap.maxX - region.minX) / cellWidth).rounded(.up)) - 1)
-			let firstRow = max(0, Int(((overlap.minY - region.minY) / cellHeight).rounded(.down)))
-			let lastRow = min(Self.gridRows - 1, Int(((overlap.maxY - region.minY) / cellHeight).rounded(.up)) - 1)
-
-			guard firstColumn <= lastColumn, firstRow <= lastRow else {
-				continue
-			}
-
-			for row in firstRow...lastRow {
-				for column in firstColumn...lastColumn {
-					grid[row * Self.gridColumns + column] = true
-				}
-			}
+			coveringRects.append(flippingFromWindowServer(cgBounds, arrangementHeight: arrangementHeight))
 		}
 
-		let coveredCells = grid.count { $0 }
-		return 1 - (Double(coveredCells) / Double(grid.count))
-	}
-}
-
-extension CGRect {
-	/**
-	The smallest rectangle containing all the given rectangles.
-	*/
-	fileprivate init(coordinates rects: [CGRect]) {
-		self = rects.reduce(.null) { $0.union($1) }
+		return uncoveredFraction(of: region, covering: coveringRects)
 	}
 }

@@ -59,7 +59,7 @@ final class DesktopWindow: NSWindow {
 		self.collectionBehavior = [
 			.stationary,
 			.ignoresCycle,
-			.fullScreenNone // This ensures that if Noren is launched while an app is fullscreen (fullscreen is a separate space), it will not show behind that app and instead show in the primary space.
+			.fullScreenNone // This ensures that if Nefro is launched while an app is fullscreen (fullscreen is a separate space), it will not show behind that app and instead show in the primary space.
 		]
 
 		disableSnapshotRestoration()
@@ -86,7 +86,7 @@ final class DesktopWindow: NSWindow {
 
 		// A cropped website gets a window the size of its crop. Anything larger would keep covering the desktop it was supposed to give back.
 		if let cropRect {
-			setFrame(cropRect.screenFrame(on: screen), display: true)
+			setFrame(cropRect.screenFrame(inScreen: screen.frame), display: true)
 			return
 		}
 

@@ -23,15 +23,15 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .xcode-build/SourcePackages
-          key: spm-${{ hashFiles('Noren.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+          key: spm-${{ hashFiles('Nefro.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
           restore-keys: spm-
 
       # Signing needs a certificate we deliberately do not put in CI. Release signing lives in release.yml.
       - name: Build
         run: |
           xcodebuild build \
-            -project Noren.xcodeproj \
-            -scheme Noren \
+            -project Nefro.xcodeproj \
+            -scheme Nefro \
             -configuration Debug \
             -destination 'platform=macOS' \
             -derivedDataPath .xcode-build \
@@ -39,6 +39,19 @@ jobs:
             | xcbeautify --renderer github-actions
         env:
           NSUnbufferedIO: YES
+
+  test:
+    name: Geometry tests
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_26.app
+
+      # The crop and coverage maths are pure functions, so they run without an app bundle or a window server.
+      - name: Test
+        run: swift test
 
   lint:
     name: SwiftLint

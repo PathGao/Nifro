@@ -10,7 +10,7 @@ final class ShareController: ExtensionController {
 		}
 
 		var components = URLComponents()
-		components.scheme = "noren"
+		components.scheme = "nefro"
 		components.path = "add"
 
 		components.queryItems = [

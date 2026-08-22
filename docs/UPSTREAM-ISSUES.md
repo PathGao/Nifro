@@ -6,7 +6,7 @@
 **数据来源**：`sindresorhus/Plash` issue 追踪器（源码已删，issue 还在）。
 **抓取方式**：GitHub REST API 匿名读取 `/issues?state=open`（35 条正文、标签、reaction）+ 每条的 `/comments`（21 条有评论的全部 90 条评论）。评论数为 0 的也读了正文。
 **抓取时间**：2026-08-23。
-**实现成本判据**：基线 `mattdanielbrown/Plash @ 364f3e1`（v2.16.0）在 `Noren/` 下的当前代码。
+**实现成本判据**：基线 `mattdanielbrown/Plash @ 364f3e1`（v2.16.0）在 `Nefro/` 下的当前代码。
 
 成本口径：**S** = 一个设置项 / 几十行；**M** = 一个新文件或改一处结构；**L** = 需要 R1 场景化或 S1 验证这类前置改造。
 
@@ -130,7 +130,7 @@ F10 / F11 各自独立的真 bug ── #173 / #169
 
 配套要改的还有 `AppState.isEnabled` 的 else 分支（现在是 `loadURL("about:blank")` + `orderOut`）和 `Events.swift` 里唤醒无条件 reload —— 后者应该出一个"唤醒时重新加载"的开关，默认可以保持现状。
 
-成本 S–M。收益：三条 issue，且 #127 的抱怨对"用 Noren 显示带状态的页面"这类用户是致命的。
+成本 S–M。收益：三条 issue，且 #127 的抱怨对"用 Nefro 显示带状态的页面"这类用户是致命的。
 
 ### F1 / F2 裁切 —— #162 #93
 
@@ -156,13 +156,13 @@ F10 / F11 各自独立的真 bug ── #173 / #169
 
 ### F14 进入浏览模式时真正取得焦点 —— #114
 
-用户用 Noren 写东西，快捷键切到浏览模式后还得手动点一下窗口才能打字，因为 JS 的 `onfocus`/`onblur` 也不触发。他的替代方案是拿 Alfred + AppleScript 合成一次鼠标点击。
+用户用 Nefro 写东西，快捷键切到浏览模式后还得手动点一下窗口才能打字，因为 JS 的 `onfocus`/`onblur` 也不触发。他的替代方案是拿 Alfred + AppleScript 合成一次鼠标点击。
 
 代码里 `DesktopWindow.isInteractive = true` 时已经 `makeKeyAndOrderFront(self)`，但 app 是 accessory 型，没有 `SSApp.forceActivate()` 就拿不到真正的键盘焦点。成本 S。
 
 ### F13 修饰键在默认浏览器打开链接 —— #140
 
-用户用 Noren 显示监控面板，站内链接总在 Noren 里打开，他想按住 shift+cmd 点一下丢给真浏览器排查。
+用户用 Nefro 显示监控面板，站内链接总在 Nefro 里打开，他想按住 shift+cmd 点一下丢给真浏览器排查。
 
 `WebViewController.decidePolicyFor` 里现成的判断是 `Defaults[.openExternalLinksInBrowser] && 跨 host`；加一个"或者当前按着某修饰键"即可。代码里已经有读修饰键的先例（`NSEvent.modifiers != .option`）。成本 S，约十行。只在浏览模式下有意义。
 
@@ -191,7 +191,7 @@ F10 / F11 各自独立的真 bug ── #173 / #169
 | **#158 geolocation** | 作者本人开的 issue，他自己判断"要手动实现，不打算做，希望 Apple 原生支持"（WWDC24 之后并没有）。可行路径是在 `.page` world 注入一个 `navigator.geolocation` 的 shim，后面接 CoreLocation。**但这要给一个 24 小时渲染任意用户 URL 的进程加定位权限**，和 #125 是同一套论证，区别只在于粗定位一次性 vs 实时视频流。要做的话必须默认关 + 按站点授权。1 人附议。 |
 | **#164 点链接就地跳转** | 需要更多信息。诉求写于 2024 年（2.x），而当前代码里：`target=_blank` 只在浏览模式下才开新窗口（`createWebViewWith` 里 `targetFrame == nil` 就地加载），前进后退手势也已经开着（`allowsBackForwardNavigationGestures = true`）。**缺的信息**：他遇到的到底是弹窗口还是别的。要么等复现，要么按"总是在同一视图内导航"做成一个开关（S）。 |
 | **#132 页面声音响不了** | 需要更多信息。标题写"Force mute"，正文要的其实相反：他关掉了 Mute audio，页面里的 Web Audio (`AudioContext` + `Audio().play()`) 还是不响。我们的 `muteAudio()` 只处理 `<audio>/<video>` 元素，管不到 AudioContext，所以静音开关不是原因；更可能是 WebKit 的自动播放策略要 user gesture，而桌面层根本没有 gesture。**缺的信息**：在我们基线上设 `mediaTypesRequiringUserActionForPlayback = []` 之后能不能解封 AudioContext。如果只能靠私有的 `_WKWebsiteAutoplayPolicy`，这条直接转 X 系列。 |
-| **#79 301 跳转的外链** | 真 bug。`openExternalLinksInBrowser` 的判断只在 `navigationType == .linkActivated` 那一刻比对 host，服务端 301 到站外时导航类型已经是 `.other`，于是跳转结果留在了 Noren 里。修法是记住"这次导航是用户点出来的"，在 `didReceiveServerRedirect` 或响应阶段再比一次 host。成本 M（要在导航生命周期里带状态），收益中等偏小，排在 F12 后面 —— 两者都在动导航链路，一起改更省。 |
+| **#79 301 跳转的外链** | 真 bug。`openExternalLinksInBrowser` 的判断只在 `navigationType == .linkActivated` 那一刻比对 host，服务端 301 到站外时导航类型已经是 `.other`，于是跳转结果留在了 Nefro 里。修法是记住"这次导航是用户点出来的"，在 `didReceiveServerRedirect` 或响应阶段再比一次 host。成本 M（要在导航生命周期里带状态），收益中等偏小，排在 F12 后面 —— 两者都在动导航链路，一起改更省。 |
 | **#50 + #16 桌面层有限交互** | 合并成一条（F15）。#50 十条评论，用户想要"桌面上的可交互小组件"（计算器、按钮、计时器）；#16 想要跟随鼠标的粒子/流体背景（+1×2、hooray×3）。<br>**上游已经解掉了一半**：2020 年那次提交让浏览模式不再盖住所有窗口，我们基线里就是 `bringBrowsingModeToFront` 默认关；而 `isBrowsingMode` 本身是持久化的 Default，所以"启动即浏览模式"这个诉求（评论里 imaverage 提的）今天就成立。剩下真正没解的是"只吃点击、不吃选择和滚动"。<br>#16 的实现比看起来便宜：`NSEvent.addGlobalMonitorForEvents(matching: .mouseMoved)` 不需要辅助功能权限，拿到坐标合成 JS 事件即可。**但这跟整个 P 系列的立场冲突** —— 一个 60Hz 的全局监听 + 每次 `evaluateJavaScript`。要做就必须按站点开、带节流，并且在文档里写清它的功耗代价。 |
 | **#37 cookie 横幅 / 广告拦截** | 作者自己开的，自己标注"工作量巨大，不会很快做"。全量自维护过滤规则确实不该碰。但中间路线便宜：`WKContentRuleListStore.compileContentRuleList` 是现成 API，我们只提供**加载入口**（内置一小份 cookie 横幅规则 + 允许用户指向自己的规则 JSON），不承诺跟进任何上游规则源。成本 M。收益真实：cookie 横幅确实会毁掉一整块壁纸。 |
 
@@ -206,7 +206,7 @@ F10 / F11 各自独立的真 bug ── #173 / #169
 **技术上做得到**（`navigator.mediaDevices` 之所以 undefined 就是缺 entitlement），所以拒的理由不是难度：
 
 1. **entitlement 是进程级的，不是按站点的。** 一旦签上相机权限，这个 24 小时渲染**用户任意输入的 URL** 的进程就永久具备了取摄像头的能力。macOS 的授权弹窗只是第二道闸，第一道闸——"这个 app 压根不该有这个能力"——是我们自己放弃的。壁纸 app 的 entitlement 列表越短越好，这是用户能核查的少数几件事之一。
-2. **违背定位。** 它是壁纸，不是视频采集软件。一个 3 人规模的诉求换来所有用户在"隐私与安全"里看到 Noren 申请摄像头。
+2. **违背定位。** 它是壁纸，不是视频采集软件。一个 3 人规模的诉求换来所有用户在"隐私与安全"里看到 Nefro 申请摄像头。
 3. **有更合适的现成工具。** 采集卡/多路视频合成走 OBS（虚拟摄像头 / 全屏投影 + 置底窗口），监控墙走专门的 NVR 客户端。这些工具本来就在做这件事，做得比我们好。
 
 **建议进 X 系列（X7）**，连同"屏幕采集 / `getDisplayMedia`"一起写死，省得以后再讨论。

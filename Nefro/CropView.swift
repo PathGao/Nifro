@@ -43,26 +43,6 @@ final class CropView: NSView {
 	}
 
 	private func layOutContent() {
-		// Page coordinates run down from the top, view coordinates run up from the bottom, so the vertical offset is measured from the bottom edge of the crop to the bottom edge of the page.
-		content.frame = CGRect(
-			x: -crop.minX,
-			y: crop.maxY - pageSize.height,
-			width: pageSize.width,
-			height: pageSize.height
-		)
-	}
-}
-
-extension CGRect {
-	/**
-	Where this page-coordinate crop lands on `screen`, so the framed region stays put and everything around it simply disappears.
-	*/
-	func screenFrame(on screen: NSScreen) -> CGRect {
-		CGRect(
-			x: screen.frame.minX + minX,
-			y: screen.frame.maxY - maxY,
-			width: width,
-			height: height
-		)
+		content.frame = crop.contentFrame(pageSize: pageSize)
 	}
 }

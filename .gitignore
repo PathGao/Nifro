@@ -4,3 +4,4 @@ xcuserdata/
 .xcode-build/
 .release/
 .venv/
+.build/

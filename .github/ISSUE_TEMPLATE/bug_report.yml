@@ -1,5 +1,5 @@
 name: Bug report
-description: Something in Noren is broken or behaves unexpectedly
+description: Something in Nefro is broken or behaves unexpectedly
 labels: ["bug"]
 body:
   - type: markdown
@@ -9,13 +9,13 @@ body:
 
         **One problem per issue, please.** If you have hit several, open one issue for each: problems added to the end of an existing report tend to get lost in the thread while the first one is being discussed.
 
-        If the page renders wrong but the same URL looks fine in Safari, that is still a bug worth reporting — Noren runs the page in a `WKWebView` with a different configuration, and the difference is usually the cause.
+        If the page renders wrong but the same URL looks fine in Safari, that is still a bug worth reporting — Nefro runs the page in a `WKWebView` with a different configuration, and the difference is usually the cause.
 
   - type: input
     id: app-version
     attributes:
-      label: Noren version
-      description: Shown in the menu bar icon → About, or `Noren → About Noren`.
+      label: Nefro version
+      description: Shown in the menu bar icon → About, or `Nefro → About Nefro`.
       placeholder: "2.16.0"
     validations:
       required: true
@@ -35,7 +35,7 @@ body:
       label: How did you install it?
       description: A cask install and a build from source can fail in different ways — code signing, sandbox entitlements and screen recording permission all differ.
       options:
-        - "Homebrew cask (brew install --cask noren)"
+        - "Homebrew cask (brew install --cask nefro)"
         - "DMG from GitHub Releases"
         - "Built from source in Xcode"
         - "Not sure"
