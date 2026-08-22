@@ -284,3 +284,32 @@ private struct ClearWebsiteDataSetting: View {
 #Preview {
 	SettingsScreen()
 }
+
+enum SettingsTabType {
+	case general
+	case advanced
+	case shortcuts
+	case about
+
+	fileprivate var label: some View {
+		switch self {
+		case .general:
+			Label("General", systemImage: "gearshape")
+		case .advanced:
+			Label("Advanced", systemImage: "gearshape.2")
+		case .shortcuts:
+			Label("Shortcuts", systemImage: "command")
+		case .about:
+			Label("About", systemImage: "info.circle")
+		}
+	}
+}
+
+extension View {
+	/**
+	Make the view a settings tab of the given type.
+	*/
+	func settingsTabItem(_ type: SettingsTabType) -> some View {
+		tabItem { type.label }
+	}
+}
