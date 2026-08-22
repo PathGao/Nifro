@@ -2366,6 +2366,21 @@ extension WKUserContentController {
 				element.muted = true;
 			}
 
+			// A full rescan is still needed: players reuse and reparent their media elements, so a
+			// node that was muted on insertion can come back unmuted. But a live stream's chat
+			// fires mutations continuously, and rescanning the document on every batch made the
+			// muting cost scale with the chat rather than with the video. One rescan per frame is
+			// enough, and it collapses a burst into a single pass.
+			let rescanQueued = false;
+
+			const rescan = () => {
+				rescanQueued = false;
+
+				for (const element of document.querySelectorAll(selector)) {
+					element.muted = true;
+				}
+			};
+
 			const observer = new MutationObserver(mutations => {
 				for (const mutation of mutations) {
 					for (const node of mutation.addedNodes) {
@@ -2379,12 +2394,9 @@ extension WKUserContentController {
 					}
 				}
 
-				// TODO: Find a way to avoid this.
-				// This is quite inefficient, but it's needed to be able to work, for example, when browsing videos on YouTube.
-				if (mutations.length > 0) {
-					for (const element of document.querySelectorAll(selector)) {
-						element.muted = true;
-					}
+				if (!rescanQueued) {
+					rescanQueued = true;
+					requestAnimationFrame(rescan);
 				}
 			});
 

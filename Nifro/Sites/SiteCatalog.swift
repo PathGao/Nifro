@@ -27,6 +27,9 @@ enum SiteCatalog {
 		let javaScript: String?
 		let requiresLogin: Bool
 
+		/// Whether the entry is one you would want to hear, which for a wallpaper is the exception.
+		let playsSound: Bool
+
 		var id: String { url }
 
 		var parsedURL: URL? { URL(string: url) }
@@ -80,6 +83,7 @@ extension SiteCatalog.Entry {
 		binding.wrappedValue.javaScript = javaScript ?? ""
 		binding.wrappedValue.crop = crop
 		binding.wrappedValue.rendering = isLive ? .live : .snapshot
+		binding.wrappedValue.audio = playsSound ? .unmuted : .muted
 
 		// The app has no per-site reload interval yet, so the catalogue's value goes to the global setting only when nothing has been chosen. That beats ignoring it, and beats overriding a choice the user made.
 		if let reloadInterval, Defaults[.reloadInterval] == nil {

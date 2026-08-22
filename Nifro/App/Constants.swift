@@ -32,7 +32,6 @@ extension Defaults.Keys {
 	static let showOnAllSpaces = Key<Bool>("showOnAllSpaces", default: false)
 	static let bringBrowsingModeToFront = Key<Bool>("bringBrowsingModeToFront", default: false)
 	static let openExternalLinksInBrowser = Key<Bool>("openExternalLinksInBrowser", default: false)
-	static let muteAudio = Key<Bool>("muteAudio", default: true)
 
 	static let extendBelowMenuBar = Key<Bool>("extendBelowMenuBar", default: false)
 	static let freezeWhenCovered = Key<Bool>("freezeWhenCovered", default: true)

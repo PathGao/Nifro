@@ -31,9 +31,7 @@ final class WebViewController: NSViewController {
 		configuration.userContentController = userContentController
 		configuration.applyContentRules()
 
-		if Defaults[.muteAudio] {
-			userContentController.muteAudio()
-		}
+
 
 		let preferences = WKPreferences()
 		preferences.javaScriptCanOpenWindowsAutomatically = false
@@ -63,6 +61,10 @@ final class WebViewController: NSViewController {
 		userContentController.addJavaScript("document.documentElement.classList.add('is-nifro-app', 'is-plash-app')")
 
 		if let website = WebsitesController.shared.current {
+			if website.audio == .muted {
+				userContentController.muteAudio()
+			}
+
 			if website.invertColors2 != .never {
 				userContentController.invertColors(
 					onlyWhenInDarkMode: website.invertColors2 == .darkMode

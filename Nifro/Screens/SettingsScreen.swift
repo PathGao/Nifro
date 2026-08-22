@@ -67,7 +67,6 @@ private struct AdvancedSettings: View {
 				DimWhenUnfocusedSetting()
 				OpenExternalLinksInBrowserSetting()
 				HideMenuBarIconSetting()
-				Defaults.Toggle("Mute audio", key: .muteAudio)
 			}
 			Section {} // Padding
 			Section {} footer: {

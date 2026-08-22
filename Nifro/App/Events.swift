@@ -178,13 +178,6 @@ extension AppState {
 			}
 			.store(in: &cancellables)
 
-		Defaults.publisher(.muteAudio, options: [])
-			.receive(on: DispatchQueue.main)
-			.sink { [self] _ in
-				recreateWebViewAndReload()
-			}
-			.store(in: &cancellables)
-
 		KeyboardShortcuts.onKeyUp(for: .toggleBrowsingMode) {
 			Defaults[.isBrowsingMode].toggle()
 		}

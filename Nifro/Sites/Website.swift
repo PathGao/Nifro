@@ -39,6 +39,14 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	@DecodableDefault.Custom<Rendering> var rendering
 
 	/**
+	Whether this website is allowed to make noise.
+
+	Per website because the answer is a property of the page. A clock should never make a sound; a
+	live stream is pointless without one. A single app-wide switch forces the same answer on both.
+	*/
+	@DecodableDefault.Custom<Audio> var audio
+
+	/**
 	Whether this website can be clicked without turning on Browsing Mode.
 
 	Asked for repeatedly upstream (Plash#50 over ten comments, Plash#16). Off by default and per website, because it costs something. A window that accepts clicks puts your desktop icons behind it, and it keeps the page awake. A page tracking the pointer cannot be frozen or drawn from stills.
@@ -127,6 +135,28 @@ extension Website {
 
 extension Website.InvertColors: DecodableDefault.Source {
 	static let defaultValue = never
+}
+
+extension Website {
+	enum Audio: String, CaseIterable, Codable, Sendable {
+		case muted
+		case unmuted
+
+		var title: String {
+			switch self {
+			case .muted:
+				"Muted"
+			case .unmuted:
+				"Plays sound"
+			}
+		}
+	}
+}
+
+extension Website.Audio: DecodableDefault.Source {
+	// Every website that existed before this setting was silent, and a wallpaper that starts talking
+	// after an update is a bad surprise.
+	static let defaultValue = muted
 }
 
 extension Website.Rendering: DecodableDefault.Source {

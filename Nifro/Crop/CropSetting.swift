@@ -155,3 +155,19 @@ struct WebsiteInteractionSetting: View {
 			.help("Lets you use the page without switching to Browsing Mode. The window then stops letting clicks through, so your desktop icons sit behind it, and the page has to keep rendering.")
 	}
 }
+
+/**
+Whether a website is allowed to make noise.
+*/
+struct WebsiteAudioSetting: View {
+	@Binding var audio: Website.Audio
+
+	var body: some View {
+		Picker("Audio", selection: $audio) {
+			ForEach(Website.Audio.allCases, id: \.self) { option in
+				Text(option.title).tag(option)
+			}
+		}
+		.help("Muting is done by keeping every audio and video element on the page muted. It covers media elements, not sound a page generates with the Web Audio API.")
+	}
+}

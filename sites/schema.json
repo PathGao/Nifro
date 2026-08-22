@@ -4,7 +4,14 @@
   "title": "Nifro site entry",
   "description": "One curated website that works well as a desktop wallpaper. One YAML file per site in sites/.",
   "type": "object",
-  "required": ["name", "url", "description", "tags", "backend", "source"],
+  "required": [
+    "name",
+    "url",
+    "description",
+    "tags",
+    "backend",
+    "source"
+  ],
   "additionalProperties": false,
   "properties": {
     "name": {
@@ -50,7 +57,10 @@
     },
     "backend": {
       "type": "string",
-      "enum": ["snapshot", "live"],
+      "enum": [
+        "snapshot",
+        "live"
+      ],
       "description": "snapshot: the page changes slowly, so Nifro can screenshot it periodically and suspend the web process — power cost near zero. live: the page animates or is meant to be interacted with, so it must keep rendering. Default to snapshot; only use live when animation or interaction is the point."
     },
     "backendNote": {
@@ -66,13 +76,30 @@
     "crop": {
       "type": "object",
       "description": "Crop the rendered page to a rectangle, in CSS pixels from the top-left. Use it to cut away nav bars, borders and chrome.",
-      "required": ["x", "y", "width", "height"],
+      "required": [
+        "x",
+        "y",
+        "width",
+        "height"
+      ],
       "additionalProperties": false,
       "properties": {
-        "x": {"type": "integer", "minimum": 0},
-        "y": {"type": "integer", "minimum": 0},
-        "width": {"type": "integer", "minimum": 1},
-        "height": {"type": "integer", "minimum": 1}
+        "x": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "y": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        }
       }
     },
     "css": {
@@ -96,6 +123,14 @@
       "type": "string",
       "minLength": 1,
       "description": "Where this entry came from. Credit the person and link the upstream discussion or issue if you adapted their CSS/JS."
+    },
+    "audio": {
+      "type": "string",
+      "enum": [
+        "muted",
+        "unmuted"
+      ],
+      "description": "Whether the site should be allowed to make sound. Omit for muted, which is what a wallpaper wants unless it is a stream."
     }
   }
 }
