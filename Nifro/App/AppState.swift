@@ -196,12 +196,6 @@ final class AppState: ObservableObject {
 		}
 	}
 
-	func recreateWebView() {
-		for scene in scenes {
-			scene.recreateWebView()
-		}
-	}
-
 	func installContentView() {
 		for scene in scenes {
 			scene.installContentView()
@@ -220,12 +214,6 @@ final class AppState: ObservableObject {
 	func reloadWebsite() {
 		for scene in scenes {
 			scene.reload()
-		}
-	}
-
-	func loadUserURL() {
-		for scene in scenes {
-			scene.loadWebsite()
 		}
 	}
 

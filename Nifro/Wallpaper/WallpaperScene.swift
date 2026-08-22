@@ -123,10 +123,6 @@ final class WallpaperScene {
 		webViewController.adopt(replacement)
 	}
 
-	func makeReplacementWebView() -> SSWebView {
-		webViewController.makeReplacementWebView()
-	}
-
 	/**
 	Drop the page and the process behind it.
 	*/

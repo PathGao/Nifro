@@ -65,7 +65,7 @@ sites/ 里 24 条真实条目已经按这个维度分好类：18 条 snapshot，
 ## 三、状态总览
 
 ```
-本轮 commit 数        5
+本轮 commit 数        24
 构建状态              BUILD SUCCEEDED（Swift 6 语言模式，macOS 15.0，Debug/Release）
 测试                  15 条几何断言，swift test 全绿，变异验证过确实守得住
 上游 issue 分诊       35 条 → DO 17 / LATER 13 / REJECT 1 / OBSOLETE 4
@@ -112,7 +112,7 @@ sites/ 里 24 条真实条目已经按这个维度分好类：18 条 snapshot，
 | **P2** | 遮挡时挂起媒体 | ✅ 已实现 | `setAllMediaPlaybackSuspended(true)`。上游只有 `muteAudio`，静音不省 CPU，视频照解码 |
 | **P3** | 遮挡时停 reload timer | ✅ 已实现 | 恢复可见时若已过期立刻补一次 |
 | **P4** | 遮挡时换成快照层 | ✅ 已实现 | webView 摘出视图树，WebKit 才会真的停渲染。**注意**：靠 CSS 动效/滤镜吃饭的页面会退化，上游 [#193](https://github.com/sindresorhus/Plash/issues/193) 正文是现成回归用例，将来要做成按站点可关 |
-| **P5** | 快照后端（Backend A） | 待做 | 默认路径。多数网站根本不需要实时渲染。P2 的验收项：恢复可见后视频要自己接着播 |
+| **P5** | 快照后端（Backend A） | ✅ 已实现 | 默认路径。多数网站根本不需要实时渲染。P2 的验收项：恢复可见后视频要自己接着播 |
 | **P6** | 真壁纸路线（A2） | **阻塞，见 S1** | 收益最大，风险也最大 |
 | ~~P7~~ | ~~内容铺满时不透明化~~ | **不做** | 省的量量不出来，而且需要一个用户开关，开在透明背景的页面上直接黑屏。收益不明的设置项不加 |
 | **P8** | webview 真正销毁 | ✅ 已实现 | 上游在这儿留了条 TODO，实际是 load about:blank + orderOut，进程和它那一百多 MB 一直留着 |
@@ -154,9 +154,9 @@ NSScreen.visibleFrame 未被覆盖的比例 < 2%  →  判定全遮挡
 |---|---|---|---|
 | **F1** | 裁切：选网页的一块显示，规避导航栏和边框 | [#138](https://github.com/sindresorhus/Plash/issues/138) [#162](https://github.com/sindresorhus/Plash/issues/162) [#93](https://github.com/sindresorhus/Plash/issues/93) | ✅ 已实现 |
 | **F2** | 框选 UI：拖一个框存成 crop | #138 原话「可视化选取像素范围」 | ✅ 已实现 |
-| **F3** | 多显示器 | [#2](https://github.com/sindresorhus/Plash/issues/2)，47 👍 / 36 评论，全表第一需求，2026-08 仍在 bump | 待做，需 R1。**主流诉求是每块屏不同 URL**，不是同屏铺满；社区已自建 `plash-cloner` 克隆 app 绕路 |
-| **F4** | 静态模式 | [#15](https://github.com/sindresorhus/Plash/issues/15) | 等价于 P5 |
-| **F5** | 播放列表 | [#4](https://github.com/sindresorhus/Plash/issues/4) | 待做，需 R1。评论里还要求**按时间排班**（早晚不同页面） |
+| **F3** | 多显示器 | [#2](https://github.com/sindresorhus/Plash/issues/2)，47 👍 / 36 评论，全表第一需求，2026-08 仍在 bump | ✅ 已实现。**显示器是网站的属性**，不是全局设置 —— 读评论才发现主流诉求是每块屏不同页面 |
+| **F4** | 静态模式 | [#15](https://github.com/sindresorhus/Plash/issues/15) | ✅ 等价于 P5，已实现 |
+| **F5** | 播放列表 | [#4](https://github.com/sindresorhus/Plash/issues/4) | ✅ 已实现。轮播 + 按小时排班；排班永远不会把一块屏清空 |
 | **F6** | 站点图库 | — | ✅ 已实现。GitHub 是权威来源与提交入口，app 内运行时拉取 `sites/index.json`，编进包里的那份只在没网时兜底 |
 | **F7** | 保留**会话状态**：URL + 滚动位置 + 缩放，`WKWebView.interactionState` 一次拿下；配「唤醒时重新加载」开关 | [#39](https://github.com/sindresorhus/Plash/issues/39) [#127](https://github.com/sindresorhus/Plash/issues/127) [#154](https://github.com/sindresorhus/Plash/issues/154) | ✅ 已实现，但**用的是滚动位置而不是 `interactionState`**。后者靠驱动一次导航生效，数据过期就是白壁纸，交付前测不了；滚动是安全失败的。等能实测再换 |
 | **F8** | 显示器选择进主菜单 | [#195](https://github.com/sindresorhus/Plash/issues/195) | ✅ 已实现。只在多于一块屏时出现 |
@@ -166,8 +166,8 @@ NSScreen.visibleFrame 未被覆盖的比例 < 2%  →  判定全遮挡
 | **F12** | 双 webview 交换加载：成功才淡入，失败保留旧内容 | [#9](https://github.com/sindresorhus/Plash/issues/9) [#11](https://github.com/sindresorhus/Plash/issues/11) [#21](https://github.com/sindresorhus/Plash/issues/21) [#41](https://github.com/sindresorhus/Plash/issues/41) [#47](https://github.com/sindresorhus/Plash/issues/47) | ✅ 已实现。**只覆盖「替换页面」**，会话内首次加载仍直接进窗口 —— 没理由把必须能工作的路径放到新机制后面 |
 | **F13** | 修饰键点击时在默认浏览器打开链接 | [#140](https://github.com/sindresorhus/Plash/issues/140) | ✅ 已实现 |
 | **F14** | 进入浏览模式时真正取得键盘焦点 | [#114](https://github.com/sindresorhus/Plash/issues/114) | ✅ 已实现。缺的就是 `SSApp.forceActivate()` |
-| **F15** | 桌面层有限交互（点击 / 鼠标移动），按站点开 | [#50](https://github.com/sindresorhus/Plash/issues/50) [#16](https://github.com/sindresorhus/Plash/issues/16) | 待做，L。功耗代价必须写进文档 |
-| **F16** | 内容规则加载入口（cookie 横幅 / 广告），不自维护规则源 | [#37](https://github.com/sindresorhus/Plash/issues/37) | 待做，M |
+| **F15** | 桌面层有限交互（点击 / 鼠标移动），按站点开 | [#50](https://github.com/sindresorhus/Plash/issues/50) [#16](https://github.com/sindresorhus/Plash/issues/16) | ✅ 已实现。按网站开，且与冻结/静止化互斥（会点的页面必须醒着） |
+| **F16** | 内容规则加载入口（cookie 横幅 / 广告），不自维护规则源 | [#37](https://github.com/sindresorhus/Plash/issues/37) | ✅ 已实现。**不自维护规则**，只接受一个别人维护的列表 URL 交给 WebKit |
 
 ### F1 必须两侧同时改，这是上游踩的坑
 
@@ -210,7 +210,7 @@ AppState.shared                        AppState
 | **E3** | 移除 Sentry | ✅ 调用点 + helper + SPM 依赖 |
 | **E4** | 清掉上游作者的 `DEVELOPMENT_TEAM` | ✅ |
 | **E5** | 改名 Plash → Nifro | ✅ target / 目录 / 工程 / scheme / bundle id |
-| **E6** | 拆 `Utilities.swift` | **待做**。5745 行，全文只有 2 个 `// MARK`。这是新贡献者最大的一堵墙 |
+| **E6** | 拆 `Utilities.swift` | ✅ 已实现。拆成 Extensions / MenuSupport / Display / SystemEvents / AppInfo，参照 Ice 与 Rectangle 的形状 |
 | **E7** | 测试 | ✅ 几何部分 18 条，做过变异验证。其余仍是 0 |
 | **E8** | CI | ✅ build / test / lint / sites 四个 job，外加生成物新鲜度检查 |
 | **E9** | release 流水线与签名 | ✅ 逐架构构建，`lipo` 校验产物只含一个架构 |
