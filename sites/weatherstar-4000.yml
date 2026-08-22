@@ -1,0 +1,11 @@
+name: WeatherStar 4000+
+url: https://weatherstar.netbymatt.com/?kiosk=true
+description: A faithful emulation of the 1990s Weather Channel local forecast, US locations only.
+tags: [weather, ambient, data]
+backend: live
+backendNote: >-
+  The whole point is the auto-advancing slide rotation, the scrolling ticker and the music-video
+  pacing. A still frame of one panel loses it.
+source: >-
+  paulrudy in upstream discussion #136, who noted you should append the kiosk flag to the
+  permalink so it starts playing without the settings panel.

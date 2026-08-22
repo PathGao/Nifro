@@ -1,0 +1,9 @@
+name: Flying Toasters
+url: https://www.bryanbraun.com/after-dark-css/all/flying-toasters.html
+description: The After Dark flying toasters screensaver, rebuilt in pure CSS.
+tags: [screensaver, art, ambient]
+backend: live
+backendNote: A screensaver. The animation is the entire content.
+source: >-
+  sindresorhus in upstream discussion #136 (linking the After Dark CSS collection index).
+  The index page also has Fish, Globe, Warp, Rainstorm and others — swap the last path segment.

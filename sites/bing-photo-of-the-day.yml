@@ -1,0 +1,9 @@
+name: Bing Photo of the Day
+url: https://bing-photo-of-the-day.netlify.app
+description: Bing's daily featured photograph, aspect-filled to the screen.
+tags: [photo, ambient]
+backend: snapshot
+reloadInterval: 21600
+source: >-
+  Upstream Plash readme "Use-cases" section, linking sindresorhus/plash-bing-photo-of-the-day.
+  That readme notes the page refreshes its own image every 6 hours, so no Plash interval was needed.

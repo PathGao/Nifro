@@ -1,0 +1,7 @@
+name: WebClock
+url: https://findtreasureisland.github.io/clock/index.html
+description: A large full-screen digital clock with the date.
+tags: [clock]
+backend: snapshot
+reloadInterval: 60
+source: FindTreasureIsland in upstream discussion #136.

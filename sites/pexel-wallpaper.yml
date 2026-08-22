@@ -1,0 +1,9 @@
+name: Pexels Wallpaper
+url: https://geert.github.io/pexel-wallpaper/
+description: A rotating full-bleed photograph pulled from Pexels.
+tags: [photo, ambient]
+backend: snapshot
+reloadInterval: 3600
+source: >-
+  Geert in upstream discussion #136, built as a replacement for the Unsplash source URL that
+  the upstream readme used to recommend.

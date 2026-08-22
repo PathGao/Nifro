@@ -1,0 +1,10 @@
+name: Panomax Webcam
+url: https://panodata.panomax.com/cams/879/recent_full.jpg
+description: The latest frame from a Panomax panoramic outdoor webcam, served as a plain image.
+tags: [photo, ambient]
+backend: snapshot
+backendNote: A single JPEG. There is nothing to render between reloads.
+reloadInterval: 600
+source: >-
+  odolphie in upstream discussion #136, who used camera 879 (Glastonbury Festival site).
+  Other Panomax cameras work by swapping the number in the URL.

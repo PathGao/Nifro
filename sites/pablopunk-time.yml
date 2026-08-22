@@ -1,0 +1,12 @@
+name: Minimal Clock
+url: https://time.pablopunk.com/?fg=white&bg=transparent&font=SFMono-Regular,Consolas,%27Liberation%20Mono%27,Menlo,monospace
+description: A plain monospace clock on a transparent background, so the wallpaper underneath shows through.
+tags: [clock]
+backend: snapshot
+backendNote: >-
+  Minute resolution only. The URL sindresorhus shared included the `seconds` flag; it is dropped
+  here because a ticking seconds hand forces a live renderer for one glyph of information.
+reloadInterval: 60
+source: >-
+  pablopunk in upstream discussion #136, with the colour/font query string as posted by
+  sindresorhus in the same thread. `seconds` removed deliberately (see backendNote).

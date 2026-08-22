@@ -1,0 +1,10 @@
+name: Google Trends
+url: https://trends.google.com/tv/
+description: What the world is searching for right now, as a self-updating tile wall.
+tags: [data, news, dashboard]
+backend: snapshot
+reloadInterval: 1800
+source: >-
+  sindresorhus in upstream discussion #136. The URL he posted
+  (trends.google.com/trends/hottrends/visualize) now redirects to /tv/, which is the current
+  equivalent.

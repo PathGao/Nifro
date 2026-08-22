@@ -1,0 +1,9 @@
+name: Zoom Earth
+url: https://zoom.earth/maps/satellite/#view=41.989,12.766,6.23z/beta=mtg/overlays=radar,labels:off,lines:off
+description: Near-live satellite imagery with a rain-radar overlay and all labels turned off.
+tags: [weather, map, photo]
+backend: snapshot
+reloadInterval: 900
+source: >-
+  debernardis in upstream discussion #136, including the labels:off / lines:off overlay
+  settings. The view coordinates in the URL point at Rome — edit them for your own region.

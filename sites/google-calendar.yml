@@ -1,0 +1,38 @@
+name: Google Calendar
+url: https://calendar.google.com/
+description: Your week laid over the desktop, with all of Google's chrome stripped away.
+tags: [calendar, dashboard]
+backend: snapshot
+reloadInterval: 900
+requiresLogin: true
+css: |
+  * {
+    background-color: transparent !important;
+    color: white !important;
+  }
+
+  .QQYuzf,
+  .gboEAb,
+  header.NkK3Fc,
+  .Hrn1mc {
+    display: none !important;
+  }
+
+  [role="grid"] * {
+    border-color: rgba(255, 255, 255, 0.3) !important;
+  }
+
+  .tNDBE:not(.Wyo4Qe),
+  .SGWAac,
+  .QIadxc:last-child {
+    border: none !important;
+  }
+
+  [data-chips-dialog] {
+    background-color: rgba(0 0 0 / 80%) !important;
+  }
+source: >-
+  Listed in the upstream Plash readme "Use-cases"; the CSS above is sindresorhus's transparency
+  example in upstream discussion #136. ha404 posted a shorter variant in the same thread that
+  also pads the grid into the left half of the screen. Google's obfuscated class names change
+  from time to time, so the selectors may need refreshing.

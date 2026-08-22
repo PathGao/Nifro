@@ -1,0 +1,101 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/PathGao/oriel/blob/main/sites/schema.json",
+  "title": "Oriel site entry",
+  "description": "One curated website that works well as a desktop wallpaper. One YAML file per site in sites/.",
+  "type": "object",
+  "required": ["name", "url", "description", "tags", "backend", "source"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 60,
+      "description": "Display name shown in the in-app gallery."
+    },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "pattern": "^https?://",
+      "description": "The URL Oriel loads. Include any query parameters that are part of the recommended setup (kiosk mode, transparent background, etc.)."
+    },
+    "description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "One sentence. What the user sees on their desktop."
+    },
+    "tags": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "enum": [
+          "clock",
+          "weather",
+          "dashboard",
+          "art",
+          "data",
+          "calendar",
+          "ambient",
+          "photo",
+          "map",
+          "screensaver",
+          "news",
+          "personal",
+          "3d"
+        ]
+      }
+    },
+    "backend": {
+      "type": "string",
+      "enum": ["snapshot", "live"],
+      "description": "snapshot: the page changes slowly, so Oriel can screenshot it periodically and suspend the web process — power cost near zero. live: the page animates or is meant to be interacted with, so it must keep rendering. Default to snapshot; only use live when animation or interaction is the point."
+    },
+    "backendNote": {
+      "type": "string",
+      "maxLength": 300,
+      "description": "Why this backend was chosen, when it is not obvious. Required in spirit for every `live` entry."
+    },
+    "reloadInterval": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Seconds between reloads. For snapshot sites this is also the screenshot cadence. Omit if the page refreshes itself."
+    },
+    "crop": {
+      "type": "object",
+      "description": "Crop the rendered page to a rectangle, in CSS pixels from the top-left. Use it to cut away nav bars, borders and chrome.",
+      "required": ["x", "y", "width", "height"],
+      "additionalProperties": false,
+      "properties": {
+        "x": {"type": "integer", "minimum": 0},
+        "y": {"type": "integer", "minimum": 0},
+        "width": {"type": "integer", "minimum": 1},
+        "height": {"type": "integer", "minimum": 1}
+      }
+    },
+    "css": {
+      "type": "string",
+      "description": "Custom CSS injected into the page. Typically hides nav bars and makes the background transparent."
+    },
+    "js": {
+      "type": "string",
+      "description": "Custom JavaScript injected into the page after load."
+    },
+    "requiresLogin": {
+      "type": "boolean",
+      "default": false,
+      "description": "true if the user must be signed in to the site for it to show anything useful."
+    },
+    "screenshot": {
+      "type": "string",
+      "description": "Path or URL of a preview image. Leave unset until an image exists."
+    },
+    "source": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Where this entry came from. Credit the person and link the upstream discussion or issue if you adapted their CSS/JS."
+    }
+  }
+}

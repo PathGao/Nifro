@@ -1,0 +1,9 @@
+name: Hoodmaps
+url: https://hoodmaps.com/new-york-city-neighborhood-map
+description: A crowdsourced, opinionated map of who actually lives in each part of a city.
+tags: [map, data, art]
+backend: snapshot
+reloadInterval: 86400
+source: >-
+  jonbstrong in upstream discussion #136. Swap the path for your own city — the root URL
+  redirects based on your location.

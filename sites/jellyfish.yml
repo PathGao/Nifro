@@ -1,0 +1,7 @@
+name: Jellyfish
+url: https://akirodic.com/p/jellyfish/
+description: A translucent jellyfish drifting through dark water.
+tags: [art, ambient, 3d, screensaver]
+backend: live
+backendNote: Continuous WebGL animation.
+source: sindresorhus in upstream discussion #136.

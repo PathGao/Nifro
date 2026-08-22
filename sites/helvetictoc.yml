@@ -1,0 +1,23 @@
+name: Helvetictoc
+url: http://www.helvetictoc.com/
+description: A Helvetica word clock that spells out the time in prose.
+tags: [clock]
+backend: snapshot
+reloadInterval: 60
+css: |
+  body.day, body.night {
+    background-color: transparent;
+    color: white
+  }
+
+  div.screen {
+    margin: 4%;
+    font-size: 100px !important;
+    bottom: 0;
+    top: auto;
+  }
+
+  #colophon { display: none }
+source: >-
+  tobie in upstream discussion #136; the CSS above is sindresorhus's reply in that same thread
+  (transparent background, larger type, moved to the bottom, colophon hidden).

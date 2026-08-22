@@ -123,15 +123,20 @@ final class SSWebView: WKWebView {
 	}
 
 	func toggleBrowsingModeClass() {
-		Task {
-			try? await callAsyncJavaScript(
-				"document.documentElement.classList[method]('noren-is-browsing-mode');document.documentElement.classList[method]('plash-is-browsing-mode')",
-				arguments: [
-					"method": Defaults[.isBrowsingMode] ? "add" : "remove"
-				],
-				contentWorld: .page
-			)
-		}
+		// `plash-is-browsing-mode` is kept alongside ours so the custom CSS people wrote for Plash over the past five years keeps working.
+		let method = Defaults[.isBrowsingMode] ? "add" : "remove"
+
+		// The async variant hands back `Any`, which cannot cross an actor boundary under Swift 6. Nothing here needs the result.
+		evaluateJavaScript(
+			"""
+			const list = document.documentElement.classList;
+			list.\(method)("noren-is-browsing-mode");
+			list.\(method)("plash-is-browsing-mode");
+			""",
+			in: nil,
+			in: .page,
+			completionHandler: nil
+		)
 	}
 }
 

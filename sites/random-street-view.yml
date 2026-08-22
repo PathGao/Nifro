@@ -1,0 +1,10 @@
+name: Random Street View
+url: https://randomstreetview.com/#slideshow
+description: A random Google Street View panorama from somewhere on Earth, new one on every reload.
+tags: [photo, map, ambient]
+backend: snapshot
+backendNote: >-
+  The site's own slideshow advances on a timer, but reloading achieves the same thing and lets
+  the renderer sleep in between. Interval controls how often the location changes.
+reloadInterval: 600
+source: Upstream Plash readme "Use-cases" section.

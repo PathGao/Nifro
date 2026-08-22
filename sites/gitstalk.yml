@@ -1,0 +1,7 @@
+name: Gitstalk
+url: https://gitstalk.netlify.app/sindresorhus
+description: A GitHub user's recent public activity as a card feed. Replace the username in the URL with your own.
+tags: [dashboard, personal, data]
+backend: snapshot
+reloadInterval: 1800
+source: gleich in upstream discussion #136, who ran it with inverted colours and reduced opacity.

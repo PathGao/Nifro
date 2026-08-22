@@ -131,8 +131,9 @@ func fatalError(
 
 
 final class CallbackMenuItem: NSMenuItem {
-	private static var validateCallback: ((NSMenuItem) -> Bool)?
+	@MainActor private static var validateCallback: ((NSMenuItem) -> Bool)?
 
+	@MainActor
 	static func validate(_ callback: @escaping (NSMenuItem) -> Bool) {
 		validateCallback = callback
 	}
@@ -395,8 +396,9 @@ extension NSMenu {
 
 
 extension AnyCancellable {
-	private static var foreverStore = Set<AnyCancellable>()
+	@MainActor private static var foreverStore = Set<AnyCancellable>()
 
+	@MainActor
 	func storeForever() {
 		store(in: &Self.foreverStore)
 	}
@@ -409,7 +411,7 @@ enum SSApp {
 	static let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
 	static let build = Bundle.main.object(forInfoDictionaryKey: kCFBundleVersionKey as String) as! String
 	static let versionWithBuild = "\(version) (\(build))"
-	static let icon = NSApp.applicationIconImage!
+	@MainActor static let icon = NSApp.applicationIconImage!
 	static let url = Bundle.main.bundleURL
 
 	@MainActor
@@ -478,6 +480,7 @@ extension SSApp {
 
 
 extension SSApp {
+	@MainActor
 	static func setUpExternalEventListeners() {
 		DistributedNotificationCenter.default.publisher(for: .init("\(SSApp.idString):showSettings"))
 			.sink { _ in
@@ -749,10 +752,9 @@ extension String {
 }
 
 
-private var controlActionClosureProtocolAssociatedObjectKey: UInt8 = 0
+nonisolated(unsafe) private var controlActionClosureProtocolAssociatedObjectKey: UInt8 = 0
 
-// TODO: When NSMenu conforms, otherwise it's too annoying.
-//@MainActor
+@MainActor
 protocol ControlActionClosureProtocol: NSObjectProtocol {
 	var target: AnyObject? { get set }
 	var action: Selector? { get set }
@@ -1873,7 +1875,7 @@ You can even pass in a meta type (`Foo.self`), for example, to wrap an struct:
 struct Display {
 	static var text: String { … }
 
-	static let observable = ObservableValue(
+	@MainActor static let observable = ObservableValue(
 		value: Self.self,
 		publisher: NotificationCenter.default
 			.publisher(for: NSApplication.didChangeScreenParametersNotification)
@@ -2099,7 +2101,7 @@ struct Display: Hashable, Codable, Identifiable {
 	/**
 	Self wrapped in an observable that updates when display change.
 	*/
-	static let observable = ObservableValue(
+	@MainActor static let observable = ObservableValue(
 		value: Self.self,
 		publisher: NSScreen.publisher
 	)
@@ -2719,7 +2721,7 @@ enum SecurityScopedBookmarkManager {
 	private static let lock = NSLock()
 
 	// TODO: Abstract this to a generic class to have a Dictionary like thing that is synced to UserDefaults and the subclass it here.
-	private final class BookmarksUserDefaults {
+	private final class BookmarksUserDefaults: @unchecked Sendable {
 		// TODO: This should probably be an argument to init.
 		private let userDefaultsKey = Defaults.Key<[String: Data]>("__securityScopedBookmarks__", default: [:])
 
@@ -2770,7 +2772,7 @@ enum SecurityScopedBookmarkManager {
 		}
 	}
 
-	private static var bookmarks = BookmarksUserDefaults()
+	private static let bookmarks = BookmarksUserDefaults()
 
 	/**
 	Save the bookmark.
@@ -3402,7 +3404,7 @@ extension SSApp {
 
 extension AnyCancellable {
 	private enum AssociatedKeys {
-		static let cancellables = ObjectAssociation<Set<AnyCancellable>>(defaultValue: [])
+		nonisolated(unsafe) static let cancellables = ObjectAssociation<Set<AnyCancellable>>(defaultValue: [])
 	}
 
 	/**
@@ -3808,40 +3810,41 @@ extension RangeReplaceableCollection {
 
 
 extension NSItemProvider {
+	/**
+	Carries a value across a continuation boundary.
+
+	`loadObject` produces its result on an arbitrary queue and never touches it again, so the value is handed over rather than shared. The compiler cannot see that, hence the unchecked conformance.
+	*/
+	private struct Transfer<Value>: @unchecked Sendable {
+		let value: Value
+	}
+
 	func loadObject<T>(ofClass: T.Type) async throws -> T? where T: NSItemProviderReading {
-		try await withCheckedThrowingContinuation { continuation in
+		try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Transfer<T?>, Error>) in
 			_ = loadObject(ofClass: ofClass) { data, error in
 				if let error {
 					continuation.resume(throwing: error)
 					return
 				}
 
-				guard let image = data as? T else {
-					continuation.resume(returning: nil)
-					return
-				}
-
-				continuation.resume(returning: image)
+				continuation.resume(returning: Transfer(value: data as? T))
 			}
 		}
+		.value
 	}
 
 	func loadObject<T>(ofClass: T.Type) async throws -> T? where T: _ObjectiveCBridgeable, T._ObjectiveCType: NSItemProviderReading {
-		try await withCheckedThrowingContinuation { continuation in
+		try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Transfer<T?>, Error>) in
 			_ = loadObject(ofClass: ofClass) { data, error in
 				if let error {
 					continuation.resume(throwing: error)
 					return
 				}
 
-				guard let data else {
-					continuation.resume(returning: nil)
-					return
-				}
-
-				continuation.resume(returning: data)
+				continuation.resume(returning: Transfer(value: data))
 			}
 		}
+		.value
 	}
 }
 
@@ -5262,7 +5265,7 @@ extension SSEvents {
 		private final class EventManager {
 			typealias Handler = (URLComponents) -> Void
 
-			static let shared = EventManager()
+			nonisolated(unsafe) static let shared = EventManager()
 
 			private init() {}
 
@@ -5346,7 +5349,7 @@ extension SSEvents {
 
 	- Important: You must set up the listener before the app finishes launching. Ideally, in the app controller's initializer.
 	*/
-	static let appOpenURL: some Publisher<URLComponents, Never> = AppOpenURLPublisher()
+	nonisolated(unsafe) static let appOpenURL: some Publisher<URLComponents, Never> = AppOpenURLPublisher()
 }
 
 

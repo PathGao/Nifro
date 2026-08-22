@@ -1,0 +1,11 @@
+name: Infinitown
+url: https://demos.littleworkshop.fr/infinitown
+description: An endlessly scrolling low-poly town with cars and trees, seen from above.
+tags: [art, ambient, 3d, screensaver]
+backend: live
+backendNote: A continuously animating 3D scene.
+css: |
+  #about-button {
+    display: none;
+  }
+source: patrickpistor in upstream discussion #136, including the CSS that hides the about button.

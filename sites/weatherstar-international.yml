@@ -1,0 +1,7 @@
+name: WeatherStar International
+url: https://mwood77.github.io/ws4kp-international/?kiosk=true
+description: The WeatherStar 4000+ presentation, rebuilt for locations outside the United States.
+tags: [weather, ambient, data]
+backend: live
+backendNote: Same auto-advancing slide rotation as WeatherStar 4000+.
+source: paulrudy in upstream discussion #136, posted alongside the US version.

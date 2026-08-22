@@ -1,0 +1,247 @@
+# 打 tag 触发的发布流水线。
+#
+# ⚠️ 占位变量：Xcode 工程内部的 target / scheme 目前仍叫 "Plash"（还没重命名）。
+#    下面 env 里的 XCODE_PROJECT / XCODE_SCHEME / BUILT_APP_NAME 就是为此准备的占位符。
+#    等 target 改名为 Oriel 之后，把这三个值改成 Oriel.xcodeproj / Oriel / Oriel.app 即可，
+#    其余步骤不用动（重命名 .app 目录的那步会自动变成 no-op）。
+#
+# 两条路径，靠 secrets 是否存在自动选择：
+#   有 MACOS_CERTIFICATE_P12  → Developer ID 签名 + 公证 + staple（用户双击直接开）
+#   没有                      → ad-hoc 签名（codesign -s -），靠 cask postflight 去隔离属性
+# 详见 docs/RELEASE.md。
+
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "要发布的 tag，例如 v0.1.0"
+        required: true
+
+env:
+  # —— 占位变量，target 改名后同步修改 ——
+  XCODE_PROJECT: Plash.xcodeproj
+  XCODE_SCHEME: Plash
+  BUILT_APP_NAME: Plash.app
+  # —— 对外的产品名，不随 target 名变化 ——
+  APP_NAME: Oriel
+  BUNDLE_ID: com.pathgao.oriel
+
+jobs:
+  release:
+    runs-on: macos-15
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 解析版本号并与 Config.xcconfig 对账
+        id: version
+        run: |
+          set -euo pipefail
+          tag="${{ github.event.inputs.tag || github.ref_name }}"
+          version="${tag#v}"
+          xcconfig_version="$(sed -n 's/^MARKETING_VERSION *= *//p' Config.xcconfig | tr -d ' \r')"
+          if [ "$version" != "$xcconfig_version" ]; then
+            echo "::error::tag $tag 与 Config.xcconfig 的 MARKETING_VERSION ($xcconfig_version) 不一致"
+            exit 1
+          fi
+          echo "tag=$tag"         >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      # secrets 不能直接写在 if: 里判断，先映射到 env 再产出一个 output
+      - name: 判断是否具备签名与公证凭据
+        id: caps
+        env:
+          CERT: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+          NOTARY_KEY: ${{ secrets.NOTARY_KEY_P8 }}
+        run: |
+          set -euo pipefail
+          if [ -n "${CERT:-}" ]; then echo "sign=true" >> "$GITHUB_OUTPUT"; else echo "sign=false" >> "$GITHUB_OUTPUT"; fi
+          if [ -n "${NOTARY_KEY:-}" ]; then echo "notarize=true" >> "$GITHUB_OUTPUT"; else echo "notarize=false" >> "$GITHUB_OUTPUT"; fi
+
+      - name: 导入 Developer ID 证书到临时钥匙串
+        if: steps.caps.outputs.sign == 'true'
+        env:
+          CERT_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+          CERT_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          keychain="$RUNNER_TEMP/build.keychain-db"
+          # 钥匙串口令是一次性的，用不着做成 secret
+          kc_pass="$(openssl rand -base64 24)"
+          echo "$CERT_P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
+
+          security create-keychain -p "$kc_pass" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$kc_pass" "$keychain"
+          security import "$RUNNER_TEMP/cert.p12" -k "$keychain" -P "$CERT_PASSWORD" \
+            -T /usr/bin/codesign -T /usr/bin/security
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$kc_pass" "$keychain" > /dev/null
+          security list-keychain -d user -s "$keychain" login.keychain-db
+
+          rm -f "$RUNNER_TEMP/cert.p12"
+          security find-identity -v -p codesigning "$keychain"
+
+      - name: 构建（Release）
+        env:
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          mkdir -p .release
+
+          # 工程里默认写死了 CODE_SIGN_STYLE=Automatic / "Apple Development" / 上游的
+          # DEVELOPMENT_TEAM，CI 上都不能用，这里全部用 Manual 覆盖掉。
+          # ENABLE_HARDENED_RUNTIME 工程里已经是 YES，公证需要它。
+          if [ "${{ steps.caps.outputs.sign }}" = "true" ]; then
+            signing_args=(
+              CODE_SIGN_STYLE=Manual
+              CODE_SIGN_IDENTITY="Developer ID Application"
+              DEVELOPMENT_TEAM="$TEAM_ID"
+              OTHER_CODE_SIGN_FLAGS="--timestamp --options=runtime"
+              PROVISIONING_PROFILE_SPECIFIER=""
+            )
+          else
+            # ad-hoc："-" 表示本机签名，没有身份。沙盒 entitlements 照样会被写进签名。
+            signing_args=(
+              CODE_SIGN_STYLE=Manual
+              CODE_SIGN_IDENTITY="-"
+              DEVELOPMENT_TEAM=""
+              PROVISIONING_PROFILE_SPECIFIER=""
+            )
+          fi
+
+          xcodebuild -version
+          xcodebuild clean build \
+            -project "$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Release \
+            -destination "generic/platform=macOS" \
+            -derivedDataPath .xcode-build \
+            "${signing_args[@]}" \
+            | tee .release/xcodebuild.log | grep -E '^(\*\*|CompileSwift|CodeSign|error:|warning:)' || true
+
+      - name: 归集产物
+        run: |
+          set -euo pipefail
+          src=".xcode-build/Build/Products/Release/$BUILT_APP_NAME"
+          test -d "$src" || { echo "::error::没找到 $src"; exit 1; }
+          rm -rf ".release/$APP_NAME.app"
+          # 重命名 .app 目录不会破坏签名（签名覆盖的是包内容，不是目录名）。
+          # target 改名之后 BUILT_APP_NAME 就等于 Oriel.app，这一步自然变成 no-op。
+          cp -R "$src" ".release/$APP_NAME.app"
+
+      - name: 公证并 staple
+        if: steps.caps.outputs.sign == 'true' && steps.caps.outputs.notarize == 'true'
+        env:
+          NOTARY_KEY_P8: ${{ secrets.NOTARY_KEY_P8 }}
+          NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
+          NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
+        run: |
+          set -euo pipefail
+          echo "$NOTARY_KEY_P8" | base64 --decode > "$RUNNER_TEMP/notary.p8"
+
+          # notarytool 只吃 zip/pkg/dmg，必须用 ditto 打包（保留符号链接和扩展属性）
+          ditto -c -k --keepParent ".release/$APP_NAME.app" "$RUNNER_TEMP/notarize.zip"
+
+          xcrun notarytool submit "$RUNNER_TEMP/notarize.zip" \
+            --key "$RUNNER_TEMP/notary.p8" \
+            --key-id "$NOTARY_KEY_ID" \
+            --issuer "$NOTARY_ISSUER_ID" \
+            --wait --timeout 30m
+
+          # staple 打在 .app 上，之后再重新压包，用户离线也能通过 Gatekeeper
+          xcrun stapler staple ".release/$APP_NAME.app"
+          rm -f "$RUNNER_TEMP/notary.p8"
+
+      - name: 打包与校验
+        id: package
+        run: |
+          set -euo pipefail
+          version="${{ steps.version.outputs.version }}"
+          zip=".release/$APP_NAME-$version.zip"
+
+          codesign --verify --deep --strict --verbose=2 ".release/$APP_NAME.app"
+          codesign -dvv ".release/$APP_NAME.app" 2>&1 | sed -n '1,12p'
+
+          if [ "${{ steps.caps.outputs.notarize }}" = "true" ] && [ "${{ steps.caps.outputs.sign }}" = "true" ]; then
+            # 只有公证过的包才可能通过 spctl，没过就直接失败，别把坏包发出去
+            spctl -a -vvv --type exec ".release/$APP_NAME.app"
+            xcrun stapler validate ".release/$APP_NAME.app"
+          else
+            echo "::warning::本次为 ad-hoc 签名、未公证。用户首次打开会被 Gatekeeper 拦截，"
+            echo "::warning::brew 安装的用户由 cask 的 postflight 去掉隔离属性，直接下载 zip 的用户需按 README 手动放行。"
+          fi
+
+          ditto -c -k --keepParent ".release/$APP_NAME.app" "$zip"
+          sha="$(shasum -a 256 "$zip" | awk '{print $1}')"
+          echo "zip=$zip"  >> "$GITHUB_OUTPUT"
+          echo "sha=$sha"  >> "$GITHUB_OUTPUT"
+          echo "sha256: $sha"
+
+      - name: 上传构建日志
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcodebuild-log
+          path: .release/xcodebuild.log
+          if-no-files-found: ignore
+
+      - name: 创建 GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="${{ steps.version.outputs.tag }}"
+
+          if [ "${{ steps.caps.outputs.notarize }}" = "true" ] && [ "${{ steps.caps.outputs.sign }}" = "true" ]; then
+            note="本次构建已用 Developer ID 签名并通过 Apple 公证，双击即可打开。"
+          else
+            note="本次构建为 ad-hoc 签名、**未经 Apple 公证**。推荐用 Homebrew 安装（cask 会自动去掉隔离属性）；直接下载 zip 的话，首次打开需要在「系统设置 → 隐私与安全性」里点「仍要打开」。"
+          fi
+
+          cat > "$RUNNER_TEMP/notes.md" <<EOF
+          $note
+
+          安装：\`brew install --cask PathGao/tap/oriel\`
+
+          \`\`\`
+          sha256  ${{ steps.package.outputs.sha }}
+          \`\`\`
+          EOF
+
+          gh release create "$tag" "${{ steps.package.outputs.zip }}" \
+            --repo "$GITHUB_REPOSITORY" \
+            --title "$tag" \
+            --generate-notes \
+            --notes-file "$RUNNER_TEMP/notes.md"
+
+      # cask 里的 version / sha256 每次发布都要改，交给 CI 写回 main，省掉一次人工操作。
+      # 如果 main 开了分支保护导致 push 失败，这步会告警但不影响 release 本身。
+      - name: 回写 Casks/oriel.rb
+        continue-on-error: true
+        run: |
+          set -euo pipefail
+          version="${{ steps.version.outputs.version }}"
+          sha="${{ steps.package.outputs.sha }}"
+
+          git fetch origin main
+          git checkout -B main origin/main
+          sed -i '' -E "s/^  version \".*\"$/  version \"$version\"/" Casks/oriel.rb
+          sed -i '' -E "s/^  sha256 \".*\"$/  sha256 \"$sha\"/" Casks/oriel.rb
+
+          if git diff --quiet -- Casks/oriel.rb; then
+            echo "cask 没有变化，跳过"
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "cask: bump to $version" -- Casks/oriel.rb
+          git push origin main

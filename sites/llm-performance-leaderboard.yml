@@ -1,0 +1,7 @@
+name: LLM Performance Leaderboard
+url: https://huggingface.co/spaces/ArtificialAnalysis/LLM-Performance-Leaderboard
+description: Artificial Analysis's ranking of language models by speed, price and quality.
+tags: [data, dashboard]
+backend: snapshot
+reloadInterval: 21600
+source: jonbstrong in upstream discussion #136.
