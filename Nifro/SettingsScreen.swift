@@ -11,6 +11,8 @@ struct SettingsScreen: View {
 				.settingsTabItem(.shortcuts)
 			AdvancedSettings()
 				.settingsTabItem(.advanced)
+			AboutSettings()
+				.settingsTabItem(.about)
 		}
 		.formStyle(.grouped)
 		.frame(width: 400)

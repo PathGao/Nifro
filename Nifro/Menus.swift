@@ -39,22 +39,6 @@ extension AppState {
 		return menu
 	}
 
-	private func createMoreMenu() -> SSMenu {
-		let menu = SSMenu()
-
-		menu.addAboutItem()
-
-		menu.addSeparator()
-
-		menu.addCallbackItem("Send Feedback…") {
-			SSApp.openSendFeedbackPage()
-		}
-
-		menu.addLinkItem("GitHub", destination: "https://github.com/PathGao/nifro")
-
-		return menu
-	}
-
 	private func addWebsiteItems() {
 		if let webViewError {
 			menu.addDisabled("Error: \(webViewError.localizedDescription)".wordWrapped(atLength: 36).toNSAttributedString)
@@ -188,7 +172,7 @@ extension AppState {
 		menu.addSeparator()
 
 		// Right under the on/off switch: this is where someone who has nothing set up yet, or wants something new up there, is actually headed.
-		menu.addLinkItem("Site Gallery", destination: "https://github.com/PathGao/nifro/tree/main/sites")
+		menu.addLinkItem("Site Gallery", destination: Constants.siteGalleryURL)
 
 		menu.addSeparator()
 
@@ -217,9 +201,6 @@ extension AppState {
 		menu.addSeparator()
 
 		menu.addSettingsItem()
-
-		menu.addItem("More")
-			.withSubmenu(createMoreMenu())
 
 		menu.addSeparator()
 

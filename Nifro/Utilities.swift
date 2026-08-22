@@ -5218,6 +5218,7 @@ enum SettingsTabType {
 	case general
 	case advanced
 	case shortcuts
+	case about
 
 	fileprivate var label: some View {
 		switch self {
@@ -5227,6 +5228,8 @@ enum SettingsTabType {
 			Label("Advanced", systemImage: "gearshape.2")
 		case .shortcuts:
 			Label("Shortcuts", systemImage: "command")
+		case .about:
+			Label("About", systemImage: "info.circle")
 		}
 	}
 }

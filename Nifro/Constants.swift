@@ -2,6 +2,9 @@ import SwiftUI
 import KeyboardShortcuts
 
 enum Constants {
+	static let repositoryURL = URL("https://github.com/PathGao/nifro")
+	static let siteGalleryURL = URL("https://github.com/PathGao/nifro/tree/main/sites")
+
 	@MainActor
 	static var websitesWindow: NSWindow? {
 		NSApp.windows.first { $0.identifier?.rawValue == "websites" }
