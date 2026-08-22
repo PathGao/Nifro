@@ -24,6 +24,7 @@
 		09AD36F5F7945DFEE7B4A938 /* DimWhenUnfocused.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2E55F44121887A577509380 /* DimWhenUnfocused.swift */; };
 		90372F4A56E2E0453B651FEE /* AboutSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6ECFB57E09E3EAEAFA81C47 /* AboutSettings.swift */; };
 		3A6D23E265F2D846E64E08F3 /* SwapLoading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A22FF14B425D5D7E6F2A3D /* SwapLoading.swift */; };
+		E2357719BB2492A797E09894 /* SnapshotBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB46554608E9F419109045D1 /* SnapshotBackend.swift */; };
 		BD0C69E56B842F1B2CAA990C /* WallpaperScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8022D73138D2D927070B3744 /* WallpaperScene.swift */; };
 		17E64A773B2907C884AD5849 /* ScrollRestoration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB5B9537B30041D469CE55C /* ScrollRestoration.swift */; };
 		F7CEB84C882E8730A2C4B649 /* MenuBarBand.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB494D7D82CDA92E0D71731F /* MenuBarBand.swift */; };
@@ -102,6 +103,7 @@
 		E2E55F44121887A577509380 /* DimWhenUnfocused.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = DimWhenUnfocused.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A6ECFB57E09E3EAEAFA81C47 /* AboutSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = AboutSettings.swift; sourceTree = "<group>"; usesTabs = 1; };
 		37A22FF14B425D5D7E6F2A3D /* SwapLoading.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = SwapLoading.swift; sourceTree = "<group>"; usesTabs = 1; };
+		AB46554608E9F419109045D1 /* SnapshotBackend.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = SnapshotBackend.swift; sourceTree = "<group>"; usesTabs = 1; };
 		8022D73138D2D927070B3744 /* WallpaperScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = WallpaperScene.swift; sourceTree = "<group>"; usesTabs = 1; };
 		8BB5B9537B30041D469CE55C /* ScrollRestoration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ScrollRestoration.swift; sourceTree = "<group>"; usesTabs = 1; };
 		DB494D7D82CDA92E0D71731F /* MenuBarBand.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = MenuBarBand.swift; sourceTree = "<group>"; usesTabs = 1; };
@@ -244,6 +246,7 @@
 				E30FD88823C4515200C716E9 /* SSWebView.swift */,
 				E32421592384FBE500D28A91 /* WebViewController.swift */,
 				37A22FF14B425D5D7E6F2A3D /* SwapLoading.swift */,
+				AB46554608E9F419109045D1 /* SnapshotBackend.swift */,
 				8022D73138D2D927070B3744 /* WallpaperScene.swift */,
 				8BB5B9537B30041D469CE55C /* ScrollRestoration.swift */,
 			);
@@ -462,6 +465,7 @@
 				09AD36F5F7945DFEE7B4A938 /* DimWhenUnfocused.swift in Sources */,
 				90372F4A56E2E0453B651FEE /* AboutSettings.swift in Sources */,
 				3A6D23E265F2D846E64E08F3 /* SwapLoading.swift in Sources */,
+				E2357719BB2492A797E09894 /* SnapshotBackend.swift in Sources */,
 				BD0C69E56B842F1B2CAA990C /* WallpaperScene.swift in Sources */,
 				17E64A773B2907C884AD5849 /* ScrollRestoration.swift in Sources */,
 				F7CEB84C882E8730A2C4B649 /* MenuBarBand.swift in Sources */,

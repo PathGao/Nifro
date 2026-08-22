@@ -79,6 +79,7 @@ extension SiteCatalog.Entry {
 		binding.wrappedValue.css = css ?? ""
 		binding.wrappedValue.javaScript = javaScript ?? ""
 		binding.wrappedValue.crop = crop
+		binding.wrappedValue.rendering = isLive ? .live : .snapshot
 
 		// A per-site reload interval is not something the app models yet, so the catalogue's value is applied to the global setting only when nothing has been chosen. Better than silently ignoring it, and better than overriding a choice the user made.
 		if let reloadInterval, Defaults[.reloadInterval] == nil {

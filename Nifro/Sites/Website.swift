@@ -34,6 +34,11 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	var endHour: Int?
 
 	/**
+	Whether to keep a browser running behind this website or to photograph it periodically.
+	*/
+	@DecodableDefault.Custom<Rendering> var rendering
+
+	/**
 	The display this website actually appears on.
 	*/
 	@MainActor
@@ -115,4 +120,10 @@ extension Website {
 
 extension Website.InvertColors: DecodableDefault.Source {
 	static let defaultValue = never
+}
+
+extension Website.Rendering: DecodableDefault.Source {
+	// Existing websites and anything typed in by hand keep rendering live. Switching a page to
+	// stills without being asked would stop animations people put there on purpose.
+	static let defaultValue = live
 }

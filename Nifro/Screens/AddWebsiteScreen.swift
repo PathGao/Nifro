@@ -256,6 +256,7 @@ struct AddWebsiteScreen: View {
 			.accessibilityHint(Text(javaScriptHelpText))
 		}
 		Section {
+			WebsiteRenderingSetting(rendering: website.rendering)
 			WebsiteDisplaySetting(display: website.display)
 			WebsiteScheduleSetting(startHour: website.startHour, endHour: website.endHour)
 			CropSetting(crop: website.crop)

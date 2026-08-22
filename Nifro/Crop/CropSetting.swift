@@ -125,3 +125,21 @@ struct WebsiteScheduleSetting: View {
 		.frame(maxWidth: 140)
 	}
 }
+
+/**
+Whether a website keeps a browser running or gets photographed periodically.
+
+Per website rather than a global switch, because the answer is a property of the page: a clock is the same picture for a minute at a time, a screensaver is not.
+*/
+struct WebsiteRenderingSetting: View {
+	@Binding var rendering: Website.Rendering
+
+	var body: some View {
+		Picker("Rendering", selection: $rendering) {
+			ForEach(Website.Rendering.allCases, id: \.self) { option in
+				Text(option.title).tag(option)
+			}
+		}
+		.help(rendering.explanation)
+	}
+}

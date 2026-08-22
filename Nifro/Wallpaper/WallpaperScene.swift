@@ -54,6 +54,12 @@ final class WallpaperScene {
 	var reloadTimer: Timer?
 	var playlistTimer: Timer?
 
+	/**
+	The still being shown in place of a live page, and the task producing the next one.
+	*/
+	var snapshotView: NSImageView?
+	var snapshotTask: Task<Void, Never>?
+
 	let occlusionMonitor: OcclusionMonitor
 
 	private var cancellables = Set<AnyCancellable>()
@@ -135,10 +141,21 @@ final class WallpaperScene {
 	// MARK: - Loading
 
 	func loadWebsite() {
+		guard !usesSnapshotRendering else {
+			refreshSnapshot()
+			return
+		}
+
+		stopSnapshotRendering()
 		load(website?.url)
 	}
 
 	func reload() {
+		guard !usesSnapshotRendering else {
+			refreshSnapshot()
+			return
+		}
+
 		captureScrollPosition()
 
 		// Always the URL the user specified rather than the current one: it may be a redirect that resolves differently each time.
@@ -240,6 +257,7 @@ final class WallpaperScene {
 	func tearDown() {
 		reloadTimer?.invalidate()
 		playlistTimer?.invalidate()
+		snapshotTask?.cancel()
 		pendingLoad?.cancel()
 		window.orderOut(nil)
 		window.contentView = nil

@@ -32,6 +32,8 @@ extension WallpaperScene {
 
 	var isVisibilityManagementEnabled: Bool {
 		Defaults[.freezeWhenCovered]
+			// A website drawn from stills is already costing nothing between refreshes.
+			&& !usesSnapshotRendering
 			&& AppState.shared.isEnabled
 			&& !AppState.shared.isBrowsingMode
 			&& website != nil
