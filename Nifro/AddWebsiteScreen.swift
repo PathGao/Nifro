@@ -13,7 +13,9 @@ struct AddWebsiteScreen: View {
 		id: UUID(),
 		isCurrent: true,
 		url: ".",
-		usePrintStyles: false
+		usePrintStyles: false,
+		css: Website.starterCSS,
+		javaScript: Website.starterJavaScript
 	)
 
 	private var isURLValid: Bool {

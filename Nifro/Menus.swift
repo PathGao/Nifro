@@ -50,17 +50,7 @@ extension AppState {
 			SSApp.openSendFeedbackPage()
 		}
 
-		menu.addSeparator()
-
-		menu.addLinkItem("Site Gallery", destination: "https://github.com/PathGao/nifro/tree/main/sites")
-
-		menu.addLinkItem("Tips", destination: "https://github.com/PathGao/nifro#tips")
-
-		menu.addLinkItem("FAQ", destination: "https://github.com/PathGao/nifro#faq")
-
-		menu.addLinkItem("Scripting", destination: "https://github.com/PathGao/nifro#scripting")
-
-		menu.addLinkItem("Website", destination: "https://github.com/PathGao/nifro")
+		menu.addLinkItem("GitHub", destination: "https://github.com/PathGao/nifro")
 
 		return menu
 	}
@@ -152,18 +142,6 @@ extension AppState {
 			menu.addSeparator()
 		}
 
-		menu.addCallbackItem("Add Website…") {
-			Constants.openWebsitesWindow()
-
-			// TODO: Find a better way to do this.
-			NotificationCenter.default.post(name: .showAddWebsiteDialog, object: nil)
-		}
-
-		menu.addCallbackItem("Websites…") {
-			Constants.openWebsitesWindow()
-		}
-
-		addDisplayItemIfNeeded()
 	}
 
 	/**
@@ -209,11 +187,32 @@ extension AppState {
 
 		menu.addSeparator()
 
+		// Right under the on/off switch: this is where someone who has nothing set up yet, or wants something new up there, is actually headed.
+		menu.addLinkItem("Site Gallery", destination: "https://github.com/PathGao/nifro/tree/main/sites")
+
+		menu.addSeparator()
+
 		if isEnabled {
 			addWebsiteItems()
 		} else if !isManuallyDisabled {
 			menu.addDisabled("Deactivated While on Battery")
 		}
+
+		// Adding and managing websites has nothing to do with whether the wallpaper is currently showing. Leaving them out while disabled meant the app offered no way to set anything up until you turned it back on.
+		menu.addSeparator()
+
+		menu.addCallbackItem("Add Website…") {
+			Constants.openWebsitesWindow()
+
+			// TODO: Find a better way to do this.
+			NotificationCenter.default.post(name: .showAddWebsiteDialog, object: nil)
+		}
+
+		menu.addCallbackItem("Manage Websites…") {
+			Constants.openWebsitesWindow()
+		}
+
+		addDisplayItemIfNeeded()
 
 		menu.addSeparator()
 

@@ -39,6 +39,41 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 }
 
 extension Website {
+	/**
+	What a new website's CSS field starts out as.
+
+	Every line is a comment, so it changes nothing until someone edits it — but it puts the two things people always end up asking for, and the hooks this app provides, in front of them at the moment they need them. The alternative is a tips page somewhere else, which is a worse version of the same information.
+	*/
+	static let starterCSS = """
+		/* Anything you write here is applied to the page.
+
+		   Hide a site's own furniture:
+		     header, nav, footer, .cookie-banner { display: none !important; }
+
+		   Make the page's background transparent so your wallpaper shows through:
+		     :root, body { background: transparent !important; }
+
+		   Nifro puts these classes on <html> for you:
+		     .is-nifro-app             always
+		     .nifro-is-browsing-mode   only while Browsing Mode is on
+		   so you can show something only when you can actually click it:
+		     .nifro-is-browsing-mode nav { display: block !important; }
+		*/
+		"""
+
+	/**
+	What a new website's JavaScript field starts out as. Comments only, same reasoning as `starterCSS`.
+	*/
+	static let starterJavaScript = """
+		// Runs once the page has loaded. Top-level await is allowed.
+		//
+		// Scroll to a fixed position:
+		//   window.scrollTo(0, 500);
+		//
+		// Click something the page needs clicked every time:
+		//   document.querySelector('.dismiss')?.click();
+		"""
+
 	enum InvertColors: String, CaseIterable, Codable {
 		case never
 		case always

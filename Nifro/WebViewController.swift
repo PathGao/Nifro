@@ -67,11 +67,18 @@ final class WebViewController: NSViewController {
 				webView.mediaType = "print"
 			}
 
-			if !website.css.trimmed.isEmpty {
+			// An untouched starter template is all comments; injecting it would add an empty style element to every page for nothing.
+			if
+				!website.css.trimmed.isEmpty,
+				website.css != Website.starterCSS
+			{
 				userContentController.addCSS(website.css)
 			}
 
-			if !website.javaScript.trimmed.isEmpty {
+			if
+				!website.javaScript.trimmed.isEmpty,
+				website.javaScript != Website.starterJavaScript
+			{
 				userContentController.addJavaScript(
 					"""
 					try {
