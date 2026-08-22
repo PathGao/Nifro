@@ -256,6 +256,7 @@ struct AddWebsiteScreen: View {
 			.accessibilityHint(Text(javaScriptHelpText))
 		}
 		Section {
+			WebsiteDisplaySetting(display: website.display)
 			CropSetting(crop: website.crop)
 		}
 		Section("Advanced") {

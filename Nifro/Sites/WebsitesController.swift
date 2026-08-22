@@ -159,6 +159,32 @@ final class WebsitesController {
 	}
 
 	/**
+	Every display that has at least one website assigned to it.
+
+	Falls back to the display chosen in Settings so there is always exactly one scene to show, even before anything is configured.
+	*/
+	var displaysInUse: [Display?] {
+		var seen: [Display?] = []
+
+		for website in all {
+			let display = website.effectiveDisplay
+			if !seen.contains(where: { $0 == display }) {
+				seen.append(display)
+			}
+		}
+
+		return seen.isEmpty ? [Defaults[.display]] : seen
+	}
+
+	/**
+	The website showing on `display`, if any.
+	*/
+	func current(for display: Display?) -> Website? {
+		let onDisplay = all.filter { $0.effectiveDisplay == display }
+		return onDisplay.first { $0.isCurrent } ?? onDisplay.first
+	}
+
+	/**
 	Record a title observed in the live web view, if we do not already have one.
 
 	`LPMetadataProvider` fetches the raw HTML with subresources turned off and gives up after a few seconds, so it comes back empty for anything that sets its title from JavaScript or takes its time — which is a large share of the sites people actually use as wallpapers. The web view has already loaded and run the page, so its title is both more accurate and free.

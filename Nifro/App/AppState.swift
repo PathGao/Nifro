@@ -19,12 +19,28 @@ final class AppState: ObservableObject {
 
 	private(set) lazy var statusItemButton = statusItem.button!
 
-	private(set) lazy var webViewController = WebViewController()
+	/**
+	One wallpaper per display in use. Always at least one.
+	*/
+	private(set) var scenes: [WallpaperScene] = []
 
-	private(set) lazy var desktopWindow = with(DesktopWindow(display: Defaults[.display])) {
-		$0.contentView = webViewController.webView
-		$0.contentView?.isHidden = true
+	/**
+	The scene the menu and the settings act on when nothing says otherwise.
+	*/
+	var primaryScene: WallpaperScene {
+		if let match = scenes.first(where: { $0.display == Defaults[.display] }) {
+			return match
+		}
+
+		if scenes.isEmpty {
+			rebuildScenes()
+		}
+
+		return scenes[0]
 	}
+
+	var desktopWindow: DesktopWindow { primaryScene.window }
+	var webViewController: WebViewController { primaryScene.webViewController }
 
 	var isBrowsingMode = false {
 		didSet {
@@ -32,36 +48,34 @@ final class AppState: ObservableObject {
 				return
 			}
 
-			desktopWindow.isInteractive = isBrowsingMode
-			applyOpacity()
+			for scene in scenes {
+				scene.window.isInteractive = isBrowsingMode
+				scene.applyOpacity()
+				scene.applyVisibilityState()
+				scene.resetTimer()
+			}
 
 			// Making the window key is not enough when the app is an accessory: the window comes forward but keystrokes still go to whatever was active, so the page cannot be typed into. Plash#114.
 			if isBrowsingMode {
 				SSApp.forceActivate()
 			}
-
-			applyVisibilityState()
-			resetTimer()
 		}
 	}
 
 	var isEnabled = true {
 		didSet {
-			resetTimer()
 			statusItemButton.appearsDisabled = !isEnabled
 
-			if isEnabled {
-				loadUserURL()
-				desktopWindow.makeKeyAndOrderFront(self)
-			} else {
-				desktopWindow.orderOut(self)
-				frozenView = nil
-				renderedRegion = nil
-				desktopWindow.cropRect = nil
-				pendingLoad?.cancel()
-				pendingWebView = nil
-				webViewController.releaseWebView()
-				desktopWindow.contentView = webViewController.webView
+			for scene in scenes {
+				if isEnabled {
+					scene.loadWebsite()
+					scene.window.makeKeyAndOrderFront(self)
+				} else {
+					scene.window.orderOut(self)
+					scene.releaseWebView()
+				}
+
+				scene.resetTimer()
 			}
 		}
 	}
@@ -74,41 +88,11 @@ final class AppState: ObservableObject {
 		}
 	}
 
-	var reloadTimer: Timer?
-
-	let occlusionMonitor = OcclusionMonitor()
-
-	/**
-	The last rendered frame, standing in for the web view while frozen.
-	*/
-	var frozenView: NSImageView?
-
-	/**
-	The screen region currently being rendered, when the window has been shrunk to what is still on show.
-	*/
-	var renderedRegion: CGRect?
-
-	/**
-	Opaque band covering the strip of wallpaper behind the menu bar, when the user asked for colour without content.
-	*/
-	var menuBarBand: MenuBarBandView?
-
-	/**
-	The replacement page being loaded out of sight, and the task driving it.
-	*/
-	var pendingWebView: SSWebView?
-	var pendingLoad: Task<Void, Never>?
-
 	/**
 	The overlay shown while the user is dragging out a crop region, and the crop that was in place before they started.
 	*/
 	var cropSelectionView: CropSelectionView?
 	var cropSelectionPreviousCrop: CGRect?
-
-	/**
-	A reload came due while frozen and still has to happen.
-	*/
-	var isReloadPending = false
 
 	var webViewError: Error? {
 		didSet {
@@ -141,8 +125,7 @@ final class AppState: ObservableObject {
 
 	private func didLaunch() {
 		_ = statusItemButton
-		_ = desktopWindow
-		installContentView()
+		rebuildScenes()
 		setUpEvents()
 		showWelcomeScreenIfNeeded()
 
@@ -172,123 +155,78 @@ final class AppState: ObservableObject {
 		isEnabled = !isManuallyDisabled && !isScreenLocked && !(Defaults[.deactivateOnBattery] && powerSourceWatcher?.powerSource.isUsingBattery == true)
 	}
 
-	func resetTimer() {
-		reloadTimer?.invalidate()
-		reloadTimer = nil
+	/**
+	Create one scene per display that should show a wallpaper, reusing the ones that already match.
 
-		guard
-			isEnabled,
-			!isBrowsingMode,
-			let reloadInterval = Defaults[.reloadInterval]
-		else {
-			return
-		}
+	Called whenever the set of displays or the assignment of websites to them changes. Scenes for displays that went away are torn down; the rest keep their web views and whatever they had loaded.
+	*/
+	func rebuildScenes() {
+		let wanted = WebsitesController.shared.displaysInUse
 
-		// While frozen there is nothing to reload into. Remember that one came due so the thaw can settle it.
-		guard frozenView == nil else {
-			isReloadPending = true
-			return
-		}
+		var kept: [WallpaperScene] = []
 
-		reloadTimer = Timer.scheduledTimer(withTimeInterval: reloadInterval, repeats: true) { [self] _ in
-			Task { @MainActor in
-				reloadWebsite()
+		for display in wanted {
+			if let existing = scenes.first(where: { $0.display == display }) {
+				kept.append(existing)
+			} else {
+				kept.append(WallpaperScene(display: display))
 			}
+		}
+
+		for scene in scenes where !kept.contains(where: { $0 === scene }) {
+			scene.tearDown()
+		}
+
+		scenes = kept
+
+		for scene in scenes {
+			scene.website = WebsitesController.shared.current(for: scene.display)
+			scene.installContentView()
+			scene.window.isInteractive = isBrowsingMode
+			scene.applyOpacity(animated: false)
+		}
+	}
+
+	func resetTimer() {
+		for scene in scenes {
+			scene.resetTimer()
 		}
 	}
 
 	func recreateWebView() {
-		webViewController.recreateWebView()
-		installContentView()
+		for scene in scenes {
+			scene.recreateWebView()
+		}
 	}
 
-	/**
-	Puts the web view into the window, wrapped in a crop when the current website has one.
-
-	The page lays out at full screen size even when cropped. Letting it lay out at the crop size instead would change the site's own layout, and the region the user framed would no longer be the region they get.
-	*/
 	func installContentView() {
-		let webView = webViewController.webView
-
-		guard
-			let crop = WebsitesController.shared.current?.crop,
-			let screen = desktopWindow.targetDisplay?.screen ?? .main
-		else {
-			desktopWindow.cropRect = nil
-			desktopWindow.contentView = webView
-			installMenuBarBandIfNeeded()
-			return
+		for scene in scenes {
+			scene.installContentView()
 		}
-
-		desktopWindow.cropRect = crop
-		desktopWindow.contentView = CropView(
-			content: webView,
-			crop: crop,
-			pageSize: screen.frameWithoutStatusBar.size
-		)
-		installMenuBarBandIfNeeded()
 	}
 
 	func recreateWebViewAndReload() {
-		recreateWebView()
-		loadUserURL()
+		rebuildScenes()
+
+		for scene in scenes {
+			scene.recreateWebView()
+			scene.loadWebsite()
+		}
 	}
 
 	func reloadWebsite() {
-		captureScrollPosition()
-
-		// Always the URL the user specified rather than the current one: it may be a redirect that resolves differently each time.
-		loadURLBySwapping(WebsitesController.shared.current?.url)
+		for scene in scenes {
+			scene.reload()
+		}
 	}
 
 	func loadUserURL() {
-		loadURL(WebsitesController.shared.current?.url)
+		for scene in scenes {
+			scene.loadWebsite()
+		}
 	}
 
 	func toggleBrowsingMode() {
 		Defaults[.isBrowsingMode].toggle()
-	}
-
-	func loadURL(_ url: URL?) {
-		webViewError = nil
-
-		guard
-			var url,
-			url.isValid
-		else {
-			return
-		}
-
-		do {
-			url = try replacePlaceholders(of: url) ?? url
-		} catch {
-			error.presentAsModal()
-			return
-		}
-
-		webViewController.loadURL(url)
-
-		// The web view starts hidden so the first frame is not a flash of white. Unhide the web view itself rather than whatever view happens to be installed a second from now: by then the visibility policy may have swapped in a still or a crop container, and unhiding that would leave the real web view hidden for the rest of the session — a blank wallpaper with no way back.
-		//
-		// TODO: Add a callback to `loadURL` when it's done loading instead.
-		delay(.seconds(1)) { [self] in
-			webViewController.webView.isHidden = false
-			desktopWindow.contentView?.isHidden = false
-		}
-	}
-
-	/**
-	Replaces app-specific placeholder strings in the given URL with a corresponding value.
-	*/
-	func replacePlaceholders(of url: URL) throws -> URL? {
-		// Here we swap out `[[screenWidth]]` and `[[screenHeight]]` for their actual values.
-		// We proceed only if we have an `NSScreen` to work with.
-		guard let screen = desktopWindow.targetDisplay?.screen ?? .main else {
-			return nil
-		}
-
-		return try url
-			.replacingPlaceholder("[[screenWidth]]", with: String(format: "%.0f", screen.frameWithoutStatusBar.width))
-			.replacingPlaceholder("[[screenHeight]]", with: String(format: "%.0f", screen.frameWithoutStatusBar.height))
 	}
 }

@@ -8,7 +8,7 @@ extension AppState {
 
 		var url = website.url
 		do {
-			url = try replacePlaceholders(of: url) ?? url
+			url = try primaryScene.replacePlaceholders(of: url) ?? url
 		} catch {
 			error.presentAsModal()
 			return
@@ -143,21 +143,34 @@ extension AppState {
 	private func addDisplayItemIfNeeded() {
 		let displays = Display.all
 
-		guard displays.count > 1 else {
+		guard
+			displays.count > 1,
+			let website = WebsitesController.shared.current
+		else {
 			return
 		}
 
 		menu.addSeparator()
 
 		let submenu = SSMenu()
-		let chosen = Defaults[.display]?.withFallbackToMain ?? Display.main
+
+		submenu.addCallbackItem(
+			"Default display",
+			isChecked: website.display == nil
+		) {
+			WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
+				$0.display = nil
+			}
+		}
 
 		for display in displays {
 			submenu.addCallbackItem(
 				display.localizedName,
-				isChecked: display == chosen
+				isChecked: website.display == display
 			) {
-				Defaults[.display] = display
+				WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
+					$0.display = display
+				}
 			}
 		}
 

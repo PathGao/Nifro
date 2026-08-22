@@ -61,3 +61,26 @@ struct CropSetting: View {
 		)
 	}
 }
+
+/**
+Which display a website appears on.
+
+Only offered when there is more than one display: on a single-display Mac the choice does not exist, and the answer to "show a different page on each screen" — the most-asked-for thing upstream (Plash#2) — is that the display belongs to the website, not to the app.
+*/
+struct WebsiteDisplaySetting: View {
+	@Binding var display: Display?
+
+	@ObservedObject private var displays = Display.observable
+
+	var body: some View {
+		if displays.wrappedValue.all.count > 1 {
+			Picker("Show on", selection: $display) {
+				Text("Default display").tag(nil as Display?)
+				ForEach(displays.wrappedValue.all) { candidate in
+					Text(candidate.localizedName).tag(candidate as Display?)
+				}
+			}
+			.help("Each website can live on its own screen. “Default display” follows the choice in Settings.")
+		}
+	}
+}

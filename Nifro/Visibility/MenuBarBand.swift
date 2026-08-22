@@ -27,12 +27,12 @@ final class MenuBarBandView: NSView {
 	override func hitTest(_ point: CGPoint) -> NSView? { nil }
 }
 
-extension AppState {
+extension WallpaperScene {
 	/**
 	Height of the strip the menu bar occupies on the wallpaper's screen, or 0 when there is none.
 	*/
 	var menuBarHeight: CGFloat {
-		guard let screen = desktopWindow.targetDisplay?.screen ?? .main else {
+		guard let screen else {
 			return 0
 		}
 
@@ -55,7 +55,7 @@ extension AppState {
 			return
 		}
 
-		guard let contentView = desktopWindow.contentView else {
+		guard let contentView = window.contentView else {
 			return
 		}
 

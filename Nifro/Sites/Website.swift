@@ -18,6 +18,19 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	*/
 	var crop: CGRect?
 
+	/**
+	Which display to show this website on. `nil` follows the display chosen in Settings.
+
+	The single most-asked-for thing upstream was not "show the same page on every screen" but "show a different page on each" — a calendar on one, a dashboard on the other (Plash#2, 47 reactions). That needs the display to be a property of the website rather than a single app-wide setting.
+	*/
+	var display: Display?
+
+	/**
+	The display this website actually appears on.
+	*/
+	@MainActor
+	var effectiveDisplay: Display? { display ?? Defaults[.display] }
+
 	var subtitle: String { url.humanString }
 
 	var menuTitle: String { title.isEmpty ? subtitle : title }

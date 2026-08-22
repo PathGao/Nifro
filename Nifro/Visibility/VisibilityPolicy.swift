@@ -17,7 +17,7 @@ largest patch of wallpaper still on show
 
 The middle case is the one that matters in practice. The web view keeps its full-screen layout — the page must still believe it has the whole screen or it reflows and the strip shows different content — and only the part on show gets painted. WebKit paints by tile against the exposed rectangle, so a window the width of the Dock paints a fraction of what a full-screen one does.
 */
-extension AppState {
+extension WallpaperScene {
 	/**
 	How much of the screen has to stay on show before rendering the whole thing is worth it.
 
@@ -32,17 +32,17 @@ extension AppState {
 
 	var isVisibilityManagementEnabled: Bool {
 		Defaults[.freezeWhenCovered]
-			&& isEnabled
-			&& !isBrowsingMode
-			&& WebsitesController.shared.current != nil
+			&& AppState.shared.isEnabled
+			&& !AppState.shared.isBrowsingMode
+			&& website != nil
 			// A website with its own crop already decides what is shown and how big the window is. Two things moving the same window would fight.
-			&& WebsitesController.shared.current?.crop == nil
+			&& website?.crop == nil
 	}
 
 	func applyVisibilityState() {
 		guard
 			isVisibilityManagementEnabled,
-			let screen = desktopWindow.targetDisplay?.screen ?? .main
+			let screen
 		else {
 			restoreFullRendering()
 			return
@@ -78,7 +78,7 @@ extension AppState {
 
 		frozenView = nil
 		renderedRegion = nil
-		desktopWindow.cropRect = nil
+		window.cropRect = nil
 		installContentView()
 
 		// Belt and braces: the launch-time hide is cleared on a timer, and this path can run before that timer fires.
@@ -102,8 +102,8 @@ extension AppState {
 
 		let pageRegion = snapped.pageFrame(inScreen: screen.frame)
 
-		desktopWindow.cropRect = pageRegion
-		desktopWindow.contentView = CropView(
+		window.cropRect = pageRegion
+		window.contentView = CropView(
 			content: webViewController.webView,
 			crop: pageRegion,
 			pageSize: screen.frame.size
@@ -150,15 +150,15 @@ extension AppState {
 	}
 
 	private func installFrozenView(showing image: NSImage?) {
-		let view = NSImageView(frame: desktopWindow.contentLayoutRect)
+		let view = NSImageView(frame: window.contentLayoutRect)
 		view.imageScaling = .scaleAxesIndependently
 		view.image = image
 		view.autoresizingMask = [.width, .height]
 
 		renderedRegion = nil
 		frozenView = view
-		desktopWindow.cropRect = nil
-		desktopWindow.contentView = view
+		window.cropRect = nil
+		window.contentView = view
 	}
 
 	private func settlePendingReload() {
@@ -168,6 +168,6 @@ extension AppState {
 		}
 
 		isReloadPending = false
-		reloadWebsite()
+		reload()
 	}
 }

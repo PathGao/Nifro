@@ -36,21 +36,26 @@ extension AppState {
 			}
 			.store(in: &cancellables)
 
-		occlusionMonitor.visibleRegionPublisher
-			.sink { [self] _ in
-				applyVisibilityState()
-			}
-			.store(in: &cancellables)
-
 		Defaults.publisher(.solidColorUnderMenuBar, options: [])
 			.sink { [self] _ in
-				installMenuBarBandIfNeeded()
+				for scene in scenes {
+					scene.installMenuBarBandIfNeeded()
+				}
 			}
 			.store(in: &cancellables)
 
 		Defaults.publisher(.freezeWhenCovered, options: [])
 			.sink { [self] _ in
-				applyVisibilityState()
+				for scene in scenes {
+					scene.applyVisibilityState()
+				}
+			}
+			.store(in: &cancellables)
+
+		// Plugging or unplugging a display changes how many wallpapers there should be.
+		NSScreen.publisher
+			.sink { [self] in
+				rebuildScenes()
 			}
 			.store(in: &cancellables)
 
@@ -100,25 +105,33 @@ extension AppState {
 
 		Defaults.publisher(.opacity)
 			.sink { [self] _ in
-				applyOpacity()
+				for scene in scenes {
+					scene.applyOpacity()
+				}
 			}
 			.store(in: &cancellables)
 
 		Defaults.publisher(.dimWhenUnfocused, options: [])
 			.sink { [self] _ in
-				applyOpacity()
+				for scene in scenes {
+					scene.applyOpacity()
+				}
 			}
 			.store(in: &cancellables)
 
 		Defaults.publisher(.dimmedOpacityFactor, options: [])
 			.sink { [self] _ in
-				applyOpacity()
+				for scene in scenes {
+					scene.applyOpacity()
+				}
 			}
 			.store(in: &cancellables)
 
 		NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didActivateApplicationNotification)
 			.sink { [self] _ in
-				applyOpacity()
+				for scene in scenes {
+					scene.applyOpacity()
+				}
 			}
 			.store(in: &cancellables)
 
@@ -129,8 +142,8 @@ extension AppState {
 			.store(in: &cancellables)
 
 		Defaults.publisher(.display, options: [])
-			.sink { [self] change in
-				desktopWindow.targetDisplay = change.newValue
+			.sink { [self] _ in
+				rebuildScenes()
 			}
 			.store(in: &cancellables)
 
@@ -142,13 +155,17 @@ extension AppState {
 
 		Defaults.publisher(.showOnAllSpaces)
 			.sink { [self] change in
-				desktopWindow.collectionBehavior.toggleExistence(.canJoinAllSpaces, shouldExist: change.newValue)
+				for scene in scenes {
+					scene.window.collectionBehavior.toggleExistence(.canJoinAllSpaces, shouldExist: change.newValue)
+				}
 			}
 			.store(in: &cancellables)
 
 		Defaults.publisher(.bringBrowsingModeToFront, options: [])
 			.sink { [self] _ in
-				desktopWindow.isInteractive = desktopWindow.isInteractive
+				for scene in scenes {
+					scene.window.isInteractive = scene.window.isInteractive
+				}
 			}
 			.store(in: &cancellables)
 

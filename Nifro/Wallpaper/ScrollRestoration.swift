@@ -10,7 +10,7 @@ The position is captured just before a reload rather than polled, so nothing run
 
 `WKWebView.interactionState` would restore history, form state and scroll in one property and is the fuller answer. It is not used here because applying it drives a navigation, and a stale or rejected blob leaves a blank wallpaper with no obvious way back — a failure this could not be tested against before shipping. Scrolling fails safe: if it does not work, the page is merely at the top.
 */
-extension AppState {
+extension WallpaperScene {
 	private static let scrollPositionKeyPrefix = "scrollPosition_"
 
 	private func scrollPositionKey(for url: URL) -> Defaults.Key<[Double]?> {

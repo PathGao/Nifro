@@ -14,7 +14,7 @@ Loading into a second web view fixes all three at once: the current page stays u
 
 Deliberately scoped to *replacing* a page. The first load of the session still goes straight into the window, because there is nothing to protect yet and no reason to put the one path that has to work behind new machinery.
 */
-extension AppState {
+extension WallpaperScene {
 	/**
 	How long to let a replacement load before giving up on it and keeping what is already on screen.
 	*/
@@ -25,13 +25,13 @@ extension AppState {
 
 	Falls back to loading in place when there is nothing on screen worth protecting.
 	*/
-	func loadURLBySwapping(_ url: URL?) {
+	func loadBySwapping(_ url: URL?) {
 		guard
 			let url,
 			webViewController.webView.url != nil,
 			frozenView == nil
 		else {
-			loadURL(url)
+			load(url)
 			return
 		}
 
@@ -60,7 +60,7 @@ extension AppState {
 					return
 				}
 
-				webViewError = error
+				AppState.shared.webViewError = error
 				return
 			}
 
@@ -68,7 +68,7 @@ extension AppState {
 				return
 			}
 
-			webViewError = nil
+			AppState.shared.webViewError = nil
 			adopt(replacement)
 		}
 	}
@@ -78,10 +78,10 @@ extension AppState {
 	*/
 	private func adopt(_ replacement: SSWebView) {
 		replacement.isHidden = false
-		webViewController.adopt(replacement)
+		adoptWebView(replacement)
 		installContentView()
 
-		guard let contentView = desktopWindow.contentView else {
+		guard let contentView = window.contentView else {
 			return
 		}
 

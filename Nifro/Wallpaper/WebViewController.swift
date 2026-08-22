@@ -3,6 +3,11 @@ import Cocoa
 import WebKit
 
 final class WebViewController: NSViewController {
+	/**
+	The scene this controller draws into. Weak because the scene owns the controller.
+	*/
+	weak var scene: WallpaperScene?
+
 	private var popupWindow: NSWindow?
 	private let didLoadSubject = PassthroughSubject<Void, Error>()
 	private var currentDownloadFile: URL?
@@ -230,8 +235,8 @@ extension WebViewController: WKNavigationDelegate {
 		webView.centerAndAspectFillImage(mimeType: response?.mimeType)
 
 		recordTitleIfNeeded(from: webView)
-		AppState.shared.refreshMenuBarBandColor()
-		AppState.shared.restoreScrollPosition(in: webView)
+		scene?.refreshMenuBarBandColor()
+		scene?.restoreScrollPosition(in: webView)
 
 		internalOnLoaded(nil)
 	}
