@@ -162,6 +162,38 @@ extension AppState {
 		menu.addCallbackItem("Websites…") {
 			Constants.openWebsitesWindow()
 		}
+
+		addDisplayItemIfNeeded()
+	}
+
+	/**
+	Which display to show the wallpaper on, one level down from the menu bar icon.
+
+	Only shown when there is more than one display: on a single-display Mac the choice does not exist, and a menu item that always says the same thing is noise. Buried in Settings it is a chore for anyone who docks and undocks a laptop several times a day (Plash#195).
+	*/
+	private func addDisplayItemIfNeeded() {
+		let displays = Display.all
+
+		guard displays.count > 1 else {
+			return
+		}
+
+		menu.addSeparator()
+
+		let submenu = SSMenu()
+		let chosen = Defaults[.display]?.withFallbackToMain ?? Display.main
+
+		for display in displays {
+			submenu.addCallbackItem(
+				display.localizedName,
+				isChecked: display == chosen
+			) {
+				Defaults[.display] = display
+			}
+		}
+
+		menu.addItem("Show on")
+			.withSubmenu(submenu)
 	}
 
 	func updateMenu() {

@@ -16,6 +16,8 @@
 		E32421562384F09D00D28A91 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = E32421552384F09D00D28A91 /* Constants.swift */; };
 		E32421582384F0E600D28A91 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = E32421572384F0E600D28A91 /* Utilities.swift */; };
 		E324215A2384FBE500D28A91 /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E32421592384FBE500D28A91 /* WebViewController.swift */; };
+		3A6D23E265F2D846E64E08F3 /* SwapLoading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37A22FF14B425D5D7E6F2A3D /* SwapLoading.swift */; };
+		17E64A773B2907C884AD5849 /* ScrollRestoration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8BB5B9537B30041D469CE55C /* ScrollRestoration.swift */; };
 		F7CEB84C882E8730A2C4B649 /* MenuBarBand.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB494D7D82CDA92E0D71731F /* MenuBarBand.swift */; };
 		BDFCFA72BA731BAB9380DAC9 /* VisibilityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7D1774A2E51E303343371E8 /* VisibilityPolicy.swift */; };
 		2304ABCA5B85D50BF749039D /* Geometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A081BCFF6DF8B8B2FB4CB31B /* Geometry.swift */; };
@@ -78,6 +80,8 @@
 		E32421552384F09D00D28A91 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Constants.swift; sourceTree = "<group>"; usesTabs = 1; };
 		E32421572384F0E600D28A91 /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Utilities.swift; sourceTree = "<group>"; usesTabs = 1; };
 		E32421592384FBE500D28A91 /* WebViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = WebViewController.swift; sourceTree = "<group>"; usesTabs = 1; };
+		37A22FF14B425D5D7E6F2A3D /* SwapLoading.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = SwapLoading.swift; sourceTree = "<group>"; usesTabs = 1; };
+		8BB5B9537B30041D469CE55C /* ScrollRestoration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ScrollRestoration.swift; sourceTree = "<group>"; usesTabs = 1; };
 		DB494D7D82CDA92E0D71731F /* MenuBarBand.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = MenuBarBand.swift; sourceTree = "<group>"; usesTabs = 1; };
 		E7D1774A2E51E303343371E8 /* VisibilityPolicy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = VisibilityPolicy.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A081BCFF6DF8B8B2FB4CB31B /* Geometry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Geometry.swift; sourceTree = "<group>"; usesTabs = 1; };
@@ -158,6 +162,8 @@
 				E32421462384EB4E00D28A91 /* DesktopWindow.swift */,
 				E30FD88823C4515200C716E9 /* SSWebView.swift */,
 				E32421592384FBE500D28A91 /* WebViewController.swift */,
+				37A22FF14B425D5D7E6F2A3D /* SwapLoading.swift */,
+				8BB5B9537B30041D469CE55C /* ScrollRestoration.swift */,
 				DB494D7D82CDA92E0D71731F /* MenuBarBand.swift */,
 				E7D1774A2E51E303343371E8 /* VisibilityPolicy.swift */,
 				A081BCFF6DF8B8B2FB4CB31B /* Geometry.swift */,
@@ -349,6 +355,8 @@
 				E384F28024C3B37E002FD21B /* Events.swift in Sources */,
 				E384F28224C3B3CD002FD21B /* Menus.swift in Sources */,
 				E324215A2384FBE500D28A91 /* WebViewController.swift in Sources */,
+				3A6D23E265F2D846E64E08F3 /* SwapLoading.swift in Sources */,
+				17E64A773B2907C884AD5849 /* ScrollRestoration.swift in Sources */,
 				F7CEB84C882E8730A2C4B649 /* MenuBarBand.swift in Sources */,
 				BDFCFA72BA731BAB9380DAC9 /* VisibilityPolicy.swift in Sources */,
 				2304ABCA5B85D50BF749039D /* Geometry.swift in Sources */,

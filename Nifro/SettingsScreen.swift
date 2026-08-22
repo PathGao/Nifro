@@ -58,6 +58,8 @@ private struct AdvancedSettings: View {
 				Defaults.Toggle("Deactivate while on battery", key: .deactivateOnBattery)
 				FreezeWhenCoveredSetting()
 				SolidColorUnderMenuBarSetting()
+				Defaults.Toggle("Restore scroll position after reload", key: .restoreScrollPosition)
+				Defaults.Toggle("Reload when the Mac wakes", key: .reloadOnWake)
 				OpenExternalLinksInBrowserSetting()
 				HideMenuBarIconSetting()
 				Defaults.Toggle("Mute audio", key: .muteAudio)

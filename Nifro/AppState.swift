@@ -34,6 +34,12 @@ final class AppState: ObservableObject {
 
 			desktopWindow.isInteractive = isBrowsingMode
 			desktopWindow.alphaValue = isBrowsingMode ? 1 : Defaults[.opacity]
+
+			// Making the window key is not enough when the app is an accessory: the window comes forward but keystrokes still go to whatever was active, so the page cannot be typed into. Plash#114.
+			if isBrowsingMode {
+				SSApp.forceActivate()
+			}
+
 			applyVisibilityState()
 			resetTimer()
 		}
@@ -81,6 +87,12 @@ final class AppState: ObservableObject {
 	Opaque band covering the strip of wallpaper behind the menu bar, when the user asked for colour without content.
 	*/
 	var menuBarBand: MenuBarBandView?
+
+	/**
+	The replacement page being loaded out of sight, and the task driving it.
+	*/
+	var pendingWebView: SSWebView?
+	var pendingLoad: Task<Void, Never>?
 
 	/**
 	A reload came due while frozen and still has to happen.
@@ -212,10 +224,10 @@ final class AppState: ObservableObject {
 	}
 
 	func reloadWebsite() {
-		// We always load the website the user specified in case it's a redirect that may change on each call.
-		loadUserURL()
+		captureScrollPosition()
 
-//		webViewController.reloadCurrentPageFromOrigin()
+		// Always the URL the user specified rather than the current one: it may be a redirect that resolves differently each time.
+		loadURLBySwapping(WebsitesController.shared.current?.url)
 	}
 
 	func loadUserURL() {

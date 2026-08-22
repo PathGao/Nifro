@@ -12,11 +12,11 @@ extension AppState {
 			title: "Welcome to Nifro!",
 			message:
 				"""
-				Nifro lives in the menu bar (droplet icon at the top-right of the screen). Click it and then select “Add Website…” to get started.
+				Nifro lives in the menu bar, towards the right of the screen. Click its icon and choose “Add Website…” to get started.
 
-				Use “Browsing Mode” if you need to log into a website or interact with it in some way.
+				Use “Browsing Mode” when you need to log into a site or interact with it. Everything you do there is remembered, so you only have to sign in once.
 
-				Note: Support for multiple displays is currently limited to the ability to choose which display to show the website on.
+				Not sure what to put up there? “More › Site Gallery” has a list of pages that work well as wallpapers, each with the settings that make it work.
 				""",
 			buttonTitles: [
 				"Continue"
@@ -28,7 +28,7 @@ extension AppState {
 			title: "Feedback Welcome",
 			message:
 				"""
-				If you have any feedback, bug reports, or feature requests, use the feedback button in the app. I quickly respond to all submissions.
+				Nifro is open source and its issue tracker is open. If something is broken, missing, or just annoying, the feedback button in the app goes straight there.
 				""",
 			buttonTitles: [
 				"Get Started with Nifro"

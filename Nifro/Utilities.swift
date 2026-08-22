@@ -1403,7 +1403,15 @@ extension NSEvent {
 
 
 extension WKWebView {
-	static let safariUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3 Safari/605.1.15"
+	/**
+	A Safari user agent whose version number tracks the system instead of being frozen at build time.
+
+	A hardcoded version rots: sites that gate on it start showing "your browser is out of date" a year or two after release, which is exactly what happened upstream (Plash#169 — Google Calendar, four people, two years). Safari's marketing version has tracked the macOS major version since macOS 26, so deriving it from the running system keeps this honest for free.
+	*/
+	static let safariUserAgent: String = {
+		let major = ProcessInfo.processInfo.operatingSystemVersion.majorVersion
+		return "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/\(major).0 Safari/605.1.15"
+	}()
 	static let chromeUserAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
 
 	/**
@@ -1626,12 +1634,30 @@ extension WKWebView {
 	static nonisolated func createCSSInjectScript(_ css: String) -> String {
 		let textContent = css.addingPercentEncoding(withAllowedCharacters: .letters) ?? css
 
+		// Injected at document start, so the style element gets appended to a document the page has not finished building. Frameworks that swap out `documentElement` or clear `head` on mount take our style with them, and the user's CSS silently stops applying — the failure people report as "my CSS works in Safari but not here" (Plash#173).
+		//
+		// Re-appending on mutation is the fix. The observer is cheap because it only watches childList on the root, and re-appending the same element is a move, not a duplicate.
 		return
 			"""
 			(() => {
 				const style = document.createElement('style');
 				style.textContent = unescape('\(textContent)');
-				document.documentElement.appendChild(style);
+				style.dataset.nifroInjected = 'css';
+
+				const attach = () => {
+					const root = document.head ?? document.documentElement;
+
+					if (root && style.parentNode !== root) {
+						root.appendChild(style);
+					}
+				};
+
+				attach();
+
+				new MutationObserver(attach).observe(document, {
+					childList: true,
+					subtree: true
+				});
 			})();
 			"""
 	}

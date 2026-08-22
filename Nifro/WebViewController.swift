@@ -93,6 +93,21 @@ final class WebViewController: NSViewController {
 		return webView
 	}
 
+	/**
+	A second web view, configured exactly like the live one, for loading a replacement page out of sight.
+	*/
+	func makeReplacementWebView() -> SSWebView {
+		createWebView()
+	}
+
+	/**
+	Take a finished replacement as the live web view.
+	*/
+	func adopt(_ replacement: SSWebView) {
+		webView = replacement
+		view = replacement
+	}
+
 	func recreateWebView() {
 		webView = createWebView()
 		view = webView
@@ -146,6 +161,21 @@ final class WebViewController: NSViewController {
 
 extension WebViewController: WKNavigationDelegate {
 	func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
+		// Holding Command or Option sends a link to the default browser whatever the settings say. Matches what the same chord does in every other Mac app that embeds a web view, and it is the only way to get at a same-site link without changing a setting first. Plash#140.
+		if
+			navigationAction.navigationType == .linkActivated,
+			!NSEvent.modifiers.intersection([.command, .option]).isEmpty,
+			let newURL = navigationAction.request.url
+		{
+			if Defaults[.isBrowsingMode], Defaults[.bringBrowsingModeToFront] {
+				Defaults[.isBrowsingMode] = false
+			}
+
+			newURL.open()
+
+			return .cancel
+		}
+
 		if
 			Defaults[.openExternalLinksInBrowser],
 			navigationAction.navigationType == .linkActivated,
@@ -192,6 +222,7 @@ extension WebViewController: WKNavigationDelegate {
 
 		recordTitleIfNeeded(from: webView)
 		AppState.shared.refreshMenuBarBandColor()
+		AppState.shared.restoreScrollPosition(in: webView)
 
 		internalOnLoaded(nil)
 	}
