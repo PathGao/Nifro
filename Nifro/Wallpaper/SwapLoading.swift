@@ -106,6 +106,9 @@ extension SSWebView {
 	@MainActor
 	func loadAndWait(_ url: URL, timeout: Duration) async throws {
 		if url.isFileURL {
+			// Without this the sandbox refuses the read. Swap loading keeps the old page on failure,
+			// so the refusal would show up as a local website that silently stops updating.
+			_ = url.accessSandboxedURLByPromptingIfNeeded()
 			loadFileURL(url.appendingPathComponent("index.html", isDirectory: false), allowingReadAccessTo: url)
 		} else {
 			var request = URLRequest(url: url)

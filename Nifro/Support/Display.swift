@@ -191,3 +191,17 @@ extension Display: Defaults.Serializable {
 
 	static let bridge = Bridge()
 }
+
+extension NSScreen {
+	/**
+	The screen rectangle a wallpaper page lays out in.
+
+	Both the size the page is given and the origin its coordinates are measured from have to come
+	from here. They were separate answers to one question once, and a crop stored against one and
+	displayed against the other lands a menu bar height away from where it was framed.
+	*/
+	@MainActor
+	var pageFrame: CGRect {
+		Defaults[.extendBelowMenuBar] ? frame : frameWithoutStatusBar
+	}
+}

@@ -69,7 +69,7 @@ extension AppState {
 		// View coordinates → screen coordinates → page coordinates.
 		let inWindow = desktopWindow.contentView?.convert(selection, to: nil) ?? selection
 		let onScreen = desktopWindow.convertToScreen(inWindow)
-		let page = onScreen.pageFrame(inScreen: screen.frame).integral
+		let page = onScreen.pageFrame(inScreen: screen.pageFrame).integral
 
 		WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
 			$0.crop = page

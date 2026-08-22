@@ -44,7 +44,7 @@ through Swift Package Manager and Xcode resolves them on first open.
 
 ```
 git clone https://github.com/PathGao/nifro.git
-open nifro/Plash.xcodeproj
+open nifro/Nifro.xcodeproj
 ```
 
 Then build and run the `Plash` scheme. (The Xcode project, its targets and the
@@ -55,7 +55,7 @@ passing — don't rename them as part of an unrelated change.)
 - **Swift 6 language mode.** Concurrency errors are errors, not warnings. If
   you hit one, the fix is almost always to move the work onto the actor that
   owns the state rather than to add `@unchecked Sendable`.
-- **Deployment target: macOS 26.0.** New API is available and you should use
+- **Deployment target: macOS 15.0.** New API is available and you should use
   it. There is no back-compatibility to preserve.
 - **SwiftLint** runs as a build phase, so a clean build means a clean lint.
   Install it with `brew install swiftlint`; without it the build phase warns
@@ -66,8 +66,15 @@ passing — don't rename them as part of an unrelated change.)
 - Match the style of the file you're in. Indentation and line endings are
   covered by `.editorconfig`.
 
-There is no test target. That means the burden of showing a change works falls
-on the description of what you ran — see below.
+The pure logic behind cropping, occlusion and scheduling has tests that run without an
+app bundle or a window server:
+
+```sh
+swift test
+```
+
+Everything else has no automated coverage, so the burden of showing a change works
+falls on the description of what you ran. See below.
 
 ## Pull requests
 

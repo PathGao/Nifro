@@ -95,8 +95,8 @@ Coverage detection. What it has to get right is the difference between "one patc
 struct CoverageTests {
 	private let screen = CGRect(x: 0, y: 0, width: 1600, height: 1000)
 
-	/// Roughly 200×200pt, matching `OcclusionMonitor.minimumMeaningfulPatchArea`.
-	private let meaningful = 40_000.0
+	/// The same constant the app checks against, not a copy of it.
+	private let meaningful = minimumMeaningfulPatchArea
 
 	@Test("Nothing on screen leaves the whole screen visible")
 	func noWindows() {
@@ -150,6 +150,25 @@ struct CoverageTests {
 
 		// Each margin is its own patch, and every one of them is too thin to matter.
 		#expect(largestUncoveredRegion(of: screen, covering: [window]).area < meaningful)
+	}
+
+	@Test("The threshold sits between a patch you would notice and one you would not")
+	func thresholdBracket() {
+		// The assertions about thin strips pass for any positive threshold: the grid rounds a 15pt
+		// band to zero area on its own, so they test the grid, not the number. These two bracket the
+		// number itself. On this screen a grid cell is 25 by 25, so the threshold is 64 cells.
+		func corner(_ side: Double) -> [CGRect] {
+			[
+				CGRect(x: side, y: 0, width: 1600 - side, height: 1000),
+				CGRect(x: 0, y: side, width: 1600, height: 1000 - side)
+			]
+		}
+
+		// 12 by 12 cells.
+		#expect(largestUncoveredRegion(of: screen, covering: corner(300)).area > meaningful)
+
+		// 6 by 6 cells.
+		#expect(largestUncoveredRegion(of: screen, covering: corner(150)).area < meaningful)
 	}
 
 	@Test("A genuinely visible desktop stays above the threshold")

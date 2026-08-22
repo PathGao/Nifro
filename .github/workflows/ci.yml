@@ -104,6 +104,10 @@ jobs:
       # The app reads sites/index.json directly from this branch, and falls back to a
       # snapshot compiled into the binary. Both are generated, so a YAML change that
       # forgets to regenerate them would silently never reach anyone.
+      # Cross-target identifiers no compiler compares. See the script for why.
+      - name: Check the URL scheme matches in both targets
+        run: python3 scripts/check-url-scheme.py
+
       - name: Check the generated catalogue is current
         run: |
           python3 scripts/generate-site-catalog.py

@@ -101,7 +101,7 @@ final class DesktopWindow: NSWindow {
 
 		// A cropped website gets a window the size of its crop. Anything larger would keep covering the desktop it was supposed to give back.
 		if let cropRect {
-			setFrame(cropRect.screenFrame(inScreen: screen.frame), display: true)
+			setFrame(cropRect.screenFrame(inScreen: screen.pageFrame), display: true)
 			return
 		}
 

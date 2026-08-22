@@ -25,12 +25,7 @@ extension WallpaperScene {
 	*/
 	private static let fullRenderFraction = 0.6
 
-	/**
-	How big a patch has to be, in square points, to be worth rendering at all, roughly 200×200pt.
-	*/
-	private static let minimumMeaningfulPatchArea = 40_000.0
-
-	func applyVisibilityState() {
+		func applyVisibilityState() {
 		guard
 			renderingMode == .managed,
 			let screen
@@ -52,7 +47,7 @@ extension WallpaperScene {
 			return
 		}
 
-		if visible.area >= Self.minimumMeaningfulPatchArea {
+		if visible.area >= minimumMeaningfulPatchArea {
 			renderOnly(visible.rect, on: screen)
 			return
 		}
@@ -82,7 +77,7 @@ extension WallpaperScene {
 
 	private func renderOnly(_ region: CGRect, on screen: NSScreen) {
 		// Snapping to whole points keeps a one-pixel jitter in the coverage grid from rebuilding the view every poll.
-		let pageRegion = region.integral.pageFrame(inScreen: screen.frame)
+		let pageRegion = region.integral.pageFrame(inScreen: screen.pageFrame)
 
 		if case .reduced(let current) = content, current == pageRegion {
 			return
@@ -117,7 +112,7 @@ extension WallpaperScene {
 			guard
 				let self,
 				renderingMode == .managed,
-				occlusionMonitor.largestVisibleRegion.area < Self.minimumMeaningfulPatchArea,
+				occlusionMonitor.largestVisibleRegion.area < minimumMeaningfulPatchArea,
 				!isFrozen
 			else {
 				return

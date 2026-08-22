@@ -173,3 +173,24 @@ extension SSApp {
 extension SSApp {
 
 }
+
+extension Bundle {
+	/**
+	The first URL scheme this bundle registers.
+
+	Read rather than repeated. The scheme is declared in `Info.plist`, which is what actually makes
+	the system route a URL here, so a Swift copy of the string is a second answer that no compiler
+	compares against the first. Getting them out of step shows up as the share extension doing
+	nothing, with nothing going red.
+	*/
+	var urlScheme: String? {
+		guard
+			let types = object(forInfoDictionaryKey: "CFBundleURLTypes") as? [[String: Any]],
+			let schemes = types.first?["CFBundleURLSchemes"] as? [String]
+		else {
+			return nil
+		}
+
+		return schemes.first
+	}
+}

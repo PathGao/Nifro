@@ -109,13 +109,8 @@ final class WallpaperScene {
 
 	`renderOnly` used to answer this with `screen.frame.size` while `installContentView` answered with `screen.frameWithoutStatusBar.size`, so the same crop showed different content depending on which path installed it.
 	*/
-	var pageLayoutSize: CGSize? {
-		guard let screen else {
-			return nil
-		}
+	var pageLayoutSize: CGSize? { screen?.pageFrame.size }
 
-		return Defaults[.extendBelowMenuBar] ? screen.frame.size : screen.frameWithoutStatusBar.size
-	}
 
 	/**
 	Show the live page, cropped when the website asks for one.

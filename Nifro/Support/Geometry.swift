@@ -6,6 +6,20 @@ The geometry behind cropping and coverage detection.
 Kept free of AppKit so the tests can call it directly. Everything here is a pure function of rectangles. The views and windows that call it only supply the numbers.
 */
 
+/**
+How big one uncovered patch has to be, in square points, to be worth rendering live.
+
+Roughly 200 by 200 points, a block you would notice on any display. An absolute size rather than a
+share of the screen: a percentage means something different on a 6K display than on a laptop, and
+four thin margins around a nearly maximised window add up to a healthy percentage while showing
+nothing anybody would call a wallpaper.
+
+It lives here rather than next to the code that reads it so the tests can assert against the same
+number the app uses. A threshold and the check guarding it in two files means changing the threshold
+leaves every test green.
+*/
+let minimumMeaningfulPatchArea = 40_000.0
+
 extension CGRect {
 	/**
 	Where a page has to sit inside a crop window so that `self` is what shows. `self` is a region in page coordinates with the origin at the top-left.

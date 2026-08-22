@@ -10,7 +10,7 @@ extension AppState {
 	}
 
 	private func handleURLCommands(_ urlComponents: URLComponents) {
-		guard urlComponents.scheme == "nifro" else {
+		guard urlComponents.scheme == Bundle.main.urlScheme else {
 			return
 		}
 
