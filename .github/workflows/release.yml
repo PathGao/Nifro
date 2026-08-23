@@ -102,17 +102,29 @@ jobs:
           security list-keychain -d user -s "$keychain" login.keychain-db
 
           rm -f "$RUNNER_TEMP/cert.p12"
-          security find-identity -v -p codesigning "$keychain"
 
+          # Without `-v`. A self-signed certificate is never "valid" in the sense that flag means —
+          # nothing trusts the root, so it is listed as CSSMERR_TP_NOT_TRUSTED and `-v` reports zero
+          # identities even though the import succeeded. codesign does not care: trust is the
+          # verifier's problem, and signing needs the private key and nothing else. The local build
+          # script has always signed with a certificate this same check calls invalid.
+          listing="$(security find-identity -p codesigning "$keychain")"
+          echo "$listing"
+
+          # By SHA-1 rather than by name: unambiguous, and it does not have to survive being quoted
+          # through an xcodebuild argument.
+          identity="$(printf '%s\n' "$listing" | sed -n 's/^ *[0-9]*) \([0-9A-F]\{40\}\) "\([^"]*\)".*/\1 \2/p' | head -1)"
+          test -n "$identity" || { echo "::error::no code-signing identity in the keychain"; exit 1; }
+          hash="${identity%% *}"
+          name="${identity#* }"
+
+          echo "name=$hash" >> "$GITHUB_OUTPUT"
           # The certificate itself says which path to take, so no second secret has to declare it.
-          name="$(security find-identity -v -p codesigning "$keychain" | sed -n '1s/.*"\(.*\)"$/\1/p')"
-          test -n "$name" || { echo "::error::no code-signing identity in the keychain"; exit 1; }
-          echo "name=$name" >> "$GITHUB_OUTPUT"
           case "$name" in
             "Developer ID Application"*) echo "kind=developer-id" >> "$GITHUB_OUTPUT" ;;
             *)                           echo "kind=self-signed"  >> "$GITHUB_OUTPUT" ;;
           esac
-          echo "Signing identity: $name"
+          echo "Signing identity: $name ($hash)"
 
       - name: Build, notarize and package, one architecture at a time
         id: package
