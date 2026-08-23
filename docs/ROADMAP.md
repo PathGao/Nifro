@@ -234,6 +234,14 @@ of the answer.
 | **M2** | The URL fragment | **Yes, now.** The address the page moved itself to is remembered beside the website's own, never over it, and used only when the two differ in nothing but the fragment. A fragment cannot 404, which is why the check stops there rather than allowing the query as well. Shares the "Put the page back where it was" switch with M3 |
 | **M3** | Document scroll | **On a reload, yes** — `ScrollRestoration` captures it just before reloading and puts it back after. A hard quit loses at most the last scroll, because nothing polls in the background to support it |
 | **M4** | Only in memory | **No, and there is nothing to be done.** A canvas that keeps its camera in a variable and writes it nowhere cannot be asked where it was |
+| **M5** | Half in the address, half in memory | **Half.** floor796 is this, and it is worth reading its own numbers for: `restorePositionFromUrl: true`, `restorePositionFromLS: false`, and a `_matrixPosition._zoomFactor` that appears in neither. So *where* comes back — the fragment is the only route the site supports, which is exactly what M2 restores — and *how close* does not. The two together are what somebody sees, so getting one back still looks wrong |
+
+**Why a site entry cannot patch M5.** Custom per-site JavaScript is injected into
+`.world(name: UUID())`, an isolated world, so it cannot see `window.floor796` or any other page
+global. Persisting a site's own zoom from a site entry would mean injecting into the page's world
+instead — which is a real change of boundary, not a flag: the page could then read and rewrite
+anything a site entry does, and every entry in the catalogue runs on somebody else's machine. Worth
+deciding on purpose if a second site ever needs it; not worth it for one.
 
 **M2 is built.** The manual version already existed — "Update Website to Current" in
 the menu points the stored website at the address currently loaded — which is proof both that people
