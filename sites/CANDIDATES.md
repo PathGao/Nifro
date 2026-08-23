@@ -1,5 +1,7 @@
 # Candidate sites
 
+[简体中文](CANDIDATES.zh-Hans.md)
+
 A pool of pages that look like they would work as wallpapers, kept as links because that is all
 anyone has established about them yet.
 
@@ -23,160 +25,160 @@ Adding a link here is welcome and cheap. Graduating one is worth more.
 
 ---
 
-更新：2026-08-23。此文件只保留适合 Nifro 展示、或适合通过快捷键偶尔介入的网页空间。每个链接均通过 HTTPS/跳转探测；被反爬策略拦住自动探测的页面，已在隔离浏览器中复核其可加载性。无效、证书异常、验证页或请求拒绝的链接已剔除。
+Updated 2026-08-23. This file keeps only pages worth looking at as a wallpaper, or worth stepping into occasionally with the hold-to-interact key. Every link was checked with an HTTPS/redirect probe; pages whose anti-bot rules blocked the probe were opened in an isolated browser to confirm they still load. Dead links, certificate errors, challenge pages and refused requests have been dropped.
 
-筛选基准来自你原先列出的 `Windy`、`World Monitor`、`Floor796`、`A Genealogy of Technology and Power since 1500`、`anime.js`：要么让真实系统显形，要么提供可漫游的网络空间，要么把运动做得克制且有生命感。
+The bar comes from the entries this list started with — `Windy`, `World Monitor`, `Floor796`, `A Genealogy of Technology and Power since 1500`, `anime.js`: a page either makes a real system visible, or offers a space to wander around in, or keeps its motion restrained and alive.
 
-## 世界状态
+## The state of the world
 
-- [Windy](https://www.windy.com/?35.689,139.690,5) — 风、云、浪、雨和航班叠在一张地球上。收起侧栏后，就是持续变化的世界地图。
-- [Earth Nullschool](https://earth.nullschool.net/) — 暗色全球风场、洋流和气温。信息很密，但远看仍然安静。
-- [Zoom Earth](https://zoom.earth/) — 卫星云图、雷达和台风路径。适合让桌面显示“此刻从太空看地球”。
-- [Ventusky](https://www.ventusky.com/) — 更强调颜色和气象层的天气地图，可作为 `Windy` 的视觉替换。
-- [World Monitor](https://worldmonitor.app/) — 冲突、灾害、市场、航运、航班和新闻同时出现的世界状态墙。
-- [LightningMaps.org](https://www.lightningmaps.org/) — 实时闪电网络。比天气预报更像地球传感系统本身。
-- [Submarine Cable Map](https://www.submarinecablemap.com/) — 海底光缆把互联网显露为港口、线路和地缘基础设施。
-- [The Internet Map](https://internet-map.net/) — 以流量和关联绘制的网站星图，让网络空间成为能直接观看的地形。
-- [FlightRadar24](https://www.flightradar24.com/) — 飞机流动形成的全球人流图景。
-- [MarineTraffic](https://www.marinetraffic.com/) — 船舶轨迹让海洋从蓝色空白变成活动中的物流网络。
-- [Google Trends TV](https://trends.google.com/tv/?rows=4&cols=4) — 多屏趋势流，适合展示此时此刻人们正在注意什么。
+- [Windy](https://www.windy.com/?35.689,139.690,5) — Wind, cloud, waves, rain and flights layered over one globe. Collapse the sidebar and what is left is a world map that never stops changing.
+- [Earth Nullschool](https://earth.nullschool.net/) — A dark globe of wind, ocean currents and temperature. Dense up close, still quiet from across the room.
+- [Zoom Earth](https://zoom.earth/) — Satellite cloud imagery, radar and storm tracks, for a desktop that shows what the planet looks like from space right now.
+- [Ventusky](https://www.ventusky.com/) — A weather map built around colour and switchable meteorological layers; the one to use if `Windy` does not look right.
+- [World Monitor](https://worldmonitor.app/) — Conflict, disaster, markets, shipping, flights and news on one wall of world state.
+- [LightningMaps.org](https://www.lightningmaps.org/) — A live lightning detection network, closer to the planet's own sensor feed than to a forecast.
+- [Submarine Cable Map](https://www.submarinecablemap.com/) — Undersea cables, which show the internet as landing points, routes and geopolitical infrastructure.
+- [The Internet Map](https://internet-map.net/) — Websites drawn as a star field by traffic and by what links to what, so the network becomes terrain you can look at directly.
+- [FlightRadar24](https://www.flightradar24.com/) — Aircraft in the air, which is also a picture of where people are going.
+- [MarineTraffic](https://www.marinetraffic.com/) — Ship tracks turn the ocean from blank blue into a logistics network at work.
+- [Google Trends TV](https://trends.google.com/tv/?rows=4&cols=4) — A grid of trend feeds, for showing what people are paying attention to at this moment.
 
-## 公开现场与现实窗口
+## Live cameras and windows onto somewhere real
 
-> 只收录发布者主动公开的地标与自然直播。使用时应进入具体直播机位后，再把该机位的网址交给 Nifro；聚合首页通常有导航和广告。
+> Only landmark and nature streams that their operators publish deliberately. Open the individual camera first and give Nifro that URL; the aggregator front pages carry navigation and ads.
 
-- [WindowSwap](https://www.window-swap.com/) — 随机的一扇真实窗户。没有任务感，适合把桌面打开到另一个地方。
-- [EarthCam](https://www.earthcam.com/) — 城市地标、街头和建设现场的公开直播网络。
-- [SkylineWebcams](https://www.skylinewebcams.com/en.html) — 广场、海岸、滑雪场和遗址的高清公开机位。
-- [Explore.org Live Cams](https://www.explore.org/livecams) — 熊、鹰、海象、海底与保护区的自然直播。
-- [Cornell Lab Bird Cams](https://www.allaboutbirds.org/cams/) — 鸟巢、迁徙和育雏的长期公开直播。
-- [Africam — Elephant Pan](https://africam.com/lodge/elephant-pan/) — 博茨瓦纳 Khwai 私人保护区的水坑直播；页面嵌入 YouTube Live，适合直接交给 Nifro。
+- [WindowSwap](https://www.window-swap.com/) — Someone else's window, picked at random. Nothing asks anything of you, so the desktop just opens onto another place.
+- [EarthCam](https://www.earthcam.com/) — A network of public streams from city landmarks, streets and construction sites.
+- [SkylineWebcams](https://www.skylinewebcams.com/en.html) — High-definition public cameras on squares, coastlines, ski slopes and heritage sites.
+- [Explore.org Live Cams](https://www.explore.org/livecams) — Nature streams of bears, eagles, walruses, reefs and reserves.
+- [Cornell Lab Bird Cams](https://www.allaboutbirds.org/cams/) — Long-running public streams of nests, migration and chicks being raised.
+- [Africam — Elephant Pan](https://africam.com/lodge/elephant-pan/) — A waterhole in the Khwai private reserve in Botswana; the page embeds a YouTube live stream, so it goes straight into Nifro.
 
-## 数字空间
+## Digital spaces
 
-- [Floor796](https://floor796.com/) — 永远在扩建的像素大楼。作为桌面更像一座可以随时走进去的网络城市。
-- [Zoomquilt](https://zoomquilt.org/) — 无尽推进的协作绘画。每一次移动都进入新的梦境，没有复杂 UI。
-- [Slow Roads](https://slowroads.io/) — 自动生成的道路、地形与天气；静置时像一部缓慢的驾驶电影。
-- [Akirodic — Jellyfish](https://akirodic.com/p/jellyfish/) — 有生命感的微型水族箱，适合暗色桌面。
-- [After Dark CSS](https://www.bryanbraun.com/after-dark-css/) — 老 Mac 屏保的 CSS 复刻，轻量又有媒介记忆。
+- [Floor796](https://floor796.com/) — A pixel building under permanent construction, less a picture than a city you can walk into whenever you feel like it.
+- [Zoomquilt](https://zoomquilt.org/) — A collaborative painting that zooms forward forever. Every move lands in another dream, and there is no UI in the way.
+- [Slow Roads](https://slowroads.io/) — Generated road, terrain and weather; left alone it is a slow driving film.
+- [Akirodic — Jellyfish](https://akirodic.com/p/jellyfish/) — A small aquarium with something alive in it, suited to a dark desktop.
+- [After Dark CSS](https://www.bryanbraun.com/after-dark-css/) — The old Mac screensavers rebuilt in CSS: cheap to run, and a record of what screens used to do.
 
-## 图形与动画
+## Graphics and animation
 
-- [Pavel DoGreat — WebGL Fluid Simulation](https://paveldogreat.github.io/WebGL-Fluid-Simulation/) — 静置时是流动的颜色；想互动时再通过 Nifro 快捷键进入页面。
-- [Mr.doob Lab — Clouds](https://mrdoob.com/lab/javascript/webgl/clouds/) — 早期 WebGL 云海实验，安静、不抢画面。
-- [Flat Surface Shader](https://matthew.wagerfield.com/flat-surface-shader/) — 鼠标带动的低多边形空间，颜色和动感都克制。
-- [Patatap](https://patatap.com/) — 键盘触发的声音与图形；不操作时画面保持简洁，适合偶尔互动。
+- [Pavel DoGreat — WebGL Fluid Simulation](https://paveldogreat.github.io/WebGL-Fluid-Simulation/) — Left alone it is colour in motion; hold the Nifro key when you want to stir it.
+- [Mr.doob Lab — Clouds](https://mrdoob.com/lab/javascript/webgl/clouds/) — An early WebGL cloud field, quiet and content to sit behind the windows in front of it.
+- [Flat Surface Shader](https://matthew.wagerfield.com/flat-surface-shader/) — A low-poly surface lit by the pointer, restrained in both colour and movement.
+- [Patatap](https://patatap.com/) — Keys trigger sounds and shapes; untouched, the screen stays plain, which makes it a page for occasional interaction.
 
-## 地图、基础设施与时间
+## Maps, infrastructure and time
 
-- [Starlink Map](https://www.starlink.com/map) — 低轨卫星与覆盖范围。
-- [Satellite Map](https://satellitemap.space/) — 近地卫星的实时位置。
-- [OpenSky Network](https://opensky-network.org/network/explorer) — 开放航空数据的实时视图。
-- [ADS-B Exchange Globe](https://globe.adsbexchange.com/) — 更密集的全球飞行轨迹。
-- [Global Fishing Watch](https://globalfishingwatch.org/map/) — 渔船活动和海洋治理。
-- [NASA Worldview](https://worldview.earthdata.nasa.gov/) — 可叠加的地球卫星观测层。
-- [NASA Eyes](https://eyes.nasa.gov/) — 行星、任务与航天器轨迹。
-- [USGS Earthquake Map](https://earthquake.usgs.gov/earthquakes/map/) — 全球地震的实时分布。
-- [VolcanoDiscovery](https://www.volcanodiscovery.com/earthquakes/today.html) — 地震与火山活动地图。
-- [SpaceWeatherLive](https://www.spaceweatherlive.com/en/auroral-activity/auroral-oval.html) — 极光椭圆和空间天气。
-- [NOAA Aurora Forecast](https://www.swpc.noaa.gov/products/aurora-30-minute-forecast) — 30 分钟极光预测图。
-- [NASA FIRMS](https://firms.modaps.eosdis.nasa.gov/map/) — 全球热源与野火观测。
-- [Global Forest Watch](https://www.globalforestwatch.org/map/) — 森林变化的地球视图。
-- [LiveUAMap](https://liveuamap.com/) — 地缘事件的空间化信息流。
-- [Earth Clock](https://earthclock.cwandt.com/) — 极简地球时间与日照视图。
-- [GeaCron](https://geacron.com/home-en/) — 历史边界随年份变化的地图。
-- [Old Maps Online](https://www.oldmapsonline.org/en/) — 历史地图与今天的叠层。
-- [MapCrunch](https://www.mapcrunch.com/) — 随机落入一个街景地点。
-- [Radio Garden](https://radio.garden/) — 把世界电台铺在可旋转地球上。
-- [AirPano](https://www.airpano.com/) — 高质量 360° 地点漫游。
+- [Starlink Map](https://www.starlink.com/map) — Low-orbit satellites and their coverage.
+- [Satellite Map](https://satellitemap.space/) — Where satellites in low orbit are right now.
+- [OpenSky Network](https://opensky-network.org/network/explorer) — A live view built on open air-traffic data.
+- [ADS-B Exchange Globe](https://globe.adsbexchange.com/) — Denser global flight tracks.
+- [Global Fishing Watch](https://globalfishingwatch.org/map/) — Fishing vessel activity and ocean governance.
+- [NASA Worldview](https://worldview.earthdata.nasa.gov/) — Stackable layers of satellite observation of the Earth.
+- [NASA Eyes](https://eyes.nasa.gov/) — Planets, missions and spacecraft trajectories.
+- [USGS Earthquake Map](https://earthquake.usgs.gov/earthquakes/map/) — Earthquakes worldwide, as they are recorded.
+- [VolcanoDiscovery](https://www.volcanodiscovery.com/earthquakes/today.html) — A map of earthquake and volcanic activity.
+- [SpaceWeatherLive](https://www.spaceweatherlive.com/en/auroral-activity/auroral-oval.html) — The auroral oval and space weather.
+- [NOAA Aurora Forecast](https://www.swpc.noaa.gov/products/aurora-30-minute-forecast) — The 30-minute aurora forecast map.
+- [NASA FIRMS](https://firms.modaps.eosdis.nasa.gov/map/) — Global heat sources and wildfire observations.
+- [Global Forest Watch](https://www.globalforestwatch.org/map/) — The Earth seen by how its forests are changing.
+- [LiveUAMap](https://liveuamap.com/) — Geopolitical events placed on a map.
+- [Earth Clock](https://earthclock.cwandt.com/) — A minimal view of Earth time and daylight.
+- [GeaCron](https://geacron.com/home-en/) — Historical borders redrawn as the year moves.
+- [Old Maps Online](https://www.oldmapsonline.org/en/) — Historical maps laid over today's.
+- [MapCrunch](https://www.mapcrunch.com/) — Dropped into a random Street View location.
+- [Radio Garden](https://radio.garden/) — The world's radio stations spread over a globe you can spin.
+- [AirPano](https://www.airpano.com/) — High-quality 360° tours of places.
 
-## 环境、地点与感官漫游
+## Environments, places and wandering
 
-- [Webcam Taxi](https://www.webcamtaxi.com/) — 世界城市与自然机位目录。
-- [EarthTV](https://www.earthtv.com/) — 城市公开实景流。
-- [Monterey Bay Aquarium Live Cams](https://www.montereybayaquarium.org/animals/live-cams) — 水母、海獭与海湾直播。
-- [Aquarium of the Pacific Webcams](https://www.aquariumofpacific.org/exhibits/webcams) — 海洋馆实时窗口。
-- [Drive & Listen](https://driveandlisten.com/) — 驾车穿过城市并收听当地电台。
-- [360Cities](https://www.360cities.net/) — 人类上传的全球全景图。
-- [Google Arts & Culture](https://artsandculture.google.com/) — 艺术、文化与机器学习实验的可视化入口。
-- [The Useless Web](https://theuselessweb.com/) — 随机跳进一个怪异网页。
-- [Pixel Thoughts](https://www.pixelthoughts.co/) — 把念头放进缓慢扩散的宇宙。
-- [This Person Does Not Exist](https://thispersondoesnotexist.com/) — 随机生成的人脸，适合短暂凝视而非长期使用。
+- [Webcam Taxi](https://www.webcamtaxi.com/) — A directory of city and nature cameras around the world.
+- [EarthTV](https://www.earthtv.com/) — Public live views of cities.
+- [Monterey Bay Aquarium Live Cams](https://www.montereybayaquarium.org/animals/live-cams) — Jellyfish, sea otters and the bay itself.
+- [Aquarium of the Pacific Webcams](https://www.aquariumofpacific.org/exhibits/webcams) — A live window into the tanks.
+- [Drive & Listen](https://driveandlisten.com/) — Drive through a city with its local radio playing.
+- [360Cities](https://www.360cities.net/) — Panoramas from everywhere, uploaded by the people who shot them.
+- [Google Arts & Culture](https://artsandculture.google.com/) — A way into art, culture and machine-learning experiments.
+- [The Useless Web](https://theuselessweb.com/) — Dropped into a random strange page.
+- [Pixel Thoughts](https://www.pixelthoughts.co/) — Put a thought into a slowly expanding universe.
+- [This Person Does Not Exist](https://thispersondoesnotexist.com/) — A generated face, worth a short look rather than a whole day.
 
-## 网络艺术与怪异网页
+## Net art and strange pages
 
-- [Jackson Pollock](https://www.jacksonpollock.org/) — 可直接泼洒的数字滴画。
-- [Pointer Pointer](https://pointerpointer.com/) — 光标位置总会被照片中的人指到。
-- [OMFGDOGS](https://www.omfgdogs.com/) — 纯粹的早期网络欢腾。
-- [Cat Bounce](https://cat-bounce.com/) — 弹跳猫的桌面级荒诞。
-- [RRRGGGBBB](https://www.rrrgggbbb.com/) — RGB 与鼠标驱动的极简玩具。
-- [ZomboCom](https://zombo.com/) — 早期网络“什么都能做”的空话剧场。
-- [Click Click Click](https://clickclickclick.click/) — 每次点击都被网页看见。
-- [Superbad](https://www.superbad.com/) — 迷宫式早期 Flash / 网页艺术遗迹。
-- [JODI](https://wwwwwwwww.jodi.org/) — 经典 net.art，故意让浏览器像失控机器。
-- [Falling Falling](https://www.fallingfalling.com/) — 两种无尽坠落之间的渐变。
-- [The Deep Sea](https://neal.fun/deep-sea/) — 用下潜重建对尺度的直觉。
-- [Internet Artifacts](https://neal.fun/internet-artifacts/) — 已消失的互联网形态陈列。
-- [The Size of Space](https://neal.fun/size-of-space/) — 从人体走到宇宙的大尺度漫游。
-- [Neal.fun](https://neal.fun/) — 适合常驻并随时进入的一组互动叙事。
-- [A Soft Murmur](https://asoftmurmur.com/) — 可混合的雨、风、火和咖啡馆环境声。
-- [Noisli](https://www.noisli.com/) — 环境声与简洁色块。
-- [Nyan Cat](https://www.nyan.cat/) — 永恒飞行的网络图腾。
-- [The Museum of Modern Art Collection](https://www.moma.org/collection/) — 可从一件作品切入的当代艺术空间。
+- [Jackson Pollock](https://www.jacksonpollock.org/) — Digital drip painting you throw paint at yourself.
+- [Pointer Pointer](https://pointerpointer.com/) — Wherever the cursor is, a photo of someone pointing at it.
+- [OMFGDOGS](https://www.omfgdogs.com/) — Early-web glee, undiluted.
+- [Cat Bounce](https://cat-bounce.com/) — Bouncing cats, at desktop scale.
+- [RRRGGGBBB](https://www.rrrgggbbb.com/) — A minimal toy driven by RGB and the pointer.
+- [ZomboCom](https://zombo.com/) — The early web's you-can-do-anything speech, looping forever.
+- [Click Click Click](https://clickclickclick.click/) — Every click gets noticed by the page.
+- [Superbad](https://www.superbad.com/) — A maze-like relic of early Flash and web art.
+- [JODI](https://wwwwwwwww.jodi.org/) — Classic net.art, deliberately making the browser look like a machine coming apart.
+- [Falling Falling](https://www.fallingfalling.com/) — A gradient between two kinds of endless falling.
+- [The Deep Sea](https://neal.fun/deep-sea/) — Descending far enough to rebuild your sense of scale.
+- [Internet Artifacts](https://neal.fun/internet-artifacts/) — A display case of internet forms that no longer exist.
+- [The Size of Space](https://neal.fun/size-of-space/) — From a human body out to the universe.
+- [Neal.fun](https://neal.fun/) — A set of interactive pieces worth leaving up and stepping into.
+- [A Soft Murmur](https://asoftmurmur.com/) — Rain, wind, fire and cafe noise, mixed to taste.
+- [Noisli](https://www.noisli.com/) — Ambient sound over plain blocks of colour.
+- [Nyan Cat](https://www.nyan.cat/) — The web totem that never stops flying.
+- [The Museum of Modern Art Collection](https://www.moma.org/collection/) — Contemporary art entered one work at a time.
 
-## 可快速介入的网页实验
+## Web experiments you can step into
 
-- [anime.js](https://animejs.com/) — 网页运动设计与时间控制的基准。
-- [Three.js Examples](https://threejs.org/examples/) — 浏览器 3D 的大型活标本。
-- [p5.js Editor](https://editor.p5js.org/) — 轻量创意编程与实时草图。
-- [OpenProcessing](https://openprocessing.org/discover/) — p5.js / Processing 的作品流。
-- [ShaderToy](https://www.shadertoy.com/) — 可直接运行的着色器宇宙。
-- [Cables](https://cables.gl/) — 节点式 WebGL 与沉浸作品。
-- [CodePen](https://codepen.io/) — 前端小实验的实时展场。
-- [Dwitter](https://www.dwitter.net/top/month) — 140 字符 JavaScript 动画。
-- [Chrome Experiments](https://experiments.withgoogle.com/collection/chrome) — Google 收集的浏览器原生实验。
-- [Chrome Music Lab](https://musiclab.chromeexperiments.com/) — 声音、节奏与可视化互动。
-- [Quick, Draw!](https://quickdraw.withgoogle.com/) — 画画与机器学习的即时回馈。
-- [Teachable Machine](https://teachablemachine.withgoogle.com/) — 直接用摄像头训练一个小模型。
-- [Sampulator](https://sampulator.com/) — 键盘采样器与声音拼贴。
-- [Incredibox](https://www.incredibox.com/) — 人声节奏的可视化编排。
-- [Line Rider](https://www.linerider.com/) — 画线，让物理系统自己表演。
-- [Loopy](https://ncase.me/loopy/) — 用箭头和节点画反馈系统。
-- [The Evolution of Trust](https://ncase.me/trust/) — 用游戏理解合作与背叛。
-- [The Wisdom and/or Madness of Crowds](https://ncase.me/crowds/) — 人群、传播与临界点。
-- [Parable of the Polygons](https://ncase.me/polygons/) — 个体偏好如何形成隔离。
-- [How to Simulate the Universe](https://ncase.me/simulating/) — 模拟与现实的关系。
-- [World's Biggest Pac-Man](https://worldsbiggestpacman.com/) — 由玩家接起来的迷宫地图。
-- [A Dark Room](https://adarkroom.doublespeakgames.com/) — 极简文字界面逐渐长成一个世界。
-- [Universal Paperclips](https://www.decisionproblem.com/paperclips/) — 自动化、优化和失控增长的极简寓言。
-- [Cookie Clicker](https://orteil.dashnet.org/cookieclicker/) — 另一个增长机器，适合偶尔回看。
+- [anime.js](https://animejs.com/) — The reference point for web motion design and timeline control.
+- [Three.js Examples](https://threejs.org/examples/) — A large live specimen collection of 3D in the browser.
+- [p5.js Editor](https://editor.p5js.org/) — Light creative coding with the sketch running as you type.
+- [OpenProcessing](https://openprocessing.org/discover/) — A feed of p5.js and Processing work.
+- [ShaderToy](https://www.shadertoy.com/) — A universe of shaders that run where they sit.
+- [Cables](https://cables.gl/) — Node-based WebGL and the pieces built with it.
+- [CodePen](https://codepen.io/) — A live showcase of small front-end experiments.
+- [Dwitter](https://www.dwitter.net/top/month) — JavaScript animations in 140 characters.
+- [Chrome Experiments](https://experiments.withgoogle.com/collection/chrome) — Google's collection of browser-native experiments.
+- [Chrome Music Lab](https://musiclab.chromeexperiments.com/) — Sound, rhythm and visualisation to play with.
+- [Quick, Draw!](https://quickdraw.withgoogle.com/) — Draw something and a model guesses it back at once.
+- [Teachable Machine](https://teachablemachine.withgoogle.com/) — Train a small model with the webcam.
+- [Sampulator](https://sampulator.com/) — A keyboard sampler and sound collage.
+- [Incredibox](https://www.incredibox.com/) — Vocal rhythms arranged on screen.
+- [Line Rider](https://www.linerider.com/) — Draw a line and let the physics perform it.
+- [Loopy](https://ncase.me/loopy/) — Draw a feedback system out of arrows and nodes.
+- [The Evolution of Trust](https://ncase.me/trust/) — Cooperation and betrayal, worked out as a game.
+- [The Wisdom and/or Madness of Crowds](https://ncase.me/crowds/) — Crowds, contagion and tipping points.
+- [Parable of the Polygons](https://ncase.me/polygons/) — How individual preferences turn into segregation.
+- [How to Simulate the Universe](https://ncase.me/simulating/) — What a simulation has to do with the thing it simulates.
+- [World's Biggest Pac-Man](https://worldsbiggestpacman.com/) — A maze map that players keep joining onto.
+- [A Dark Room](https://adarkroom.doublespeakgames.com/) — A bare text interface that grows into a world.
+- [Universal Paperclips](https://www.decisionproblem.com/paperclips/) — A minimal parable of automation, optimisation and growth getting away from itself.
+- [Cookie Clicker](https://orteil.dashnet.org/cookieclicker/) — Another growth machine, worth checking back on now and then.
 
-## 技术、权力与网络记忆
+## Technology, power and the memory of the web
 
-- [Calculating Empires](https://calculatingempires.net/) — *A Genealogy of Technology and Power since 1500*：技术、资本、殖民与基础设施的艺术化长时间线。
-- [Wayback Machine](https://archive.org/web/) — 把网站放回过去版本中看。
-- [OldWeb.Today](https://oldweb.today/) — 用旧浏览器体验旧网页。
-- [The History of the Web](https://thehistoryoftheweb.com/) — Web 技术和文化的时间线。
-- [Web Design Museum](https://www.webdesignmuseum.org/) — 界面史与网页审美的档案。
-- [Internet Archive](https://archive.org/) — 书、音频、电影、软件和网页的公共记忆库。
-- [Public Domain Review](https://publicdomainreview.org/) — 旧图像、地图和奇异文本的高质量策展。
-- [Low-tech Magazine](https://solar.lowtechmagazine.com/) — 能源、维护与低技术的杂志，服务器本身也是作品。
-- [Software Library](https://archive.org/details/softwarelibrary) — 可直接运行的旧软件与游戏。
-- [DiscMaster](https://discmaster.textfiles.com/) — 从旧 CD-ROM 检索被遗忘的数字出版物。
-- [Rhizome](https://rhizome.org/) — 数字艺术、软件保存和网络文化。
-- [Are.na](https://www.are.na/) — 研究卡片与个人化资料脉络。
-- [Neocities Browse](https://neocities.org/browse) — 仍在生长的个人网页生态。
-- [Histography](https://histography.io/) — 可缩放的历史事件时间线。
-- [The Pudding](https://pudding.cool/) — 数据、交互与文化叙事结合的文章展览。
-- [Information Is Beautiful](https://informationisbeautiful.net/) — 数据图形与视觉叙事作品库。
-- [Institute of Network Cultures](https://networkcultures.org/) — 网络文化、平台与数字出版研究。
-- [The HTML Review](https://thehtml.review/) — 把网页当作文学和交互媒介的年度刊物。
-- [Wiby](https://wiby.me/) — 偏爱旧式、个人化网页的搜索入口。
-- [The Old Net](https://theoldnet.com/) — 用今日浏览器体验旧网络。
-- [Computer History Museum](https://www.computerhistory.org/) — 计算机与互联网史的展览入口。
+- [Calculating Empires](https://calculatingempires.net/) — *A Genealogy of Technology and Power since 1500*: a long timeline of technology, capital, colonialism and infrastructure, drawn as art.
+- [Wayback Machine](https://archive.org/web/) — Put a site back into an older version of itself and look at it.
+- [OldWeb.Today](https://oldweb.today/) — Old pages through the browsers of their time.
+- [The History of the Web](https://thehistoryoftheweb.com/) — A timeline of web technology and web culture.
+- [Web Design Museum](https://www.webdesignmuseum.org/) — An archive of interface history and of how web pages looked.
+- [Internet Archive](https://archive.org/) — The public memory of books, audio, film, software and web pages.
+- [Public Domain Review](https://publicdomainreview.org/) — Old images, maps and odd texts, carefully curated.
+- [Low-tech Magazine](https://solar.lowtechmagazine.com/) — A magazine about energy, maintenance and low technology whose own server is part of the work.
+- [Software Library](https://archive.org/details/softwarelibrary) — Old software and games that run in the page.
+- [DiscMaster](https://discmaster.textfiles.com/) — Search old CD-ROMs for forgotten digital publications.
+- [Rhizome](https://rhizome.org/) — Digital art, software preservation and network culture.
+- [Are.na](https://www.are.na/) — Research cards and how one person's material connects up.
+- [Neocities Browse](https://neocities.org/browse) — The personal-homepage ecosystem, still growing.
+- [Histography](https://histography.io/) — A zoomable timeline of historical events.
+- [The Pudding](https://pudding.cool/) — Essays where the data, the interaction and the story are one thing.
+- [Information Is Beautiful](https://informationisbeautiful.net/) — A library of data graphics and visual storytelling.
+- [Institute of Network Cultures](https://networkcultures.org/) — Research on network culture, platforms and digital publishing.
+- [The HTML Review](https://thehtml.review/) — An annual journal that treats the web page as a literary and interactive medium.
+- [Wiby](https://wiby.me/) — A search engine that prefers old, personal pages.
+- [The Old Net](https://theoldnet.com/) — The old web through today's browser.
+- [Computer History Museum](https://www.computerhistory.org/) — A way into the history of computing and the internet.
 
-## 使用约束
+## Using these
 
-1. 先选一个页面在浏览器中确认视觉效果，再把该 URL 粘进 Nifro。
-2. 直播站优先使用具体机位页，避免保留检索页、登录弹窗或广告导航。
-3. 动画和实时地图会占用 GPU；出现发热、掉帧或风扇持续高转时，优先换成 `WindowSwap`、`After Dark CSS`、`Mr.doob Clouds` 或单一直播机位。
+1. Open a page in a browser and check how it looks first, then paste that URL into Nifro.
+2. For live streams, use the individual camera page rather than a search page, a login prompt or an ad-heavy index.
+3. Animation and live maps use the GPU; if the machine runs hot, drops frames or keeps its fans up, switch to `WindowSwap`, `After Dark CSS`, `Mr.doob Clouds` or a single camera stream.

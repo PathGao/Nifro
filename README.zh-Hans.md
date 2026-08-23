@@ -22,6 +22,8 @@
   ·
   <a href="sites/">站点清单</a>
   ·
+  <a href="sites/CANDIDATES.zh-Hans.md">候选站点</a>
+  ·
   <a href="docs/ROADMAP.md">路线图</a>
   ·
   <a href="CONTRIBUTING.md">参与贡献</a>

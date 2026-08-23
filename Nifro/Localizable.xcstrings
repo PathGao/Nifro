@@ -250,6 +250,7 @@
       }
     },
     "Browse on GitHub": {
+      "extractionState": "stale",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {

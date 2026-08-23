@@ -133,7 +133,7 @@ struct AddWebsiteScreen: View {
 					.buttonStyle(.link)
 				}
 				Spacer()
-				Link("More ideas", destination: "https://github.com/PathGao/Nifro/discussions/136")
+				Link("More ideas", destination: Constants.candidateSitesURL)
 					.buttonStyle(.link)
 			}
 		}

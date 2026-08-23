@@ -22,6 +22,8 @@
   ·
   <a href="sites/">Site list</a>
   ·
+  <a href="sites/CANDIDATES.md">Candidate sites</a>
+  ·
   <a href="docs/ROADMAP.md">Roadmap</a>
   ·
   <a href="CONTRIBUTING.md">Contributing</a>

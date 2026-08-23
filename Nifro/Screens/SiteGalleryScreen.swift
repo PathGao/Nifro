@@ -54,7 +54,10 @@ struct SiteGalleryScreen: View {
 	}
 
 	/**
-	The catalogue lives in the repository and submissions arrive there too, so both links sit in the footer.
+	Two ways out: more pages than are in the list yet, and the way to add one.
+
+	Neither points at the directory the entries are authored in. That is thirty-eight YAML files of
+	settings — the format for writing an entry, not for reading a list.
 	*/
 	private var footer: some View {
 		HStack(spacing: 12) {
@@ -72,7 +75,7 @@ struct SiteGalleryScreen: View {
 
 			Spacer()
 
-			Link("Browse on GitHub", destination: Constants.siteGalleryURL)
+			Link("More ideas", destination: Constants.candidateSitesURL)
 			Link("Submit a Site…", destination: Constants.siteSubmissionURL)
 		}
 		.padding(.horizontal)

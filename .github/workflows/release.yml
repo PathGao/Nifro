@@ -1,17 +1,19 @@
-# 打 tag 触发的发布流水线。
+# The release pipeline, triggered by a tag.
 #
-# 每个架构单独出一份产物，不做通用二进制：一份 arm64、一份 x86_64。
-# 通用包等于让每个用户下载一份自己永远用不到的另一半。
+# Each architecture gets its own build, and there is no universal binary: one arm64, one x86_64.
+# A universal package means every user downloads the half they can never run.
 #
-# 签名靠 MACOS_CERTIFICATE_P12 这一个 secret，装什么证书就走什么路：
-#   Developer ID 证书 → 硬化运行时 + 公证 + staple（用户双击直接开）
-#   自签名证书        → 签名身份固定，不公证，靠 cask postflight 去隔离属性
-#   没有 secret       → ad-hoc，只为让没有证书的 fork 也能出包
+# Signing hangs off one secret, MACOS_CERTIFICATE_P12, and whichever certificate it holds picks the path:
+#   Developer ID certificate → hardened runtime + notarization + staple (users just double-click)
+#   self-signed certificate  → stable signing identity, no notarization, cask postflight strips the quarantine attribute
+#   no secret                → ad-hoc, only so a fork without a certificate can still produce builds
 #
-# 自签名和 ad-hoc 在 Gatekeeper 眼里一样过不了，区别在签名身份稳不稳定：Nifro 是沙盒 app，
-# 用户选本地文件当壁纸时存的是安全作用域书签，书签绑在签名上。ad-hoc 每次构建签名都不同，
-# 用户每次升级都会丢掉已授权的文件。自签名证书让指定要求（designated requirement）跨版本不变。
-# 详见 docs/RELEASE.md。
+# Gatekeeper turns away self-signed and ad-hoc builds alike; the difference is whether the signing
+# identity stays put. Nifro is a sandboxed app, so a local file picked as a wallpaper is stored as a
+# security-scoped bookmark, and that bookmark is tied to the signature. Ad-hoc signs differently on
+# every build, so users lose the files they had authorised on every update. A self-signed
+# certificate keeps the designated requirement the same across versions.
+# See docs/RELEASE.md.
 
 name: release
 
@@ -22,7 +24,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "要发布的 tag，例如 v0.1.0"
+        description: "The tag to release, for example v0.1.0"
         required: true
 
 env:
@@ -43,7 +45,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 解析版本号并与 Config.xcconfig 对账
+      - name: Resolve the version and reconcile it with Config.xcconfig
         id: version
         run: |
           set -euo pipefail
@@ -51,14 +53,14 @@ jobs:
           version="${tag#v}"
           xcconfig_version="$(sed -n 's/^MARKETING_VERSION *= *//p' Config.xcconfig | tr -d ' \r')"
           if [ "$version" != "$xcconfig_version" ]; then
-            echo "::error::tag $tag 与 Config.xcconfig 的 MARKETING_VERSION ($xcconfig_version) 不一致"
+            echo "::error::tag $tag does not match MARKETING_VERSION ($xcconfig_version) in Config.xcconfig"
             exit 1
           fi
           echo "tag=$tag"         >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
-      # secrets 不能直接写在 if: 里判断，先映射到 env 再产出一个 output
-      - name: 判断是否具备签名与公证凭据
+      # secrets cannot be tested inside an if:, so map them to env first and emit an output
+      - name: Work out whether signing and notarization credentials exist
         id: caps
         env:
           CERT: ${{ secrets.MACOS_CERTIFICATE_P12 }}
@@ -68,7 +70,7 @@ jobs:
           if [ -n "${CERT:-}" ]; then echo "sign=true" >> "$GITHUB_OUTPUT"; else echo "sign=false" >> "$GITHUB_OUTPUT"; fi
           if [ -n "${NOTARY_KEY:-}" ]; then echo "notarize=true" >> "$GITHUB_OUTPUT"; else echo "notarize=false" >> "$GITHUB_OUTPUT"; fi
 
-      - name: 导入签名证书到临时钥匙串
+      - name: Import the signing certificate into a temporary keychain
         id: identity
         if: steps.caps.outputs.sign == 'true'
         env:
@@ -77,7 +79,7 @@ jobs:
         run: |
           set -euo pipefail
           keychain="$RUNNER_TEMP/build.keychain-db"
-          # 钥匙串口令是一次性的，用不着做成 secret
+          # The keychain password is used once, so there is no point making it a secret
           kc_pass="$(openssl rand -base64 24)"
           echo "$CERT_P12" | base64 --decode > "$RUNNER_TEMP/cert.p12"
 
@@ -92,17 +94,17 @@ jobs:
           rm -f "$RUNNER_TEMP/cert.p12"
           security find-identity -v -p codesigning "$keychain"
 
-          # 证书自己说明该走哪条路，不用再加一个 secret 来声明。
+          # The certificate itself says which path to take, so no second secret has to declare it.
           name="$(security find-identity -v -p codesigning "$keychain" | sed -n '1s/.*"\(.*\)"$/\1/p')"
-          test -n "$name" || { echo "::error::钥匙串里没有可用于代码签名的身份"; exit 1; }
+          test -n "$name" || { echo "::error::no code-signing identity in the keychain"; exit 1; }
           echo "name=$name" >> "$GITHUB_OUTPUT"
           case "$name" in
             "Developer ID Application"*) echo "kind=developer-id" >> "$GITHUB_OUTPUT" ;;
             *)                           echo "kind=self-signed"  >> "$GITHUB_OUTPUT" ;;
           esac
-          echo "签名身份：$name"
+          echo "Signing identity: $name"
 
-      - name: 逐架构构建、公证、打包
+      - name: Build, notarize and package, one architecture at a time
         id: package
         env:
           TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
@@ -114,10 +116,10 @@ jobs:
           version="${{ steps.version.outputs.version }}"
           mkdir -p .release
 
-          # 工程里默认写死了 CODE_SIGN_STYLE=Automatic / "Apple Development" / 上游的
-          # DEVELOPMENT_TEAM，CI 上都不能用，这里全部用 Manual 覆盖掉。
-          # ENABLE_HARDENED_RUNTIME 工程里已经是 YES，公证需要它。
-          # 没有 secret 时退回 ad-hoc："-" 表示本机签名、没有身份。
+          # The project hard-codes CODE_SIGN_STYLE=Automatic / "Apple Development" / the upstream
+          # DEVELOPMENT_TEAM, none of which works on CI, so Manual overrides all of it here.
+          # ENABLE_HARDENED_RUNTIME is already YES in the project, and notarization needs it.
+          # With no secret it falls back to ad-hoc: "-" means signed locally, with no identity.
           identity="${{ steps.identity.outputs.name }}"
           signing_args=(
             CODE_SIGN_STYLE=Manual
@@ -126,8 +128,8 @@ jobs:
             PROVISIONING_PROFILE_SPECIFIER=""
           )
 
-          # 硬化运行时和时间戳只对 Developer ID 有意义：它们是公证的前置条件，
-          # 而自签名和 ad-hoc 都不可能公证。
+          # The hardened runtime and the timestamp only mean anything for Developer ID: they are
+          # preconditions for notarization, and self-signed and ad-hoc builds can never be notarized.
           if [ "${{ steps.identity.outputs.kind }}" = "developer-id" ]; then
             signing_args+=(
               DEVELOPMENT_TEAM="$TEAM_ID"
@@ -142,10 +144,10 @@ jobs:
           xcodebuild -version
 
           for arch in arm64 x86_64; do
-            echo "::group::构建 $arch"
+            echo "::group::Build $arch"
             rm -rf .xcode-build/Build/Products
 
-            # ONLY_ACTIVE_ARCH=NO 加单一 ARCHS：产出只含这一个架构的瘦二进制。
+            # ONLY_ACTIVE_ARCH=NO with a single ARCHS: a thin binary holding only this architecture.
             xcodebuild clean build \
               -project "$XCODE_PROJECT" \
               -scheme "$XCODE_SCHEME" \
@@ -158,22 +160,22 @@ jobs:
               | tee ".release/xcodebuild-$arch.log" | grep -E '^(\*\*|CodeSign|error:)' || true
 
             src=".xcode-build/Build/Products/Release/$BUILT_APP_NAME"
-            test -d "$src" || { echo "::error::$arch 没找到 $src"; exit 1; }
+            test -d "$src" || { echo "::error::$arch: $src not found"; exit 1; }
 
             staged=".release/$arch/$APP_NAME.app"
             rm -rf ".release/$arch"
             mkdir -p ".release/$arch"
             cp -R "$src" "$staged"
 
-            # 证明产物真的只含这一个架构。通用包混进来会在这里挂掉。
+            # Prove the build really holds only this architecture. A universal binary fails here.
             actual="$(lipo -archs "$staged/Contents/MacOS/$APP_NAME" | tr -s ' ')"
             if [ "$actual" != "$arch" ]; then
-              echo "::error::$arch 的产物实际包含 [$actual]"
+              echo "::error::the $arch build actually contains [$actual]"
               exit 1
             fi
 
             if [ "${{ steps.caps.outputs.notarize }}" = "true" ] && [ "${{ steps.identity.outputs.kind }}" = "developer-id" ]; then
-              # notarytool 只吃 zip/pkg/dmg，必须用 ditto 打包（保留符号链接和扩展属性）
+              # notarytool only takes zip/pkg/dmg, and ditto is what keeps symlinks and extended attributes
               ditto -c -k --keepParent "$staged" "$RUNNER_TEMP/notarize-$arch.zip"
               xcrun notarytool submit "$RUNNER_TEMP/notarize-$arch.zip" \
                 --key "$RUNNER_TEMP/notary.p8" \
@@ -182,13 +184,34 @@ jobs:
                 --wait
               xcrun stapler staple "$staged"
             else
-              echo "::warning::$arch 未公证（签名身份 ${identity:-ad-hoc}）。brew 用户由 cask 的 postflight 去掉隔离属性；直接下 zip 的用户需手动放行。"
+              echo "::warning::$arch is not notarized (signing identity ${identity:-ad-hoc}). For brew users the cask postflight strips the quarantine attribute; anyone downloading the disk image directly has to allow it by hand."
             fi
 
-            zip=".release/$APP_NAME-$version-$arch.zip"
-            ditto -c -k --keepParent "$staged" "$zip"
-            sha="$(shasum -a 256 "$zip" | awk '{print $1}')"
-            echo "zip_$arch=$zip" >> "$GITHUB_OUTPUT"
+            # A disk image rather than a zip. A zip expands to a bare .app sitting in Downloads with
+            # nothing to say it belongs in /Applications; a disk image with a symlink to Applications
+            # next to the app says it without a word. The Applications symlink is the whole reason
+            # this is the format every other Mac app ships in.
+            #
+            # Notarization above happens on the .app, and stapling the .app before the image is built
+            # is what puts the ticket inside the image.
+            image_root=".release/image-$arch"
+            rm -rf "$image_root"
+            mkdir -p "$image_root"
+            cp -R "$staged" "$image_root/"
+            ln -s /Applications "$image_root/Applications"
+
+            dmg=".release/$APP_NAME-$version-$arch.dmg"
+            rm -f "$dmg"
+            hdiutil create \
+              -volname "$APP_NAME" \
+              -srcfolder "$image_root" \
+              -fs HFS+ \
+              -format UDZO \
+              -ov \
+              "$dmg"
+
+            sha="$(shasum -a 256 "$dmg" | awk '{print $1}')"
+            echo "dmg_$arch=$dmg" >> "$GITHUB_OUTPUT"
             echo "sha_$arch=$sha" >> "$GITHUB_OUTPUT"
             echo "$arch  sha256 $sha"
             echo "::endgroup::"
@@ -196,7 +219,7 @@ jobs:
 
           rm -f "$RUNNER_TEMP/notary.p8"
 
-      - name: 上传构建日志
+      - name: Upload the build logs
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -204,39 +227,43 @@ jobs:
           path: .release/xcodebuild-*.log
           if-no-files-found: ignore
 
-      - name: 创建 GitHub Release
+      - name: Create the GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           tag="${{ steps.version.outputs.tag }}"
+          # Set here as well as in the packaging step: each step is its own shell, and the release
+          # notes below name the version. Under `set -u` an unset one aborts the step.
+          version="${{ steps.version.outputs.version }}"
 
           if [ "${{ steps.caps.outputs.notarize }}" = "true" ] && [ "${{ steps.identity.outputs.kind }}" = "developer-id" ]; then
-            note="本次构建已用 Developer ID 签名并通过 Apple 公证，双击即可打开。"
+            note="This build is signed with a Developer ID certificate and notarized by Apple, so it opens on a double-click."
           else
-            note="本次构建为自签名、**未经 Apple 公证**。推荐用 Homebrew 安装（cask 会自动去掉隔离属性）；直接下载 zip 的话，首次打开需要在「系统设置 → 隐私与安全性」里点「仍要打开」。"
+            note="This build is self-signed and **not notarized by Apple**. Homebrew is the recommended route, since the cask strips the quarantine attribute for you. If you download the disk image directly, the first launch needs System Settings → Privacy & Security, then Open Anyway."
           fi
 
           cat > "$RUNNER_TEMP/notes.md" <<EOF
           $note
 
-          安装：\`brew install --cask PathGao/tap/nifro\`
+          Install: \`brew install --cask PathGao/tap/nifro\`
 
           \`\`\`
-          Apple silicon  Nifro-$version-arm64.zip   sha256 ${{ steps.package.outputs.sha_arm64 }}
-          Intel          Nifro-$version-x86_64.zip  sha256 ${{ steps.package.outputs.sha_x86_64 }}
+          Apple silicon  Nifro-$version-arm64.dmg   sha256 ${{ steps.package.outputs.sha_arm64 }}
+          Intel          Nifro-$version-x86_64.dmg  sha256 ${{ steps.package.outputs.sha_x86_64 }}
           \`\`\`
           EOF
 
-          gh release create "$tag" ""${{ steps.package.outputs.zip_arm64 }}" "${{ steps.package.outputs.zip_x86_64 }}"" \
+          gh release create "$tag" "${{ steps.package.outputs.dmg_arm64 }}" "${{ steps.package.outputs.dmg_x86_64 }}" \
             --repo "$GITHUB_REPOSITORY" \
             --title "$tag" \
             --generate-notes \
             --notes-file "$RUNNER_TEMP/notes.md"
 
-      # cask 里的 version / sha256 每次发布都要改，交给 CI 写回 main，省掉一次人工操作。
-      # 如果 main 开了分支保护导致 push 失败，这步会告警但不影响 release 本身。
-      - name: 回写 Casks/nifro.rb
+      # The version / sha256 in the cask change on every release, so CI writes them back to main
+      # and nobody has to do it by hand. If branch protection on main makes the push fail, this step
+      # warns but leaves the release itself alone.
+      - name: Write the new version back to Casks/nifro.rb
         continue-on-error: true
         run: |
           set -euo pipefail
@@ -250,7 +277,7 @@ jobs:
           sed -i '' -E "s/^    sha256 arm:   \".*\", intel: \".*\"$/    sha256 arm:   \"$sha_arm\", intel: \"$sha_intel\"/" Casks/nifro.rb
 
           if git diff --quiet -- Casks/nifro.rb; then
-            echo "cask 没有变化，跳过"
+            echo "cask unchanged, skipping"
             exit 0
           fi
           git config user.name  "github-actions[bot]"

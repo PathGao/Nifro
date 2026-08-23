@@ -1,12 +1,13 @@
-# Homebrew cask，供 PathGao/homebrew-tap 使用。
+# Homebrew cask, for use from PathGao/homebrew-tap.
 #
 #   brew tap PathGao/tap https://github.com/PathGao/Nifro
 #   brew install --cask PathGao/tap/nifro
 #
-# version 和 sha256 由 .github/workflows/release.yml 在每次发布后自动回写，不要手改。
+# version and sha256 are written back automatically by .github/workflows/release.yml after every
+# release. Do not edit them by hand.
 #
-# 两个架构各发一份瘦二进制，不做通用包 —— 通用包等于让每个用户下载一份
-# 自己永远用不到的另一半。brew 会按机器自己选。
+# Each architecture ships a thin binary, and there is no universal package — a universal package
+# means every user downloads the half they can never run. brew picks the right one for the machine.
 cask "nifro" do
   arch arm: "arm64", intel: "x86_64"
 
@@ -25,22 +26,23 @@ cask "nifro" do
     strategy :github_latest
   end
 
-  # 工程的 MACOSX_DEPLOYMENT_TARGET = 15.0
+  # The project's MACOSX_DEPLOYMENT_TARGET = 15.0
   depends_on macos: ">= :sequoia"
 
   app "Nifro.app"
 
-  # ⚠️ 只有在「未公证」的构建下才需要这段。
-  # 一旦发布流水线拿到 Developer ID 证书并开始公证（见 docs/RELEASE.md 路径 A），
-  # 把整个 postflight 块删掉。
+  # ⚠️ This block is only needed for builds that are not notarized.
+  # Once the release pipeline has a Developer ID certificate and starts notarizing (path A in
+  # docs/RELEASE.md), delete the whole postflight block.
   postflight do
     system_command "/usr/bin/xattr",
                    args:         ["-dr", "com.apple.quarantine", "#{appdir}/Nifro.app"],
                    must_succeed: false
   end
 
-  # 沙盒 app，用户数据都在容器里。最后一条只为保险：正常的沙盒构建永远不会写到那里，
-  # 但一个签名时丢掉了 entitlements 的构建会，而那种包用户也可能装过。
+  # Sandboxed app, so user data lives in the container. The last entry is only insurance: a proper
+  # sandboxed build never writes there, but a build that lost its entitlements while being signed
+  # does, and a user may well have installed one of those.
   zap trash: [
     "~/Library/Containers/com.pathgao.nifro",
     "~/Library/Containers/com.pathgao.nifro.ShareExtension",

@@ -3,7 +3,14 @@ import KeyboardShortcuts
 
 enum Constants {
 	static let repositoryURL = URL("https://github.com/PathGao/Nifro")
-	static let siteGalleryURL = URL("https://github.com/PathGao/Nifro/tree/main/sites")
+	/**
+	The candidate list, not the directory the entries are authored in.
+
+	`sites/` holds one YAML file per entry, which is a format for writing an entry and not one for
+	reading a list. Sending somebody browsing for a wallpaper there shows them thirty-eight files of
+	settings; the candidate list is prose with links, which is what they came for.
+	*/
+	static let candidateSitesURL = URL("https://github.com/PathGao/Nifro/blob/main/sites/CANDIDATES.md")
 	static let siteSubmissionURL = URL("https://github.com/PathGao/Nifro/issues/new?template=site_submission.yml")
 
 	@MainActor
