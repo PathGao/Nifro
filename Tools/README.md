@@ -11,9 +11,12 @@ Everything the repository is maintained with. Nothing here ships in the app.
 | `generate-site-catalog.py` | Writes `sites/index.json` and the bundled Swift copy from the YAML. CI fails if they disagree |
 | `check-url-scheme.py` | Fails the build if the URL scheme in `Info.plist` drifts from the one the code handles |
 
-The Python ones want `jsonschema` and `PyYAML`. CI installs them; locally the repository's `.venv`
-has them:
+The Python ones want `jsonschema` and `PyYAML`. CI pins Python 3.12 and installs the two with
+`pip install jsonschema pyyaml`. Locally there is nothing to inherit — `.venv/` is gitignored and
+nothing in the repository creates one — so make it yourself:
 
 ```sh
+python3 -m venv .venv
+.venv/bin/pip install jsonschema pyyaml
 .venv/bin/python Tools/validate-sites.py
 ```

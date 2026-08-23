@@ -17,8 +17,10 @@ dismiss a banner.
 Adding one needs no Xcode, no Swift and no build. Two routes, both equally
 welcome:
 
-- Open a [Site submission issue](https://github.com/PathGao/Nifro/issues/new?template=site_submission.yml)
-  and fill in the URL and your settings. Someone else will land it.
+- Open a [Site submission issue](https://github.com/PathGao/Nifro/issues/new?template=site_submission.yml).
+  The form asks for one thing you cannot type from memory: open the website's
+  settings in the app and press **Copy Settings**, which puts the whole
+  configuration on the clipboard. Someone else will land it.
 - Or open a pull request against `sites/` directly. Copy an existing entry,
   change the values, done.
 
@@ -39,8 +41,10 @@ the first one is being discussed.
 
 ## Building it
 
-You need Xcode. Nothing else is required to build — dependencies come in
-through Swift Package Manager and Xcode resolves them on first open.
+You need Xcode 26 or later — CI fails outright below that, so a change built
+on an older one is a red run rather than a review. Nothing else is required to
+build: dependencies come in through Swift Package Manager and Xcode resolves
+them on first open.
 
 ```
 git clone https://github.com/PathGao/Nifro.git
@@ -63,8 +67,10 @@ Then build and run the `Nifro` scheme.
 - Match the style of the file you're in. Indentation and line endings are
   covered by `.editorconfig`.
 
-The pure logic behind cropping, occlusion and scheduling has tests that run without an
-app bundle or a window server:
+The pure logic has tests that run without an app bundle or a window server — the
+crop and zoom geometry, the menu bar strip and what the colour band samples from
+it, schedule windows, which website is current on which display, video embedding,
+URL commands and menu word wrapping:
 
 ```sh
 swift test
@@ -77,13 +83,13 @@ falls on the description of what you ran. See below.
 
 ```
 Nifro/
-├── App/          entry point, state, events, menus, Shortcuts
-├── Wallpaper/    the window, the web view, loading, snapshots
-├── Visibility/   how much to render, and when to stop
-├── Zoom/         zooming, the drag-to-frame overlay and per-website settings
-├── Sites/        the website model and the curated list
+├── App/          entry point, state, events, menus, Shortcuts, URL commands
+├── Wallpaper/    the window, the web view, loading, content rules, scroll restoration
+├── Visibility/   the menu bar colour band, and dimming when another app is in front
+├── Zoom/         framing a region, the overlay it is framed with, per-website settings
+├── Sites/        the website model, the curated list, the report a bug carries
 ├── Screens/      SwiftUI windows and settings
-└── Support/      geometry, scheduling and shared extensions
+└── Support/      geometry, scheduling, rotation, URL commands and shared extensions
 ```
 
 `Support/` is mostly inherited from Plash and shared across the author's apps. Changing it makes

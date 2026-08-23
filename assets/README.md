@@ -5,8 +5,8 @@ Images the repository itself uses. Nothing here ships inside the app — the app
 
 | File | Where it is used | How it gets there |
 | --- | --- | --- |
-| `icon.png` | The heading of both READMEs | Exported from `Nifro/Assets.xcassets/AppIcon.appiconset/icon_512x512@2x.png` |
-| `icon-256.png` | Spare, for anywhere 1024px is too much | Downscaled from `icon.png` |
+| `icon.png` | Nothing references it. Kept as the full-size original, for anywhere 256px is too small | Exported from `Nifro/Assets.xcassets/AppIcon.appiconset/icon_512x512@2x.png` |
+| `icon-256.png` | The heading of both READMEs | Downscaled from `icon.png` |
 
 There is no social preview here any more. Several uploads through Settings → General were accepted
 by the page and stored a broken reference: the repository's `og:image` points at

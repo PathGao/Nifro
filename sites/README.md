@@ -21,28 +21,31 @@ entry's `source` field.
 | `name` | string | yes | Display name in the gallery. |
 | `url` | string | yes | What Nifro loads. Include query parameters that are part of the setup (kiosk mode, transparent background, colours). |
 | `description` | string | yes | One sentence describing what the user ends up staring at. |
-| `tags` | string[] | yes | One or more of: `clock`, `weather`, `dashboard`, `art`, `data`, `calendar`, `ambient`, `photo`, `map`, `screensaver`, `news`, `personal`, `3d`. |
-| `backend` | `snapshot` \| `live` | yes | See below. This is the field that matters most. |
-
-> `backend` is recorded but not acted on at the moment. The two rendering backends were taken out
-> so that the interaction could be got right first; the field stays because it is a true thing about
-> the page and will be read again when they come back. See `docs/ROADMAP.md`.
-
+| `tags` | string[] | yes | One or more of: `3d`, `ambient`, `art`, `calendar`, `clock`, `dashboard`, `data`, `gaming`, `live`, `map`, `music`, `nature`, `news`, `personal`, `photo`, `screensaver`, `space`, `weather`. [`schema.json`](schema.json) is the list that is enforced; this table follows it. |
+| `backend` | `snapshot` \| `live` | yes | Recorded, not acted on. See below. |
 | `backendNote` | string | no | Why you chose that backend, when it is not obvious. Write one for every `live` entry. |
-| `reloadInterval` | integer | no | Seconds between reloads. For `snapshot` sites this is also how often the screenshot is retaken. Omit if the page refreshes itself. |
+| `reloadInterval` | integer | no | Seconds between reloads. Omit if the page refreshes itself. |
 | `zoom` | `{centerX, centerY, scale}` | no | Fill the wallpaper with one part of the page. `centerX`/`centerY` are fractions of the page from its top-left; `scale` is how many times that part is enlarged. Given this way rather than as a rectangle so the entry works on any screen shape. |
 | `css` | string | no | Custom CSS injected into the page. Usually hides chrome or makes the background transparent. |
 | `js` | string | no | Custom JavaScript injected after load. |
 | `audio` | `muted` \| `unmuted` | no | The sound setting the site **starts** with. Only a starting value: once added, the website belongs to the user and the Sound item in the menu owns this. Omit for muted, which is what a wallpaper wants unless it is a stream. |
 | `requiresLogin` | boolean | no | `true` if the site shows nothing useful unless the user is signed in. |
 | `screenshot` | string | no | Preview image. Leave it out — we will add images later. |
+| `featured` | boolean | no | `true` ships the entry with the app and installs it on first launch, so it is what someone sees before they have chosen anything. Order comes from the file name: featured entries are installed in file-name order, and the first one is the wallpaper that actually shows. Keep the list very short — every featured entry is one a new user has to delete if they do not want it. Eight entries carry it today; adding a ninth needs a reason. |
 | `source` | string | yes | Where the entry came from. Credit the person, and link the upstream thread if you took their CSS or JS. |
 
-### `backend`: the power switch
+### `backend`: what the page needs
 
-- **`snapshot`** — the page changes slowly. Nifro renders it, takes a picture, and suspends the web
-  process. Between reloads the wallpaper costs about as much as a JPEG. Clocks, weather, calendars,
-  dashboards, charts, photo feeds: all snapshot.
+**Nothing reads this field today.** The two rendering backends were built and then taken out, so that
+the interaction could be got right first, and nothing in the app currently branches on `backend`. It
+stays in the schema and stays required because it records something true about the page that only
+somebody who has watched it can tell you, and re-deriving it later for every entry would be worse than
+carrying it. It will be read again when the backends come back. See `docs/ROADMAP.md`.
+
+So answer it for the page, not for what the app does with it:
+
+- **`snapshot`** — the page changes slowly, and a still frame taken every so often would lose nothing.
+  Clocks, weather, calendars, dashboards, charts, photo feeds: all snapshot.
 - **`live`** — the page has to keep rendering, because animation or interaction *is* the content.
   Screensavers, WebGL scenes, simulations, auto-advancing presentations.
 
@@ -111,17 +114,11 @@ source: >-
    (`Polish TV Clock` → `polish-tv-clock.yml`). Copy the example above and edit it. Fill in `source`
    honestly, and credit whoever's CSS you borrowed.
 3. **Open a pull request.** CI validates every file against [`schema.json`](schema.json). To check
-   locally before pushing:
+   locally before pushing, run the same script CI runs — see [`../Tools/README.md`](../Tools/README.md)
+   for the dependencies:
 
    ```sh
-   pip install jsonschema pyyaml
-   python3 -c "
-   import json, glob, yaml, jsonschema
-   v = jsonschema.Draft7Validator(json.load(open('sites/schema.json')))
-   for f in sorted(glob.glob('sites/*.yml')):
-       for e in v.iter_errors(yaml.safe_load(open(f))):
-           print(f, list(e.path), e.message)
-   "
+   python3 Tools/validate-sites.py
    ```
 
 ### What gets merged

@@ -54,17 +54,22 @@ body:
     attributes:
       label: That website's settings, if you have them
       description: |
-        Open the website for editing in Nifro and press **Copy Settings**, then paste here. It writes out the address, the rendering mode, sound, region, display, hours and the rest in one block.
+        Open the website for editing in Nifro and press **Copy Settings**, then paste here. It writes out the address, sound, region, display, hours and the rest in one block.
 
         Nearly every question about a wallpaper is decided by these, and pasting them saves being asked for them one at a time. The CSS and JavaScript are reported by size rather than by content, so nothing private goes in.
       render: text
       placeholder: |
-        Nifro 0.1.0 (1) · macOS 26.1 · MacBookAir15,2
+        Nifro 0.1.2 (1) · macOS 26.1 · MacBookAir15,2
         URL: https://example.com/dashboard
-        Rendering: Refresh periodically
         Sound: Muted
         Region: whole page
-        …
+        Clickable on the desktop: no
+        Invert colours: Never
+        Print styles: no
+        Display: default
+        Custom CSS: none
+        Custom JavaScript: 4 lines
+        Reload every: 15 min
 
   - type: input
     id: version

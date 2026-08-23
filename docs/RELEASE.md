@@ -6,10 +6,10 @@ Files involved:
 
 | File | What it does |
 | --- | --- |
-| `.github/workflows/release.yml` | Triggered by pushing a `v*` tag: build → sign → (notarize) → package → create the Release → write back the cask |
+| `.github/workflows/release.yml` | Dispatched by hand from a branch: build → sign → (notarize) → package → create the tag and the Release → open a pull request against the cask |
 | `Tools/setup-signing.sh` | Generates the self-signed certificate: installs it into the local keychain, or exports a `.p12` for CI |
 | `Tools/build-local.sh` | Produces a local test build signed the same way a release is |
-| `Casks/nifro.rb` | The cask definition. `version` / `sha256` are updated automatically by the workflow |
+| `Casks/nifro.rb` | The cask definition. The workflow writes the new `version` / `sha256` into a branch and opens a **pull request**; nothing lands until somebody merges it, and the step is `continue-on-error`, so a release can succeed with the cask left behind. That is how the cask sat on 0.1.0 after v0.1.1 shipped — check for the pull request after every release |
 | `Config.xcconfig` | `MARKETING_VERSION`. It has to match the tag, and the workflow checks that |
 
 ---
@@ -23,10 +23,10 @@ The workflow only looks at which kind of certificate is installed from `MACOS_CE
 works out which path to take on its own. The YAML does not need changing:
 
 ```
-                                                       ┌─ Developer ID certificate ─→ hardened runtime + notarization + staple
-  push tag v* ─→ import certificate ─→ check identity ─┤
-                        │                              └─ self-signed certificate ──→ sign only, no notarization   ← the current path
-                        └─ no secret ───────────────────────────────────────────────→ ad-hoc
+                                                    ┌─ Developer ID certificate ─→ hardened runtime + notarization + staple
+  dispatch ─→ import certificate ─→ check identity ─┤
+                     │                              └─ self-signed certificate ──→ sign only, no notarization   ← the current path
+                     └─ no secret ───────────────────────────────────────────────→ ad-hoc
 ```
 
 ### Where self-signed and ad-hoc differ
@@ -164,8 +164,6 @@ Where to set them: repo → Settings → Secrets and variables → Actions → N
   the workflow can open the cask pull request. It uses the default `GITHUB_TOKEN`, so nothing has
   to be configured — but a ruleset that forbids branch creation would stop it. A failure here only
   warns; the Release itself is already published.
-- **B3** ~~Line up `XCODE_SCHEME` / `BUILT_APP_NAME` at the top of the workflow~~ Done, both values
-  are `Nifro`.
 
 ---
 
@@ -184,8 +182,11 @@ gh workflow run release.yml --ref main -f dry_run=true
 gh workflow run release.yml --ref main
 ```
 
-The workflow covers the rest: build, sign, notarize, package, **create the tag**, create the Release,
-write back `Casks/nifro.rb` as a pull request.
+The workflow covers the rest: build, sign, package, **create the tag**, create the Release, and open a
+pull request bumping `Casks/nifro.rb`. Notarization is in there but does not run on the current path —
+it is gated on a Developer ID certificate, and §1 says why this project signs with its own. Merging the
+cask pull request is manual, and the step that opens it is `continue-on-error`, so a green run is not
+proof the cask moved. Check.
 
 When it fails, start with the `xcodebuild-logs` artifact in Actions.
 
@@ -226,8 +227,8 @@ that class; the rest of the pipeline still only proves itself by running.
 
 ### What the Release page ends up saying
 
-`--notes-file` writes a fixed skeleton — the first-launch instructions, the two install lines, the two
-checksums — and `--generate-notes` appends the titles of the pull requests merged since the last tag.
+`--notes-file` writes a fixed skeleton — the first-launch instructions, the three install lines, the
+two checksums — and `--generate-notes` appends the titles of the pull requests merged since the last tag.
 **So the pull request titles are the entire changelog**, which makes a release pull request titled
 after its version number produce a release page whose only content is that version number. Title it
 after what it does.
@@ -249,31 +250,25 @@ install and checksum blocks have to be carried into the new file by hand.
 
 | Install route | What the user sees |
 | --- | --- |
-| `brew install --cask PathGao/tap/nifro` | Opens straight after installing, no prompt |
+| `brew tap …`<br>`brew trust --cask PathGao/tap/nifro`<br>`brew install --cask nifro` | Opens straight after installing, no prompt |
 | Download the disk image and double-click | First open asks "Nifro is an app downloaded from the Internet. Are you sure you want to open it?" → click Open → done |
 
 ### Now (self-signed, not notarized)
 
 | Install route | What the user sees |
 | --- | --- |
-| `brew install --cask PathGao/tap/nifro` | Opens straight after installing, no prompt (the cask's `postflight` has already removed the quarantine attribute) |
-| Download the disk image and double-click | **Blocked**: "Nifro can't be opened because Apple cannot check it for malicious software", with only a Move to Trash and a Done button |
+| `brew tap …`<br>`brew trust --cask PathGao/tap/nifro`<br>`brew install --cask nifro` | Opens straight after installing, no prompt (the cask's `postflight` has already removed the quarantine attribute). The `brew trust` line is what a `postflight` costs: Homebrew will not load a cask from outside its own repositories until the user says they trust it |
+| Download the disk image and double-click | **Blocked**: "Apple could not verify Nifro is free of malware", a dialog offering only Move to Trash and Cancel |
 
-Users who download the disk image directly need one extra step. Wording for the install section of the
-README:
+Users who download the disk image directly need one extra step, and the wording for it lives in the
+README's install section — one copy, so the two cannot drift. Point people there rather than repeating
+it here. What matters when editing it: **Cancel**, not Move to Trash, then System Settings → Privacy &
+Security → Open Anyway. Control-click → Open no longer works; Apple removed that route in macOS 15.
 
-> The first time you open it, macOS says "Nifro can't be opened because Apple cannot check it for
-> malicious software". That is because Nifro is not notarized by Apple (notarization needs a
-> developer account at $99 a year). Installing with Homebrew does not hit this prompt.
->
-> To allow it by hand, either:
->
-> 1. Open the blocked app once → System Settings → Privacy & Security → scroll to the bottom →
->    click Open Anyway.
-> 2. Or run this in a terminal:
->    ```bash
->    xattr -dr com.apple.quarantine /Applications/Nifro.app
->    ```
+The README deliberately does not offer `xattr -dr com.apple.quarantine` as the way out. It works, but
+it teaches a reflex — strip the mark off anything that will not open — that is worth far more to an
+attacker than the two minutes it saves here. The cask runs it because a cask is read before it is
+trusted; a person pasting it into a terminal is not reading anything.
 
 **Do not send users off to turn off SIP or run `spctl --master-disable`**, that lowers the security
 level of the whole machine and is not the way to solve this.
@@ -303,7 +298,7 @@ Where Nifro deviates:
 
 | Item | AeroSpace | Nifro | Why |
 | --- | --- | --- | --- |
-| Release trigger | Local script + manual upload | GitHub Actions on a tag | Releasing locally needs the maintainer's machine to be in the right state, and is not reproducible |
+| Release trigger | Local script + manual upload | GitHub Actions, dispatched by hand; the tag is made at the end | Releasing locally needs the maintainer's machine to be in the right state, and is not reproducible |
 | Signing | Self-signed certificate (local only) | Self-signed certificate (one certificate shared by local builds and CI) | The two are equivalent to Gatekeeper, but a fixed identity is what keeps sandbox bookmarks alive across versions, and it is only fixed if CI has it too |
 | Notarization | Not done | Not done now, switch left in place | No notarization at this stage either. The workflow switches on the certificate type, so buying an account later changes one secret and nothing else |
 | cask version | Generated by hand, then cp | CI opens a pull request against `Casks/` in this repository | One fewer tap repository to maintain, one fewer manual step |

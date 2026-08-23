@@ -30,9 +30,9 @@ at once.
 
 ## Verification
 
-`swift test` covers the pure logic — geometry, scheduling, video embedding, window coverage,
-the activity classifier. Anything that needs a window server or a web view has no automated
-coverage at all, so say what you ran by hand.
+`swift test` covers the pure logic — the crop and zoom geometry, the menu bar strip, schedule
+windows, which website is current on which display, video embedding and URL commands. Anything that
+needs a window server or a web view has no automated coverage at all, so say what you ran by hand.
 
 - Which macOS version and hardware you ran it on.
 - The websites you tried it against, by URL.

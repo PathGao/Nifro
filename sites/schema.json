@@ -66,7 +66,7 @@
         "snapshot",
         "live"
       ],
-      "description": "snapshot: the page changes slowly, so Nifro can screenshot it periodically and suspend the web process — power cost near zero. live: the page animates or is meant to be interacted with, so it must keep rendering. Default to snapshot; only use live when animation or interaction is the point."
+      "description": "Nothing reads this field today. The two rendering backends it selected between were built, measured and taken back out (docs/ROADMAP.md section 4), and it is recorded so the answer does not have to be worked out again for 38 sites when they return. snapshot: the page settles and then holds still, so it would not need to keep rendering. live: the page animates, or being able to click it is the point. Default to snapshot; only say live when animation or interaction is what the page is for."
     },
     "backendNote": {
       "type": "string",

@@ -259,17 +259,6 @@
         }
       }
     },
-    "Browse on GitHub" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在 GitHub 上浏览"
-          }
-        }
-      }
-    },
     "Browsing Mode" : {
       "localizations" : {
         "zh-Hans" : {
@@ -286,17 +275,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "浏览模式让你临时操作网站，比如登录账号，或者把网页滚到某个位置。"
-          }
-        }
-      }
-    },
-    "Browsing mode always uses full opacity." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "浏览模式下始终完全不透明。"
           }
         }
       }
@@ -327,28 +305,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "取消"
-          }
-        }
-      }
-    },
-    "Centre X" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "中心 X"
-          }
-        }
-      }
-    },
-    "Centre Y" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "中心 Y"
           }
         }
       }
@@ -523,17 +479,6 @@
         }
       }
     },
-    "Custom CSS and JavaScript" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "自定义 CSS 与 JavaScript"
-          }
-        }
-      }
-    },
     "Custom code" : {
       "localizations" : {
         "zh-Hans" : {
@@ -560,17 +505,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "使用电池时已停用"
-          }
-        }
-      }
-    },
-    "Decide automatically" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "自动判断"
           }
         }
       }
@@ -651,17 +585,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "完成"
-          }
-        }
-      }
-    },
-    "Drag a rectangle over the wallpaper to keep only that part of the page." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在壁纸上拖一个框，只保留网页的那一部分。"
           }
         }
       }
@@ -752,17 +675,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "欢迎反馈"
-          }
-        }
-      }
-    },
-    "Fills the screen with one part of the page, cutting away navigation bars, borders and whatever else surrounds it. Use “Choose Region…” in the menu to frame it by dragging over the wallpaper." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "用网页的一部分铺满屏幕，导航栏、边框和周围其他东西都被去掉。用菜单里的「选择区域…」在壁纸上拖着框。"
           }
         }
       }
@@ -1027,17 +939,6 @@
         }
       }
     },
-    "Keep rendering" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "持续渲染"
-          }
-        }
-      }
-    },
     "Keep the website above all other windows while browsing mode is active." : {
       "localizations" : {
         "zh-Hans" : {
@@ -1168,17 +1069,6 @@
         }
       }
     },
-    "Muting is done by keeping every audio and video element on the page muted. It covers media elements, not sound a page generates with the Web Audio API." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "静音的做法是把网页上每个音频和视频元素都保持静音。它覆盖媒体元素，不覆盖网页用 Web Audio API 生成的声音。"
-          }
-        }
-      }
-    },
     "Never" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1275,17 +1165,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "没有匹配的网站"
-          }
-        }
-      }
-    },
-    "Only render what is on show" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "只渲染看得见的部分"
           }
         }
       }
@@ -1410,17 +1289,6 @@
         }
       }
     },
-    "Points at a WebKit content-blocking rule list somebody else maintains, for hiding cookie banners and ads. Nifro keeps no rules of its own, because blocklists go stale within weeks and keeping one working is a full-time job." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "指向别人维护的一份 WebKit 内容拦截规则，用来挡掉 Cookie 横幅和广告。Nifro 自己不维护规则——拦截列表几周就会过期，让它一直有效是一份全职工作。"
-          }
-        }
-      }
-    },
     "Points the stored website at the URL currently loaded" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1491,17 +1359,6 @@
         }
       }
     },
-    "Refresh periodically" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "定时刷新"
-          }
-        }
-      }
-    },
     "Region" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1548,17 +1405,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "刷新间隔"
-          }
-        }
-      }
-    },
-    "Reload interval in minutes" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "刷新间隔（分钟）"
           }
         }
       }
@@ -1629,17 +1475,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "从 Nifro 中移除指定的网站。"
-          }
-        }
-      }
-    },
-    "Rendering" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "渲染方式"
           }
         }
       }
@@ -1844,17 +1679,6 @@
         }
       }
     },
-    "Show on all spaces" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在所有桌面上显示"
-          }
-        }
-      }
-    },
     "Show on every Space" : {
       "localizations" : {
         "zh-Hans" : {
@@ -2005,45 +1829,12 @@
         }
       }
     },
-    "The centre is a position on the page, from its top-left corner. The zoom is how many times that part is enlarged." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "中心是网页上的位置，从左上角算起。缩放是那一部分被放大的倍数。"
-          }
-        }
-      }
-    },
     "The page is laid out at the size of the wallpaper — your screen without the menu bar strip — so `100vw`, `100vh` and `@media (min-aspect-ratio: 16/9)` all mean that area. A rule written for a 16:10 laptop and a rule written for a 16:9 monitor can live in the same stylesheet; branch on the aspect ratio rather than guessing.\n\nNifro adds two classes to `<html>` you can target: `is-nifro-app`, always, and `nifro-is-browsing-mode` while Browsing Mode is on — useful for showing controls only when the page can be clicked. Both also exist under their Plash names, so stylesheets written for Plash keep working.\n\nZooming into a region is not done with CSS and cannot be seen from CSS. It is the web view's own magnification, and the page is deliberately never told: if the layout changed when you zoomed, the part you framed would stop being the part you get." : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "页面是按壁纸的大小排版的——你的屏幕去掉菜单栏那一条——所以 `100vw`、`100vh` 和 `@media (min-aspect-ratio: 16/9)` 指的都是那块区域。为 16:10 笔记本写的规则和为 16:9 显示器写的规则可以放在同一份样式表里，按宽高比分支，不要靠猜。\n\nNifro 会往 `<html>` 上加两个类供你选中：`is-nifro-app` 一直都在，`nifro-is-browsing-mode` 只在浏览模式开着时出现——适合让某些控件只在页面可点时才显示。两个类都同时保留了 Plash 时代的名字，为 Plash 写的样式表照样能用。\n\n放大到某个区域不是用 CSS 做的，CSS 也看不见它。那是 web view 自己的缩放，而且是故意不告诉页面的：如果缩放时布局跟着变，你框出来的那一部分就不再是你拿到的那一部分了。"
-          }
-        }
-      }
-    },
-    "The page is loaded, photographed and closed again on each refresh. Costs almost nothing between refreshes, but nothing moves." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "每次刷新时加载网页、拍一张、再关掉。两次刷新之间几乎不耗资源，但什么都不会动。"
-          }
-        }
-      }
-    },
-    "The page keeps running. Necessary for anything that animates or that you want to click." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "网页持续运行。有动画或者你想点它，就得用这个。"
           }
         }
       }
@@ -2248,17 +2039,6 @@
         }
       }
     },
-    "Watches what the page actually does for a minute, then keeps rendering it or switches to stills. It changes its mind again if the page starts moving." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "先观察网页一分钟到底在做什么，然后决定继续渲染还是改用静图。如果网页开始动，它会改回来。"
-          }
-        }
-      }
-    },
     "Website" : {
       "localizations" : {
         "zh-Hans" : {
@@ -2299,17 +2079,6 @@
         }
       }
     },
-    "When other windows cover most of the wallpaper, Nifro shrinks the window to whatever is still visible, such as the strip behind the Dock, and keeps rendering only that. When nothing is visible it holds the last frame. Turn this off to keep drawing the whole page." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "当其他窗口盖住大部分壁纸时，Nifro 把窗口缩到还露在外面的那一块（比如程序坞后面那条），只渲染那一块。什么都看不见时就停在最后一帧。关掉这个开关会一直画整张网页。"
-          }
-        }
-      }
-    },
     "Whether this website is allowed to make noise. Remembered per website, so a clock stays silent and a live stream does not." : {
       "localizations" : {
         "zh-Hans" : {
@@ -2326,17 +2095,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "这个网站能不能出声。按网站分别记住，所以时钟保持安静而直播不会；它和 Nifro 菜单里的「声音」是同一个设置，在哪边改都行。静音的做法是把页面上每个音频和视频元素保持静音，所以覆盖媒体元素，不覆盖网页用 Web Audio API 生成的声音。"
-          }
-        }
-      }
-    },
-    "While disabled, Nifro will display the website on the space that is active at launch." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "关闭时，Nifro 只在启动时所在的那个桌面显示网站。"
           }
         }
       }
@@ -2361,17 +2119,6 @@
         }
       }
     },
-    "Zoom" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "缩放"
-          }
-        }
-      }
-    },
     "Zoom In" : {
       "localizations" : {
         "zh-Hans" : {
@@ -2392,17 +2139,6 @@
         }
       }
     },
-    "Zoom into part of the page" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "放大网页的一部分"
-          }
-        }
-      }
-    },
     "^[%lld site](inflect: true) · bundled copy, could not reach GitHub" : {
       "localizations" : {
         "zh-Hans" : {
@@ -2419,17 +2155,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld 个站点 · 已与 GitHub 同步"
-          }
-        }
-      }
-    },
-    "minutes" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "分钟"
           }
         }
       }
