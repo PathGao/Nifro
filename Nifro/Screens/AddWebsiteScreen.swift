@@ -236,6 +236,14 @@ struct AddWebsiteScreen: View {
 				}
 			}
 			.help("Inject your own CSS or JavaScript into this website. Most websites need neither.")
+
+			LabeledContent(String(localized: "Report a problem")) {
+				Button(String(localized: "Copy Settings")) {
+					NSPasteboard.general.prepareForNewContents()
+					NSPasteboard.general.setString(website.wrappedValue.reportText, forType: .string)
+				}
+			}
+			.help("Copies this website's settings as text, ready to paste into an issue. Nearly every question about a wallpaper is decided by these, and it saves being asked for them one at a time. The address is included; the CSS and JavaScript are reported by size rather than by content, since a stylesheet can carry something private and this gets pasted in public.")
 		}
 		Section {
 			WebsiteAudioSetting(audio: website.audio)

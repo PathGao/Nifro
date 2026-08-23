@@ -1,6 +1,6 @@
 name: Site submission
 description: Suggest a website that works well as a wallpaper, for the sites/ directory
-labels: ["site-submission"]
+labels: ["site submission"]
 body:
   - type: markdown
     attributes:

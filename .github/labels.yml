@@ -1,0 +1,73 @@
+# The label set, kept in the repository so it is reviewable and reproducible.
+#
+# Apply it with:
+#
+#   ./Tools/sync-labels.sh
+#
+# Carried over from Markpad, whose triage this follows. Three of these do work no
+# default label does, and they are the ones worth explaining:
+#
+#   needs info           the issue is stalled on the reporter, not on us. Without it,
+#                        "open" means both "waiting for me" and "waiting for you".
+#   awaiting decision    the work is understood and the product call is not made. Separated
+#                        from `planned` so that "we know how" and "we have agreed to" are
+#                        never the same state.
+#   Final_Check_Request  a fix has landed and nobody has confirmed the symptom is gone.
+#                        A commit is not a confirmation, and closing on one is how a bug
+#                        gets reported twice.
+
+- name: bug
+  color: d73a4a
+  description: Something isn't working
+
+- name: enhancement
+  color: a2eeef
+  description: New feature or request
+
+- name: question
+  color: FBCA04
+  description: A usage question, not a defect
+
+- name: documentation
+  color: BFD4F2
+  description: Docs, README or contributor-facing text
+
+- name: site submission
+  color: 1D76DB
+  description: A page proposed for the curated site list
+
+- name: needs info
+  color: F9D0C4
+  description: Waiting on the reporter to confirm or supply detail
+
+- name: awaiting decision
+  color: c129c4
+  description: Needs a product-direction call from the maintainer before work can start
+
+- name: planned
+  color: "0453ab"
+  description: Accepted and queued for the next round of work
+
+- name: Final_Check_Request
+  color: 5ade98
+  description: "Looks fixed, but do not close yet: needs confirmation, or part of it is still open"
+
+- name: wontfix
+  color: 6E7781
+  description: Decided against, with a reason
+
+- name: upstream
+  color: E4E669
+  description: The cause is in WebKit, macOS or the site itself, not in Nifro
+
+- name: dependencies
+  color: b9d130
+  description: Pull requests that update a dependency file
+
+- name: github_actions
+  color: "000000"
+  description: Pull requests that update GitHub Actions code
+
+- name: swift
+  color: F05138
+  description: Pull requests that update Swift code

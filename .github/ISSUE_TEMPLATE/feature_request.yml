@@ -43,8 +43,32 @@ body:
       required: true
 
   - type: input
+    id: site-url
+    attributes:
+      label: The website this is about, if it is about one
+      description: Paste the actual address. A request aimed at a real page gets answered against that page; one described in prose gets answered against a guess at which page you meant.
+      placeholder: "https://example.com/dashboard"
+
+  - type: textarea
+    id: website-settings
+    attributes:
+      label: That website's settings, if you have them
+      description: |
+        Open the website for editing in Nifro and press **Copy Settings**, then paste here. It writes out the address, the rendering mode, sound, region, display, hours and the rest in one block.
+
+        Nearly every question about a wallpaper is decided by these, and pasting them saves being asked for them one at a time. The CSS and JavaScript are reported by size rather than by content, so nothing private goes in.
+      render: text
+      placeholder: |
+        Nifro 0.1.0 (1) · macOS 26.1 · MacBookAir15,2
+        URL: https://example.com/dashboard
+        Rendering: Refresh periodically
+        Sound: Muted
+        Region: whole page
+        …
+
+  - type: input
     id: version
     attributes:
       label: Your Nifro and macOS version
       description: Skip only if the request has nothing to do with your setup.
-      placeholder: "2.16.0 · macOS 26.1"
+      placeholder: "0.1.0 · macOS 26.1"

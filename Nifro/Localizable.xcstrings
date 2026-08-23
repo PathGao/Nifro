@@ -461,6 +461,26 @@
         }
       }
     },
+    "Copies this website's settings as text, ready to paste into an issue. Nearly every question about a wallpaper is decided by these, and it saves being asked for them one at a time. The address is included; the CSS and JavaScript are reported by size rather than by content, since a stylesheet can carry something private and this gets pasted in public.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "把这个网站的设置复制成文本，可以直接粘进 issue。关于壁纸的问题几乎都由这些设置决定，贴上它们就不用被一项项追问。地址会包含在内；CSS 和 JavaScript 只报行数不报内容——样式表里可能有私人信息，而这段文本是要贴到公开地方的。"
+          }
+        }
+      }
+    },
+    "Copy Settings": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制设置"
+          }
+        }
+      }
+    },
     "Creates a fake dark mode for websites without a native dark mode by inverting all the colors on the website.": {
       "localizations": {
         "zh-Hans": {
@@ -1481,6 +1501,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "报告问题或提出需求…"
+          }
+        }
+      }
+    },
+    "Report a problem": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "报告问题"
           }
         }
       }

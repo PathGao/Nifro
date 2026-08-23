@@ -16,7 +16,7 @@ body:
     attributes:
       label: Nifro version
       description: Shown in the menu bar icon → About, or `Nifro → About Nifro`.
-      placeholder: "2.16.0"
+      placeholder: "0.1.0"
     validations:
       required: true
 
@@ -25,7 +25,7 @@ body:
     attributes:
       label: macOS version
       description: Apple menu → About This Mac. Add the chip (Apple silicon or Intel) if you know it — some `WKWebView` and display bugs only appear on one.
-      placeholder: "macOS 26.1 · M2"
+      placeholder: "macOS 26.1 · Apple silicon"
     validations:
       required: true
 
@@ -50,6 +50,23 @@ body:
       placeholder: "https://example.com/dashboard"
     validations:
       required: true
+
+  - type: textarea
+    id: website-settings
+    attributes:
+      label: The website's settings
+      description: |
+        Open the website for editing in Nifro and press **Copy Settings**, then paste here. It writes out the address, the rendering mode, sound, region, display, hours and the rest in one block.
+
+        Nearly every question about a wallpaper is decided by these, and pasting them saves being asked for them one at a time. The CSS and JavaScript are reported by size rather than by content, so nothing private goes in.
+      render: text
+      placeholder: |
+        Nifro 0.1.0 (1) · macOS 26.1 · MacBookAir15,2
+        URL: https://example.com/dashboard
+        Rendering: Refresh periodically
+        Sound: Muted
+        Region: whole page
+        …
 
   - type: dropdown
     id: custom-code
