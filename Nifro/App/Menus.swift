@@ -18,7 +18,7 @@ extension AppState {
 	*/
 	private func addInfoMenuItem() {
 		guard
-			let website = WebsitesController.shared.current,
+			let website = currentWebsite,
 			!website.menuTitle.isEmpty
 		else {
 			return
@@ -57,13 +57,20 @@ extension AppState {
 		.withSymbolConfiguration(configuration)
 	}
 
+	/**
+	Every website, across every display, with this display's one ticked.
+
+	Deliberately the whole list rather than this display's share of it: picking a website that lives
+	on another screen is how you move the wallpaper there without going into Settings first, and the
+	tick answers "which one am I looking at" for the screen the menu bar is on.
+	*/
 	private func createSwitchMenu() -> SSMenu {
 		let menu = SSMenu()
 
 		for website in WebsitesController.shared.all {
 			let menuItem = menu.addCallbackItem(
 				website.menuTitle.truncating(to: 40),
-				isChecked: website.isCurrent
+				isChecked: website.id == currentWebsite?.id
 			) {
 				website.makeCurrent()
 			}
@@ -83,18 +90,18 @@ extension AppState {
 		if !WebsitesController.shared.all.isEmpty {
 			menu.addCallbackItem(
 				String(localized: "Reload"),
-				isEnabled: WebsitesController.shared.current != nil
+				isEnabled: currentWebsite != nil
 			) {
 				Action.reload.run()
 			}
 			.setShortcut(for: Shortcut.reload.name)
 
 			if
-				let website = WebsitesController.shared.current,
+				let website = currentWebsite,
 				let url = primaryScene.webViewController.webView.navigatedURL(for: website)
 			{
 				let menuItem = menu.addCallbackItem(String(localized: "Update Website to Current")) {
-					WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
+					WebsitesController.shared.update(website.id) {
 						$0.url = url
 					}
 				}
@@ -104,14 +111,14 @@ extension AppState {
 
 			menu.addCallbackItem(
 				String(localized: "Browsing Mode"),
-				isEnabled: WebsitesController.shared.current != nil,
+				isEnabled: currentWebsite != nil,
 				isChecked: Defaults[.isBrowsingMode]
 			) {
 				Action.toggleBrowsingMode.run()
 			}
 			.setShortcut(for: Shortcut.toggleBrowsingMode.name)
 
-			if let website = WebsitesController.shared.current {
+			if let website = currentWebsite {
 				menu.addCallbackItem(
 					String(localized: "Sound"),
 					isChecked: website.audio == .unmuted
@@ -126,7 +133,7 @@ extension AppState {
 
 		// Its own section. Framing a region is usually not a single attempt, so the way back has to sit
 		// next to the way in rather than in a settings window.
-		if let website = WebsitesController.shared.current {
+		if let website = currentWebsite {
 			menu.addSeparator()
 
 			menu.addCallbackItem(String(localized: "Choose Region…")) {
@@ -140,7 +147,7 @@ extension AppState {
 				String(localized: "Show Whole Page"),
 				isEnabled: website.zoom != nil
 			) {
-				WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
+				WebsitesController.shared.update(website.id) {
 					$0.zoom = nil
 				}
 			}
@@ -182,7 +189,7 @@ extension AppState {
 
 		guard
 			displays.count > 1,
-			let website = WebsitesController.shared.current
+			let website = currentWebsite
 		else {
 			return
 		}
@@ -195,7 +202,7 @@ extension AppState {
 			String(localized: "Default display"),
 			isChecked: website.display == nil
 		) {
-			WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
+			WebsitesController.shared.update(website.id) {
 				$0.display = nil
 			}
 		}
@@ -205,7 +212,7 @@ extension AppState {
 				display.localizedName,
 				isChecked: website.display == display
 			) {
-				WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
+				WebsitesController.shared.update(website.id) {
 					$0.display = display
 				}
 			}
@@ -227,8 +234,6 @@ extension AppState {
 			.setShortcut(for: Shortcut.toggleEnabled.name)
 		}
 
-		// Under the switch, because the switch is about this website: "Disable" and the name of the
-		// thing being disabled belong to each other.
 		addInfoMenuItem()
 
 		menu.addSeparator()

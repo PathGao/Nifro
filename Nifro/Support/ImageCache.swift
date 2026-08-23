@@ -1,0 +1,288 @@
+import AppKit
+import os
+
+// Moved out of Extensions.swift, which is where it was only because everything was. This is a
+// component, not an extension.
+
+// MARK: - SimpleImageCacheKeyable
+protocol SimpleImageCacheKeyable: Hashable {
+	var cacheKey: String { get }
+}
+
+extension String: SimpleImageCacheKeyable {
+	var cacheKey: String { self }
+}
+
+extension URL: SimpleImageCacheKeyable {
+	var cacheKey: String { absoluteString }
+}
+
+/**
+Wrapper around `NSCache` that enables using any hashable key and any value.
+*/
+final class Cache<Key: Hashable, Value> {
+	private final class WrappedKey: NSObject {
+		let key: Key
+
+		init(key: Key) {
+			self.key = key
+		}
+
+		override var hash: Int { key.hashValue }
+
+		override func isEqual(_ object: Any?) -> Bool {
+			guard let value = object as? Self else {
+				return false
+			}
+
+			return value.key == key
+		}
+	}
+
+	private final class WrappedValue {
+		let value: Value
+
+		init(value: Value) {
+			self.value = value
+		}
+	}
+
+	private let cache = NSCache<WrappedKey, WrappedValue>()
+
+	/**
+	Get, set, or remove an entry from the cache.
+	*/
+	subscript(key: Key) -> Value? {
+		get { cache.object(forKey: .init(key: key))?.value }
+		set {
+			guard let newValue else {
+				// If the value is `nil`, remove the entry from the cache.
+				cache.removeObject(forKey: .init(key: key))
+
+				return
+			}
+
+			cache.setObject(.init(value: newValue), forKey: .init(key: key))
+		}
+	}
+
+	/**
+	Removes all entries.
+	*/
+	func removeAll() {
+		cache.removeAllObjects()
+	}
+}
+// TODO: Rewrite as an actor.
+/**
+Extremely simple and naive image cache.
+
+The cache is thread-safe.
+
+You can optionally persist the cache to disk. Reading from the cache is synchronous. Saving to the cache happens asynchronously in a background thread.
+*/
+final class SimpleImageCache<Key: SimpleImageCacheKeyable> {
+	private let lock = OSAllocatedUnfairLock()
+	private let diskQueue = DispatchQueue(label: "SimpleImageCache")
+	private let cache = Cache<Key, NSImage>()
+	private var cacheDirectory: URL?
+
+	private var shouldUseDisk: Bool { cacheDirectory != nil }
+
+	/**
+	- Parameter diskCacheName: If you want to cache to disk, pass a name. The name should be a valid directory name.
+	*/
+	init(diskCacheName: String? = nil) {
+		if let diskCacheName {
+			do {
+				self.cacheDirectory = try createCacheDirectory(name: diskCacheName)
+			} catch {
+				assertionFailure("Failed to create cache directory: \(error)")
+			}
+		}
+	}
+
+	private func createCacheDirectory(name: String) throws -> URL {
+		let rootCacheDirectory = try FileManager.default.url(for: .cachesDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+
+		let cacheDirectory = rootCacheDirectory
+			.appendingPathComponent(SSApp.name, isDirectory: true)
+			.appendingPathComponent(name, isDirectory: true)
+
+		try FileManager.default.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
+
+		return cacheDirectory
+	}
+
+	private func createCacheDirectoryIfNeeded() {
+		guard let cacheDirectory else {
+			return
+		}
+
+		try? FileManager.default.createDirectory(at: cacheDirectory, withIntermediateDirectories: true)
+	}
+
+	private func cacheFileFromKey(_ key: Key) -> URL? {
+		cacheDirectory?.appendingPathComponent(key.cacheKey.sha256(), isDirectory: false)
+	}
+
+	private func loadImageFromDiskIfNeeded(for key: Key) -> NSImage? {
+		guard
+			shouldUseDisk,
+			let cacheFile = cacheFileFromKey(key)
+		else {
+			return nil
+		}
+
+		return NSImage(contentsOf: cacheFile)
+	}
+
+	private func saveImageToDiskIfNeeded(_ image: NSImage, for key: Key) {
+		guard
+			shouldUseDisk,
+			let cacheFile = cacheFileFromKey(key)
+		else {
+			return
+		}
+
+		diskQueue.async { [weak self] in
+			guard let self else {
+				return
+			}
+
+			guard let tiffData = image.tiffRepresentation else {
+				assertionFailure("Could not get TIFF representation from image.")
+				return
+			}
+
+			// Ensure the cache directory exists in case it was removed by `.removeAllImages()` or the user.
+			createCacheDirectoryIfNeeded()
+
+			do {
+				try tiffData.write(to: cacheFile)
+			} catch {
+				assertionFailure("Failed to write image to disk: \(error.localizedDescription)")
+			}
+		}
+	}
+
+	private func removeImageFromDiskIfNeeded(for key: Key) {
+		guard
+			shouldUseDisk,
+			let cacheFile = cacheFileFromKey(key)
+		else {
+			return
+		}
+
+		diskQueue.async {
+			try? FileManager.default.removeItem(at: cacheFile)
+		}
+	}
+
+	private func removeAllImagesFromDiskIfNeeded() {
+		guard
+			shouldUseDisk,
+			let cacheDirectory
+		else {
+			return
+		}
+
+		diskQueue.async {
+			try? FileManager.default.removeItem(at: cacheDirectory)
+		}
+	}
+
+	/**
+	Get the image for the given key.
+	*/
+	private func image(for key: Key) -> NSImage? {
+		lock.lock()
+		defer {
+			lock.unlock()
+		}
+
+		guard let image = cache[key] else {
+			guard let image = loadImageFromDiskIfNeeded(for: key) else {
+				return nil
+			}
+
+			cache[key] = image
+
+			return image
+		}
+
+		return image
+	}
+
+	/**
+	Insert an image into the cache for the given key.
+	*/
+	private func insertImage(_ image: NSImage?, for key: Key) {
+		guard let image else {
+			removeImage(for: key)
+			return
+		}
+
+		lock.lock()
+		defer {
+			lock.unlock()
+		}
+
+		cache[key] = image
+		saveImageToDiskIfNeeded(image, for: key)
+	}
+
+	/**
+	Remove an image from the cache for the given key.
+	*/
+	private func removeImage(for key: Key) {
+		lock.lock()
+		defer {
+			lock.unlock()
+		}
+
+		cache[key] = nil
+		removeImageFromDiskIfNeeded(for: key)
+	}
+
+	/**
+	If the cache items exists on disk but not in the memory cache, this adds it them the memory cache too.
+
+	This is run in a background thread.
+	*/
+	func prewarmCacheFromDisk(for keys: [Key]) {
+		DispatchQueue.global().async { [self] in
+			for key in keys {
+				_ = image(for: key)
+			}
+		}
+	}
+
+	/**
+	Remove all images from the cache.
+	*/
+	func removeAllImages() {
+		lock.lock()
+		defer {
+			lock.unlock()
+		}
+
+		cache.removeAll()
+		removeAllImagesFromDiskIfNeeded()
+	}
+
+	/**
+	Get, set, or remove an image from the cache.
+	*/
+	subscript(_ key: Key) -> NSImage? {
+		get { image(for: key) }
+		set {
+			guard let newValue else {
+				removeImage(for: key)
+				return
+			}
+
+			insertImage(newValue, for: key)
+		}
+	}
+}

@@ -433,12 +433,12 @@
         }
       }
     },
-    "Clears cookies, local storage, caches, page thumbnails, and where each page had been scrolled or moved to. Your websites and their settings are kept." : {
+    "Clears cookies, local storage, caches, page thumbnails, and what each page had remembered: where it was scrolled or moved to, and how far it was zoomed in. Your websites and their settings are kept." : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "清除 Cookie、本地存储、缓存、页面缩略图，以及每个页面滚动到或移动到过的位置。你的网站和它们的设置会保留。"
+            "value" : "清除 Cookie、本地存储、缓存、页面缩略图，以及每个页面记住的东西：它滚动到或移动到过的位置，以及它被放大到多少。你的网站和它们的设置会保留。"
           }
         }
       }

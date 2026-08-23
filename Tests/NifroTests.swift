@@ -430,3 +430,184 @@ struct WordWrappingTests {
 		#expect(!isCancellation(NSError(domain: NSURLErrorDomain, code: NSURLErrorTimedOut)))
 	}
 }
+
+/**
+Which website is the current one, on a Mac with more than one display.
+
+Every part of this was written and shipped on a one-display machine, where a list-wide answer and a
+per-display answer are the same answer. They are not the same on two, and the difference is not
+visible by reading: it shows as one screen quietly refusing to rotate. These are the cheapest way to
+have the two-display case checked at all.
+*/
+@Suite("Current website per display")
+struct CurrentWebsiteTests {
+	@Test("Making one current leaves the other display's mark alone")
+	func otherDisplaysKeepTheirMark() {
+		// Two websites on display A, two on display B, one marked on each.
+		let displays = ["A", "A", "B", "B"]
+		let wasCurrent = [true, false, true, false]
+
+		// Display A advances to its second website.
+		let flags = currentFlags(displays: displays, wasCurrent: wasCurrent, makingCurrent: 1)
+
+		#expect(flags == [false, true, true, false])
+	}
+
+	@Test("A display never ends up with two marked websites")
+	func oneMarkPerDisplay() {
+		let displays = ["A", "A", "A"]
+
+		let flags = currentFlags(displays: displays, wasCurrent: [true, true, false], makingCurrent: 2)
+
+		#expect(flags == [false, false, true])
+	}
+
+	@Test("Websites following the default display are one display, not none")
+	func nilDisplaysGroupTogether() {
+		// `effectiveDisplay` is optional and `nil` means "whatever Settings says", so two of those are
+		// on the same screen and have to fight over one mark like any other pair.
+		let displays: [String?] = [nil, nil, "B"]
+
+		let flags = currentFlags(displays: displays, wasCurrent: [true, false, true], makingCurrent: 1)
+
+		#expect(flags == [false, true, true])
+	}
+
+	@Test("Rotation goes round its own display and wraps")
+	func rotationWraps() {
+		#expect(nextRotationIndex(count: 3, after: 0) == 1)
+		#expect(nextRotationIndex(count: 3, after: 2) == 0)
+	}
+
+	@Test("A display that has lost its mark starts again rather than stopping")
+	func unmarkedDisplayStartsOver() {
+		#expect(nextRotationIndex(count: 3, after: nil) == 0)
+		#expect(nextRotationIndex(count: 0, after: nil) == nil)
+	}
+
+	@Test("Two displays can each advance without disturbing the other")
+	func twoDisplaysRotateIndependently() {
+		// The exact sequence that used to pin display A to its first website. A advances, then B
+		// advances; if B's advance clears A's mark, A's next advance starts from the beginning and A
+		// never gets past index 0.
+		let displays = ["A", "A", "B", "B"]
+
+		var flags = currentFlags(displays: displays, wasCurrent: [true, false, true, false], makingCurrent: 1)
+		flags = currentFlags(displays: displays, wasCurrent: flags, makingCurrent: 3)
+
+		// A is still on its second website.
+		#expect(flags == [false, true, false, true])
+
+		// So A's next tick moves it on rather than back to the start.
+		let aFlags = [flags[0], flags[1]]
+		#expect(nextRotationIndex(count: 2, after: aFlags.firstIndex(of: true)) == 0)
+		#expect(aFlags.firstIndex(of: true) == 1)
+	}
+}
+
+/**
+The strip of page the menu bar band takes its colour from.
+
+The band stands in for whatever is drawn behind the menu bar. With a region framed, that is not the
+top of the page — it is somewhere in the middle of it, magnified — and the version that shipped took
+the colour off the top of the page regardless, so a framed wallpaper tinted the menu bar with a part
+of the page that is usually not on screen at all.
+*/
+@Suite("Menu bar band sampling")
+struct MenuBarBandSamplingTests {
+	private let pageSize = CGSize(width: 1470, height: 896)
+	private let height = 33.0
+
+	@Test("With no magnification the strip is the top of the page")
+	func unzoomedIsTheTop() {
+		let strip = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 1).topStrip(inPageOfSize: pageSize, height: height)
+
+		#expect(strip == CGRect(x: 0, y: 0, width: pageSize.width, height: height))
+	}
+
+	@Test("The strip is as wide as the window, not as wide as the region")
+	func widthIsNotScaled() {
+		let strip = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 2).topStrip(inPageOfSize: pageSize, height: height)
+
+		// Half the page across, centred, magnified twice: the top-left of the region is a quarter of
+		// the page in and down, and that lands at half the page's dimensions once magnified.
+		#expect(strip.origin.x == pageSize.width / 2)
+		#expect(strip.origin.y == pageSize.height / 2)
+
+		// Not `region.width`, and not `pageSize.width * scale`. Both are plausible and both are wrong:
+		// the view's coordinates are already magnified, so the strip stays the width of the window.
+		// Literals rather than the properties above: a rectangle's members are `CGFloat` and these are
+		// `Double`, and `#expect` reports the mixed comparison as failed even when both sides print the
+		// same number.
+		#expect(strip.width == pageSize.width)
+		#expect(strip.height == 33)
+	}
+
+	@Test("A region at the top-left samples the view's own corner")
+	func topLeftRegionSamplesTheCorner() {
+		let strip = Zoom(center: .zero, scale: 4).topStrip(inPageOfSize: pageSize, height: height)
+
+		#expect(strip.origin == .zero)
+	}
+
+	@Test("A region at the bottom-right stays inside the magnified page")
+	func bottomRightRegionStaysInBounds() {
+		let strip = Zoom(center: CGPoint(x: 1, y: 1), scale: 4).topStrip(inPageOfSize: pageSize, height: height)
+
+		// The region is clamped to the page's far corner, so its origin is three quarters of the way
+		// along, and magnified that is the far edge of the view minus one window's width.
+		#expect(strip.origin.x == pageSize.width * 3)
+		#expect(strip.maxX == pageSize.width * 4)
+	}
+
+	@Test("Magnification follows the clamped region, not the raw scale")
+	func magnificationFollowsTheClampedRegion() {
+		// Below 1 there is nothing left to frame, so the region is the whole page and the page is
+		// drawn at its own size.
+		#expect(Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 0.5).magnification(inPageOfSize: pageSize) == 1)
+		#expect(Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 3).magnification(inPageOfSize: pageSize) == 3)
+	}
+}
+
+/**
+How a `nifro:` URL says which command it means.
+
+A URL scheme is a public interface, and this one has two spellings that parse differently. Only one
+of them worked, and the other failed with a message that named nothing — so the failure looked like
+"no such command" rather than "wrong number of slashes". These pin both, because the whole reason the
+bug survived is that nothing said which spelling was the real one.
+*/
+@Suite("URL commands")
+struct URLCommandTests {
+	private func command(_ string: String) -> String {
+		urlCommand(from: URLComponents(string: string)!)
+	}
+
+	@Test("The documented spelling puts the command in the path")
+	func withoutSlashes() {
+		#expect(command("nifro:reload") == "reload")
+	}
+
+	@Test("The spelling people actually type puts it in the host")
+	func withSlashes() {
+		// This is the one that used to answer "The command “” is not supported".
+		#expect(command("nifro://reload") == "reload")
+		#expect(command("nifro://next") == "next")
+	}
+
+	@Test("A third slash puts it back in the path, with a leading slash to drop")
+	func withThreeSlashes() {
+		#expect(command("nifro:///reload") == "reload")
+	}
+
+	@Test("Parameters belong to the query, whichever spelling carries the command")
+	func parametersSurvive() {
+		#expect(command("nifro:add?url=https://example.com") == "add")
+		#expect(command("nifro://add?url=https://example.com") == "add")
+	}
+
+	@Test("A URL with no command at all is empty rather than something")
+	func noCommand() {
+		#expect(command("nifro:").isEmpty)
+	}
+}

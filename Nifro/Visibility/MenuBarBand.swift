@@ -73,7 +73,7 @@ final class MenuBarBandWindow: NSWindow {
 	}
 
 	static func frame(on screen: NSScreen) -> CGRect {
-		let height = screen.menuBarHeight
+		let height = screen.statusBarThickness
 
 		return CGRect(
 			x: screen.frame.minX,
@@ -102,13 +102,6 @@ private final class MenuBarBandView: NSView {
 	override func hitTest(_ point: CGPoint) -> NSView? { nil }
 }
 
-extension NSScreen {
-	/**
-	Height of the strip the menu bar occupies on this screen, or 0 when it has none.
-	*/
-	var menuBarHeight: Double { frame.height - frameWithoutStatusBar.height }
-}
-
 extension WallpaperScene {
 	/**
 	Add or remove the band to match the screen the scene is on.
@@ -121,7 +114,7 @@ extension WallpaperScene {
 			// how it survived being disabled in the first place.
 			AppState.shared.isEnabled,
 			let screen,
-			screen.menuBarHeight > 0
+			screen.statusBarThickness > 0
 		else {
 			menuBarBand?.close()
 			menuBarBand = nil
@@ -154,7 +147,7 @@ extension WallpaperScene {
 	}
 
 	/**
-	Sample the top strip of the page and paint the band with its average colour.
+	Sample the top strip of the wallpaper and paint the band with its average colour.
 
 	Re-sampled on every load rather than once, because the wallpaper changes and the menu bar has to
 	keep matching it.
@@ -173,7 +166,10 @@ extension WallpaperScene {
 
 		let webView = webViewController.webView
 		let configuration = WKSnapshotConfiguration()
-		configuration.rect = CGRect(x: 0, y: 0, width: webView.bounds.width, height: screen.menuBarHeight)
+
+		// Clipped rather than trusted. The rectangle is worked out from the size the page was laid out
+		// at, and a display change moves that before the view holding the page has been rebuilt for it.
+		configuration.rect = topStripOfWallpaper(height: screen.statusBarThickness).intersection(webView.bounds)
 
 		guard
 			configuration.rect.width > 0,
@@ -195,9 +191,42 @@ extension WallpaperScene {
 			self?.updateMenuBarBandVisibility()
 		}
 	}
+
+	/**
+	The `height` points of web view that end up along the top of the display, in the web view's own
+	coordinates.
+
+	With no region framed that is the web view's own top strip: the page fills the window at its own
+	size, so the two tops are the same place. With one it is somewhere in the middle of the page, and
+	`Zoom.topStrip(inPageOfSize:height:)` is where that is worked out — the same place `PageView` gets
+	its magnification from, so the band cannot drift away from the thing it is standing in for.
+
+	Reads `content` rather than `website?.zoom`, so it mirrors what is on screen rather than what the
+	website asks for. The two differ for as long as a new website takes to load out of sight, and
+	during that the old page is still up wearing the old region.
+	*/
+	private func topStripOfWallpaper(height: Double) -> CGRect {
+		guard
+			case .live(let zoom?) = content,
+			let pageSize = pageLayoutSize
+		else {
+			return CGRect(x: 0, y: 0, width: webViewController.webView.bounds.width, height: height)
+		}
+
+		return zoom.topStrip(inPageOfSize: pageSize, height: height)
+	}
 }
 
 extension NSImage {
+	/**
+	One rendering context for every sample.
+
+	A `CIContext` is a renderer, not a value: building one per call stood up a fresh one on every page
+	load on every scene, to produce a single pixel. It holds nothing belonging to a particular image,
+	so there is nothing for the callers to disagree about.
+	*/
+	private static let averageColorContext = CIContext(options: [.workingColorSpace: NSNull()])
+
 	/**
 	The average colour of the whole image, or `nil` if it cannot be read.
 	*/
@@ -216,7 +245,7 @@ extension NSImage {
 
 		var pixel = [UInt8](repeating: 0, count: 4)
 
-		CIContext(options: [.workingColorSpace: NSNull()]).render(
+		Self.averageColorContext.render(
 			output,
 			toBitmap: &pixel,
 			rowBytes: 4,

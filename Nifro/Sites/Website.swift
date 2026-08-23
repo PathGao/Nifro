@@ -70,6 +70,26 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	*/
 	var effectiveReloadInterval: Double? { reloadInterval ?? Defaults[.reloadInterval] }
 
+	/**
+	The CSS this website actually applies, `nil` when it applies none.
+
+	A hand-added website starts with `starterCSS` in the field and every line of it is a comment, so an
+	untouched template is fourteen lines that change nothing. Anything asking whether this website has
+	custom code has to treat that as none, or it answers yes for every website nobody has edited — which
+	is what the bug report text did, and CONTRIBUTING names that field as one of the two answers that
+	settle most reports.
+	*/
+	var customCSS: String? {
+		css.trimmed.isEmpty || css == Self.starterCSS ? nil : css
+	}
+
+	/**
+	The JavaScript this website actually runs, `nil` when it runs none. Same reasoning as `customCSS`.
+	*/
+	var customJavaScript: String? {
+		javaScript.trimmed.isEmpty || javaScript == Self.starterJavaScript ? nil : javaScript
+	}
+
 	var subtitle: String { url.humanString }
 
 	var menuTitle: String { title.isEmpty ? subtitle : title }
@@ -77,13 +97,6 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	// The space is there to force `NSMenu` to display an empty line.
 	var tooltip: String { "\(title)\n \n\(subtitle)".trimmed }
 
-	/**
-	The key this website's preview image is cached under.
-
-	The whole address, not its host. Keyed by host, every page on a site shared one image — so a list
-	with several YouTube videos in it showed the same picture on all of them, which is the case where
-	a preview would have been most use.
-	*/
 	/**
 	Symbols for the settings this website has that are not the default, in a fixed order.
 
@@ -117,11 +130,18 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 		return symbols
 	}
 
+	/**
+	The key this website's preview image is cached under.
+
+	The whole address, not its host. Keyed by host, every page on a site shared one image — so a list
+	with several YouTube videos in it showed the same picture on all of them, which is the case where
+	a preview would have been most use.
+	*/
 	var thumbnailCacheKey: String { url.isFileURL ? url.tildePath : url.absoluteString }
 
 	@MainActor
 	func makeCurrent() {
-		WebsitesController.shared.current = self
+		WebsitesController.shared.makeCurrent(self)
 	}
 
 	@MainActor

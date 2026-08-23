@@ -46,9 +46,11 @@ extension WebsitesController {
 			return candidates.first
 		}
 
-		let currentIndex = candidates.firstIndex { $0.isCurrent } ?? -1
-		let next = candidates[(currentIndex + 1) % candidates.count]
+		guard let nextIndex = nextRotationIndex(count: candidates.count, after: candidates.firstIndex { $0.isCurrent }) else {
+			return nil
+		}
 
+		let next = candidates[nextIndex]
 		makeCurrent(next)
 
 		return next
@@ -60,6 +62,49 @@ extension WebsitesController {
 	func scheduled(for display: Display?, at date: Date = .now) -> Website? {
 		let candidates = eligible(for: display, at: date)
 		return candidates.first(where: \.isCurrent) ?? candidates.first
+	}
+
+	/**
+	Move `display` to the next, previous, or a random one of its own websites.
+
+	Next, Previous and Random live here rather than beside the rest of the list because they are the
+	same mechanism as the playlist: they move one display's rotation. Walking the whole list instead
+	would let a menu item on the screen in front of you change the wallpaper on the one behind you,
+	which is the version of this that shipped and is the reason they take a display at all.
+	*/
+	func makeNextCurrent(on display: Display?) {
+		guard let next = eligible(for: display).elementAfterOrFirst(scheduled(for: display)) else {
+			return
+		}
+
+		makeCurrent(next)
+	}
+
+	func makePreviousCurrent(on display: Display?) {
+		guard let previous = eligible(for: display).elementBeforeOrLast(scheduled(for: display)) else {
+			return
+		}
+
+		makeCurrent(previous)
+	}
+
+	func makeRandomCurrent(on display: Display?) {
+		let candidates = eligible(for: display)
+
+		// Built on demand and kept, because the point of the shuffled order is that it does not
+		// repeat until it has been all the way round, and an iterator made fresh each time cannot
+		// know where it had got to. Thrown away whenever a website is added or removed.
+		var iterator = randomIterators[display] ?? candidates.infiniteUniformRandomSequence().makeIterator()
+
+		defer {
+			randomIterators[display] = iterator
+		}
+
+		guard let website = iterator.next() else {
+			return
+		}
+
+		makeCurrent(website)
 	}
 }
 

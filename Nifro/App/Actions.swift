@@ -11,6 +11,10 @@ turning it on by shortcut, by URL, or from Shortcuts silently skipped it — whi
 where the explanation matters most, since the point of it is that the page may be hidden behind your
 windows.
 
+Each one acts on the primary scene, the display Settings points at. An action reached from the menu
+bar has no way to say which screen it means, and moving a screen the person is not looking at is the
+worse of the two answers.
+
 What is *not* in here is where each action sits in the menu, when it is greyed out, and what its
 tooltip says. Those differ per item and per entry point, and pulling them in would turn this into a
 table of exceptions. The table owns what an action *is*; the menu still owns what the menu looks
@@ -67,11 +71,11 @@ enum Action: String, CaseIterable {
 				}
 			}
 		case .toggleSound:
-			guard let website = WebsitesController.shared.current else {
+			guard let website = AppState.shared.currentWebsite else {
 				return
 			}
 
-			WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
+			WebsitesController.shared.update(website.id) {
 				$0.audio = $0.audio == .unmuted ? .muted : .unmuted
 			}
 		case .chooseRegion:
@@ -79,11 +83,11 @@ enum Action: String, CaseIterable {
 		case .reload:
 			AppState.shared.reloadWebsite()
 		case .nextWebsite:
-			WebsitesController.shared.makeNextCurrent()
+			WebsitesController.shared.makeNextCurrent(on: AppState.shared.primaryScene.display)
 		case .previousWebsite:
-			WebsitesController.shared.makePreviousCurrent()
+			WebsitesController.shared.makePreviousCurrent(on: AppState.shared.primaryScene.display)
 		case .randomWebsite:
-			WebsitesController.shared.makeRandomCurrent()
+			WebsitesController.shared.makeRandomCurrent(on: AppState.shared.primaryScene.display)
 		}
 	}
 

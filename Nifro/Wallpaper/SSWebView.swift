@@ -3,6 +3,15 @@ import WebKit
 final class SSWebView: WKWebView {
 	override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 
+	/**
+	The scene this web view draws into. Weak because the scene owns it, through its controller.
+
+	Here so the context menu can offer to change the website this page belongs to. Read off the
+	list-wide current website instead, "Update Website to Current" on the second display rewrote the
+	first display's website with the second one's address.
+	*/
+	weak var scene: WallpaperScene?
+
 	private var cancellables = Set<AnyCancellable>()
 
 	private var excludedMenuItems: Set<MenuItemIdentifier> = [
@@ -81,11 +90,11 @@ final class SSWebView: WKWebView {
 		menu.addSeparator()
 
 		if
-			let website = WebsitesController.shared.current,
+			let website = scene?.website,
 			let url = navigatedURL(for: website)
 		{
 			let menuItem = menu.addCallbackItem(String(localized: "Update Website to Current")) {
-				WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
+				WebsitesController.shared.update(website.id) {
 					$0.url = url
 				}
 			}
@@ -134,14 +143,9 @@ extension SSWebView {
 			return nil
 		}
 
-		let keyPart = url
-			.normalized(removeFragment: true, removeQuery: true)
-			.absoluteString
-			.removingSchemeAndWWWFromURL
-			.toData
-			.base64EncodedString()
-
-		return .init("zoomLevel_\(keyPart)")
+		// The query goes, unlike the scroll position and the remembered address: how far in a page is
+		// zoomed is a property of the page, and `?tab=2` is the same page at the same size.
+		return .init(PerPageDefaults.zoomLevel.key(for: url, removeQuery: true))
 	}
 
 	private var zoomLevelDefaultsValue: Double? {

@@ -12,17 +12,12 @@ scales up pixels that were already drawn and the result is soft; `magnification`
 the page again at that size, so text stays text.
 */
 final class PageView: NSView {
-	private let pageSize: CGSize
-	private let region: CGRect
-	private let scale: Double
+	private let zoom: Zoom
 	private let content: WKWebView
 
 	init(content: WKWebView, zoom: Zoom, pageSize: CGSize) {
 		self.content = content
-		self.pageSize = pageSize
-
-		region = zoom.region(inPageOfSize: pageSize)
-		scale = region.width > 0 ? pageSize.width / region.width : 1
+		self.zoom = zoom
 
 		super.init(frame: CGRect(origin: .zero, size: pageSize))
 
@@ -42,6 +37,16 @@ final class PageView: NSView {
 	}
 
 	private func layOutContent() {
+		// Worked out from the current bounds rather than from the size passed in at birth. The two are
+		// the same until the view is resized, and then the stored copy is a layout for a display this
+		// page is no longer on. Nothing was observed going wrong — a display change rebuilds this view
+		// through `installContentView` before `layout()` gets a chance to run on the old numbers — but
+		// a cached copy of a value the view is handed the live version of is a trap set for whoever
+		// adds the next reason to resize.
+		let pageSize = bounds.size
+		let region = zoom.region(inPageOfSize: pageSize)
+		let scale = zoom.magnification(inPageOfSize: pageSize)
+
 		// Order matters. The frame is worked out in the magnified space, so the magnification has to
 		// be the one it was worked out for before the frame is set.
 		content.magnification = scale

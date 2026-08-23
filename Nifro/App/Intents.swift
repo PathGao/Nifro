@@ -126,7 +126,7 @@ struct GetCurrentWebsiteIntent: AppIntent {
 	@MainActor
 	func perform() async throws -> some IntentResult & ReturnsValue<WebsiteAppEntity?> {
 		ensureRunning()
-		return .result(value: WebsitesController.shared.current.flatMap { .init($0) })
+		return .result(value: AppState.shared.currentWebsite.flatMap { .init($0) })
 	}
 }
 
@@ -145,7 +145,13 @@ struct SetCurrentWebsiteIntent: AppIntent {
 	@MainActor
 	func perform() async throws -> some IntentResult {
 		ensureRunning()
-		WebsitesController.shared.current = website.toNative
+
+		// A website that is no longer in the list is not an error worth raising here: Shortcuts holds
+		// entities from whenever the action was configured, and the list is the user's to edit.
+		if let website = website.toNative {
+			WebsitesController.shared.makeCurrent(website)
+		}
+
 		return .result()
 	}
 }

@@ -1,13 +1,11 @@
 import SwiftUI
 
-/**
-TODO macOS 16:
-- Use `MenuBarExtra` and afterwards switch to `@Observable`.
-- Remove `Combine` and `Defaults.publisher` usage.
-- Remove `ensureRunning()` from some intents that don't require Nifro to stay open.
-- Focus filter support.
-- Use SwiftUI for the desktop window and the web view.
-*/
+// TODO macOS 16:
+// - Use `MenuBarExtra` and afterwards switch to `@Observable`.
+// - Remove `Combine` and `Defaults.publisher` usage.
+// - Remove `ensureRunning()` from some intents that don't require Nifro to stay open.
+// - Focus filter support.
+// - Use SwiftUI for the desktop window and the web view.
 
 @main
 private struct AppMain: App {

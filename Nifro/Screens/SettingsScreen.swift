@@ -304,7 +304,7 @@ private struct ClearWebsiteDataSetting: View {
 					.foregroundStyle(.secondary)
 			}
 		}
-		.help("Clears cookies, local storage, caches, page thumbnails, and where each page had been scrolled or moved to. Your websites and their settings are kept.")
+		.help("Clears cookies, local storage, caches, page thumbnails, and what each page had remembered: where it was scrolled or moved to, and how far it was zoomed in. Your websites and their settings are kept.")
 	}
 
 	private func clear() {
