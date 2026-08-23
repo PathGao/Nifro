@@ -148,10 +148,39 @@ owner.
 
 | | Item | Status | Notes |
 |---|---|---|---|
+| **L0** | Choose a region by moving the wallpaper, not by drawing a box on it | To do. **Do this before L1** | See below |
 | **L1** | A website has a place and a size on its display, not just a display | To do | Stored as fractions, like `Zoom` stores a centre and a magnification, so a block survives a change of display |
 | **L2** | A four-way grid to snap to, and free placement for anything else | To do | The grid is the affordance, not the model. Free placement is the model |
 | **L3** | Whether the grid uses the whole screen or keeps clear of the Dock | To do | A setting. `pageFrame` and `visibleFrame` are both already computed |
 | **L4** | Which block takes a click | To do | Browsing Mode and hold-to-interact currently mean "the wallpaper". With blocks they have to mean one of them |
+
+### L0, in full
+
+A region is stored as a centre and a magnification. It is *chosen* by dragging an aspect-locked
+rectangle over the wallpaper — a different shape of thing, converted into the stored one at the end.
+Three problems come from that gap:
+
+- **You are drawing on the thing you are framing.** The rectangle is not the result; you look at an
+  outline and imagine what it will become.
+- **It is one shot.** Drawn slightly wrong means starting over. There is no way to adjust a region
+  that already exists — `beginCropSelection` clears it first, on purpose, because otherwise you would
+  be framing a region of a region.
+- **The conversion is where K2 lives.** A rectangle measured against the window becomes a fraction
+  measured against the page, and the two do not agree to the pixel.
+
+Direct manipulation removes all three, because it *is* the stored model: drag moves the centre, scroll
+or pinch changes the magnification around the pointer, and the wallpaper shows the result at every
+moment because the wallpaper is the result. Return keeps it, Escape puts back what was there before.
+Nothing is converted, so K2 has nowhere left to happen, and adjusting an existing region becomes the
+same gesture as making one — you start from where it is instead of from nothing.
+
+The overlay stays. Its job changes from drawing a rectangle to swallowing scroll and drag so they
+reach the region instead of the page: on a page that pans itself, floor796 or a map, the gesture has
+to move the frame rather than the content inside it.
+
+This is also the interaction blocks want (L1–L3): placing and sizing a block on the desktop is the
+same two gestures against a different rectangle. Building it once for regions is the reason to do it
+first.
 
 **The three things that make this harder than it looks**, named now so they are not discovered later:
 
@@ -177,7 +206,7 @@ fixed so that the first release is a thing that exists.
 | | What happens | What is known about it |
 |---|---|---|
 | **K1** | A YouTube video cannot be shrunk back into the YouTube page, so there is no way to sign in | The address is rewritten to the player-only page and framed by a host page, because YouTube's player answers "error 153" when it is the document rather than a frame in one. That gets the video on the wallpaper and takes the site with it: there is no page around the player to navigate, and Browsing Mode has nothing to click into. Bilibili's player is a normal page and does not have this problem, which is why the two behave differently. Whatever the fix is, it has to keep 153 away |
-| **K2** | A framed region does not land exactly where it was framed, and part of it can end up under the menu bar | The page lays out in the screen minus the menu bar strip, and the selection is drawn over that same area, so the two should agree exactly. They do not: `DesktopWindow.setFrame` adds a point of height on purpose, and the overlay measures against the window while the region is measured against the page. The edges of what somebody drew are the whole point of drawing it — this is the one to fix first. Two neighbouring faults are fixed: the region was dropped for the seconds a website switch took, and it did not come back after the app was disabled and enabled |
+| **K2** | A framed region does not land exactly where it was framed, and part of it can end up under the menu bar | The page lays out in the screen minus the menu bar strip, and the selection is drawn over that same area, so the two should agree exactly. They do not: `DesktopWindow.setFrame` adds a point of height on purpose, and the overlay measures against the window while the region is measured against the page. The edges of what somebody drew are the whole point of drawing it. **Likely fixed by L0 rather than by chasing the arithmetic**: with direct manipulation there is no rectangle to convert, so there is nothing to be a point out. Two neighbouring faults are fixed: the region was dropped for the seconds a website switch took, and it did not come back after the app was disabled and enabled |
 | **K3** | Switching website can take several seconds | It is a page load, and swap loading keeps the previous page up for all of it, so nothing is broken — but nothing tells the user it is working either, and a few seconds of an unchanged wallpaper after choosing a website reads as the choice not having registered |
 | **K4** | Nothing is done to reduce what the app costs when nobody is looking at it | Deliberate, for now. See the note under "Power" — the machinery came out because it owned an answer the interaction also owns, and it comes back one piece at a time, each with a measurement first |
 | **K5** | No way to choose the app's language from inside the app | It follows the system. macOS has a per-app setting for this — System Settings → General → Language & Region → Applications — and it works today, but nobody finds it, and a person running their Mac in English who wants Nifro in Chinese has no reason to think the answer is three levels into System Settings. A picker in Settings that writes `AppleLanguages` and offers to relaunch would cost little |
