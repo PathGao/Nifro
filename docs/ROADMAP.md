@@ -250,6 +250,29 @@ behave differently, and nothing currently explains it.
 
 ---
 
+## 5.6 Multiple displays: built, never tested (the D series)
+
+**Every part of this was written on a one-display machine and has never been run on two.** It is not
+a known bug list; it is a list of claims nobody has checked. The centre-and-magnification design
+exists *because* of the second display — a rectangle framed on one screen cannot come out right on
+another shape — so the one feature most argued for is the one with the least evidence behind it.
+
+| | The claim | What would show it is wrong |
+|---|---|---|
+| **D1** | A different website on each display | Two websites with different `display` values give two scenes. A website whose display is `nil` follows Settings, so two of those land on one screen and one of them is not shown |
+| **D2** | A region framed on one display comes out right on the other | The point of `Zoom`. On a second display of a different aspect the region should be the shape of *that* display, around the same part of the page. Framed on 16:10, shown on 16:9, and nobody has looked |
+| **D3** | Framing happens on the display the website is on | `beginCropSelection` picks the scene by website and puts the overlay on that window. On the wrong screen, the frame would be moved against a page the user cannot see |
+| **D4** | The menu bar band, on a display with no menu bar | `installMenuBarBandIfNeeded` refuses when `menuBarHeight` is 0, which is a second display unless "Displays have separate Spaces" is on. That switch changes the answer, and both states need looking at |
+| **D5** | Plugging and unplugging while it runs | `rebuildScenes` runs on a display change: scenes for displays that went away are torn down, new ones built. A laptop that docks and undocks does this several times a day |
+| **D6** | Different scale factors and different sizes side by side | The page lays out at each screen's `pageFrame`, so a Retina and a non-Retina display should each get their own. Never seen |
+| **D7** | Where the page was, with the same website on two displays | Both the scroll position and the remembered address are keyed by URL, not by display, so two scenes showing one website would write over each other. `displaysInUse` suggests one website reaches one display, which would make this impossible — but "suggests" is the whole problem with this section |
+| **D8** | "Show on every Space" and the playlist, per display | Both are per scene. Two scenes rotating on their own timers is a thing nobody has watched happen |
+
+Ordinary use finds these faster than reasoning does, so this is a list to walk once with a second
+display attached rather than work to schedule.
+
+---
+
 ## 6. Known and not yet fixed (the K series)
 
 Reported while using the app, reproduced, and left alone for now. Each is written down rather than
