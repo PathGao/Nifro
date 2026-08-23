@@ -30,11 +30,14 @@ report_exclude:
 # Named retentions, each with the reason it is not really dead.
 retain_files: []
 
-# `Zoom.init(center:scale:)` is reported and kept. It is used by the tests in `Tests/`, which are an
-# SwiftPM target that this scan — configured against the Xcode project — cannot see. Deleting it on
-# the scan's word would break `swift test`, which is the check that would then go red instead.
+# Nothing is retained by name right now. The one entry that used to be here was
+# `Zoom.init(center:scale:)`, kept because the SwiftPM test target uses it and this scan — configured
+# against the Xcode project — cannot see that target. It is gone because the initializer is gone: once
+# the rectangle-based one was deleted, the memberwise initializer is synthesized and writing it out
+# was the thing SwiftLint objected to. The reason expired with the code, which is the point of making
+# every entry argue for itself.
 #
-# Everything else is reported by nothing, and the scan runs with `--strict`, so anything new fails CI.
+# Everything is reported by nothing, and the scan runs with `--strict`, so anything new fails CI.
 #
 # The three findings that used to be listed here were parameters that `#selector` signatures require
 # and nothing reads. They are written `_` now, which is what they always were — the scan was right,

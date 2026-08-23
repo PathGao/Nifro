@@ -1,181 +1,187 @@
 import AppKit
 
 /**
-Drag a rectangle over the wallpaper to choose what fills it.
+Move the wallpaper to choose what fills it.
 
-Asked for upstream and answered with a snippet of JavaScript instead (Plash#138). Typing numbers in works, but nobody knows where the part they want sits in page pixels.
+A region is stored as a centre and a magnification. It used to be *chosen* as a rectangle dragged
+over the page, and converting one shape into the other is where three problems came from: you were
+drawing on the thing you were framing rather than looking at the result, a rectangle drawn slightly
+wrong meant starting over, and what somebody drew and what they got did not agree to the pixel.
 
-The rectangle is locked to the shape of the screen. What is drawn becomes the whole wallpaper, so a
-rectangle of any other shape could only be delivered by letterboxing it or by quietly showing more
-than was framed. Refusing to draw the wrong shape is the honest version of both.
+Moving the page is the stored model rather than a conversion of it. Drag moves the centre, scroll or
+pinch changes the magnification, and there is nothing to convert at the end. Apple's own
+aspect-locked crops work this way — Photos, the iOS photo crop, every avatar picker: the frame stays
+still and the content moves underneath. Here the frame is the screen, so it could not move anyway.
+
+The overlay is transparent. Dimming the page would hide the one thing this mode exists to show.
 */
 final class CropSelectionView: NSView {
 	/**
-	Called with the chosen rectangle in this view's coordinates, or `nil` if the user cancelled.
+	Called on every change, so the wallpaper behind can show it.
 	*/
-	var onFinish: ((CGRect?) -> Void)?
-
-	private var anchor: CGPoint?
-	private var selection: CGRect?
+	var onChange: ((Zoom) -> Void)?
 
 	/**
-	Smaller than this and it was a stray click, not a selection.
+	Called with the region to keep, or `nil` if the user backed out.
 	*/
-	private static let minimumSide = 20.0
+	var onFinish: ((Zoom?) -> Void)?
+
+	private var zoom: Zoom {
+		didSet {
+			onChange?(zoom)
+			needsDisplay = true
+		}
+	}
+
+	/**
+	How far one arrow key press moves the region, in view points.
+	*/
+	private static let keyboardStep = 40.0
+
+	/**
+	How much one key press changes the magnification.
+	*/
+	private static let keyboardZoomStep = 1.1
+
+	/**
+	A wheel notch is a bigger, coarser thing than a trackpad's continuous scroll, so it maps to a step
+	rather than to a distance.
+	*/
+	private static let wheelZoomPerLine = 1.06
+
+	init(frame: CGRect, zoom: Zoom) {
+		self.zoom = zoom
+		super.init(frame: frame)
+	}
+
+	@available(*, unavailable)
+	required init?(coder: NSCoder) {
+		fatalError("Not implemented")
+	}
 
 	override var acceptsFirstResponder: Bool { true }
 
 	override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 
-	override func draw(_ dirtyRect: CGRect) {
-		NSColor.black.withAlphaComponent(0.55).setFill()
-		dirtyRect.fill()
+	private var pageSize: CGSize { bounds.size }
 
-		guard let selection else {
-			drawHint()
-			return
-		}
-
-		// Punch the selection out of the dimming so the user sees the actual page underneath.
-		NSColor.clear.set()
-		selection.fill(using: .copy)
-
-		NSColor.white.setStroke()
-		let outline = NSBezierPath(rect: selection.insetBy(dx: 0.5, dy: 0.5))
-		outline.lineWidth = 1
-		outline.stroke()
-
-		let magnification = selection.width > 0 ? bounds.width / selection.width : 1
-		drawLabel(String(format: "%.1f×", magnification), near: selection)
-	}
-
-	private func drawHint() {
-		let text = String(localized: "Drag to choose the part of the page to fill the screen with.  Esc to cancel.")
-		let attributes: [NSAttributedString.Key: Any] = [
-			.font: NSFont.systemFont(ofSize: 15, weight: .medium),
-			.foregroundColor: NSColor.white
-		]
-		let size = (text as NSString).size(withAttributes: attributes)
-
-		(text as NSString).draw(
-			at: CGPoint(x: bounds.midX - size.width / 2, y: bounds.midY - size.height / 2),
-			withAttributes: attributes
-		)
-	}
-
-	private func drawLabel(_ text: String, near rect: CGRect) {
-		let attributes: [NSAttributedString.Key: Any] = [
-			.font: NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .regular),
-			.foregroundColor: NSColor.white
-		]
-		let size = (text as NSString).size(withAttributes: attributes)
-		let padding = 6.0
-
-		// Above the selection normally, inside it when there is no room above.
-		let originY = rect.maxY + padding + size.height > bounds.maxY
-			? rect.maxY - size.height - padding
-			: rect.maxY + padding
-
-		let box = CGRect(
-			x: rect.minX,
-			y: originY,
-			width: size.width + padding * 2,
-			height: size.height + padding
-		)
-
-		NSColor.black.withAlphaComponent(0.7).setFill()
-		NSBezierPath(roundedRect: box, xRadius: 4, yRadius: 4).fill()
-
-		(text as NSString).draw(
-			at: CGPoint(x: box.minX + padding, y: box.minY + padding / 2),
-			withAttributes: attributes
-		)
-	}
-
-	override func mouseDown(with event: NSEvent) {
-		anchor = convert(event.locationInWindow, from: nil)
-		selection = nil
-		needsDisplay = true
-	}
+	// MARK: - Gestures
 
 	override func mouseDragged(with event: NSEvent) {
-		guard let anchor else {
-			return
-		}
-
-		let point = convert(event.locationInWindow, from: nil)
-
-		selection = rectangle(from: anchor, to: point)
-		needsDisplay = true
+		zoom = zoom.panned(
+			byViewDelta: CGSize(width: event.deltaX, height: -event.deltaY),
+			inPageOfSize: pageSize
+		)
 	}
 
 	/**
-	The screen-shaped rectangle between the two points, kept inside the view.
+	Two-finger scroll on a trackpad moves the page; a wheel changes the magnification.
 
-	Grown to whichever of the two dimensions the pointer went further in, so the rectangle follows the
-	drag rather than only its narrower half. Then shrunk, in proportion, by however much it overran
-	the edge — clipping it to the edge instead would leave a rectangle that is no longer the shape of
-	the screen.
+	`hasPreciseScrollingDeltas` is what tells the two apart. A trackpad has a pinch for magnifying and
+	nothing else for panning, so scrolling has to pan. A wheel mouse has no pinch at all, and dragging
+	already pans, so the wheel is the only way it can reach the magnification.
 	*/
-	private func rectangle(from anchor: CGPoint, to point: CGPoint) -> CGRect {
-		let aspectRatio = bounds.height > 0 ? bounds.width / bounds.height : 1
-
-		var width = abs(point.x - anchor.x)
-		var height = abs(point.y - anchor.y)
-
-		if height > 0, width / height > aspectRatio {
-			height = width / aspectRatio
-		} else {
-			width = height * aspectRatio
-		}
-
-		let room = CGSize(
-			width: point.x < anchor.x ? anchor.x - bounds.minX : bounds.maxX - anchor.x,
-			height: point.y < anchor.y ? anchor.y - bounds.minY : bounds.maxY - anchor.y
-		)
-
-		let fit = min(
-			1,
-			width > 0 ? room.width / width : 1,
-			height > 0 ? room.height / height : 1
-		)
-
-		width *= fit
-		height *= fit
-
-		return CGRect(
-			x: point.x < anchor.x ? anchor.x - width : anchor.x,
-			y: point.y < anchor.y ? anchor.y - height : anchor.y,
-			width: width,
-			height: height
-		)
-	}
-
-	override func mouseUp(with event: NSEvent) {
-		defer {
-			anchor = nil
-		}
-
-		guard
-			let selection,
-			selection.width >= Self.minimumSide,
-			selection.height >= Self.minimumSide
-		else {
-			// A stray click means carry on selecting, not cancel. Losing the drag to a mis-click is worse than making the user press Escape.
-			self.selection = nil
-			needsDisplay = true
+	override func scrollWheel(with event: NSEvent) {
+		guard event.hasPreciseScrollingDeltas else {
+			let steps = event.scrollingDeltaY
+			zoom = zoom.magnified(
+				by: pow(Self.wheelZoomPerLine, steps),
+				around: convert(event.locationInWindow, from: nil),
+				inPageOfSize: pageSize
+			)
 			return
 		}
 
-		onFinish?(selection.integral)
+		zoom = zoom.panned(
+			byViewDelta: CGSize(width: event.scrollingDeltaX, height: event.scrollingDeltaY),
+			inPageOfSize: pageSize
+		)
+	}
+
+	/**
+	Pinch.
+
+	Swallowed here on purpose: the web view has `allowsMagnification` on, so a pinch that reached the
+	page would zoom the page instead of the frame — and the page's own magnification is not something
+	this mode records or can put back.
+	*/
+	override func magnify(with event: NSEvent) {
+		zoom = zoom.magnified(
+			by: 1 + event.magnification,
+			around: convert(event.locationInWindow, from: nil),
+			inPageOfSize: pageSize
+		)
 	}
 
 	override func keyDown(with event: NSEvent) {
-		guard event.keyCode == 53 else { // Escape
-			super.keyDown(with: event)
-			return
-		}
+		let pointer = CGPoint(x: bounds.midX, y: bounds.midY)
 
-		onFinish?(nil)
+		switch event.keyCode {
+		case 53: // Escape
+			onFinish?(nil)
+		case 36, 76: // Return, Enter
+			onFinish?(zoom)
+		case 123: // Left
+			pan(x: Self.keyboardStep)
+		case 124: // Right
+			pan(x: -Self.keyboardStep)
+		case 125: // Down
+			pan(y: -Self.keyboardStep)
+		case 126: // Up
+			pan(y: Self.keyboardStep)
+		default:
+			switch event.charactersIgnoringModifiers {
+			case "+", "=":
+				zoom = zoom.magnified(by: Self.keyboardZoomStep, around: pointer, inPageOfSize: pageSize)
+			case "-", "_":
+				zoom = zoom.magnified(by: 1 / Self.keyboardZoomStep, around: pointer, inPageOfSize: pageSize)
+			default:
+				super.keyDown(with: event)
+			}
+		}
+	}
+
+	private func pan(x: Double = 0, y: Double = 0) {
+		zoom = zoom.panned(byViewDelta: CGSize(width: x, height: y), inPageOfSize: pageSize)
+	}
+
+	// MARK: - The panel
+
+	override func draw(_ dirtyRect: CGRect) {
+		let magnification = String(format: "%.1f×", max(zoom.scale, 1))
+		let hint = String(localized: "Drag or scroll to move · pinch to zoom · Return to keep · Esc to cancel")
+
+		let numberAttributes: [NSAttributedString.Key: Any] = [
+			.font: NSFont.monospacedDigitSystemFont(ofSize: 22, weight: .semibold),
+			.foregroundColor: NSColor.white
+		]
+		let hintAttributes: [NSAttributedString.Key: Any] = [
+			.font: NSFont.systemFont(ofSize: 12, weight: .regular),
+			.foregroundColor: NSColor.white.withAlphaComponent(0.75)
+		]
+
+		let numberSize = (magnification as NSString).size(withAttributes: numberAttributes)
+		let hintSize = (hint as NSString).size(withAttributes: hintAttributes)
+		let padding = 16.0
+		let gap = 6.0
+
+		let box = CGRect(
+			x: bounds.midX - (max(numberSize.width, hintSize.width) / 2 + padding),
+			y: bounds.minY + 64,
+			width: max(numberSize.width, hintSize.width) + padding * 2,
+			height: numberSize.height + hintSize.height + gap + padding * 2
+		)
+
+		NSColor.black.withAlphaComponent(0.72).setFill()
+		NSBezierPath(roundedRect: box, xRadius: 12, yRadius: 12).fill()
+
+		(hint as NSString).draw(
+			at: CGPoint(x: box.midX - hintSize.width / 2, y: box.minY + padding),
+			withAttributes: hintAttributes
+		)
+		(magnification as NSString).draw(
+			at: CGPoint(x: box.midX - numberSize.width / 2, y: box.minY + padding + hintSize.height + gap),
+			withAttributes: numberAttributes
+		)
 	}
 }

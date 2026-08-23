@@ -34,22 +34,6 @@ extension CGRect {
 	}
 }
 
-extension CGRect {
-	/**
-	Where a screen rectangle falls in page coordinates, the inverse of `screenFrame(inScreen:)`.
-
-	Only valid while the page lays out at the size of that screen, which is the arrangement the wallpaper always uses.
-	*/
-	func pageFrame(inScreen screenFrame: CGRect) -> CGRect {
-		CGRect(
-			x: minX - screenFrame.minX,
-			y: screenFrame.maxY - maxY,
-			width: width,
-			height: height
-		)
-	}
-}
-
 /**
 Which part of a page fills the wallpaper.
 
@@ -95,17 +79,83 @@ struct Zoom: Codable, Hashable, Sendable {
 	}
 
 	/**
-	The zoom that picks out `region` of a page of `pageSize`.
+	As far in as a region is allowed to go.
+
+	At 20× the region is a twentieth of the page across, which is a few words of body text filling a
+	display. Past that there is nothing left to frame, and a scroll gesture that never stops is a
+	worse answer than one that stops somewhere defensible.
 	*/
-	init(region: CGRect, inPageOfSize pageSize: CGSize) {
-		center = CGPoint(x: region.midX / pageSize.width, y: region.midY / pageSize.height)
-		scale = region.width > 0 ? pageSize.width / region.width : 1
+	static let maximumScale = 20.0
+
+	/**
+	The same region moved by a distance in view points, with the region kept on the page.
+
+	The centre is clamped here rather than only in `region(inPageOfSize:)`. Clamping only the
+	rectangle lets the centre wander off the page while the picture stops moving, and then the
+	gesture has to be given back exactly as far before anything happens again — which reads as the
+	drag having stuck.
+	*/
+	func panned(byViewDelta delta: CGSize, inPageOfSize pageSize: CGSize) -> Self {
+		let scale = max(scale, 1)
+
+		return Self(
+			center: CGPoint(
+				// View coordinates run up from the bottom and page coordinates run down from the top,
+				// so the vertical sign is the opposite of the horizontal one. Dragging the page down
+				// shows what was above it.
+				x: center.x - (delta.width / scale) / pageSize.width,
+				y: center.y + (delta.height / scale) / pageSize.height
+			),
+			scale: self.scale
+		)
+		.clampedToPage()
 	}
 
-	// periphery:ignore - exercised by the SwiftPM test target, which the scan cannot see.
-	init(center: CGPoint, scale: Double) {
-		self.center = center
-		self.scale = scale
+	/**
+	The same region magnified by `factor`, keeping the part of the page under `anchor` where it is.
+
+	`anchor` is a point in a view the size of the page area, running up from the bottom left. Zooming
+	around the pointer rather than around the middle is the difference between moving a page and
+	operating a control.
+	*/
+	func magnified(by factor: Double, around anchor: CGPoint, inPageOfSize pageSize: CGSize) -> Self {
+		let oldScale = max(scale, 1)
+		let newScale = (oldScale * factor).clamped(to: 1...Self.maximumScale)
+
+		// Where the pointer is across the region, from its middle, as a fraction of the region.
+		let acrossRegion = anchor.x / pageSize.width - 0.5
+		let downRegion = 0.5 - anchor.y / pageSize.height
+
+		// The point of the page under the pointer, which is what has to stay put.
+		let held = CGPoint(
+			x: center.x + acrossRegion / oldScale,
+			y: center.y + downRegion / oldScale
+		)
+
+		return Self(
+			center: CGPoint(
+				x: held.x - acrossRegion / newScale,
+				y: held.y - downRegion / newScale
+			),
+			scale: newScale
+		)
+		.clampedToPage()
+	}
+
+	/**
+	The same region moved as little as possible to sit inside the page.
+	*/
+	func clampedToPage() -> Self {
+		let scale = max(scale, 1).clamped(to: 1...Self.maximumScale)
+		let half = 1 / (2 * scale)
+
+		return Self(
+			center: CGPoint(
+				x: center.x.clamped(to: half...(1 - half)),
+				y: center.y.clamped(to: half...(1 - half))
+			),
+			scale: scale
+		)
 	}
 }
 

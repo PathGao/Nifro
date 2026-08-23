@@ -113,7 +113,7 @@ extension AppState {
 			}
 			.setShortcut(for: Shortcut.chooseRegion.name)
 
-			menu.items.last?.toolTip = String(localized: "Drag a rectangle over the wallpaper. That part fills the screen.")
+			menu.items.last?.toolTip = String(localized: "Move the wallpaper until it shows what you want. Drag or scroll to move it, pinch to zoom.")
 
 			menu.addCallbackItem(
 				String(localized: "Show Whole Page"),

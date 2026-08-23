@@ -60,23 +60,6 @@ struct CropGeometryTests {
 		#expect(placed.size == crop.size)
 	}
 
-	@Test("Page and screen coordinates are exact inverses")
-	func roundTrip() {
-		// What the drag-to-select mode relies on: you draw on screen, it stores page pixels,
-		// and putting the window back has to land on the same rectangle you drew.
-		let screen = CGRect(x: 1600, y: 200, width: 1600, height: 1000)
-
-		for crop in [
-			CGRect(x: 0, y: 0, width: 100, height: 100),
-			CGRect(x: 250, y: 700, width: 400, height: 300),
-			CGRect(x: 0, y: 900, width: 1600, height: 100)
-		] {
-			let there = crop.screenFrame(inScreen: screen)
-			let back = there.pageFrame(inScreen: screen)
-
-			#expect(back == crop)
-		}
-	}
 
 	@Test("Placement follows a screen that is not at the global origin")
 	func screenPlacementOnSecondaryDisplay() {
@@ -233,18 +216,10 @@ that it does, and that a region near an edge stays on the page rather than hangi
 struct ZoomTests {
 	private let page = CGSize(width: 1600, height: 1000)
 
-	@Test("A framed region comes back as the region that was framed")
-	func roundTrip() {
-		let framed = CGRect(x: 400, y: 250, width: 800, height: 500)
-		let zoom = Zoom(region: framed, inPageOfSize: page)
-
-		#expect(zoom.region(inPageOfSize: page) == framed)
-	}
-
 	@Test("The region is always the shape of the page it is asked about")
 	func followsTheDisplay() {
-		// Framed on a 16:10 screen, shown on a 16:9 one.
-		let zoom = Zoom(region: CGRect(x: 400, y: 250, width: 800, height: 500), inPageOfSize: page)
+		// Chosen on a 16:10 screen, shown on a 16:9 one.
+		let zoom = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 2)
 		let otherPage = CGSize(width: 1920, height: 1080)
 		let region = zoom.region(inPageOfSize: otherPage)
 
@@ -265,6 +240,76 @@ struct ZoomTests {
 			#expect(region.maxX <= size.width + 0.001, "right edge off the page at \(size)")
 			#expect(region.maxY <= size.height + 0.001, "bottom edge off the page at \(size)")
 		}
+	}
+
+	@Test("Dragging moves the region the way the page went")
+	func panning() {
+		let zoom = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 4)
+
+		// Dragging the page left shows what was to its right, so the region moves right.
+		let left = zoom.panned(byViewDelta: CGSize(width: -160, height: 0), inPageOfSize: page)
+		#expect(left.center.x > zoom.center.x)
+
+		// One view point moves the region by one view point divided by the magnification.
+		#expect(abs((left.center.x - zoom.center.x) * page.width - 160 / 4) < 0.001)
+
+		// View coordinates run up, page coordinates run down: dragging the page up shows what was
+		// below it, and "below" is a larger page y.
+		let up = zoom.panned(byViewDelta: CGSize(width: 0, height: 100), inPageOfSize: page)
+		#expect(up.center.y > zoom.center.y)
+	}
+
+	@Test("A drag cannot push the region off the page, or bank an offset while it looks stuck")
+	func panningStops() {
+		let zoom = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 2)
+		var far = zoom
+
+		for _ in 0..<20 {
+			far = far.panned(byViewDelta: CGSize(width: -400, height: 0), inPageOfSize: page)
+		}
+
+		// Hard against the right edge, and no further — a centre that had wandered past would have to
+		// be dragged all the way back before the picture moved again.
+		#expect(abs(far.center.x - 0.75) < 0.001)
+
+		let back = far.panned(byViewDelta: CGSize(width: 40, height: 0), inPageOfSize: page)
+		#expect(back.center.x < far.center.x)
+	}
+
+	@Test("Magnifying keeps the part of the page under the pointer where it is")
+	func magnifyingAroundAPoint() {
+		let zoom = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 2)
+		let pointer = CGPoint(x: page.width * 0.25, y: page.height * 0.25)
+
+		func pageFraction(under point: CGPoint, of zoom: Zoom) -> CGPoint {
+			let scale = max(zoom.scale, 1)
+			return CGPoint(
+				x: zoom.center.x + (point.x / page.width - 0.5) / scale,
+				y: zoom.center.y + (0.5 - point.y / page.height) / scale
+			)
+		}
+
+		let before = pageFraction(under: pointer, of: zoom)
+		let after = zoom.magnified(by: 1.5, around: pointer, inPageOfSize: page)
+
+		#expect(after.scale > zoom.scale)
+		#expect(abs(pageFraction(under: pointer, of: after).x - before.x) < 0.001)
+		#expect(abs(pageFraction(under: pointer, of: after).y - before.y) < 0.001)
+	}
+
+	@Test("Magnification stops at both ends")
+	func magnificationIsBounded() {
+		let middle = CGPoint(x: page.width / 2, y: page.height / 2)
+
+		let out = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 2)
+			.magnified(by: 0.001, around: middle, inPageOfSize: page)
+		#expect(out.scale == 1)
+		// The whole page has only one possible centre.
+		#expect(out.center == CGPoint(x: 0.5, y: 0.5))
+
+		let deepIn = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 2)
+			.magnified(by: 1000, around: middle, inPageOfSize: page)
+		#expect(deepIn.scale == Zoom.maximumScale)
 	}
 
 	@Test("Zooming out below the whole page is not a thing")

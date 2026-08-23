@@ -403,12 +403,12 @@
         }
       }
     },
-    "Choose a region with “Choose Region…” in the Nifro menu: drag a rectangle over the wallpaper and that part fills the screen. The rectangle is locked to the shape of your screen, and it is remembered as a place and a magnification, so the same website works on a second display of a different shape." : {
+    "Choose a region with “Choose Region…” in the Nifro menu: the wallpaper becomes something you can move and zoom, and where you leave it is the region. It is remembered as a place and a magnification rather than as a rectangle, so the same website works on a second display of a different shape." : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "用 Nifro 菜单里的「选择区域…」来选：在壁纸上拖一个框，那一部分就铺满屏幕。框锁定成你屏幕的形状，记下来的是「位置 + 倍率」而不是矩形，所以同一个网站换到形状不同的另一块屏也成立。"
+            "value" : "用 Nifro 菜单里的「选择区域…」来选：壁纸会变成一张可以拖动和缩放的画面，你把它停在哪里，哪里就是区域。它记住的是位置和倍率而不是一个矩形，所以同一个网站换到形状不同的第二块屏幕上一样成立。"
           }
         }
       }
@@ -656,22 +656,12 @@
         }
       }
     },
-    "Drag a rectangle over the wallpaper. That part fills the screen." : {
+    "Drag or scroll to move · pinch to zoom · Return to keep · Esc to cancel" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "在壁纸上拖一个框，那一部分会铺满屏幕。"
-          }
-        }
-      }
-    },
-    "Drag to choose the part of the page to fill the screen with.  Esc to cancel." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "拖动选择要铺满屏幕的那一部分。  按 Esc 取消。"
+            "value" : "拖动或滚动来移动 · 捏合缩放 · 回车保留 · Esc 取消"
           }
         }
       }
@@ -1114,6 +1104,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "更多说明"
+          }
+        }
+      }
+    },
+    "Move the wallpaper until it shows what you want. Drag or scroll to move it, pinch to zoom." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移动壁纸，直到它显示出你想要的部分。拖动或滚动来移动，捏合缩放。"
           }
         }
       }

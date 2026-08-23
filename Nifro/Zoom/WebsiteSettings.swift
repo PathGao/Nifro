@@ -26,7 +26,7 @@ struct ZoomSetting: View {
 			}
 		} label: {
 			Text("Region")
-				.explained(String(localized: "Choose a region with “Choose Region…” in the Nifro menu: drag a rectangle over the wallpaper and that part fills the screen. The rectangle is locked to the shape of your screen, and it is remembered as a place and a magnification, so the same website works on a second display of a different shape."))
+				.explained(String(localized: "Choose a region with “Choose Region…” in the Nifro menu: the wallpaper becomes something you can move and zoom, and where you leave it is the region. It is remembered as a place and a magnification rather than as a rectangle, so the same website works on a second display of a different shape."))
 		}
 	}
 
