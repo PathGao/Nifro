@@ -26,7 +26,14 @@ private struct GeneralSettings: View {
 	var body: some View {
 		Form {
 			Section {
-				LaunchAtLogin.Toggle()
+				// The label has to be ours. `LaunchAtLogin.Toggle()` with no label supplies its own, out
+				// of the package's bundle, so it stayed English in a Chinese settings window — and no
+				// check would have caught it, since the string was never in our catalogue to be missing
+				// a translation.
+				LaunchAtLogin.Toggle {
+					Text("Launch at login")
+						.explained(String(localized: "Starts Nifro when you log in, so the wallpaper is already up when you reach the desktop."))
+				}
 			}
 			Section {
 				ReloadIntervalSetting()

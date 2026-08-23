@@ -2,6 +2,26 @@
   "sourceLanguage" : "en",
   "strings" : {
     "" : {},
+    "${shouldToggle} Nifro" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "${shouldToggle} Nifro"
+          }
+        }
+      }
+    },
+    "${shouldToggle} Nifro ${isEnabled}" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "${shouldToggle} Nifro ${isEnabled}"
+          }
+        }
+      }
+    },
     "%@" : {},
     "%@× at %lld%%, %lld%%" : {
       "localizations" : {
@@ -29,42 +49,12 @@
         }
       }
     },
-    "^[%lld site](inflect: true) · bundled copy, could not reach GitHub" : {
+    "A WebKit content-blocking rule list, for hiding cookie banners and ads. Paste the address of a `.json` file and Nifro compiles it once and applies it to every website.\n\nNifro keeps no rules of its own: a blocklist goes stale within weeks, and keeping one working is a full-time job somebody else is already doing. Lists in WebKit's format are published by the content-blocker projects — the one your Safari extension uses can usually be exported, and several are on GitHub as a single raw `.json` file. The address has to be the raw file, not the page it is displayed on.\n\nLeave it empty for no rules at all." : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld 个站点 · 内置副本，连不上 GitHub"
-          }
-        }
-      }
-    },
-    "^[%lld site](inflect: true) · up to date with GitHub" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld 个站点 · 已与 GitHub 同步"
-          }
-        }
-      }
-    },
-    "${shouldToggle} Nifro" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "${shouldToggle} Nifro"
-          }
-        }
-      }
-    },
-    "${shouldToggle} Nifro ${isEnabled}" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "${shouldToggle} Nifro ${isEnabled}"
+            "value" : "WebKit 的内容拦截规则列表，用来挡掉 Cookie 横幅和广告。粘贴一个 `.json` 文件的地址，Nifro 编译一次，然后应用到所有网站。\n\nNifro 自己不维护规则：拦截列表几周就会过期，让它一直有效是一份全职工作，而已经有人在做了。WebKit 格式的列表由那些内容拦截项目发布——你在 Safari 里用的那个扩展通常可以导出，GitHub 上也有若干现成的单个 raw `.json` 文件。地址必须是原始文件本身，不是显示它的那个网页。\n\n留空表示不使用任何规则。"
           }
         }
       }
@@ -85,16 +75,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "视频页面大部分是导航、推荐和评论。这是播放器单独的地址，视频会直接铺满壁纸，不用裁剪也不用隐藏任何东西。"
-          }
-        }
-      }
-    },
-    "A WebKit content-blocking rule list, for hiding cookie banners and ads. Paste the address of a `.json` file and Nifro compiles it once and applies it to every website.\n\nNifro keeps no rules of its own: a blocklist goes stale within weeks, and keeping one working is a full-time job somebody else is already doing. Lists in WebKit's format are published by the content-blocker projects — the one your Safari extension uses can usually be exported, and several are on GitHub as a single raw `.json` file. The address has to be the raw file, not the page it is displayed on.\n\nLeave it empty for no rules at all." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "WebKit 的内容拦截规则列表，用来挡掉 Cookie 横幅和广告。粘贴一个 `.json` 文件的地址，Nifro 编译一次，然后应用到所有网站。\n\nNifro 自己不维护规则：拦截列表几周就会过期，让它一直有效是一份全职工作，而已经有人在做了。WebKit 格式的列表由那些内容拦截项目发布——你在 Safari 里用的那个扩展通常可以导出，GitHub 上也有若干现成的单个 raw `.json` 文件。地址必须是原始文件本身，不是显示它的那个网页。\n\n留空表示不使用任何规则。"
           }
         }
       }
@@ -149,16 +129,6 @@
         }
       }
     },
-    "Add website" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "添加网站"
-          }
-        }
-      }
-    },
     "Add Website" : {
       "localizations" : {
         "zh-Hans" : {
@@ -175,6 +145,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "添加网站…"
+          }
+        }
+      }
+    },
+    "Add website" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "添加网站"
           }
         }
       }
@@ -300,6 +280,16 @@
         }
       }
     },
+    "Browsing Mode lets you temporarily interact with the website. For example, to log into an account or scroll to a specific position on the website." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "浏览模式让你临时操作网站，比如登录账号，或者把网页滚到某个位置。"
+          }
+        }
+      }
+    },
     "Browsing mode always uses full opacity." : {
       "extractionState" : "stale",
       "localizations" : {
@@ -311,12 +301,22 @@
         }
       }
     },
-    "Browsing Mode lets you temporarily interact with the website. For example, to log into an account or scroll to a specific position on the website." : {
+    "CSS" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "浏览模式让你临时操作网站，比如登录账号，或者把网页滚到某个位置。"
+            "value" : "CSS"
+          }
+        }
+      }
+    },
+    "CSS and JavaScript…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CSS 与 JavaScript…"
           }
         }
       }
@@ -373,6 +373,26 @@
         }
       }
     },
+    "Choose Local Website" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择本地网页"
+          }
+        }
+      }
+    },
+    "Choose Region…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择区域…"
+          }
+        }
+      }
+    },
     "Choose a directory with a “index.html” file." : {
       "localizations" : {
         "zh-Hans" : {
@@ -393,32 +413,12 @@
         }
       }
     },
-    "Choose Local Website" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "选择本地网页"
-          }
-        }
-      }
-    },
     "Choose region" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "选择区域"
-          }
-        }
-      }
-    },
-    "Choose Region…" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "选择区域…"
           }
         }
       }
@@ -503,42 +503,12 @@
         }
       }
     },
-    "CSS" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CSS"
-          }
-        }
-      }
-    },
-    "CSS and JavaScript…" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CSS 与 JavaScript…"
-          }
-        }
-      }
-    },
     "Current Website" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "当前网站"
-          }
-        }
-      }
-    },
-    "Custom code" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "自定义代码"
           }
         }
       }
@@ -550,6 +520,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "自定义 CSS 与 JavaScript"
+          }
+        }
+      }
+    },
+    "Custom code" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自定义代码"
           }
         }
       }
@@ -1058,6 +1038,16 @@
         }
       }
     },
+    "Launch at login" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登录时启动"
+          }
+        }
+      }
+    },
     "Lets you use the page without switching to Browsing Mode. The window then stops letting clicks through, so your desktop icons sit behind it, and the page has to keep rendering." : {
       "localizations" : {
         "zh-Hans" : {
@@ -1104,17 +1094,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "管理网站…"
-          }
-        }
-      }
-    },
-    "minutes" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "分钟"
           }
         }
       }
@@ -1220,22 +1199,22 @@
         }
       }
     },
-    "No internet connection" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "没有网络连接"
-          }
-        }
-      }
-    },
     "No Websites" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "还没有网站"
+          }
+        }
+      }
+    },
+    "No internet connection" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "没有网络连接"
           }
         }
       }
@@ -1291,16 +1270,6 @@
         }
       }
     },
-    "Open external links in default browser" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在默认浏览器中打开外部链接"
-          }
-        }
-      }
-    },
     "Open Frame" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1337,6 +1306,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "打开视频"
+          }
+        }
+      }
+    },
+    "Open external links in default browser" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在默认浏览器中打开外部链接"
           }
         }
       }
@@ -1493,6 +1472,16 @@
         }
       }
     },
+    "Reload Website" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新加载网站"
+          }
+        }
+      }
+    },
     "Reload every" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1535,16 +1524,6 @@
       }
     },
     "Reload website" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "重新加载网站"
-          }
-        }
-      }
-    },
-    "Reload Website" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -1615,22 +1594,22 @@
         }
       }
     },
-    "Report a problem" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "报告问题"
-          }
-        }
-      }
-    },
     "Report a Problem or Request a Feature…" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "报告问题或提出需求…"
+          }
+        }
+      }
+    },
+    "Report a problem" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "报告问题"
           }
         }
       }
@@ -1715,16 +1694,6 @@
         }
       }
     },
-    "Set as Current" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "设为当前"
-          }
-        }
-      }
-    },
     "Set Current Website" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1735,22 +1704,32 @@
         }
       }
     },
-    "Set current website to ${website}" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "把当前网站设为 ${website}"
-          }
-        }
-      }
-    },
     "Set Enabled State" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "设置启用状态"
+          }
+        }
+      }
+    },
+    "Set as Current" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "设为当前"
+          }
+        }
+      }
+    },
+    "Set current website to ${website}" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "把当前网站设为 ${website}"
           }
         }
       }
@@ -1805,6 +1784,16 @@
         }
       }
     },
+    "Show Whole Page" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示整页"
+          }
+        }
+      }
+    },
     "Show on" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1832,26 +1821,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在每个「桌面」上显示"
-          }
-        }
-      }
-    },
-    "show the time." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "显示时间。"
-          }
-        }
-      }
-    },
-    "Show Whole Page" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "显示整页"
           }
         }
       }
@@ -1892,6 +1861,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "「桌面」指的是调度中心里来回切换的那些虚拟桌面，不是显示器。关掉时，壁纸只留在 Nifro 启动时最前面的那个桌面上。网站放在哪块显示器上，是在网站自己的设置里定的，不在这里。"
+          }
+        }
+      }
+    },
+    "Starts Nifro when you log in, so the wallpaper is already up when you reach the desktop." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "登录时自动启动 Nifro，你到桌面时壁纸已经在了。"
           }
         }
       }
@@ -2049,7 +2028,7 @@
         }
       }
     },
-    "Toggle browsing mode" : {
+    "Toggle Browsing Mode" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2059,7 +2038,7 @@
         }
       }
     },
-    "Toggle Browsing Mode" : {
+    "Toggle browsing mode" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
@@ -2109,36 +2088,6 @@
         }
       }
     },
-    "Undo the region and go back to the whole page." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "取消区域，回到整页。"
-          }
-        }
-      }
-    },
-    "Until" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "到"
-          }
-        }
-      }
-    },
-    "Update Website to Current" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "把网站更新为当前地址"
-          }
-        }
-      }
-    },
     "URL" : {
       "localizations" : {
         "zh-Hans" : {
@@ -2165,6 +2114,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "规则列表的网址"
+          }
+        }
+      }
+    },
+    "Undo the region and go back to the whole page." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "取消区域，回到整页。"
+          }
+        }
+      }
+    },
+    "Until" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "到"
+          }
+        }
+      }
+    },
+    "Update Website to Current" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "把网站更新为当前地址"
           }
         }
       }
@@ -2353,6 +2332,16 @@
         }
       }
     },
+    "Zoom Out" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "缩小"
+          }
+        }
+      }
+    },
     "Zoom into part of the page" : {
       "extractionState" : "stale",
       "localizations" : {
@@ -2364,12 +2353,43 @@
         }
       }
     },
-    "Zoom Out" : {
+    "^[%lld site](inflect: true) · bundled copy, could not reach GitHub" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "缩小"
+            "value" : "%lld 个站点 · 内置副本，连不上 GitHub"
+          }
+        }
+      }
+    },
+    "^[%lld site](inflect: true) · up to date with GitHub" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 个站点 · 已与 GitHub 同步"
+          }
+        }
+      }
+    },
+    "minutes" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分钟"
+          }
+        }
+      }
+    },
+    "show the time." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示时间。"
           }
         }
       }
