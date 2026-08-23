@@ -155,6 +155,45 @@ jobs:
       - name: Check the URL scheme matches in both targets
         run: python3 Tools/check-url-scheme.py
 
+      # A shell syntax error inside a `run:` block is invisible until the step runs, and the release
+      # pipeline only runs on a tag — so an unterminated quote in it sat there through every green CI
+      # run and surfaced as a failed release with the tag already pushed. That is exactly what
+      # happened to v0.1.1. Parsing every block here costs a second and moves the discovery to the
+      # pull request that introduces it.
+      - name: Check every workflow's shell blocks parse
+        run: |
+          python3 - <<'SHELLCHECK'
+          import re, subprocess, sys, pathlib
+          import yaml
+
+          bad = 0
+
+          for path in sorted(pathlib.Path(".github/workflows").glob("*.yml")):
+              document = yaml.safe_load(path.read_text())
+
+              for job, definition in (document.get("jobs") or {}).items():
+                  for index, step in enumerate(definition.get("steps") or []):
+                      script = step.get("run")
+
+                      if not script:
+                          continue
+
+                      # An expression is substituted before bash ever sees it, and its own syntax is
+                      # not shell. Stand one in so the rest of the block can be parsed.
+                      script = re.sub(r"\$\{\{[^}]*\}\}", "X", script)
+                      result = subprocess.run(["bash", "-n"], input=script, text=True, capture_output=True)
+
+                      if result.returncode:
+                          bad += 1
+                          name = step.get("name", f"step {index}")
+                          print(f"::error file={path}::{job} / {name}: {result.stderr.strip().splitlines()[-1]}")
+
+          if bad:
+              sys.exit(1)
+
+          print("every run block parses")
+          SHELLCHECK
+
       # The README promises the app is in English and Simplified Chinese. Nothing else stops a pull
       # request adding a string in one language only, and a half-translated menu is the kind of thing
       # nobody notices until somebody who reads the other language opens it.
