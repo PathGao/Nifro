@@ -2357,38 +2357,44 @@ extension WKUserContentController {
 	}
 }
 extension WKUserContentController {
-	private static let muteAudioCode =
+	/**
+	Keeps every audio and video element on the page at whatever the app last said, and keeps doing it
+	as the page replaces them.
+
+	Always injected, whatever the website's setting is, so that changing the setting is a message to
+	a script that is already there rather than a reason to rebuild the page. Sound is the one setting
+	most likely to be changed while looking at the thing it applies to, and rebuilding the page to
+	apply it starts the video again from the beginning.
+
+	It starts muted and waits to be told otherwise. Silence is the safe direction to be wrong in for
+	the moment between the page starting and the app answering.
+	*/
+	private static let audioControlCode =
 		"""
 		(() => {
 			const selector = 'audio, video';
-
-			for (const element of document.querySelectorAll(selector)) {
-				element.muted = true;
-			}
-
-			// A full rescan is still needed: players reuse and reparent their media elements, so a
-			// node that was muted on insertion can come back unmuted. But a live stream's chat
-			// fires mutations continuously, and rescanning the document on every batch made the
-			// muting cost scale with the chat rather than with the video. One rescan per frame is
-			// enough, and it collapses a burst into a single pass.
+			let muted = true;
 			let rescanQueued = false;
 
-			const rescan = () => {
-				rescanQueued = false;
-
+			const apply = () => {
 				for (const element of document.querySelectorAll(selector)) {
-					element.muted = true;
+					element.muted = muted;
 				}
 			};
 
+			// A full rescan is needed as well as muting on insertion: players reuse and reparent their
+			// media elements, so a node that was muted on insertion can come back unmuted. But a live
+			// stream's chat fires mutations continuously, and rescanning the document on every batch
+			// made the cost scale with the chat rather than with the video. One rescan per frame is
+			// enough, and it collapses a burst into a single pass.
 			const observer = new MutationObserver(mutations => {
 				for (const mutation of mutations) {
 					for (const node of mutation.addedNodes) {
 						if ('matches' in node && node.matches(selector)) {
-							node.muted = true;
+							node.muted = muted;
 						} else if ('querySelectorAll' in node) {
 							for (const element of node.querySelectorAll(selector)) {
-								element.muted = true;
+								element.muted = muted;
 							}
 						}
 					}
@@ -2400,20 +2406,39 @@ extension WKUserContentController {
 				}
 			});
 
-			observer.observe(document, {
-				childList: true,
-				subtree: true
-			});
+			const rescan = () => {
+				rescanQueued = false;
+				apply();
+			};
+
+			// Only watched while muted. With sound on there is nothing to keep enforcing, and a page
+			// that mutates constantly should not pay for a listener that would do nothing.
+			const watch = () => {
+				if (muted) {
+					observer.observe(document, { childList: true, subtree: true });
+				} else {
+					observer.disconnect();
+				}
+			};
+
+			window.\(audioSetterName) = value => {
+				muted = value;
+				apply();
+				watch();
+			};
+
+			apply();
+			watch();
 		})();
 		"""
 
 	// https://github.com/feedback-assistant/reports/issues/79
 	/**
-	Mute all existing and future audio on websites, including audio in videos.
+	Install the audio control. The setting itself is applied afterwards, and again on every load.
 	*/
-	func muteAudio() {
+	func installAudioControl() {
 		let userScript = WKUserScript(
-			source: Self.muteAudioCode,
+			source: Self.audioControlCode,
 			injectionTime: .atDocumentStart,
 			forMainFrameOnly: false,
 			in: .defaultClient
@@ -2423,6 +2448,22 @@ extension WKUserContentController {
 	}
 }
 
+/**
+The name the audio script answers to. One definition, used by the script and by whoever calls it.
+*/
+private let audioSetterName = "__nifroSetAudioMuted"
+
+extension WKWebView {
+	/**
+	Mute or unmute the page, now, without reloading it.
+
+	Muting is done by holding every audio and video element muted rather than by silencing the web
+	view, so it covers media elements and not sound a page generates with the Web Audio API.
+	*/
+	func setAudioMuted(_ muted: Bool) {
+		evaluateJavaScript("window.\(audioSetterName) && window.\(audioSetterName)(\(muted))")
+	}
+}
 // MARK: - WKWebView
 extension WKWebView {
 	// Source: https://github.com/WebKit/webkit/blob/a77f5c97c5be3a392f626f444f2111a09a3520ca/Source/WebKit/UIProcess/API/Cocoa/WKMenuItemIdentifiers.mm

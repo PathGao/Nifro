@@ -228,6 +228,36 @@ final class AppState: ObservableObject {
 		}
 	}
 
+	/**
+	Whether two versions of the website list differ in nothing but the sound setting.
+
+	The list is republished for every edit, and every edit but this one changes something that is
+	built into the page when the page is created. Telling them apart is what lets sound be changed
+	without the page starting over.
+	*/
+	func differOnlyInAudio(_ old: [Website], _ new: [Website]) -> Bool {
+		guard old.count == new.count else {
+			return false
+		}
+
+		return zip(old, new).allSatisfy { before, after in
+			var matched = before
+			matched.audio = after.audio
+			return matched == after
+		}
+	}
+
+	/**
+	Tell every page the sound setting it should be at.
+	*/
+	func applyAudioSetting() {
+		let muted = WebsitesController.shared.current?.audio != .unmuted
+
+		for scene in scenes {
+			scene.webViewController.webView.setAudioMuted(muted)
+		}
+	}
+
 	func reloadWebsite() {
 		for scene in scenes {
 			scene.reload()

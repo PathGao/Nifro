@@ -91,6 +91,18 @@ extension AppState {
 			}
 			.setShortcut(for: .toggleBrowsingMode)
 
+			if let website = WebsitesController.shared.current {
+				menu.addCallbackItem(
+					"Sound",
+					isChecked: website.audio == .unmuted
+				) {
+					WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
+						$0.audio = $0.audio == .unmuted ? .muted : .unmuted
+					}
+				}
+				.toolTip = "Whether this website is allowed to make noise. Remembered per website, so a clock stays silent and a live stream does not."
+			}
+
 			menu.addCallbackItem(
 				"Edit…",
 				isEnabled: WebsitesController.shared.current != nil

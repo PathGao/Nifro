@@ -76,12 +76,9 @@ final class WebViewController: NSViewController {
 		webView.drawsBackground = false
 
 		userContentController.addJavaScript("document.documentElement.classList.add('is-nifro-app', 'is-plash-app')")
+		userContentController.installAudioControl()
 
 		if let website = WebsitesController.shared.current {
-			if website.audio == .muted {
-				userContentController.muteAudio()
-			}
-
 			if website.invertColors2 != .never {
 				userContentController.invertColors(
 					onlyWhenInDarkMode: website.invertColors2 == .darkMode
@@ -273,6 +270,9 @@ extension WebViewController: WKNavigationDelegate {
 
 	func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
 		webView.centerAndAspectFillImage(mimeType: response?.mimeType)
+
+		// The script starts every page muted and waits to be told. This is the telling.
+		webView.setAudioMuted(WebsitesController.shared.current?.audio != .unmuted)
 
 		recordTitleIfNeeded(from: webView)
 		scene?.refreshMenuBarBandColor()

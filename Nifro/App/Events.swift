@@ -70,6 +70,14 @@ extension AppState {
 		Defaults.publisher(.websites, options: [])
 			.receive(on: DispatchQueue.main)
 			.sink { [self] in
+				// Sound is the one setting people change while looking at the thing it applies to, and
+				// it is the one the page can be told about without being rebuilt. Everything else is
+				// baked into the page when it is created, so everything else needs a new one.
+				if differOnlyInAudio($0.oldValue, $0.newValue) {
+					applyAudioSetting()
+					return
+				}
+
 				resetTimer()
 				recreateWebViewAndReload()
 
