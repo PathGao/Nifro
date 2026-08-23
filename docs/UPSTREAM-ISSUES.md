@@ -21,7 +21,7 @@
 | [195](https://github.com/sindresorhus/Plash/issues/195) | Switching displays should not mean digging three levels into settings | S | DO | **F8** (new) |
 | [193](https://github.com/sindresorhus/Plash/issues/193) | The `backdrop-filter` blur freezes while the page is not updating | M | LATER | related to the P series |
 | [183](https://github.com/sindresorhus/Plash/issues/183) | A click on the wallpaper should open apps like `vscode://` | S | LATER | — |
-| [182](https://github.com/sindresorhus/Plash/issues/182) | One swipe of the Mission Control gesture shows the real desktop picture underneath | L | LATER | P6 / A2 |
+| [182](https://github.com/sindresorhus/Plash/issues/182) | One swipe of the Mission Control gesture shows the real desktop picture underneath | L | **REJECT** | X8 — the only fix was the real-wallpaper route, and that route ends the app |
 | [177](https://github.com/sindresorhus/Plash/issues/177) | When I am working on something else, the wallpaper should dim and go grey instead of taking attention | S | LATER | **F9** (new), rides on P1 |
 | [173](https://github.com/sindresorhus/Plash/issues/173) | The custom CSS I wrote works in the browser but not in the app | S–M | DO | **F10** (new) |
 | [169](https://github.com/sindresorhus/Plash/issues/169) | Google Calendar permanently shows "browser version no longer supported" at the top | S | DO | **F11** (new) |
@@ -53,7 +53,7 @@
 | [4](https://github.com/sindresorhus/Plash/issues/4) | Rotate through several websites, ideally on a time schedule | L | LATER | F5 (needs R1) |
 | [2](https://github.com/sindresorhus/Plash/issues/2) | One page per screen | L | LATER | F3 (needs R1) |
 
-**Category counts**: DO 17 / LATER 13 / REJECT 1 / OBSOLETE 4.
+**Category counts**: DO 17 / LATER 12 / REJECT 2 / OBSOLETE 4.
 
 **These 35 issues compress into 8 mechanisms**:
 
@@ -74,8 +74,8 @@ F1/F2 cropping (page side + window side) ────┬─ #162 still covers th
 F15 limited interaction on the desktop layer ┬─ #50 clicks
                                              └─ #16 mouse movement
 
-P5/F4 snapshot backend ────────────────────── #15
-P6/A2 a real wallpaper ────────────────────── #182
+P5/F4 snapshot backend (removed) ──────────── #15
+X8 a real wallpaper (refused) ─────────────── #182
 F10 / F11 separate, genuine bugs ──────────── #173 / #169
 ```
 
@@ -198,7 +198,15 @@ The reporter of #196 came back two days later to say that once he had played it 
 
 ---
 
-## 4. REJECT (1)
+## 4. REJECT (2)
+
+### #182 the Mission Control gesture shows the real desktop underneath — grounds: the only fix ends the app
+
+The wallpaper is a window on the `.desktop` layer, so a Mission Control swipe slides it aside and shows the actual desktop picture behind it. Stage Manager treats it as a window for the same reason. Both are symptoms of one thing: it is not really the wallpaper.
+
+The only fix is to make it really the wallpaper — render the page to an image and hand that to `NSWorkspace.setDesktopImageURL`. That was P6 in the roadmap for a long time, marked blocked rather than refused. It is refused now, as **X8**: a wallpaper set that way is a picture, so clicks, Browsing Mode, scrolling and signing into anything all go, and those are what this app is. See the roadmap for the full argument.
+
+What was worth having out of it has been taken separately: the menu bar picks up the website's colour, from a band, without the page ever being behind the menu bar.
 
 ### #125 camera / capture-card input — grounds: outside what the app is for, a process-level permission surface, and better tools already exist
 
@@ -255,7 +263,7 @@ What the user sees                What is really going on                      O
 #196 video does not autoplay    ← the autoplay quota; also the recovery        an acceptance
                                   path to verify once P2 suspends media        check for P2
 
-#182 gesture gives it away /    ← two downstream symptoms of the "it is        P6 / A2, F9
+#182 gesture gives it away /    ← two downstream symptoms of the "it is        X8 (refused), F9
 #177 wants dimming                not a real wallpaper" assumption
 
 #16  mouse following            ← the cost is a 60 Hz global monitor plus      conflicts with
