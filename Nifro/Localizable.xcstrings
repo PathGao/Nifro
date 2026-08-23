@@ -696,7 +696,16 @@
         }
       }
     },
-    "Edit…" : {},
+    "Edit…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "编辑…"
+          }
+        }
+      }
+    },
     "Enable" : {
       "localizations" : {
         "zh-Hans" : {
