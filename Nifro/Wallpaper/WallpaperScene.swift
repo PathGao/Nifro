@@ -74,6 +74,15 @@ final class WallpaperScene {
 
 		// The scene owns its own loading lifecycle. Wiring this app-wide meant only the first scene
 		// ever restored its zoom or reported its errors.
+		// The page moving itself shows up as the address changing without a navigation, which is what a
+		// fragment change is. Debounced because a page that follows a drag writes one on every frame.
+		webViewController.webView.publisher(for: \.url)
+			.debounce(for: .seconds(2), scheduler: DispatchQueue.main)
+			.sink { [weak self] _ in
+				self?.captureNavigatedAddress()
+			}
+			.store(in: &cancellables)
+
 		webViewController.didLoadPublisher
 			.convertToResult()
 			.sink { [weak self] result in
@@ -192,14 +201,16 @@ final class WallpaperScene {
 	// MARK: - Loading
 
 	func loadWebsite() {
-		load(website?.url)
+		load(addressToLoad)
 	}
 
 	func reload() {
 		captureScrollPosition()
 
-		// Always the URL the user specified rather than the current one. It may be a redirect that resolves differently each time.
-		loadBySwapping(website?.url)
+		// The address the user specified rather than whatever is loaded now — that may be a redirect
+		// resolving differently each time — but moved to where the page last was, when the page says
+		// so in its fragment.
+		loadBySwapping(addressToLoad)
 	}
 
 	func load(_ url: URL?) {

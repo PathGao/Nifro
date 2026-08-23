@@ -66,8 +66,8 @@ private struct AdvancedSettings: View {
 				ContentRulesSetting()
 				PlaylistIntervalSetting()
 				Defaults.Toggle(key: .restoreScrollPosition) {
-					Text("Restore scroll position after reload")
-						.explained(String(localized: "A page that reloads on a timer starts back at the top. This puts it back where it was, which matters for a long page you scrolled to a particular part of."))
+					Text("Put the page back where it was")
+						.explained(String(localized: "A page that reloads on a timer starts over: a long page goes back to the top, and a map or a drawing goes back to wherever it opens. This puts it back — the scroll position after a reload, and the part of the page a site names after the “#” in its address, which also survives quitting. A site that saves its own position needs none of this and keeps working either way."))
 				}
 				Defaults.Toggle(String(localized: "Reload when the Mac wakes"), key: .reloadOnWake)
 				DimWhenUnfocusedSetting()

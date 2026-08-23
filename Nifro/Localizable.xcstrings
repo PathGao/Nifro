@@ -59,12 +59,12 @@
         }
       }
     },
-    "A page that reloads on a timer starts back at the top. This puts it back where it was, which matters for a long page you scrolled to a particular part of." : {
+    "A page that reloads on a timer starts over: a long page goes back to the top, and a map or a drawing goes back to wherever it opens. This puts it back — the scroll position after a reload, and the part of the page a site names after the “#” in its address, which also survives quitting. A site that saves its own position needs none of this and keeps working either way." : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "定时刷新的网页会回到顶部。这个开关把它放回原来的位置——对一个你特意滚到某处的长页面有用。"
+            "value" : "定时刷新会让页面从头开始：长页面回到顶部，地图或大图回到它默认打开的地方。这个开关把它放回去 —— 刷新后的滚动位置，以及网站写在地址「#」后面的那部分位置（这一项退出应用也留得住）。本身就会保存位置的网站不需要它，开不开都照常工作。"
           }
         }
       }
@@ -1411,6 +1411,16 @@
         }
       }
     },
+    "Put the page back where it was" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "把页面放回原来的位置"
+          }
+        }
+      }
+    },
     "Quit %@" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1610,16 +1620,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "报告问题"
-          }
-        }
-      }
-    },
-    "Restore scroll position after reload" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "重新加载后恢复滚动位置"
           }
         }
       }

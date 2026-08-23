@@ -2,7 +2,15 @@ import AppKit
 import WebKit
 
 /**
-Puts the page back where it was after a reload.
+Puts the page back where it was.
+
+Two things, because pages keep their position in two places. A long page keeps it in the document's
+scroll, and that is captured before a reload and put back after. A page that draws its own world —
+floor796, a map — keeps it in the address, after the `#`, and that is remembered here too so a
+relaunch does not drop the user back at the middle of the map.
+
+The third place, `localStorage`, needs nothing: the web view uses the persistent data store, so a
+site that saves its own position gets it back on its own.
 
 A wallpaper often shows one region of a long page, a particular day in a calendar or a section of a dashboard, and every automatic reload used to drop the user back at the top. Upstream tracked this for six years without landing it (Plash#39).
 
@@ -26,6 +34,64 @@ extension WallpaperScene {
 			.base64EncodedString()
 
 		return .init("\(Self.scrollPositionKeyPrefix)\(identifier)")
+	}
+
+	// MARK: - The address after the #
+
+	private static let lastAddressKeyPrefix = "lastAddress_"
+
+	/**
+	Keyed on the address with the fragment taken off, which is the page, so the fragment is what is
+	being remembered about it.
+	*/
+	private func lastAddressKey(for url: URL) -> Defaults.Key<String?> {
+		let identifier = url
+			.normalized(removeFragment: true, removeQuery: false)
+			.absoluteString
+			.removingSchemeAndWWWFromURL
+			.toData
+			.base64EncodedString()
+
+		return .init("\(Self.lastAddressKeyPrefix)\(identifier)")
+	}
+
+	/**
+	Remember where the page has moved itself to, when that shows in the address.
+
+	Only the fragment. A different path or query is a different page, and loading a page nobody asked
+	for is exactly how "Update Website to Current" once turned a website into a GitHub 404 by firing
+	on its own — so the remembered address is kept *beside* the website's own rather than over it, and
+	is only ever used when the two differ in nothing else.
+	*/
+	func captureNavigatedAddress() {
+		guard
+			Defaults[.restoreScrollPosition],
+			let website,
+			let current = webViewController.webView.navigatedURL(for: website),
+			current.fragment?.isEmpty == false,
+			current.normalized(removeFragment: true) == website.url.normalized(removeFragment: true)
+		else {
+			return
+		}
+
+		Defaults[lastAddressKey(for: website.url)] = current.absoluteString
+	}
+
+	/**
+	The address to load: the website's, moved to where the page last was, if it said where that is.
+	*/
+	var addressToLoad: URL? {
+		guard
+			let website,
+			Defaults[.restoreScrollPosition],
+			let stored = Defaults[lastAddressKey(for: website.url)],
+			let remembered = URL(string: stored),
+			remembered.normalized(removeFragment: true) == website.url.normalized(removeFragment: true)
+		else {
+			return website?.url
+		}
+
+		return remembered
 	}
 
 	/**

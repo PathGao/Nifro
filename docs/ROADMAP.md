@@ -231,11 +231,11 @@ of the answer.
 | | Where the page keeps its position | Survives a relaunch |
 |---|---|---|
 | **M1** | `localStorage` / IndexedDB | **Yes, already.** `WKWebViewConfiguration()` defaults to the persistent data store, so this is kept in the app's container and comes back on its own. floor796 is this case: it writes `last-pos` on every move. Settings → "Clear website data" is the one thing that throws it away |
-| **M2** | The URL fragment | **No.** Loading always uses the address stored on the website, deliberately — "always the URL the user specified rather than the current one", because it may be a redirect that resolves differently each time. So a page that says where it is in the fragment has that thrown away on every load. floor796 writes `#t0r0,444,443` as well, and a map or a dashboard with a deep link is the same shape |
+| **M2** | The URL fragment | **Yes, now.** The address the page moved itself to is remembered beside the website's own, never over it, and used only when the two differ in nothing but the fragment. A fragment cannot 404, which is why the check stops there rather than allowing the query as well. Shares the "Put the page back where it was" switch with M3 |
 | **M3** | Document scroll | **On a reload, yes** — `ScrollRestoration` captures it just before reloading and puts it back after. A hard quit loses at most the last scroll, because nothing polls in the background to support it |
 | **M4** | Only in memory | **No, and there is nothing to be done.** A canvas that keeps its camera in a variable and writes it nowhere cannot be asked where it was |
 
-**M2 is the one worth building.** The manual version already exists — "Update Website to Current" in
+**M2 is built.** The manual version already existed — "Update Website to Current" in
 the menu points the stored website at the address currently loaded — which is proof both that people
 want it and that the mechanism works. The automatic version has to avoid the bug that item caused
 once: it fired on every website with a host page and turned one of them into a GitHub 404. So the
