@@ -82,52 +82,68 @@ Upstream stops for three reasons only: manually disabled, screen locked, on batt
 
 ---
 
-## 5. Regions: more than one page on a screen (the L series)
+## 5. Blocks: a page as a piece of the desktop (the L series)
 
-Today a website gets a display. The next thing worth having is a website getting *part* of one, so a
-screen can hold several — left and right, or a full-height page on the left with two stacked on the
-right.
+Zooming already answers *which part of a page*. It puts that part on the whole screen. The remaining
+half of the idea is *where on the desktop it goes* — because a zoomed-in fragment of a page is
+usually not something you want at full-screen size. It is something you want in a corner.
 
-Not free placement. Anything can go anywhere is a layout editor, and a layout editor is a bigger
-project than this whole app: drag handles, collision, z-order, snapping, persistence per display
-size, and a settings screen nobody can hold in their head. What is proposed instead is a small set of
-splits, chosen from a menu, each region behaving exactly like a display does now.
+So: a website becomes a block. The block's content is what zooming already produces. The block's
+place and size are new, and free — with a four-way grid offered so that placing one is a choice
+between four obvious answers rather than an exercise in dragging.
 
 ```
-one              left / right        left, and right split
-┌───────────┐    ┌─────┬─────┐       ┌─────┬─────┐
-│           │    │     │     │       │     │  B  │
-│     A     │    │  A  │  B  │       │  A  ├─────┤
-│           │    │     │     │       │     │  C  │
-└───────────┘    └─────┴─────┘       └─────┴─────┘
+today                        a block                     the grid
+┌───────────────────┐        ┌───────────────────┐       ┌─────────┬─────────┐
+│                   │        │            ┌────┐ │       │         │         │
+│   zoomed region   │        │   desktop  │ A  │ │       │    1    │    2    │
+│   fills the       │        │            └────┘ │       ├─────────┼─────────┤
+│   whole screen    │        │  ┌────┐           │       │    3    │    4    │
+│                   │        │  │ B  │           │       │         │         │
+└───────────────────┘        │  └────┘           │       └─────────┴─────────┘
+                             └───────────────────┘        snapped, and optionally
+                                                          keeping clear of the Dock
 ```
 
-**Why this is worth doing.** Combined with zooming, a region turns a website into a desktop tile. The
-case that makes it concrete: the number people actually want on their desktop — how much of this
-month's Codex or Claude usage is gone — exists only as a figure on a web page. There is no widget for
-it and there will not be one. Zoom to the figure, put it in a corner region, and the rest of the
-screen carries something else. That is a class of thing, not one example: a build dashboard, a
-deployment status, a countdown, a single number from a page nobody will ever ship an app for.
+The grid's quadrants can be taken from the whole screen or from the area the Dock leaves — a setting,
+because the answer depends on where somebody keeps their Dock and whether it hides itself. That
+distinction already exists in the code (`screen.pageFrame` against `visibleFrame`); it has never been
+offered to the user.
+
+**Why this is worth doing.** A block plus a zoom turns a website into a desktop widget. The case that
+makes it concrete is a number that only exists on a web page — how much of this month's Codex or
+Claude usage is gone. Nobody is going to ship a widget for that. Zoom to the figure, put the block in
+a corner, and the rest of the desktop is still the desktop. That is a class of thing rather than one
+example: a build dashboard, a deploy status, a countdown, one number from a page nobody will ever
+write an app for.
+
+**Most of this already exists**, which is the main argument for doing it. A scene already owns a
+window; `Zoom` already picks the part of the page; `DesktopWindow` already sets an arbitrary frame;
+several scenes already run at once. Until this week a crop *did* shrink the window to itself — that
+behaviour was removed because a crop was doing two jobs at once and the visibility policy was
+fighting it for control of the frame. This brings the second job back as a thing of its own, with an
+owner.
 
 | | Item | Status | Notes |
 |---|---|---|---|
-| **L1** | A website occupies a region of a display rather than the whole display | To do | The model change: `WallpaperScene` is keyed by `Display`, and a region means several per display. `Display` stops being the key |
-| **L2** | A fixed set of splits, offered in the menu | To do | Halves, thirds, and one-plus-two-stacked. Fixed fractions, so the same choice survives a different display size the way `Zoom` does |
-| **L3** | Which region takes a click | To do | Browsing Mode and hold-to-interact currently mean "the wallpaper". With regions they have to mean one of them |
+| **L1** | A website has a place and a size on its display, not just a display | To do | Stored as fractions, like `Zoom` stores a centre and a magnification, so a block survives a change of display |
+| **L2** | A four-way grid to snap to, and free placement for anything else | To do | The grid is the affordance, not the model. Free placement is the model |
+| **L3** | Whether the grid uses the whole screen or keeps clear of the Dock | To do | A setting. `pageFrame` and `visibleFrame` are both already computed |
+| **L4** | Which block takes a click | To do | Browsing Mode and hold-to-interact currently mean "the wallpaper". With blocks they have to mean one of them |
 
 **The three things that make this harder than it looks**, named now so they are not discovered later:
 
-- **Two things sizing one window.** The occlusion policy owns the window's frame today
-  (`DesktopWindow.reducedRegion`). A region owns it too. That is the same collision that made cropping
-  and the visibility policy fight until cropping stopped moving the window at all — so a region has to
-  be the window's *base* frame, with occlusion shrinking inside it, never the other way round.
-- **One web process per region.** Three regions is three `WKWebView`s and three web processes. The
-  whole P series exists to avoid paying for rendering nobody is looking at, and this multiplies the
-  bill. It makes the snapshot backend more important, not less: a tile showing one number is the
+- **Two things sizing one window.** The visibility policy owns the window's frame today
+  (`DesktopWindow.reducedRegion`). A block owns it too. That is exactly the collision that made
+  cropping and the visibility policy fight until cropping stopped moving the window at all — so a
+  block has to be the window's *base* frame, with occlusion shrinking inside it, never the reverse.
+- **One web process per block.** Three blocks is three `WKWebView`s and three web processes. The whole
+  P series exists to avoid paying for rendering nobody is looking at, and this multiplies the bill. It
+  makes the snapshot backend more important rather than less: a block showing one number is the
   clearest case in the app for photographing a page instead of running it.
-- **Regions are not a layout the user drew.** They are fractions of a display. Storing them as
-  fractions, like `Zoom` stores a centre and a magnification, is what keeps a two-region setup
-  working when the display changes or the laptop is unplugged from the monitor.
+- **A block is not a window the user can grab.** There are no title bars down there and adding them
+  would make the wallpaper into an app. Placing one has to happen the way framing a region does — over
+  the wallpaper, with the desktop still visible behind it — or from a menu of grid positions.
 
 ---
 
