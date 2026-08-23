@@ -6,6 +6,7 @@ struct AddWebsiteScreen: View {
 	@State private var hostingWindow: NSWindow?
 	@State private var isFetchingTitle = false
 	@State private var isApplyConfirmationPresented = false
+	@State private var isCustomCodePresented = false
 	@State private var originalWebsite: Website?
 	@State private var urlString = ""
 
@@ -73,6 +74,9 @@ struct AddWebsiteScreen: View {
 		}
 		.onSubmit {
 			submit()
+		}
+		.sheet(isPresented: $isCustomCodePresented) {
+			CustomCodeScreen(css: website.css, javaScript: website.javaScript)
 		}
 		.confirmationDialog2(
 			String(localized: "Keep changes?"),
@@ -223,52 +227,15 @@ struct AddWebsiteScreen: View {
 			.help("Creates a fake dark mode for websites without a native dark mode by inverting all the colors on the website.")
 			Toggle("Use print styles", isOn: website.usePrintStyles)
 				.help("Forces the website to use its print styles (“@media print”) if any. Some websites have a simpler presentation for printing, for example, Google Calendar.")
-			// Folded away. Both are empty for almost every website, and open they took more of the
-			// dialog than everything that is actually set on a typical entry.
-			DisclosureGroup(String(localized: "Custom CSS and JavaScript")) {
-				let cssHelpText = "This lets you modify the website with CSS. You could, for example, change some colors or hide some unnecessary elements."
-				VStack(alignment: .leading) {
-					HStack {
-						Text("CSS")
-						Spacer()
-						InfoPopoverButton(cssHelpText)
-							.controlSize(.small)
-					}
-					ScrollableTextView(
-						text: website.css,
-						font: .monospacedSystemFont(ofSize: 11, weight: .regular),
-						isAutomaticQuoteSubstitutionEnabled: false,
-						isAutomaticDashSubstitutionEnabled: false,
-						isAutomaticTextReplacementEnabled: false,
-						isAutomaticSpellingCorrectionEnabled: false
-					)
-					.frame(height: 70)
+			// Its own panel rather than a fold. Both are empty for almost every website, so they should
+			// not be sitting open; and folding them open resizes the dialog, which reads as the window
+			// flinching rather than as something opening.
+			LabeledContent(String(localized: "Custom code")) {
+				Button(String(localized: "CSS and JavaScript…")) {
+					isCustomCodePresented = true
 				}
-				.accessibilityElement(children: .combine)
-				.accessibilityLabel("CSS")
-				.accessibilityHint(Text(cssHelpText))
-				let javaScriptHelpText = "This lets you modify the website with JavaScript. Prefer using CSS instead whenever possible. You can use “await” at the top-level."
-				VStack(alignment: .leading) {
-					HStack {
-						Text("JavaScript")
-						Spacer()
-						InfoPopoverButton(javaScriptHelpText)
-							.controlSize(.small)
-					}
-					ScrollableTextView(
-						text: website.javaScript,
-						font: .monospacedSystemFont(ofSize: 11, weight: .regular),
-						isAutomaticQuoteSubstitutionEnabled: false,
-						isAutomaticDashSubstitutionEnabled: false,
-						isAutomaticTextReplacementEnabled: false,
-						isAutomaticSpellingCorrectionEnabled: false
-					)
-					.frame(height: 70)
-				}
-				.accessibilityElement(children: .combine)
-				.accessibilityLabel("JavaScript")
-				.accessibilityHint(Text(javaScriptHelpText))
 			}
+			.help("Inject your own CSS or JavaScript into this website. Most websites need neither.")
 		}
 		Section {
 			WebsiteAudioSetting(audio: website.audio)
@@ -418,4 +385,75 @@ struct AddWebsiteScreen: View {
 		isEditing: false,
 		website: nil
 	)
+}
+
+
+/**
+Where a website's own CSS and JavaScript are written.
+
+A panel rather than part of the dialog. Almost no website has either, and giving them room in the
+form pushed everything that is actually set on a typical website below the fold; giving them a fold
+made the dialog resize itself every time it was opened or closed.
+*/
+private struct CustomCodeScreen: View {
+	@Environment(\.dismiss) private var dismiss
+
+	@Binding var css: String
+	@Binding var javaScript: String
+
+	var body: some View {
+		VStack(alignment: .leading) {
+				let cssHelpText = "This lets you modify the website with CSS. You could, for example, change some colors or hide some unnecessary elements."
+				VStack(alignment: .leading) {
+					HStack {
+						Text("CSS")
+						Spacer()
+						InfoPopoverButton(cssHelpText)
+							.controlSize(.small)
+					}
+					ScrollableTextView(
+						text: $css,
+						font: .monospacedSystemFont(ofSize: 11, weight: .regular),
+						isAutomaticQuoteSubstitutionEnabled: false,
+						isAutomaticDashSubstitutionEnabled: false,
+						isAutomaticTextReplacementEnabled: false,
+						isAutomaticSpellingCorrectionEnabled: false
+					)
+					.frame(height: 70)
+				}
+				.accessibilityElement(children: .combine)
+				.accessibilityLabel("CSS")
+				.accessibilityHint(Text(cssHelpText))
+				let javaScriptHelpText = "This lets you modify the website with JavaScript. Prefer using CSS instead whenever possible. You can use “await” at the top-level."
+				VStack(alignment: .leading) {
+					HStack {
+						Text("JavaScript")
+						Spacer()
+						InfoPopoverButton(javaScriptHelpText)
+							.controlSize(.small)
+					}
+					ScrollableTextView(
+						text: $javaScript,
+						font: .monospacedSystemFont(ofSize: 11, weight: .regular),
+						isAutomaticQuoteSubstitutionEnabled: false,
+						isAutomaticDashSubstitutionEnabled: false,
+						isAutomaticTextReplacementEnabled: false,
+						isAutomaticSpellingCorrectionEnabled: false
+					)
+					.frame(height: 70)
+				}
+				.accessibilityElement(children: .combine)
+				.accessibilityLabel("JavaScript")
+				.accessibilityHint(Text(javaScriptHelpText))
+		}
+		.padding()
+		.frame(width: 460, height: 420)
+		.toolbar {
+			ToolbarItem(placement: .confirmationAction) {
+				Button(String(localized: "Done")) {
+					dismiss()
+				}
+			}
+		}
+	}
 }

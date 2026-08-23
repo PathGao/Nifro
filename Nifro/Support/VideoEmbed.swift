@@ -104,6 +104,41 @@ enum VideoEmbed {
 		)
 	}
 
+	/**
+	The video's own cover image, for a list that would otherwise show the same site icon on every row.
+
+	A list of videos is the case where a picture is worth most and where the usual sources give least:
+	a player address has no link preview to read, so every entry falls back to the site's icon and the
+	list becomes a column of identical logos with only the titles to tell them apart.
+
+	YouTube publishes a cover at a fixed address derived from the video id. Bilibili does not — its
+	cover comes from an API call — so its entries still fall back to the site icon.
+	*/
+	static func previewImageURL(for url: URL) -> URL? {
+		guard
+			let host = url.host?.lowercased(),
+			let identifier = youTubeVideoID(url: url, host: host) ?? youTubeEmbedID(url: url, host: host)
+		else {
+			return nil
+		}
+
+		return URL(string: "https://img.youtube.com/vi/\(identifier)/hqdefault.jpg")
+	}
+
+	/**
+	The id in an address that is already a player, which `youTubeVideoID` deliberately refuses.
+	*/
+	private static func youTubeEmbedID(url: URL, host: String) -> String? {
+		guard
+			host.hasSuffix("youtube.com"),
+			url.path.hasPrefix("/embed/")
+		else {
+			return nil
+		}
+
+		return sanitised(url.lastPathComponent)
+	}
+
 	private static func youTubeVideoID(url: URL, host: String) -> String? {
 		if host.hasSuffix("youtu.be") {
 			return sanitised(url.lastPathComponent)

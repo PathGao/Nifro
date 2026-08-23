@@ -1,91 +1,43 @@
 import SwiftUI
 
 /**
-Editor for which part of a page fills the wallpaper.
+Shows which part of the page fills the wallpaper, and the way back to all of it.
 
-The numbers are here for adjusting a region, not for choosing one — nobody knows where the part they
-want sits as a percentage. Choosing is done by dragging over the wallpaper, from the menu.
+No control for choosing the region. Choosing means dragging a rectangle over the wallpaper, which
+cannot be done from inside a dialog covering it — and the version with a switch and three number
+fields was worse than nothing: turning it on jumped to an arbitrary magnification of the middle of
+the page, and nobody could connect those numbers to the thing in the menu that actually does this.
+
+So this reports and undoes, and says where the doing is.
 */
 struct ZoomSetting: View {
 	@Binding var zoom: Zoom?
 
-	private var isEnabled: Binding<Bool> {
-		.init(
-			get: { zoom != nil },
-			set: { zoom = $0 ? Self.defaultZoom : nil }
-		)
-	}
-
-	/**
-	A starting region small enough that turning this on visibly does something.
-	*/
-	private static let defaultZoom = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 2)
-
 	var body: some View {
-		Toggle("Zoom into part of the page", isOn: isEnabled)
-			.help("Fills the screen with one part of the page, cutting away navigation bars, borders and whatever else surrounds it. Use “Choose Region…” in the menu to frame it by dragging over the wallpaper.")
-
-		if zoom != nil {
+		LabeledContent(String(localized: "Region")) {
 			HStack {
-				field(String(localized: "Centre X"), value: binding(\.center.x), format: .percent)
-				field(String(localized: "Centre Y"), value: binding(\.center.y), format: .percent)
-				field(String(localized: "Zoom"), value: binding(\.scale), format: .magnification)
-			}
-			.help("The centre is a position on the page, from its top-left corner. The zoom is how many times that part is enlarged.")
-		}
-	}
-
-	private enum Format {
-		case percent
-		case magnification
-	}
-
-	private func field(_ label: String, value: Binding<Double>, format: Format) -> some View {
-		VStack(alignment: .leading, spacing: 2) {
-			Text(label)
-				.font(.caption)
-				.foregroundStyle(.secondary)
-			switch format {
-			case .percent:
-				TextField(label, value: value, format: .percent.precision(.fractionLength(0)))
-					.labelsHidden()
-					.frame(width: 64)
-			case .magnification:
-				TextField(label, value: value, format: .number.precision(.fractionLength(1)))
-					.labelsHidden()
-					.frame(width: 64)
+				Text(summary)
+					.foregroundStyle(.secondary)
+				if zoom != nil {
+					Button(String(localized: "Show Whole Page")) {
+						zoom = nil
+					}
+				}
 			}
 		}
+		.help("Choose a region with “Choose Region…” in the Nifro menu: drag a rectangle over the wallpaper and that part fills the screen. The rectangle is locked to the shape of your screen, and it is remembered as a place and a magnification, so the same website works on a second display of a different shape.")
 	}
 
-	private func binding(_ keyPath: WritableKeyPath<Zoom, CGFloat>) -> Binding<Double> {
-		.init(
-			get: { Double(zoom?[keyPath: keyPath] ?? 0) },
-			set: { newValue in
-				guard var zoom else {
-					return
-				}
+	private var summary: String {
+		guard let zoom else {
+			return String(localized: "Whole page")
+		}
 
-				zoom[keyPath: keyPath] = CGFloat(min(max(newValue, 0), 1))
-				self.zoom = zoom
-			}
-		)
-	}
+		let scale = zoom.scale.formatted(.number.precision(.fractionLength(1)))
+		let across = Int((zoom.center.x * 100).rounded())
+		let down = Int((zoom.center.y * 100).rounded())
 
-	private func binding(_ keyPath: WritableKeyPath<Zoom, Double>) -> Binding<Double> {
-		.init(
-			get: { zoom?[keyPath: keyPath] ?? 1 },
-			set: { newValue in
-				guard var zoom else {
-					return
-				}
-
-				// Below 1 the region is bigger than the page, which is a window full of nothing along
-				// two edges. The user is mid-typing, not asking for that.
-				zoom[keyPath: keyPath] = min(max(newValue, 1), 20)
-				self.zoom = zoom
-			}
-		)
+		return String(localized: "\(scale)× at \(across)%, \(down)%")
 	}
 }
 
@@ -195,6 +147,6 @@ struct WebsiteAudioSetting: View {
 				Text(option.title).tag(option)
 			}
 		}
-		.help("Muting is done by keeping every audio and video element on the page muted. It covers media elements, not sound a page generates with the Web Audio API.")
+		.help("Whether this website may make noise. Remembered for this website, so a clock stays silent and a live stream does not, and it is the same setting as Sound in the Nifro menu — change it in either place. Muting works by holding every audio and video element on the page muted, so it covers media and not sound a page generates with the Web Audio API.")
 	}
 }

@@ -67,7 +67,56 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	// The space is there to force `NSMenu` to display an empty line.
 	var tooltip: String { "\(title)\n \n\(subtitle)".trimmed }
 
-	var thumbnailCacheKey: String { url.isFileURL ? url.tildePath : (url.host ?? "") }
+	/**
+	The key this website's preview image is cached under.
+
+	The whole address, not its host. Keyed by host, every page on a site shared one image — so a list
+	with several YouTube videos in it showed the same picture on all of them, which is the case where
+	a preview would have been most use.
+	*/
+	/**
+	Symbols for the settings this website has that are not the default, in a fixed order.
+
+	Everything here is invisible until you open the website for editing, which is fine for one website
+	and useless for a list of twenty. Shown rather than spelled out because a row has space for
+	symbols and not for sentences; the tooltip still spells them out.
+	*/
+	var badges: [String] {
+		var symbols = [String]()
+
+		if audio == .unmuted {
+			symbols.append("speaker.wave.2.fill")
+		}
+
+		if zoom != nil {
+			symbols.append("viewfinder")
+		}
+
+		switch rendering {
+		case .snapshot:
+			symbols.append("camera")
+		case .automatic:
+			symbols.append("wand.and.stars")
+		case .live:
+			break
+		}
+
+		if startHour != nil, endHour != nil {
+			symbols.append("clock")
+		}
+
+		if display != nil {
+			symbols.append("display")
+		}
+
+		if allowsInteraction {
+			symbols.append("hand.tap")
+		}
+
+		return symbols
+	}
+
+	var thumbnailCacheKey: String { url.isFileURL ? url.tildePath : url.absoluteString }
 
 	@MainActor
 	func makeCurrent() {

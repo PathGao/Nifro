@@ -74,24 +74,21 @@ extension WallpaperScene {
 	}
 
 	/**
-	Put the finished replacement on screen, fading it in over the page it replaces.
+	Put the finished replacement on screen.
+
+	Straight swap, no fade. The fade that used to be here took the new content from transparent to
+	opaque — and the page it was replacing had already been taken out by then, so what showed through
+	for a third of a second was the desktop. Two pages that have both finished loading can just change
+	places; there is nothing to cover up.
+
+	// ponytail: a real cross-fade would need both pages in the window at once, which means a
+	// container view and a second answer to what `window.contentView` holds. Worth it only if a plain
+	// change turns out to read as abrupt.
 	*/
 	private func adopt(_ replacement: SSWebView) {
 		replacement.isHidden = false
 		webViewController.adopt(replacement)
 		installContentView()
-
-		guard let contentView = window.contentView else {
-			return
-		}
-
-		contentView.alphaValue = 0
-
-		NSAnimationContext.runAnimationGroup {
-			$0.duration = 0.35
-			$0.allowsImplicitAnimation = true
-			contentView.animator().alphaValue = 1
-		}
 
 		restoreScrollPosition(in: replacement)
 		refreshMenuBarBandColor()

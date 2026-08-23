@@ -143,10 +143,10 @@ private struct DimWhenUnfocusedSetting: View {
 private struct ShowOnAllSpacesSetting: View {
 	var body: some View {
 		Defaults.Toggle(
-			String(localized: "Show on all spaces"),
+			String(localized: "Show on every Space"),
 			key: .showOnAllSpaces
 		)
-		.help("While disabled, Nifro will display the website on the space that is active at launch.")
+		.help("Spaces are the desktops you switch between in Mission Control, not your displays. Off means the wallpaper stays on whichever Space was in front when Nifro started. Which display a website goes on is set on the website itself, not here.")
 	}
 }
 

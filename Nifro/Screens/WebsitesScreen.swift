@@ -5,9 +5,37 @@ struct WebsitesScreen: View {
 //	@State private var selection: Website.ID? // We need two states as selection must be independent from actually opening the editing because of keyboard navigation and accessibility.
 	@State private var editedWebsite: Website.ID?
 	@State private var isAddWebsiteDialogPresented = false
+	@State private var searchText = ""
+
+	/**
+	The websites the search leaves, as bindings into the real list so editing still writes through.
+
+	Searching turns dragging off. The order is the rotation order, and dragging a row while some of
+	its neighbours are hidden would move it somewhere other than where it appears to land.
+	*/
+	private var matches: [Binding<Website>] {
+		let query = searchText.trimmed.lowercased()
+
+		return $websites.filter {
+			query.isEmpty
+				|| $0.wrappedValue.title.lowercased().contains(query)
+				|| $0.wrappedValue.url.absoluteString.lowercased().contains(query)
+		}
+	}
 
 	var body: some View {
 		Form {
+			if !searchText.trimmed.isEmpty {
+				List(matches, id: \.wrappedValue.id) { website in
+					RowView(website: website, selection: $editedWebsite)
+				}
+				.overlay {
+					if matches.isEmpty {
+						Text("Nothing matches")
+							.emptyStateTextStyle()
+					}
+				}
+			} else {
 			List($websites, editActions: .all) { website in
 				RowView(
 					website: website,
@@ -36,7 +64,9 @@ struct WebsitesScreen: View {
 			.accessibilityAction(named: "Add website") {
 				isAddWebsiteDialogPresented = true
 			}
+			}
 		}
+		.searchable(text: $searchText, placement: .toolbar, prompt: Text("Search by name or address"))
 		.formStyle(.grouped)
 		.frame(width: 480, height: 500)
 //		.onChange(of: editedWebsite) {
@@ -83,14 +113,24 @@ private struct RowView: View {
 
 	var body: some View {
 		HStack {
-			Label {
+			IconView(website: website)
+			VStack(alignment: .leading, spacing: 2) {
 				// TODO: This should use something like `.lineBreakMode = .byCharWrapping` if SwiftUI ever supports that.
 				if let title = website.title.nilIfEmpty {
 					Text(title)
 				}
-				Text(website.subtitle)
-			} icon: {
-				IconView(website: website)
+				HStack(spacing: 6) {
+					Text(website.subtitle)
+						.foregroundStyle(.secondary)
+					// What is set on this website, in the same order every time. A list of videos from
+					// one site reads as identical rows otherwise, and these are what the rows differ by.
+					ForEach(website.badges, id: \.self) {
+						Image(systemName: $0)
+							.foregroundStyle(.secondary)
+							.imageScale(.small)
+					}
+				}
+				.font(.subheadline)
 			}
 			.lineLimit(1)
 			Spacer()
@@ -151,15 +191,17 @@ private struct IconView: View {
 	var body: some View {
 		VStack {
 			if let icon {
+				// Filled rather than fitted: these are video covers as often as they are site icons now,
+				// and a 16:9 cover fitted into a square is mostly empty space.
 				icon
 					.resizable()
-					.scaledToFit()
+					.scaledToFill()
 			} else {
 				Color.primary.opacity(0.1)
 			}
 		}
-		.frame(width: 32, height: 32)
-		.clipShape(.rect(cornerRadius: 4))
+		.frame(width: 44, height: 44)
+		.clipShape(.rect(cornerRadius: 5))
 		.task(id: website.url) {
 			guard let image = await fetchIcons() else {
 				return
@@ -173,6 +215,17 @@ private struct IconView: View {
 		let cache = WebsitesController.shared.thumbnailCache
 
 		if let image = cache[website.thumbnailCacheKey] {
+			return image
+		}
+
+		// A video's own cover first. The general fetcher would fall back to the site's icon here, and
+		// a list of videos all wearing the same logo is the case a picture was supposed to help with.
+		if
+			let previewURL = VideoEmbed.previewImageURL(for: website.url),
+			let (data, _) = try? await URLSession.shared.data(from: previewURL),
+			let image = NSImage(data: data)
+		{
+			cache[website.thumbnailCacheKey] = image
 			return image
 		}
 

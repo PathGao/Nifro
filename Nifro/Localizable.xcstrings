@@ -23,6 +23,22 @@
       }
     },
     "%@": {},
+    "%@× at %lld%%, %lld%%": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@× at %2$lld%%, %3$lld%%"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@× 位于 %lld%%, %lld%%"
+          }
+        }
+      }
+    },
     "%lld minutes": {
       "localizations": {
         "zh-Hans": {
@@ -283,6 +299,16 @@
         }
       }
     },
+    "CSS and JavaScript…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CSS 与 JavaScript…"
+          }
+        }
+      }
+    },
     "Cancel": {
       "localizations": {
         "zh-Hans": {
@@ -294,6 +320,7 @@
       }
     },
     "Centre X": {
+      "extractionState": "stale",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
@@ -304,6 +331,7 @@
       }
     },
     "Centre Y": {
+      "extractionState": "stale",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
@@ -359,6 +387,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "选择一个含有「index.html」文件的目录。"
+          }
+        }
+      }
+    },
+    "Choose a region with “Choose Region…” in the Nifro menu: drag a rectangle over the wallpaper and that part fills the screen. The rectangle is locked to the shape of your screen, and it is remembered as a place and a magnification, so the same website works on a second display of a different shape.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用 Nifro 菜单里的「选择区域…」来选：在壁纸上拖一个框，那一部分就铺满屏幕。框锁定成你屏幕的形状，记下来的是「位置 + 倍率」而不是矩形，所以同一个网站换到形状不同的另一块屏也成立。"
           }
         }
       }
@@ -444,11 +482,22 @@
       }
     },
     "Custom CSS and JavaScript": {
+      "extractionState": "stale",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "自定义 CSS 与 JavaScript"
+          }
+        }
+      }
+    },
+    "Custom code": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自定义代码"
           }
         }
       }
@@ -675,6 +724,7 @@
       }
     },
     "Fills the screen with one part of the page, cutting away navigation bars, borders and whatever else surrounds it. Use “Choose Region…” in the menu to frame it by dragging over the wallpaper.": {
+      "extractionState": "stale",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
@@ -820,6 +870,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "目录不对。"
+          }
+        }
+      }
+    },
+    "Inject your own CSS or JavaScript into this website. Most websites need neither.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "给这个网站注入你自己的 CSS 或 JavaScript。绝大多数网站两个都不需要。"
           }
         }
       }
@@ -995,6 +1055,7 @@
       }
     },
     "Muting is done by keeping every audio and video element on the page muted. It covers media elements, not sound a page generates with the Web Audio API.": {
+      "extractionState": "stale",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
@@ -1070,6 +1131,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "尚未实现。"
+          }
+        }
+      }
+    },
+    "Nothing matches": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有匹配的网站"
           }
         }
       }
@@ -1284,6 +1355,16 @@
         }
       }
     },
+    "Region": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "区域"
+          }
+        }
+      }
+    },
     "Reload": {
       "localizations": {
         "zh-Hans": {
@@ -1474,6 +1555,16 @@
         }
       }
     },
+    "Search by name or address": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按名称或地址搜索"
+          }
+        }
+      }
+    },
     "Set Current Website": {
       "localizations": {
         "zh-Hans": {
@@ -1585,11 +1676,22 @@
       }
     },
     "Show on all spaces": {
+      "extractionState": "stale",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "在所有桌面上显示"
+          }
+        }
+      }
+    },
+    "Show on every Space": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在每个「桌面」上显示"
           }
         }
       }
@@ -1620,6 +1722,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "声音"
+          }
+        }
+      }
+    },
+    "Spaces are the desktops you switch between in Mission Control, not your displays. Off means the wallpaper stays on whichever Space was in front when Nifro started. Which display a website goes on is set on the website itself, not here.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「桌面」指的是调度中心里来回切换的那些虚拟桌面，不是显示器。关掉时，壁纸只留在 Nifro 启动时最前面的那个桌面上。网站放在哪块显示器上，是在网站自己的设置里定的，不在这里。"
           }
         }
       }
@@ -1705,6 +1817,7 @@
       }
     },
     "The centre is a position on the page, from its top-left corner. The zoom is how many times that part is enlarged.": {
+      "extractionState": "stale",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
@@ -2004,12 +2117,33 @@
         }
       }
     },
+    "Whether this website may make noise. Remembered for this website, so a clock stays silent and a live stream does not, and it is the same setting as Sound in the Nifro menu — change it in either place. Muting works by holding every audio and video element on the page muted, so it covers media and not sound a page generates with the Web Audio API.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这个网站能不能出声。按网站分别记住，所以时钟保持安静而直播不会；它和 Nifro 菜单里的「声音」是同一个设置，在哪边改都行。静音的做法是把页面上每个音频和视频元素保持静音，所以覆盖媒体元素，不覆盖网页用 Web Audio API 生成的声音。"
+          }
+        }
+      }
+    },
     "While disabled, Nifro will display the website on the space that is active at launch.": {
+      "extractionState": "stale",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "关闭时，Nifro 只在启动时所在的那个桌面显示网站。"
+          }
+        }
+      }
+    },
+    "Whole page": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "整页"
           }
         }
       }
@@ -2025,6 +2159,7 @@
       }
     },
     "Zoom": {
+      "extractionState": "stale",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
@@ -2055,6 +2190,7 @@
       }
     },
     "Zoom into part of the page": {
+      "extractionState": "stale",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
