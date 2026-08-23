@@ -17,15 +17,25 @@
 
 name: release
 
+# Dispatched from a branch, never triggered by a tag.
+#
+# A tag used to be the trigger, which made pushing one both the request to release and the promise
+# that the release happened -- and the `version tags` ruleset forbids moving or deleting `v*`, so the
+# promise was unbreakable while the thing it promised had not run yet. v0.1.1 spent that promise on a
+# run that died at the last step: the tag was frozen at a tree whose pipeline could not parse, and the
+# release had to be finished from a branch instead, so the tag no longer describes how it was made.
+#
+# The order is reversed here. Build, sign, package, and only then create the tag, as part of creating
+# the Release it belongs to. A run that fails leaves no tag, so nothing is spent and the same version
+# number can be tried again once the cause is fixed. Immutability stops being a constraint to work
+# around and becomes free: every `v*` tag names a tree that shipped.
 on:
-  push:
-    tags:
-      - "v*"
   workflow_dispatch:
     inputs:
-      tag:
-        description: "The tag to release, for example v0.1.0"
-        required: true
+      dry_run:
+        description: "Build, sign and package, but create no tag and no Release"
+        type: boolean
+        default: false
 
 env:
   XCODE_PROJECT: Nifro.xcodeproj
@@ -60,19 +70,34 @@ jobs:
           major="$(xcodebuild -version | sed -n '1s/Xcode \([0-9]*\).*/\1/p')"
           [ "$major" -ge 26 ] || { echo "::error::Xcode $major is too old; this project needs 26 or newer"; exit 1; }
 
-      - name: Resolve the version and reconcile it with Config.xcconfig
+      # `Config.xcconfig` is the only place a version is written. The tag is derived from it rather
+      # than typed alongside it, so the two cannot disagree -- which they used to be able to, and the
+      # workflow's answer was to fail after being dispatched.
+      - name: Work out the version, and refuse to reuse one
         id: version
         run: |
           set -euo pipefail
-          tag="${{ github.event.inputs.tag || github.ref_name }}"
-          version="${tag#v}"
-          xcconfig_version="$(sed -n 's/^MARKETING_VERSION *= *//p' Config.xcconfig | tr -d ' \r')"
-          if [ "$version" != "$xcconfig_version" ]; then
-            echo "::error::tag $tag does not match MARKETING_VERSION ($xcconfig_version) in Config.xcconfig"
+
+          version="$(sed -n 's/^MARKETING_VERSION *= *//p' Config.xcconfig | tr -d ' \r')"
+          tag="v$version"
+
+          case "$version" in
+            "" | *[!0-9.]* )
+              echo "::error::MARKETING_VERSION is '$version', which is not a version"
+              exit 1
+              ;;
+          esac
+
+          # A `v*` tag cannot be moved or deleted, so a second release of one is not something to
+          # recover from afterwards. Refused here, before anything is built.
+          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+            echo "::error::$tag already exists. Bump MARKETING_VERSION in Config.xcconfig first."
             exit 1
           fi
+
           echo "tag=$tag"         >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Releasing $tag from $GITHUB_REF_NAME @ ${GITHUB_SHA:0:7}"
 
       # secrets cannot be tested inside an if:, so map them to env first and emit an output
       - name: Work out whether signing and notarization credentials exist
@@ -265,7 +290,24 @@ jobs:
           path: .release/xcodebuild-*.log
           if-no-files-found: ignore
 
-      - name: Create the GitHub Release
+      # The dry run stops here with the disk images kept as artifacts, so the whole pipeline can be
+      # exercised on a branch without spending a version number. Everything above this line has run.
+      - name: Keep the disk images, on a dry run
+        if: inputs.dry_run
+        uses: actions/upload-artifact@v7
+        with:
+          name: dry-run-disk-images
+          path: .release/*.dmg
+
+      - name: Say what the dry run would have done
+        if: inputs.dry_run
+        run: |
+          echo "::notice::Dry run. Would have created ${{ steps.version.outputs.tag }} at ${GITHUB_SHA:0:7} and released the two disk images above."
+
+      # Creating the Release is what creates the tag: `--target` names the commit, and GitHub makes
+      # the ref as part of the same call. So the tag exists only once everything before it has passed.
+      - name: Create the tag and the GitHub Release
+        if: ${{ !inputs.dry_run }}
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -299,6 +341,7 @@ jobs:
 
           gh release create "$tag" "${{ steps.package.outputs.dmg_arm64 }}" "${{ steps.package.outputs.dmg_x86_64 }}" \
             --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
             --title "$tag" \
             --generate-notes \
             --notes-file "$RUNNER_TEMP/notes.md"
@@ -312,6 +355,7 @@ jobs:
       # `continue-on-error` because a failure here must not take the release with it. The release is
       # already published by this point; the cask can be fixed afterwards.
       - name: Open a pull request with the new cask version
+        if: ${{ !inputs.dry_run }}
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
