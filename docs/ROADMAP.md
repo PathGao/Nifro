@@ -183,6 +183,8 @@ fixed so that the first release is a thing that exists.
 | **K4** | Nothing is done to reduce what the app costs when nobody is looking at it | Deliberate, for now. See the note under "Power" — the machinery came out because it owned an answer the interaction also owns, and it comes back one piece at a time, each with a measurement first |
 | **K5** | No way to choose the app's language from inside the app | It follows the system. macOS has a per-app setting for this — System Settings → General → Language & Region → Applications — and it works today, but nobody finds it, and a person running their Mac in English who wants Nifro in Chinese has no reason to think the answer is three levels into System Settings. A picker in Settings that writes `AppleLanguages` and offers to relaunch would cost little |
 | **K6** | The wording is right in places and thin in others | Every setting now says what it does, but they were written one at a time and it shows: some explain the mechanism, some explain the consequence, and a few explain both at different lengths. Worth one pass that reads them as a set rather than as twenty separate answers |
+| **K7** | Nothing anywhere handles HDR | Not one line of the app touches it: a page's HDR content is whatever WebKit decides to do with it, and no measurement has been taken of what that is. A wallpaper is the one surface on a Mac that is on screen all day, so getting this wrong is visible all day. It needs a real HDR source and a look at what actually reaches the display before it is worth designing anything |
+| **K8** | A Bilibili entry has a generic icon where a YouTube entry has the video's own cover | YouTube publishes a cover at a fixed address derived from the video id, so it costs nothing. Bilibili's is behind `api.bilibili.com`, which is a network request and a JSON field (`data.pic`) rather than a URL you can build. Worth doing, but it is the first place the app would call a site's API rather than just load a page |
 
 ---
 
@@ -200,9 +202,9 @@ From looking into what [AeroSpace](https://github.com/nikitabobko/AeroSpace) act
 
 | | AeroSpace | Nifro | Reason |
 |---|---|---|---|
-| Signing | A self-signed certificate on the machine | Developer ID / ad-hoc | To Gatekeeper a self-signed certificate is exactly the same as ad-hoc, so it is a wasted step |
+| Signing | A self-signed certificate on the machine | The same, `Nifro Signing` | To Gatekeeper the two are the same, but the identity is not: a stable certificate keeps the app's designated requirement stable, and the security-scoped bookmarks that hold local-file wallpapers are tied to it. Ad-hoc changes identity every build and breaks them |
 | Notarization | Not done | Done once there is an account | Nifro is a sandboxed GUI app, and its users are not in the habit of typing `xattr` the way tiling WM users are |
-| Releasing | A local script plus dragging the zip by hand | A tag triggers Actions | Releasing from a local machine is not reproducible |
+| Releasing | A local script plus dragging the zip by hand | A tag triggers Actions, one dmg per architecture | Releasing from a local machine is not reproducible |
 | cask | A separate tap repository | `Casks/` in this repository, written back by CI | One less repository to maintain |
 | livecheck | None | Yes | Useful later if this goes to the main homebrew-cask repository |
 
@@ -210,7 +212,7 @@ From looking into what [AeroSpace](https://github.com/nikitabobko/AeroSpace) act
 
 The difference for users:
 
-| | Installed with brew | Downloaded zip, double-clicked |
+| | Installed with brew | Downloaded dmg, double-clicked |
 |---|---|---|
 | With an account (notarized) | Nothing | One "downloaded from the internet" confirmation |
 | Without an account (ad-hoc) | Nothing (postflight strips the quarantine attribute) | **Blocked outright**, with only "Move to Trash / Cancel" |
@@ -247,3 +249,4 @@ The original reports, line numbers and all, exist only in git history (they were
 | N3 | Two animation durations, 0.25 / 0.35, that look like duplication | 2 places | One is an opacity transition, the other a content fade-in: **they change for different reasons**. Merging them manufactures coupling |
 | N4 | Narrowing the visibility of `Website.InvertColors` | Tried twice, red twice | The conformance is declared at the top level rather than inside the type's scope, and the stored property that uses it is read from other files |
 | N5 | Narrowing `WallpaperContent` / `RenderingMode` | — | Symbol counting says they only appear in this file, but they are the **types** of two internal properties read across files. Plain counting cannot see that reference edge |
+| N6 | A cross-fade when switching website, instead of the straight swap | 1 place | Both pages would have to be in the window at once, which means a container view and a second answer to what `window.contentView` holds — the exact ambiguity that cost a blank wallpaper before. Two loaded pages can just change places. Revisit only if the straight swap reads as abrupt |
