@@ -4,7 +4,6 @@ description: Whatever NASA is streaming right now, usually the view down from th
 tags: [ambient, live, space]
 backend: live
 audio: muted
-crop: {x: 0, y: 120, width: 1280, height: 720}
 css: |
   #masthead-container, #secondary, #comments, ytd-merch-shelf-renderer { display: none !important; }
 source: >-

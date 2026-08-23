@@ -12,11 +12,12 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	@DecodableDefault.False var allowSelfSignedCertificate
 
 	/**
-	The region of the page to show, in page coordinates with the origin at the top-left. `nil` shows the whole page.
+	Which part of the page fills the wallpaper. `nil` shows the whole page.
 
-	Used to cut away a site's navigation and borders and keep only the part the user wants on the desktop.
+	Used to cut away a site's navigation and borders and keep only the part the user wants, enlarged
+	to fill the screen rather than left as a small rectangle with desktop around it.
 	*/
-	var crop: CGRect?
+	var zoom: Zoom?
 
 	/**
 	Which display to show this website on. `nil` follows the display chosen in Settings.

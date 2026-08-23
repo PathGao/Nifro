@@ -92,7 +92,7 @@ final class AppState: ObservableObject {
 	The overlay the user drags a crop region on, plus the crop that was in place before they started.
 	*/
 	var cropSelectionView: CropSelectionView?
-	var cropSelectionPreviousCrop: CGRect?
+	var cropSelectionPreviousZoom: Zoom?
 
 	/**
 	Which display the crop being framed belongs to, so finishing acts on the scene that started it.

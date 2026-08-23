@@ -1,9 +1,9 @@
 import AppKit
 
 /**
-Runs the "choose a region" mode. Takes over the wallpaper window, lets the user drag, turns what they drew into the website's crop.
+Runs the "choose a region" mode. Takes over the wallpaper window, lets the user drag, turns what they drew into the website's zoom.
 
-Selection always happens against the whole page. If the website is already cropped, the crop comes off for the duration. Otherwise you would be choosing a region of a region, and the numbers coming back would not match the numbers you set.
+Selection always happens against the whole page. If the website is already zoomed, the zoom comes off for the duration. Otherwise you would be choosing a region of a region, and what came back would not match what was framed.
 */
 extension AppState {
 	var isSelectingCrop: Bool { cropSelectionView != nil }
@@ -22,18 +22,18 @@ extension AppState {
 
 		croppingSceneDisplay = scene.display
 
-		cropSelectionPreviousCrop = website.crop
+		cropSelectionPreviousZoom = website.zoom
 
-		if website.crop != nil {
+		if website.zoom != nil {
 			WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
-				$0.crop = nil
+				$0.zoom = nil
 			}
 		}
 
 		// Put the live page back before the overlay goes on. The wallpaper may currently be a frozen
 		// still or a shrunk region, and framing a rectangle against a stale picture would record a
-		// crop of something the page no longer shows.
-		scene.content = .live(crop: nil)
+		// region of something the page no longer shows.
+		scene.content = .live(zoom: nil)
 
 		// The window is normally click-through and behind everything. Neither helps while the user aims a rectangle at it.
 		scene.window.isInteractive = true
@@ -69,27 +69,28 @@ extension AppState {
 			let selection,
 			let website = WebsitesController.shared.current
 		else {
-			// Cancelled: put back whatever crop was there before.
-			restoreCropAfterCancelledSelection()
+			// Cancelled: put back whatever zoom was there before.
+			restoreZoomAfterCancelledSelection()
 			return
 		}
 
-		// View coordinates → screen coordinates → page coordinates.
+		// View coordinates → screen coordinates → page coordinates → a zoom, which is what survives
+		// the website being shown on a display of a different size later.
 		let inWindow = scene.window.contentView?.convert(selection, to: nil) ?? selection
 		let onScreen = scene.window.convertToScreen(inWindow)
-		let page = onScreen.pageFrame(inScreen: screen.pageFrame).integral
+		let page = onScreen.pageFrame(inScreen: screen.pageFrame)
 
 		WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
-			$0.crop = page
+			$0.zoom = Zoom(region: page, inPageOfSize: screen.pageFrame.size)
 		}
 
-		cropSelectionPreviousCrop = nil
+		cropSelectionPreviousZoom = nil
 		installContentView()
 	}
 
-	private func restoreCropAfterCancelledSelection() {
+	private func restoreZoomAfterCancelledSelection() {
 		guard
-			let previous = cropSelectionPreviousCrop,
+			let previous = cropSelectionPreviousZoom,
 			let website = WebsitesController.shared.current
 		else {
 			installContentView()
@@ -97,10 +98,10 @@ extension AppState {
 		}
 
 		WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
-			$0.crop = previous
+			$0.zoom = previous
 		}
 
-		cropSelectionPreviousCrop = nil
+		cropSelectionPreviousZoom = nil
 		installContentView()
 	}
 }

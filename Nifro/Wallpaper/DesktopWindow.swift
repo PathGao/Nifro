@@ -14,9 +14,11 @@ final class DesktopWindow: NSWindow {
 	}
 
 	/**
-	The region of the page being shown, if the current website is cropped.
+	The patch of wallpaper still on show, when the visibility policy has shrunk the window to it.
+
+	`nil` puts the window back to the whole page area.
 	*/
-	var cropRect: CGRect? {
+	var reducedRegion: CGRect? {
 		didSet {
 			setFrame()
 		}
@@ -94,9 +96,9 @@ final class DesktopWindow: NSWindow {
 			return
 		}
 
-		// A cropped website gets a window the size of its crop. Anything larger would keep covering the desktop it was supposed to give back.
-		if let cropRect {
-			setFrame(cropRect.screenFrame(inScreen: screen.pageFrame), display: true)
+		// The window shrinks to whatever is still visible so the rest of the desktop is given back.
+		if let reducedRegion {
+			setFrame(reducedRegion.screenFrame(inScreen: screen.pageFrame), display: true)
 			return
 		}
 

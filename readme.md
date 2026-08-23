@@ -39,9 +39,12 @@ watches what a page actually does for a minute, and if nothing moves it switches
 photographing and closing the page on a schedule instead of keeping a browser open all day. It
 changes its mind again if the page starts moving.
 
-**Cropping.** Show one rectangle of a page and nothing else, framed by dragging over the wallpaper.
-The window shrinks to the cropped region, so the rest of your desktop stays visible and stays
-clickable. That second half is the one CSS cannot do.
+**Zoom into part of a page.** Frame a region by dragging over the wallpaper and it fills the
+screen, with the navigation, borders and margins around it gone. The page still lays out at the full
+size of the screen, so the site does not reflow into something other than what you framed, and the
+region is re-rendered rather than scaled up, so text stays sharp. The frame is locked to the shape of
+your screen, and it is stored as a place and a magnification rather than a rectangle, so the same
+website zoomed the same way works on a second display of a different shape.
 
 **One page per display.** Assign a website to a screen; each screen gets its own.
 
@@ -88,7 +91,7 @@ rather than signing a build by hand: re-signing an app after Xcode has already s
 the signature and drops the sandbox entitlement with it, and an un-sandboxed Nifro reads a
 different preferences file than a real install.
 
-The pure logic behind cropping, occlusion, scheduling, video embedding and the activity classifier
+The pure logic behind zooming, occlusion, scheduling, video embedding and the activity classifier
 has tests that run without an app bundle or a window server:
 
 ```sh
@@ -102,7 +105,7 @@ Nifro/
 ├── App/          entry point, state, events, menus, Shortcuts
 ├── Wallpaper/    the window, the web view, loading, snapshots
 ├── Visibility/   how much to render, and when to stop
-├── Crop/         cropping and the drag-to-frame overlay
+├── Zoom/         zooming, the drag-to-frame overlay and per-website settings
 ├── Sites/        the website model and the curated list
 ├── Screens/      SwiftUI windows and settings
 └── Support/      geometry, scheduling and shared extensions

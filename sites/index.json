@@ -1,7 +1,6 @@
 [
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "The After Dark flying toasters screensaver, rebuilt in pure CSS.",
   "featured": false,
@@ -15,11 +14,11 @@
    "art",
    "ambient"
   ],
-  "url": "https://www.bryanbraun.com/after-dark-css/all/flying-toasters.html"
+  "url": "https://www.bryanbraun.com/after-dark-css/all/flying-toasters.html",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": "#chat-items, .aside-area, .head-info-section { display: none !important; }\n",
   "description": "Bilibili's live directory. Replace the path with a room number to pin one stream.",
   "featured": false,
@@ -32,11 +31,11 @@
    "live",
    "gaming"
   ],
-  "url": "https://live.bilibili.com"
+  "url": "https://live.bilibili.com",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "Bing's daily featured photograph, aspect-filled to the screen.",
   "featured": false,
@@ -49,11 +48,11 @@
    "photo",
    "ambient"
   ],
-  "url": "https://bing-photo-of-the-day.netlify.app"
+  "url": "https://bing-photo-of-the-day.netlify.app",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "Kate Crawford and Vladan Joler's genealogy of technology and power since 1500, as one enormous navigable diagram. A wall map you can read for a year.",
   "featured": true,
@@ -66,11 +65,11 @@
    "art",
    "data"
   ],
-  "url": "https://calculatingempires.net/"
+  "url": "https://calculatingempires.net/",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "Information Is Beautiful's chart of what actually goes into every classic cocktail.",
   "featured": false,
@@ -83,11 +82,11 @@
    "data",
    "art"
   ],
-  "url": "https://informationisbeautiful.net/visualizations/cocktails-interactive/"
+  "url": "https://informationisbeautiful.net/visualizations/cocktails-interactive/",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": ".layout-Player-barrage, .Header, .Aside { display: none !important; }\n",
   "description": "Douyu's live directory. Replace the path with a room number to pin one stream.",
   "featured": false,
@@ -100,11 +99,11 @@
    "live",
    "gaming"
   ],
-  "url": "https://www.douyu.com"
+  "url": "https://www.douyu.com",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": "header, footer, nav, .subscribe-banner { display: none !important; }\n",
   "description": "A wall of live nature cameras. Bears, puffins, reefs, aurora, running around the clock.",
   "featured": false,
@@ -118,11 +117,11 @@
    "nature",
    "live"
   ],
-  "url": "https://explore.org/livecams"
+  "url": "https://explore.org/livecams",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "Linksphotograph's first Faroe Islands episode. Cliffs, turf houses and weather, shot in 4K HDR and 24 minutes long.",
   "featured": true,
@@ -135,11 +134,11 @@
    "nature",
    "ambient"
   ],
-  "url": "https://player.bilibili.com/player.html?bvid=BV1NY411f7rf&autoplay=1&danmaku=0"
+  "url": "https://player.bilibili.com/player.html?bvid=BV1NY411f7rf&autoplay=1&danmaku=0",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "Every aircraft in the air right now, moving across the map. The shape of global traffic, drawn by the traffic.",
   "featured": true,
@@ -153,11 +152,11 @@
    "data",
    "live"
   ],
-  "url": "https://www.flightradar24.com/"
+  "url": "https://www.flightradar24.com/",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "A pixel-art cutaway of an endlessly growing space station floor, drawn one animated scene at a time. Everything on it moves, and none of it needs you.",
   "featured": true,
@@ -170,11 +169,11 @@
    "art",
    "ambient"
   ],
-  "url": "https://floor796.com/"
+  "url": "https://floor796.com/",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "A GitHub user's recent public activity as a card feed. Replace the username in the URL with your own.",
   "featured": false,
@@ -188,11 +187,11 @@
    "personal",
    "data"
   ],
-  "url": "https://gitstalk.netlify.app/sindresorhus"
+  "url": "https://gitstalk.netlify.app/sindresorhus",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": "* {\n  background-color: transparent !important;\n  color: white !important;\n}\n\n.QQYuzf,\n.gboEAb,\nheader.NkK3Fc,\n.Hrn1mc {\n  display: none !important;\n}\n\n[role=\"grid\"] * {\n  border-color: rgba(255, 255, 255, 0.3) !important;\n}\n\n.tNDBE:not(.Wyo4Qe),\n.SGWAac,\n.QIadxc:last-child {\n  border: none !important;\n}\n\n[data-chips-dialog] {\n  background-color: rgba(0 0 0 / 80%) !important;\n}\n",
   "description": "Your week laid over the desktop, with all of Google's chrome stripped away.",
   "featured": false,
@@ -205,11 +204,11 @@
    "calendar",
    "dashboard"
   ],
-  "url": "https://calendar.google.com/"
+  "url": "https://calendar.google.com/",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "What the world is searching for right now, as a self-updating tile wall.",
   "featured": false,
@@ -223,11 +222,11 @@
    "news",
    "dashboard"
   ],
-  "url": "https://trends.google.com/tv/"
+  "url": "https://trends.google.com/tv/",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "A personal life dashboard. steps, sleep, heart rate, time tracking. on one page.",
   "featured": false,
@@ -241,11 +240,11 @@
    "personal",
    "data"
   ],
-  "url": "https://gyrosco.pe/"
+  "url": "https://gyrosco.pe/",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": "body.day, body.night {\n  background-color: transparent;\n  color: white\n}\n\ndiv.screen {\n  margin: 4%;\n  font-size: 100px !important;\n  bottom: 0;\n  top: auto;\n}\n\n#colophon { display: none }\n",
   "description": "A Helvetica word clock that spells out the time in prose.",
   "featured": false,
@@ -257,11 +256,11 @@
   "tags": [
    "clock"
   ],
-  "url": "http://www.helvetictoc.com/"
+  "url": "http://www.helvetictoc.com/",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "A crowdsourced, opinionated map of who actually lives in each part of a city.",
   "featured": false,
@@ -275,11 +274,11 @@
    "data",
    "art"
   ],
-  "url": "https://hoodmaps.com/new-york-city-neighborhood-map"
+  "url": "https://hoodmaps.com/new-york-city-neighborhood-map",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": "#about-button {\n  display: none;\n}\n",
   "description": "An endlessly scrolling low-poly town with cars and trees, seen from above.",
   "featured": false,
@@ -294,11 +293,11 @@
    "3d",
    "screensaver"
   ],
-  "url": "https://demos.littleworkshop.fr/infinitown"
+  "url": "https://demos.littleworkshop.fr/infinitown",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "A translucent jellyfish drifting through dark water.",
   "featured": false,
@@ -313,11 +312,11 @@
    "3d",
    "screensaver"
   ],
-  "url": "https://akirodic.com/p/jellyfish/"
+  "url": "https://akirodic.com/p/jellyfish/",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "Artificial Analysis's ranking of language models by speed, price and quality.",
   "featured": false,
@@ -330,11 +329,11 @@
    "data",
    "dashboard"
   ],
-  "url": "https://huggingface.co/spaces/ArtificialAnalysis/LLM-Performance-Leaderboard"
+  "url": "https://huggingface.co/spaces/ArtificialAnalysis/LLM-Performance-Leaderboard",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "Slow volumetric clouds drifting across a blue sky.",
   "featured": false,
@@ -349,11 +348,11 @@
    "screensaver",
    "3d"
   ],
-  "url": "https://mrdoob.com/lab/javascript/webgl/clouds/"
+  "url": "https://mrdoob.com/lab/javascript/webgl/clouds/",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "A plain monospace clock on a transparent background, so the wallpaper underneath shows through.",
   "featured": false,
@@ -365,11 +364,11 @@
   "tags": [
    "clock"
   ],
-  "url": "https://time.pablopunk.com/?fg=white&bg=transparent&font=SFMono-Regular,Consolas,%27Liberation%20Mono%27,Menlo,monospace"
+  "url": "https://time.pablopunk.com/?fg=white&bg=transparent&font=SFMono-Regular,Consolas,%27Liberation%20Mono%27,Menlo,monospace",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "The latest frame from a Panomax panoramic outdoor webcam, served as a plain image.",
   "featured": false,
@@ -382,11 +381,11 @@
    "photo",
    "ambient"
   ],
-  "url": "https://panodata.panomax.com/cams/879/recent_full.jpg"
+  "url": "https://panodata.panomax.com/cams/879/recent_full.jpg",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "A rotating full-bleed photograph pulled from Pexels.",
   "featured": false,
@@ -399,11 +398,11 @@
    "photo",
    "ambient"
   ],
-  "url": "https://geert.github.io/pexel-wallpaper/"
+  "url": "https://geert.github.io/pexel-wallpaper/",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "A recreation of the clock that opened Polish state television broadcasts.",
   "featured": false,
@@ -416,11 +415,11 @@
    "clock",
    "art"
   ],
-  "url": "https://aresluna.org/polish-tv-clock/"
+  "url": "https://aresluna.org/polish-tv-clock/",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "A random Google Street View panorama from somewhere on Earth, new one on every reload.",
   "featured": false,
@@ -434,11 +433,11 @@
    "map",
    "ambient"
   ],
-  "url": "https://randomstreetview.com/#slideshow"
+  "url": "https://randomstreetview.com/#slideshow",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "Denis Barbas's cinematic short of Svalbard. Slow aerial shots of ice and rock, long enough to live behind your windows.",
   "featured": true,
@@ -451,11 +450,11 @@
    "nature",
    "ambient"
   ],
-  "url": "https://www.youtube.com/embed/AQ79_eDLg4w?autoplay=1&playsinline=1"
+  "url": "https://www.youtube.com/embed/AQ79_eDLg4w?autoplay=1&playsinline=1",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": ".top-nav, .side-nav, .channel-info-content { display: none !important; }\n",
   "description": "Twitch's live directory. Replace the path with a channel name to pin one stream.",
   "featured": false,
@@ -468,11 +467,11 @@
    "live",
    "gaming"
   ],
-  "url": "https://www.twitch.tv/directory"
+  "url": "https://www.twitch.tv/directory",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "A faithful emulation of the 1990s Weather Channel local forecast, US locations only.",
   "featured": false,
@@ -486,11 +485,11 @@
    "ambient",
    "data"
   ],
-  "url": "https://weatherstar.netbymatt.com/?kiosk=true"
+  "url": "https://weatherstar.netbymatt.com/?kiosk=true",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "The WeatherStar 4000+ presentation, rebuilt for locations outside the United States.",
   "featured": false,
@@ -504,11 +503,11 @@
    "ambient",
    "data"
   ],
-  "url": "https://mwood77.github.io/ws4kp-international/?kiosk=true"
+  "url": "https://mwood77.github.io/ws4kp-international/?kiosk=true",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "A large full-screen digital clock with the date.",
   "featured": false,
@@ -520,11 +519,11 @@
   "tags": [
    "clock"
   ],
-  "url": "https://findtreasureisland.github.io/clock/index.html"
+  "url": "https://findtreasureisland.github.io/clock/index.html",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "Coloured fluid that swirls across the screen and reacts to the pointer in browsing mode.",
   "featured": false,
@@ -539,11 +538,11 @@
    "screensaver",
    "3d"
   ],
-  "url": "https://paveldogreat.github.io/WebGL-Fluid-Simulation/"
+  "url": "https://paveldogreat.github.io/WebGL-Fluid-Simulation/",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "Somebody else's window, somewhere else, for a few minutes at a time. Video of a real view with nothing asked of you.",
   "featured": true,
@@ -556,11 +555,11 @@
    "nature",
    "ambient"
   ],
-  "url": "https://www.window-swap.com/"
+  "url": "https://www.window-swap.com/",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "A live weather map. wind, rain, temperature and pressure layers over the whole globe.",
   "featured": true,
@@ -574,11 +573,11 @@
    "map",
    "data"
   ],
-  "url": "https://www.windy.com/"
+  "url": "https://www.windy.com/",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "Conflicts, disasters, markets, shipping, flights and headlines on one wall. The state of the world as a single picture rather than six tabs.",
   "featured": true,
@@ -592,16 +591,11 @@
    "news",
    "map"
   ],
-  "url": "https://worldmonitor.app/"
+  "url": "https://worldmonitor.app/",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": {
-   "height": 720,
-   "width": 1280,
-   "x": 0,
-   "y": 120
-  },
   "css": "#masthead-container, #secondary, #comments { display: none !important; }\n",
   "description": "Kelp forest and jellyfish cameras from the aquarium, streaming through the day.",
   "featured": false,
@@ -615,16 +609,11 @@
    "nature",
    "live"
   ],
-  "url": "https://www.youtube.com/@MontereyBayAquarium/live"
+  "url": "https://www.youtube.com/@MontereyBayAquarium/live",
+  "zoom": null
  },
  {
   "audio": "unmuted",
-  "crop": {
-   "height": 720,
-   "width": 1280,
-   "x": 0,
-   "y": 120
-  },
   "css": "#masthead-container, #secondary, #comments { display: none !important; }\n",
   "description": "The long-running lofi radio stream. The one entry here that is arguably better with sound.",
   "featured": false,
@@ -638,16 +627,11 @@
    "music",
    "live"
   ],
-  "url": "https://www.youtube.com/@LofiGirl/live"
+  "url": "https://www.youtube.com/@LofiGirl/live",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": {
-   "height": 720,
-   "width": 1280,
-   "x": 0,
-   "y": 120
-  },
   "css": "#masthead-container, #secondary, #comments, ytd-merch-shelf-renderer { display: none !important; }\n",
   "description": "Whatever NASA is streaming right now, usually the view down from the Space Station.",
   "featured": false,
@@ -661,11 +645,11 @@
    "live",
    "space"
   ],
-  "url": "https://www.youtube.com/@NASA/live"
+  "url": "https://www.youtube.com/@NASA/live",
+  "zoom": null
  },
  {
   "audio": "muted",
-  "crop": null,
   "css": null,
   "description": "Near-live satellite imagery with a rain-radar overlay and all labels turned off.",
   "featured": false,
@@ -679,6 +663,7 @@
    "map",
    "photo"
   ],
-  "url": "https://zoom.earth/maps/satellite/#view=41.989,12.766,6.23z/beta=mtg/overlays=radar,labels:off,lines:off"
+  "url": "https://zoom.earth/maps/satellite/#view=41.989,12.766,6.23z/beta=mtg/overlays=radar,labels:off,lines:off",
+  "zoom": null
  }
 ]

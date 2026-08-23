@@ -272,7 +272,7 @@ struct AddWebsiteScreen: View {
 			WebsiteInteractionSetting(allowsInteraction: website.allowsInteraction)
 			WebsiteDisplaySetting(display: website.display)
 			WebsiteScheduleSetting(startHour: website.startHour, endHour: website.endHour)
-			CropSetting(crop: website.crop)
+			ZoomSetting(zoom: website.zoom)
 		}
 		Section("Advanced") {
 			Toggle("Allow self-signed certificate", isOn: website.allowSelfSignedCertificate)

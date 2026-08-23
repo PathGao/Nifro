@@ -4,7 +4,6 @@ description: Kelp forest and jellyfish cameras from the aquarium, streaming thro
 tags: [ambient, nature, live]
 backend: live
 audio: muted
-crop: {x: 0, y: 120, width: 1280, height: 720}
 css: |
   #masthead-container, #secondary, #comments { display: none !important; }
 source: >-

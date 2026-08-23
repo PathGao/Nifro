@@ -44,12 +44,12 @@ def swift_optional_string(value) -> str:
     return swift_string(value) if value else "nil"
 
 
-def swift_crop(crop) -> str:
-    if not crop:
+def swift_zoom(zoom) -> str:
+    if not zoom:
         return "nil"
 
     return (
-        "CGRect(x: {x}, y: {y}, width: {width}, height: {height})".format(**crop)
+        "Zoom(center: CGPoint(x: {centerX}, y: {centerY}), scale: {scale})".format(**zoom)
     )
 
 
@@ -67,7 +67,7 @@ def main() -> int:
             "tags": data.get("tags", []),
             "isLive": data.get("backend") == "live",
             "reloadInterval": data.get("reloadInterval"),
-            "crop": data.get("crop"),
+            "zoom": data.get("zoom"),
             "css": data.get("css"),
             "javaScript": data.get("js") or data.get("javaScript"),
             "requiresLogin": bool(data.get("requiresLogin")),
@@ -83,7 +83,7 @@ def main() -> int:
             f"\t\t\ttags: [{', '.join(swift_string(t) for t in data.get('tags', []))}],\n"
             f"\t\t\tisLive: {'true' if data.get('backend') == 'live' else 'false'},\n"
             f"\t\t\treloadInterval: {data.get('reloadInterval') or 'nil'},\n"
-            f"\t\t\tcrop: {swift_crop(data.get('crop'))},\n"
+            f"\t\t\tzoom: {swift_zoom(data.get('zoom'))},\n"
             f"\t\t\tcss: {swift_optional_string(data.get('css'))},\n"
             f"\t\t\tjavaScript: {swift_optional_string(data.get('js') or data.get('javaScript'))},\n"
             f"\t\t\trequiresLogin: {'true' if data.get('requiresLogin') else 'false'},\n"

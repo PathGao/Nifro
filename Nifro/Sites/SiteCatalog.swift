@@ -22,7 +22,7 @@ enum SiteCatalog {
 		let isLive: Bool
 
 		let reloadInterval: Double?
-		let crop: CGRect?
+		let zoom: Zoom?
 		let css: String?
 		let javaScript: String?
 		let requiresLogin: Bool
@@ -92,7 +92,7 @@ extension SiteCatalog.Entry {
 
 		binding.wrappedValue.css = css ?? ""
 		binding.wrappedValue.javaScript = javaScript ?? ""
-		binding.wrappedValue.crop = crop
+		binding.wrappedValue.zoom = zoom
 		binding.wrappedValue.rendering = isLive ? .live : .snapshot
 		binding.wrappedValue.audio = playsSound ? .unmuted : .muted
 

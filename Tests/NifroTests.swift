@@ -402,3 +402,62 @@ struct PageActivityTests {
 		#expect(refreshInterval(forMutationRate: 1.0 / 300) == 600)
 	}
 }
+
+/**
+Which part of a page fills the wallpaper.
+
+The reason this is a centre and a magnification rather than a rectangle is the second display: a
+region framed on one screen has to come out the shape of whichever screen it is shown on. These check
+that it does, and that a region near an edge stays on the page rather than hanging off it.
+*/
+@Suite("Zoom")
+struct ZoomTests {
+	private let page = CGSize(width: 1600, height: 1000)
+
+	@Test("A framed region comes back as the region that was framed")
+	func roundTrip() {
+		let framed = CGRect(x: 400, y: 250, width: 800, height: 500)
+		let zoom = Zoom(region: framed, inPageOfSize: page)
+
+		#expect(zoom.region(inPageOfSize: page) == framed)
+	}
+
+	@Test("The region is always the shape of the page it is asked about")
+	func followsTheDisplay() {
+		// Framed on a 16:10 screen, shown on a 16:9 one.
+		let zoom = Zoom(region: CGRect(x: 400, y: 250, width: 800, height: 500), inPageOfSize: page)
+		let otherPage = CGSize(width: 1920, height: 1080)
+		let region = zoom.region(inPageOfSize: otherPage)
+
+		#expect(abs(region.width / region.height - otherPage.width / otherPage.height) < 0.001)
+		#expect(abs(region.width - otherPage.width / zoom.scale) < 0.001)
+	}
+
+	@Test("A region near an edge is pushed back onto the page")
+	func staysOnThePage() {
+		// A corner on one screen, asked about on a much wider one, wants to hang off two edges.
+		let zoom = Zoom(center: CGPoint(x: 0.02, y: 0.98), scale: 2)
+
+		for size in [page, CGSize(width: 3840, height: 1080), CGSize(width: 1080, height: 1920)] {
+			let region = zoom.region(inPageOfSize: size)
+
+			#expect(region.minX >= 0, "left edge off the page at \(size)")
+			#expect(region.minY >= 0, "top edge off the page at \(size)")
+			#expect(region.maxX <= size.width + 0.001, "right edge off the page at \(size)")
+			#expect(region.maxY <= size.height + 0.001, "bottom edge off the page at \(size)")
+		}
+	}
+
+	@Test("Zooming out below the whole page is not a thing")
+	func neverSmallerThanThePage() {
+		// A page-sized region magnified less than once would be a window with nothing along two edges.
+		let region = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 0.25).region(inPageOfSize: page)
+
+		#expect(region == CGRect(origin: .zero, size: page))
+	}
+
+	@Test("The identity zoom is the whole page")
+	func identityIsEverything() {
+		#expect(Zoom.identity.region(inPageOfSize: page) == CGRect(origin: .zero, size: page))
+	}
+}

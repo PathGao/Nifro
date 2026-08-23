@@ -103,7 +103,7 @@ extension AppState {
 		}
 
 		if WebsitesController.shared.current != nil {
-			menu.addCallbackItem("Choose Crop Region…") { [self] in
+			menu.addCallbackItem("Choose Region…") { [self] in
 				beginCropSelection()
 			}
 			.toolTip = "Drag a rectangle over the wallpaper to keep only that part of the page."

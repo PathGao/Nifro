@@ -1,62 +1,89 @@
 import SwiftUI
 
 /**
-Editor for a website's crop region.
+Editor for which part of a page fills the wallpaper.
 
-Numbers are page pixels measured from the top-left of the page. All four move together as one setting. Cropping is either off or fully specified, so a half-filled crop never reaches the model.
+The numbers are here for adjusting a region, not for choosing one — nobody knows where the part they
+want sits as a percentage. Choosing is done by dragging over the wallpaper, from the menu.
 */
-struct CropSetting: View {
-	@Binding var crop: CGRect?
+struct ZoomSetting: View {
+	@Binding var zoom: Zoom?
 
 	private var isEnabled: Binding<Bool> {
 		.init(
-			get: { crop != nil },
-			set: { crop = $0 ? Self.defaultCrop : nil }
+			get: { zoom != nil },
+			set: { zoom = $0 ? Self.defaultZoom : nil }
 		)
 	}
 
 	/**
-	A starting region small enough that the crop is visibly doing something.
+	A starting region small enough that turning this on visibly does something.
 	*/
-	private static let defaultCrop = CGRect(x: 0, y: 0, width: 600, height: 400)
+	private static let defaultZoom = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 2)
 
 	var body: some View {
-		Toggle("Crop to a region", isOn: isEnabled)
-			.help("Shows only part of the page, cutting away navigation bars, borders and whatever else surrounds it. The window shrinks to the cropped region, so the rest of your desktop stays usable.")
+		Toggle("Zoom into part of the page", isOn: isEnabled)
+			.help("Fills the screen with one part of the page, cutting away navigation bars, borders and whatever else surrounds it. Use “Choose Region…” in the menu to frame it by dragging over the wallpaper.")
 
-		if crop != nil {
+		if zoom != nil {
 			HStack {
-				field("X", value: binding(\.origin.x))
-				field("Y", value: binding(\.origin.y))
-				field("Width", value: binding(\.size.width))
-				field("Height", value: binding(\.size.height))
+				field("Centre X", value: binding(\.center.x), format: .percent)
+				field("Centre Y", value: binding(\.center.y), format: .percent)
+				field("Zoom", value: binding(\.scale), format: .magnification)
 			}
-			.help("Page pixels, measured from the top-left of the page.")
+			.help("The centre is a position on the page, from its top-left corner. The zoom is how many times that part is enlarged.")
 		}
 	}
 
-	private func field(_ label: String, value: Binding<Double>) -> some View {
+	private enum Format {
+		case percent
+		case magnification
+	}
+
+	private func field(_ label: String, value: Binding<Double>, format: Format) -> some View {
 		VStack(alignment: .leading, spacing: 2) {
 			Text(label)
 				.font(.caption)
 				.foregroundStyle(.secondary)
-			TextField(label, value: value, format: .number.precision(.fractionLength(0)))
-				.labelsHidden()
-				.frame(width: 64)
+			switch format {
+			case .percent:
+				TextField(label, value: value, format: .percent.precision(.fractionLength(0)))
+					.labelsHidden()
+					.frame(width: 64)
+			case .magnification:
+				TextField(label, value: value, format: .number.precision(.fractionLength(1)))
+					.labelsHidden()
+					.frame(width: 64)
+			}
 		}
 	}
 
-	private func binding(_ keyPath: WritableKeyPath<CGRect, CGFloat>) -> Binding<Double> {
+	private func binding(_ keyPath: WritableKeyPath<Zoom, CGFloat>) -> Binding<Double> {
 		.init(
-			get: { Double(crop?[keyPath: keyPath] ?? 0) },
+			get: { Double(zoom?[keyPath: keyPath] ?? 0) },
 			set: { newValue in
-				guard var crop else {
+				guard var zoom else {
 					return
 				}
 
-				// A zero or negative extent would produce a window macOS cannot show. The user is mid-typing, not asking for that.
-				crop[keyPath: keyPath] = max(0, CGFloat(newValue))
-				self.crop = crop.standardized
+				zoom[keyPath: keyPath] = CGFloat(min(max(newValue, 0), 1))
+				self.zoom = zoom
+			}
+		)
+	}
+
+	private func binding(_ keyPath: WritableKeyPath<Zoom, Double>) -> Binding<Double> {
+		.init(
+			get: { zoom?[keyPath: keyPath] ?? 1 },
+			set: { newValue in
+				guard var zoom else {
+					return
+				}
+
+				// Below 1 the region is bigger than the page, which is a window full of nothing along
+				// two edges. The user is mid-typing, not asking for that.
+				zoom[keyPath: keyPath] = min(max(newValue, 1), 20)
+				self.zoom = zoom
 			}
 		)
 	}

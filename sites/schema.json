@@ -78,35 +78,6 @@
       "minimum": 1,
       "description": "Seconds between reloads. For snapshot sites this is also the screenshot cadence. Omit if the page refreshes itself."
     },
-    "crop": {
-      "type": "object",
-      "description": "Crop the rendered page to a rectangle, in CSS pixels from the top-left. Use it to cut away nav bars, borders and chrome.",
-      "required": [
-        "x",
-        "y",
-        "width",
-        "height"
-      ],
-      "additionalProperties": false,
-      "properties": {
-        "x": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "y": {
-          "type": "integer",
-          "minimum": 0
-        },
-        "width": {
-          "type": "integer",
-          "minimum": 1
-        },
-        "height": {
-          "type": "integer",
-          "minimum": 1
-        }
-      }
-    },
     "css": {
       "type": "string",
       "description": "Custom CSS injected into the page. Typically hides nav bars and makes the background transparent."
@@ -140,6 +111,36 @@
     "featured": {
       "type": "boolean",
       "description": "Ships with the app and is installed on first launch. Keep this list very short: it is what someone sees before they have chosen anything, and every entry is one they have to delete if they do not want it. Among featured entries the file name decides the order, and the first one is the wallpaper that shows."
+    },
+    "zoom": {
+      "type": "object",
+      "description": "Fill the wallpaper with one part of the page instead of the whole thing. Given as a place and a magnification rather than a rectangle, so the same entry works on any screen shape: each display works out its own rectangle around that place.",
+      "required": [
+        "centerX",
+        "centerY",
+        "scale"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "centerX": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Middle of the region across the page, 0 at the left edge and 1 at the right."
+        },
+        "centerY": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Middle of the region down the page, 0 at the top edge and 1 at the bottom."
+        },
+        "scale": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 20,
+          "description": "How many times that part is enlarged to fill the screen."
+        }
+      }
     }
   }
 }

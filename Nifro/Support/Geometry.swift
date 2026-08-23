@@ -26,12 +26,12 @@ extension CGRect {
 
 	Page coordinates run down from the top and view coordinates run up from the bottom, so the vertical offset is the distance from the bottom of the crop to the bottom of the page.
 	*/
-	func contentFrame(pageSize: CGSize) -> CGRect {
+	func contentFrame(pageSize: CGSize, scale: Double = 1) -> CGRect {
 		CGRect(
-			x: -minX,
-			y: maxY - pageSize.height,
-			width: pageSize.width,
-			height: pageSize.height
+			x: -minX * scale,
+			y: (maxY - pageSize.height) * scale,
+			width: pageSize.width * scale,
+			height: pageSize.height * scale
 		)
 	}
 
@@ -178,4 +178,73 @@ func flippingFromWindowServer(_ rect: CGRect, arrangementHeight: CGFloat) -> CGR
 		width: rect.width,
 		height: rect.height
 	)
+}
+
+/**
+Which part of a page fills the wallpaper.
+
+Stored as a place and a magnification rather than a rectangle, because the same website can be on two
+displays at once and a rectangle only fits the one it was drawn on. A 16:10 rectangle framed on the
+laptop screen, shown on a 16:9 external, either has to be letterboxed or has to show something the
+user did not frame. A centre and a magnification survive the move: each display works out its own
+rectangle, always the shape of that display, always around the same part of the page.
+
+The region is the shape of the display's page area rather than anything the user chose, which is why
+the selection is locked to that shape while it is being drawn. Framing a square and getting a
+widescreen back would be worse than not being allowed to draw the square.
+*/
+struct Zoom: Codable, Hashable, Sendable {
+	/**
+	The middle of the region, as a fraction of the page. Origin at the top-left, so (0.5, 0.5) is the
+	middle of the page.
+	*/
+	var center: CGPoint
+
+	/**
+	How many times the region is enlarged to fill the wallpaper. 1 is the whole page.
+	*/
+	var scale: Double
+
+	/**
+	The whole page, which is what a zoom starts as before anyone drags anything.
+	*/
+	static let identity = Self(center: CGPoint(x: 0.5, y: 0.5), scale: 1)
+
+	/**
+	The region this zoom picks out of a page of `pageSize`, in page coordinates from the top-left.
+
+	Kept inside the page. A centre near an edge, or a page whose shape differs from the one the zoom
+	was drawn on, would otherwise put part of the region past the end of the page and show a band of
+	nothing along that side.
+	*/
+	func region(inPageOfSize pageSize: CGSize) -> CGRect {
+		let scale = max(scale, 1)
+		let size = CGSize(width: pageSize.width / scale, height: pageSize.height / scale)
+
+		return CGRect(
+			x: (center.x * pageSize.width - size.width / 2).clamped(to: 0...(pageSize.width - size.width)),
+			y: (center.y * pageSize.height - size.height / 2).clamped(to: 0...(pageSize.height - size.height)),
+			width: size.width,
+			height: size.height
+		)
+	}
+
+	/**
+	The zoom that picks out `region` of a page of `pageSize`.
+	*/
+	init(region: CGRect, inPageOfSize pageSize: CGSize) {
+		center = CGPoint(x: region.midX / pageSize.width, y: region.midY / pageSize.height)
+		scale = region.width > 0 ? pageSize.width / region.width : 1
+	}
+
+	init(center: CGPoint, scale: Double) {
+		self.center = center
+		self.scale = scale
+	}
+}
+
+extension Comparable {
+	fileprivate func clamped(to range: ClosedRange<Self>) -> Self {
+		min(max(self, range.lowerBound), range.upperBound)
+	}
 }

@@ -152,8 +152,8 @@ NSScreen.visibleFrame 未被覆盖的比例 < 2%  →  判定全遮挡
 
 | | 功能 | 上游 issue | 状态 |
 |---|---|---|---|
-| **F1** | 裁切：选网页的一块显示，规避导航栏和边框 | [#138](https://github.com/sindresorhus/Plash/issues/138) [#162](https://github.com/sindresorhus/Plash/issues/162) [#93](https://github.com/sindresorhus/Plash/issues/93) | ✅ 已实现 |
-| **F2** | 框选 UI：拖一个框存成 crop | #138 原话「可视化选取像素范围」 | ✅ 已实现 |
+| **F1** | 选网页的一块**放大填满屏幕**，规避导航栏和边框 | [#138](https://github.com/sindresorhus/Plash/issues/138) [#162](https://github.com/sindresorhus/Plash/issues/162) [#93](https://github.com/sindresorhus/Plash/issues/93) | ✅ 已实现，语义已改（见下） |
+| **F2** | 框选 UI：拖一个框存成缩放 | #138 原话「可视化选取像素范围」 | ✅ 已实现。框锁定屏幕宽高比 |
 | **F3** | 多显示器 | [#2](https://github.com/sindresorhus/Plash/issues/2)，47 👍 / 36 评论，全表第一需求，2026-08 仍在 bump | ✅ 已实现。**显示器是网站的属性**，不是全局设置 —— 读评论才发现主流诉求是每块屏不同页面 |
 | **F4** | 静态模式 | [#15](https://github.com/sindresorhus/Plash/issues/15) | ✅ 等价于 P5，已实现 |
 | **F5** | 播放列表 | [#4](https://github.com/sindresorhus/Plash/issues/4) | ✅ 已实现。轮播 + 按小时排班；排班永远不会把一块屏清空 |
@@ -169,20 +169,37 @@ NSScreen.visibleFrame 未被覆盖的比例 < 2%  →  判定全遮挡
 | **F15** | 桌面层有限交互（点击 / 鼠标移动），按站点开 | [#50](https://github.com/sindresorhus/Plash/issues/50) [#16](https://github.com/sindresorhus/Plash/issues/16) | ✅ 已实现。按网站开，且与冻结/静止化互斥（会点的页面必须醒着） |
 | **F16** | 内容规则加载入口（cookie 横幅 / 广告），不自维护规则源 | [#37](https://github.com/sindresorhus/Plash/issues/37) | ✅ 已实现。**不自维护规则**，只接受一个别人维护的列表 URL 交给 WebKit |
 
-### F1 必须两侧同时改，这是上游踩的坑
+### F1 语义：不是裁掉周边，是把选中区放大成新的全屏
+
+第一版按上游 issue 的字面做成了「只显示这一块，窗口缩到这一块，周围还桌面」。实际用下来
+要的是另一件事：**选中的区域变成整张壁纸**。
 
 ```
-① 网页侧   clip-path: inset(...)      只裁视觉
-② 窗口侧   window.setFrame(cropRect)  裁掉命中区域
+第一版                          现在
+┌────────────────┐              ┌────────────────┐
+│   桌面          │              │                │
+│   ┌────────┐   │              │   选中区放大    │
+│   │ 选中区 │   │      →       │   填满整屏      │
+│   └────────┘   │              │                │
+│   桌面          │              │                │
+└────────────────┘              └────────────────┘
+窗口缩到选区大小                 窗口还是整屏
 ```
 
-上游只教人写 ①（discussion #139 里 sindresorhus 给的两段 JS），所以 [#162](https://github.com/sindresorhus/Plash/issues/162) 那位用户缩小了 Google 日历之后，**空白区照样挡住桌面、照样吃鼠标事件**。只做视觉不做窗口，等于没做。
+三个随之而来的决定：
 
-顺带：窗口变小 → 合成面积变小，跟 P7 是同一笔收益。
+1. **框锁定屏幕宽高比。** 画出来的东西要变成整张壁纸，别的形状只能靠加黑边或者偷偷多给一些
+   来交付。不让画错形状是这两者的诚实版本。比例按本机去掉菜单栏之后的区域算。
+2. **放大用 `WKWebView.magnification`，不是图层变换。** 变换是把已经画好的像素拉大，字会糊；
+   magnification 让 WebKit 按那个倍率重画一遍。
+3. **存的是「中心 + 倍率」，不是矩形。** 同一个网站可能同时在两块形状不同的屏上。矩形只合它
+   被画出来的那一块屏；中心加倍率则每块屏各自算出自己形状的矩形，围着页面同一个地方。
+   多屏问题就在这里解决，不需要按屏存多份。
 
-还有一层上游没人说破：**CSS 侧永远改不了 `@media` 查询**。用 `:root { width: 420px }` 缩小的页面，窗口还是整屏，所以站点仍然按桌面断点排版，拿不到移动端布局（[#93](https://github.com/sindresorhus/Plash/issues/93)）。只有窗口侧 `setFrame` 真的把窗口缩小，媒体查询才会跟着变。
+页面仍然按整屏布局——站点必须相信自己拿到了整个屏幕，否则会重排，框出来的区域就不是拿到的
+区域了。所以 `clip-path` 一直没用上，鼠标事件被吞的问题也不存在。
 
-**已实现**：`CropView` 原生剪裁 + `DesktopWindow.cropRect` 缩小窗口，页面仍按整屏布局。所以连 `clip-path` 都没用上，而且鼠标事件被吞的问题自动没了。
+窗口缩小这条机制没删，只是换了主人：现在只有遮挡策略（P7）会缩窗口，缩到还露在外面的那一块。
 
 ### R1 场景化 —— F3/F5/P5 共同的前置
 

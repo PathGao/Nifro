@@ -25,7 +25,7 @@ entry's `source` field.
 | `backend` | `snapshot` \| `live` | yes | See below. This is the field that matters most. |
 | `backendNote` | string | no | Why you chose that backend, when it is not obvious. Write one for every `live` entry. |
 | `reloadInterval` | integer | no | Seconds between reloads. For `snapshot` sites this is also how often the screenshot is retaken. Omit if the page refreshes itself. |
-| `crop` | `{x, y, width, height}` | no | Crop the rendered page to a rectangle, in CSS pixels from the top-left. Use it to cut away nav bars, borders and surrounding clutter. |
+| `zoom` | `{centerX, centerY, scale}` | no | Fill the wallpaper with one part of the page. `centerX`/`centerY` are fractions of the page from its top-left; `scale` is how many times that part is enlarged. Given this way rather than as a rectangle so the entry works on any screen shape. |
 | `css` | string | no | Custom CSS injected into the page. Usually hides chrome or makes the background transparent. |
 | `js` | string | no | Custom JavaScript injected after load. |
 | `requiresLogin` | boolean | no | `true` if the site shows nothing useful unless the user is signed in. |
@@ -44,12 +44,12 @@ entry's `source` field.
 site, and say why in `backendNote`. A clock that ticks in seconds is not a reason — drop the seconds
 and reload every 60s instead.
 
-### `crop` vs. `css`
+### `zoom` vs. `css`
 
 Prefer `css` when the site gives you a selector to hide (`header { display: none }`). Reach for
-`crop` when it does not — when the clutter is baked into a canvas, an iframe, or an embed you cannot
+`zoom` when it does not — when the clutter is baked into a canvas, an iframe, or an embed you cannot
 select. Upstream discussed a JS approach for the same problem
-([#139](https://github.com/sindresorhus/Plash/discussions/139)); `crop` exists so you do not have to
+([#139](https://github.com/sindresorhus/Plash/discussions/139)); `zoom` exists so you do not have to
 paste a transform script into every entry.
 
 ## A complete entry

@@ -28,11 +28,11 @@ final class WallpaperScene {
 	/**
 	What the window is showing right now.
 
-	`window.contentView` is one slot and four features want to fill it: the live page, the live page shrunk to the patch still on show, the still held while the wallpaper is covered, and the still the snapshot backend draws from. Each used to write the slot itself and keep a flag beside it, so every writer had to remember to clear the other three flags and pick the matching `cropRect`. Forgetting one shipped a blank wallpaper.
+	`window.contentView` is one slot and four features want to fill it: the live page, the live page shrunk to the patch still on show, the still held while the wallpaper is covered, and the still the snapshot backend draws from. Each used to write the slot itself and keep a flag beside it, so every writer had to remember to clear the other three flags and pick the matching window size. Forgetting one shipped a blank wallpaper.
 
 	One value removes the flags instead of making them easier to clear. There is nothing left to forget because there is nothing left to clear.
 	*/
-	var content = WallpaperContent.live(crop: nil) {
+	var content = WallpaperContent.live(zoom: nil) {
 		didSet {
 			applyContent()
 		}
@@ -138,11 +138,11 @@ final class WallpaperScene {
 	var screen: NSScreen? { window.targetDisplay?.screen ?? .main }
 
 	/**
-	The size the page lays out at, cropped or not.
+	The size the page lays out at, zoomed or not.
 
-	A crop shows one rectangle of a page that still believes it has the whole window. Laying it out at any other size reflows the site, and the region the user framed stops being the region they get. So this is the frame `DesktopWindow` gives an uncropped window: the screen without the menu bar strip, or the whole screen when the wallpaper is set to extend under the menu bar.
+	A zoom magnifies one rectangle of a page that still believes it has the whole window. Laying it out at any other size reflows the site, and the region the user framed stops being the region they get. So this is always the frame `DesktopWindow` gives a window it has not shrunk: the screen without the menu bar strip.
 
-	`renderOnly` used to answer this with `screen.frame.size` while `installContentView` answered with `screen.frameWithoutStatusBar.size`, so the same crop showed different content depending on which path installed it.
+	`renderOnly` used to answer this with `screen.frame.size` while `installContentView` answered with `screen.frameWithoutStatusBar.size`, so the same region showed different content depending on which path installed it.
 	*/
 	var pageLayoutSize: CGSize? { screen?.pageFrame.size }
 
@@ -163,16 +163,16 @@ final class WallpaperScene {
 
 
 	/**
-	Show the live page, cropped when the website asks for one.
+	Show the live page, magnified to a region when the website asks for one.
 	*/
 	func installContentView() {
-		content = .live(crop: website?.crop)
+		content = .live(zoom: website?.zoom)
 	}
 
 	/**
 	Put `content` on screen.
 
-	The only place that assigns `window.contentView` or `window.cropRect` for a wallpaper window, and the only place that installs the menu bar band.
+	The only place that assigns `window.contentView` or `window.reducedRegion` for a wallpaper window, and the only place that installs the menu bar band.
 	*/
 	/**
 	Re-derive the window from the content it already has.
@@ -187,52 +187,50 @@ final class WallpaperScene {
 	private func applyContent() {
 		window.allowsPassiveInteraction = renderingMode == .interactive
 
-		var crop: CGRect?
+		var reduced: CGRect?
 		var view: NSView?
 
 		switch content {
 		case .empty:
 			break
-		case .live(let websiteCrop):
-			(crop, view) = pageView(crop: websiteCrop)
+		case .live(let zoom):
+			view = pageView(zoom: zoom, clip: nil)
 		case .reduced(let region):
-			(crop, view) = pageView(crop: region)
-		case .frozen(let image):
-			view = stillView(image)
-		case .snapshot(let image, let websiteCrop):
-			crop = websiteCrop
+			reduced = region
+			view = pageView(zoom: website?.zoom, clip: region)
+		case .frozen(let image), .snapshot(let image):
 			view = stillView(image)
 		}
 
-		// The crop goes first because it resizes the window, and the content view is laid out against the size it ends up with.
-		window.cropRect = crop
+		// The shrunk region goes first because it resizes the window, and the content view is laid out against the size it ends up with.
+		window.reducedRegion = reduced
 		window.contentView = view
 
 		installMenuBarBandIfNeeded()
 	}
 
 	/**
-	The live web view, wrapped in a crop container when there is a region to show and a page size to lay it out at.
+	The live web view, wrapped when there is something to magnify or cut away and a page size to lay it out against.
 
-	Returns the crop it actually installed, which is nothing when the screen went away and there is no size to lay the page out at.
+	Bare when there is neither, because a page filling the window at its own size is what a wrapper
+	would work out anyway.
 	*/
-	private func pageView(crop: CGRect?) -> (crop: CGRect?, view: NSView) {
+	private func pageView(zoom: Zoom?, clip: CGRect?) -> NSView {
 		let webView = webViewController.webView
 
 		guard
-			let crop,
+			zoom != nil || clip != nil,
 			let pageSize = pageLayoutSize
 		else {
-			return (nil, webView)
+			webView.magnification = 1
+			return webView
 		}
 
-		return (
-			crop,
-			CropView(
-				content: webView,
-				crop: crop,
-				pageSize: pageSize
-			)
+		return PageView(
+			content: webView,
+			zoom: zoom,
+			clip: clip,
+			pageSize: pageSize
 		)
 	}
 
@@ -257,7 +255,7 @@ final class WallpaperScene {
 		pendingLoad?.cancel()
 		pendingWebView = nil
 		webViewController.releaseWebView()
-		content = .live(crop: nil)
+		content = .live(zoom: nil)
 	}
 
 	// MARK: - Loading
@@ -304,7 +302,7 @@ final class WallpaperScene {
 
 		webViewController.loadURL(url)
 
-		// The web view starts hidden so the first frame is not a flash of white. Unhide the web view itself, not whatever view happens to be installed a second from now. By then the visibility policy may have swapped in a still or a crop container, and unhiding that would leave the real web view hidden for the rest of the session. That is a blank wallpaper with no way back.
+		// The web view starts hidden so the first frame is not a flash of white. Unhide the web view itself, not whatever view happens to be installed a second from now. By then the visibility policy may have swapped in a still or a wrapper view, and unhiding that would leave the real web view hidden for the rest of the session. That is a blank wallpaper with no way back.
 		delay(.seconds(1)) { [weak self] in
 			guard let self else {
 				return
@@ -447,7 +445,7 @@ final class WallpaperScene {
 /**
 What a wallpaper window is showing.
 
-Every rectangle here is in page coordinates with the origin at the top-left, the same space `Website.crop` uses.
+Every rectangle here is in page coordinates with the origin at the top-left.
 */
 enum WallpaperContent {
 	/**
@@ -456,9 +454,9 @@ enum WallpaperContent {
 	case empty
 
 	/**
-	The live web view, showing one region of the page when the website asks for a crop.
+	The live web view, magnified to one region of the page when the website asks for it.
 	*/
-	case live(crop: CGRect?)
+	case live(zoom: Zoom?)
 
 	/**
 	The live web view with the window shrunk to the patch of wallpaper still on show.
@@ -473,11 +471,11 @@ enum WallpaperContent {
 	case frozen(NSImage?)
 
 	/**
-	A still from the snapshot backend, cropped the way the live page would have been.
+	A still from the snapshot backend, already showing whatever region the live page would have.
 
 	Separate from `frozen` because there is no live page waiting behind it. It refreshes on the reload timer and the visibility policy leaves it alone.
 	*/
-	case snapshot(NSImage?, crop: CGRect?)
+	case snapshot(NSImage?)
 }
 
 /**
@@ -514,7 +512,7 @@ extension WallpaperScene {
 			return .interactive
 		}
 
-		// While the user is dragging out a crop region the window belongs to them. Anything that
+		// While the user is framing a region the window belongs to them. Anything that
 		// replaces the content view drops the selection overlay, and the occlusion poll runs every
 		// two seconds, so this is not a narrow window to lose.
 		if AppState.shared.isSelectingCrop {
@@ -530,9 +528,7 @@ extension WallpaperScene {
 			Defaults[.freezeWhenCovered],
 			AppState.shared.isEnabled,
 			!AppState.shared.isBrowsingMode,
-			let website,
-			// A website with its own crop already decides what is shown and how big the window is. Two things moving the same window would fight.
-			website.crop == nil
+			website != nil
 		{
 			return .managed
 		}

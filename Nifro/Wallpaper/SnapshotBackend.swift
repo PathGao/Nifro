@@ -48,7 +48,7 @@ extension WallpaperScene {
 			let size = pageLayoutSize ?? CGSize(width: 1920, height: 1080)
 
 			// Puts the page in the window, which is what makes it render at all.
-			content = .live(crop: website?.crop)
+			content = .live(zoom: website?.zoom)
 
 			let webView = webViewController.webView
 
@@ -70,14 +70,19 @@ extension WallpaperScene {
 				return
 			}
 
+			// The region the live page would be showing, photographed at the width it would fill.
+			// Photographing the region at its own width and letting an image view stretch it would
+			// show the magnified page as a blur.
+			let region = (website?.zoom ?? .identity).region(inPageOfSize: size)
 			let configuration = WKSnapshotConfiguration()
-			configuration.rect = website?.crop ?? CGRect(origin: .zero, size: size)
+			configuration.rect = region
+			configuration.snapshotWidth = NSNumber(value: size.width)
 
 			guard let image = try? await webView.takeSnapshot(configuration: configuration) else {
 				return
 			}
 
-			content = .snapshot(image, crop: website?.crop)
+			content = .snapshot(image)
 
 			// The still is on screen now, so the page behind it has nothing left to do. Dropping it
 			// takes the web process with it, which is the point of rendering this way.
