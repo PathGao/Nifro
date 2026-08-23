@@ -182,6 +182,29 @@ This is also the interaction blocks want (L1–L3): placing and sizing a block o
 same two gestures against a different rectangle. Building it once for regions is the reason to do it
 first.
 
+**Which gestures, and why there is no conflict.** The worry is real for a trackpad — how do you pan
+and zoom with the same two fingers — but the answer is that macOS already separates them into two
+different gestures, and Apple already shipped this exact interaction. An aspect-locked crop where the
+frame cannot move is Photos' crop, the iOS photo crop, and every avatar picker: **the frame stays
+still and the content moves underneath it**. Our frame is the screen, so it could not move even if we
+wanted it to. The box we currently drag is the odd one out, not the pan-and-zoom.
+
+| | Pan | Zoom |
+|---|---|---|
+| Trackpad | Two-finger scroll → `scrollWheel(with:)`, `hasPreciseScrollingDeltas == true` | Pinch → `magnify(with:)`. A different gesture, so both can even happen at once |
+| Mouse | Drag, or scroll | Wheel. There is no pinch on a wheel mouse, and zoom is the thing a wheel cannot otherwise reach — the same call Apple Maps and Google Maps make |
+| Keyboard | Arrow keys | `+` / `-` |
+
+`hasPreciseScrollingDeltas` is what tells the two devices apart, so scroll can mean pan on a trackpad
+and zoom on a wheel without asking the user which they have. **Drag always pans, on every device**,
+so somebody who never discovers a gesture can still work the thing.
+
+Two details the overlay has to get right. `webView.allowsMagnification` is on, so a pinch that reaches
+the page zooms the page — the overlay has to swallow `magnify(with:)`, not just `scrollWheel(with:)`.
+And the mode needs to say what it is: a small panel with the current magnification, Return to keep,
+Escape to put back. Zoom should track the pointer rather than the centre of the screen, which is what
+makes it feel like moving a page rather than operating a control.
+
 **The three things that make this harder than it looks**, named now so they are not discovered later:
 
 - **Two things sizing one window.** The visibility policy owns the window's frame today
