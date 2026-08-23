@@ -209,38 +209,6 @@ extension Binding {
 		)
 	}
 }
-extension Binding where Value: CaseIterable & Equatable {
-	/**
-	```
-	enum Priority: String, CaseIterable {
-		case no
-		case low
-		case medium
-		case high
-	}
-
-	// …
-
-	Picker("Priority", selection: $priority.caseIndex) {
-		ForEach(Priority.allCases.indices) { priorityIndex in
-			Text(
-				Priority.allCases[priorityIndex].rawValue.capitalized
-			)
-				.tag(priorityIndex)
-		}
-	}
-	```
-	*/
-	var caseIndex: Binding<Value.AllCases.Index> {
-		.init(
-			get: { Value.allCases.firstIndex(of: wrappedValue)! },
-			set: {
-				wrappedValue = Value.allCases[$0]
-			}
-		)
-	}
-}
-
 // MARK: - BindingCollection
 extension BindingCollection where Base.Element: Identifiable {
 	/**
@@ -762,35 +730,6 @@ private struct EmptyStateTextModifier: ViewModifier {
 	}
 }
 
-// MARK: - EnumPicker
-struct EnumPicker<Enum, Label, Content>: View where Enum: CaseIterable & Equatable, Enum.AllCases.Index: Hashable, Label: View, Content: View {
-	let selection: Binding<Enum>
-	@ViewBuilder let content: (Enum) -> Content
-	@ViewBuilder let label: () -> Label
-
-	var body: some View {
-		Picker(selection: selection.caseIndex) {
-			ForEach(Array(Enum.allCases).indexed(), id: \.0) { index, element in
-				content(element)
-					.tag(index)
-			}
-		} label: {
-			label()
-		}
-	}
-}
-extension EnumPicker where Label == Text {
-	init(
-		_ title: some StringProtocol,
-		selection: Binding<Enum>,
-		@ViewBuilder content: @escaping (Enum) -> Content
-	) {
-		self.selection = selection
-		self.content = content
-		self.label = { Text(title) }
-	}
-}
-
 // MARK: - Error
 extension Error {
 	/**
@@ -1260,18 +1199,6 @@ extension Publisher {
 		map(Result.success)
 			.catch { Just(.failure($0)) }
 			.eraseToAnyPublisher()
-	}
-}
-
-// MARK: - RandomAccessCollection
-extension RandomAccessCollection {
-	/**
-	Returns a sequence with a tuple of both the index and the element.
-
-	- Important: Use this instead of `.enumerated()`. See: https://khanlou.com/2017/03/you-probably-don%27t-want-enumerated/
-	*/
-	func indexed() -> IndexedCollection<Self> {
-		IndexedCollection(base: self)
 	}
 }
 
@@ -3700,38 +3627,5 @@ struct BindingCollection<Base: MutableCollection & RandomAccessCollection>: Rand
 
 	func index(after index: Base.Index) -> Base.Index {
 		base.wrappedValue.index(after: index)
-	}
-}
-/**
-Useful in SwiftUI:
-
-```
-ForEach(persons.indexed(), id: \.1.id) { index, person in
-	// …
-}
-```
-*/
-struct IndexedCollection<Base: RandomAccessCollection>: RandomAccessCollection {
-	typealias Index = Base.Index
-	typealias Element = (index: Index, element: Base.Element)
-
-	let base: Base
-	var startIndex: Index { base.startIndex }
-	var endIndex: Index { base.endIndex }
-
-	func index(after index: Index) -> Index {
-		base.index(after: index)
-	}
-
-	func index(before index: Index) -> Index {
-		base.index(before: index)
-	}
-
-	func index(_ index: Index, offsetBy distance: Int) -> Index {
-		base.index(index, offsetBy: distance)
-	}
-
-	subscript(position: Index) -> Element {
-		(index: position, element: base[position])
 	}
 }

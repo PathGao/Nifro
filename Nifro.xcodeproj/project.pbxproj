@@ -44,6 +44,7 @@
 		FC11C05F76D3F4DD4871E11A /* PageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868FFECC725D3D54F254BEF5 /* PageView.swift */; };
 		66A8D44DC83A0DDD8B0E8BB1 /* WebsiteReport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA31C0FAF40DE6D9B93FFB1 /* WebsiteReport.swift */; };
 		66A8D44DC83A0DDD8B0E8CC1 /* Text.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA31C0FAF40DE6D9B93FFC1 /* Text.swift */; };
+		66A8D44DC83A0DDD8B0E8DD1 /* SettingHelp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA31C0FAF40DE6D9B93FFD1 /* SettingHelp.swift */; };
 		66A8D44DC83A0DDD8B0E89D7 /* OcclusionMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA31C0FAF40DE6D9B9300FD /* OcclusionMonitor.swift */; };
 		66A8D44DC83A0DDD8B0E89E1 /* Coverage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA31C0FAF40DE6D9B9301F1 /* Coverage.swift */; };
 		E3294F7E255783A800D4172F /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = E3294F7D255783A800D4172F /* Defaults */; };
@@ -133,6 +134,7 @@
 		868FFECC725D3D54F254BEF5 /* PageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = PageView.swift; sourceTree = "<group>"; usesTabs = 1; };
 		2BA31C0FAF40DE6D9B93FFB1 /* WebsiteReport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = WebsiteReport.swift; sourceTree = "<group>"; usesTabs = 1; };
 		2BA31C0FAF40DE6D9B93FFC1 /* Text.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Text.swift; sourceTree = "<group>"; usesTabs = 1; };
+		2BA31C0FAF40DE6D9B93FFD1 /* SettingHelp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = SettingHelp.swift; sourceTree = "<group>"; usesTabs = 1; };
 		2BA31C0FAF40DE6D9B9300FD /* OcclusionMonitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = OcclusionMonitor.swift; sourceTree = "<group>"; usesTabs = 1; };
 		2BA31C0FAF40DE6D9B9301F1 /* Coverage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Coverage.swift; sourceTree = "<group>"; usesTabs = 1; };
 		E32AD6A926D2718B0008D900 /* Share Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Share Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -315,6 +317,7 @@
 			isa = PBXGroup;
 			children = (
 				907A9EFAA3D92EE2E782D1EE /* SiteGalleryScreen.swift */,
+				2BA31C0FAF40DE6D9B93FFD1 /* SettingHelp.swift */,
 				A6ECFB57E09E3EAEAFA81C47 /* AboutSettings.swift */,
 				E354442E26062D6300CA060F /* WebsitesScreen.swift */,
 				E32421352384E9D700D28A91 /* AddWebsiteScreen.swift */,
@@ -514,6 +517,7 @@
 				4BA49C1538F7FCF45D0FC315 /* WebsiteSettings.swift in Sources */,
 				FC11C05F76D3F4DD4871E11A /* PageView.swift in Sources */,
 				66A8D44DC83A0DDD8B0E89D7 /* OcclusionMonitor.swift in Sources */,
+				66A8D44DC83A0DDD8B0E8DD1 /* SettingHelp.swift in Sources */,
 				66A8D44DC83A0DDD8B0E8CC1 /* Text.swift in Sources */,
 				66A8D44DC83A0DDD8B0E8BB1 /* WebsiteReport.swift in Sources */,
 				66A8D44DC83A0DDD8B0E89E1 /* Coverage.swift in Sources */,

@@ -281,6 +281,7 @@
       }
     },
     "Browsing mode always uses full opacity.": {
+      "extractionState": "stale",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
@@ -855,6 +856,16 @@
         }
       }
     },
+    "How far back the wallpaper sits. Browsing Mode always uses full opacity, whatever this says, because a page you are about to click should not be half transparent.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "壁纸退到多后面。浏览模式下始终是完全不透明的，不管这里设成多少——一个你正要去点的页面不该是半透明的。"
+          }
+        }
+      }
+    },
     "If a website requires login, you should disable this setting while logging in as the website might require you to navigate to a different page, and you don't want that to open in a browser instead of Nifro.": {
       "localizations": {
         "zh-Hans": {
@@ -1001,6 +1012,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "不用切到浏览模式就能操作网页。代价是窗口不再让点击穿过去，桌面图标会被挡在后面，而且网页必须一直渲染。"
+          }
+        }
+      }
+    },
+    "Loads the page even though its certificate is not one macOS trusts. For a device on your own network — a router, a NAS, a dashboard on a Raspberry Pi — that is normal and this is the switch for it. On a page from the public internet an untrusted certificate means somebody may be reading or altering what you load, so leave it off there.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "即使证书不被 macOS 信任也照样加载。对你自己网络里的设备——路由器、NAS、树莓派上的仪表盘——这很正常，这个开关就是为它准备的。而对来自公网的页面，证书不受信任意味着可能有人在读或改你加载的内容，那里请保持关闭。"
           }
         }
       }

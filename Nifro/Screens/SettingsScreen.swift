@@ -65,8 +65,10 @@ private struct AdvancedSettings: View {
 				ContentRulesSetting()
 				FreezeWhenCoveredSetting()
 				PlaylistIntervalSetting()
-				Defaults.Toggle(String(localized: "Restore scroll position after reload"), key: .restoreScrollPosition)
-					.help("A page that reloads on a timer starts back at the top. This puts it back where it was, which matters for a long page you scrolled to a particular part of.")
+				Defaults.Toggle(key: .restoreScrollPosition) {
+					Text("Restore scroll position after reload")
+						.explained(String(localized: "A page that reloads on a timer starts back at the top. This puts it back where it was, which matters for a long page you scrolled to a particular part of."))
+				}
 				Defaults.Toggle(String(localized: "Reload when the Mac wakes"), key: .reloadOnWake)
 				DimWhenUnfocusedSetting()
 				OpenExternalLinksInBrowserSetting()
@@ -83,11 +85,10 @@ private struct AdvancedSettings: View {
 
 private struct FreezeWhenCoveredSetting: View {
 	var body: some View {
-		Defaults.Toggle(
-			String(localized: "Only render what is on show"),
-			key: .freezeWhenCovered
-		)
-		.help("When other windows cover most of the wallpaper, Nifro shrinks the window to whatever is still visible, such as the strip behind the Dock, and keeps rendering only that. When nothing is visible it holds the last frame. Turn this off to keep drawing the whole page.")
+		Defaults.Toggle(key: .freezeWhenCovered) {
+			Text("Only render what is on show")
+				.explained(String(localized: "When other windows cover most of the wallpaper, Nifro shrinks the window to whatever is still visible, such as the strip behind the Dock, and keeps rendering only that. When nothing is visible it holds the last frame. Turn this off to keep drawing the whole page."))
+	}
 	}
 }
 
@@ -95,8 +96,13 @@ private struct ContentRulesSetting: View {
 	@Default(.contentRulesURL) private var url
 
 	var body: some View {
-		TextField("Content blocking rules", text: $url.withDefaultValue(""), prompt: Text("URL to a rule list"))
-			.help("Points at a WebKit content-blocking rule list somebody else maintains, for hiding cookie banners and ads. Nifro keeps no rules of its own, because blocklists go stale within weeks and keeping one working is a full-time job.")
+		LabeledContent {
+			TextField("", text: $url.withDefaultValue(""), prompt: Text("URL to a rule list"))
+				.labelsHidden()
+		} label: {
+			Text("Content blocking rules")
+				.explained(String(localized: "Points at a WebKit content-blocking rule list somebody else maintains, for hiding cookie banners and ads. Nifro keeps no rules of its own, because blocklists go stale within weeks and keeping one working is a full-time job."))
+		}
 	}
 }
 
@@ -106,8 +112,10 @@ private struct PlaylistIntervalSetting: View {
 	private static let defaultInterval = 60.0 * 30
 
 	var body: some View {
-		Toggle("Rotate between websites every", isOn: $interval.isNotNil(trueSetValue: Self.defaultInterval))
-			.help("Moves to the next website on each display in turn. Websites with hours set are skipped outside them.")
+		Toggle(isOn: $interval.isNotNil(trueSetValue: Self.defaultInterval)) {
+			Text("Rotate between websites every")
+				.explained(String(localized: "Moves to the next website on each display in turn. Websites with hours set are skipped outside them."))
+		}
 
 		if interval != nil {
 			Stepper(
@@ -125,8 +133,10 @@ private struct DimWhenUnfocusedSetting: View {
 	@Default(.dimmedOpacityFactor) private var factor
 
 	var body: some View {
-		Defaults.Toggle(String(localized: "Dim while another app is in front"), key: .dimWhenUnfocused)
-			.help("Fades the wallpaper back while you work elsewhere, and brings it up again when you click the desktop. A page bright enough to enjoy when you look at it is often too loud behind a document you are reading.")
+		Defaults.Toggle(key: .dimWhenUnfocused) {
+			Text("Dim while another app is in front")
+				.explained(String(localized: "Fades the wallpaper back while you work elsewhere, and brings it up again when you click the desktop. A page bright enough to enjoy when you look at it is often too loud behind a document you are reading."))
+		}
 
 		if isEnabled {
 			Slider(
@@ -142,32 +152,29 @@ private struct DimWhenUnfocusedSetting: View {
 
 private struct ShowOnAllSpacesSetting: View {
 	var body: some View {
-		Defaults.Toggle(
-			String(localized: "Show on every Space"),
-			key: .showOnAllSpaces
-		)
-		.help("Spaces are the desktops you switch between in Mission Control, not your displays. Off means the wallpaper stays on whichever Space was in front when Nifro started. Which display a website goes on is set on the website itself, not here.")
+		Defaults.Toggle(key: .showOnAllSpaces) {
+			Text("Show on every Space")
+				.explained(String(localized: "Spaces are the desktops you switch between in Mission Control, not your displays. Off means the wallpaper stays on whichever Space was in front when Nifro started. Which display a website goes on is set on the website itself, not here."))
+	}
 	}
 }
 
 private struct BringBrowsingModeToFrontSetting: View {
 	var body: some View {
 		// TODO: Find a better title for this.
-		Defaults.Toggle(
-			String(localized: "Bring browsing mode to the front"),
-			key: .bringBrowsingModeToFront
-		)
-		.help("Keep the website above all other windows while browsing mode is active.")
+		Defaults.Toggle(key: .bringBrowsingModeToFront) {
+			Text("Bring browsing mode to the front")
+				.explained(String(localized: "Keep the website above all other windows while browsing mode is active."))
+	}
 	}
 }
 
 private struct OpenExternalLinksInBrowserSetting: View {
 	var body: some View {
-		Defaults.Toggle(
-			String(localized: "Open external links in default browser"),
-			key: .openExternalLinksInBrowser
-		)
-		.help("If a website requires login, you should disable this setting while logging in as the website might require you to navigate to a different page, and you don't want that to open in a browser instead of Nifro.")
+		Defaults.Toggle(key: .openExternalLinksInBrowser) {
+			Text("Open external links in default browser")
+				.explained(String(localized: "If a website requires login, you should disable this setting while logging in as the website might require you to navigate to a different page, and you don't want that to open in a browser instead of Nifro."))
+	}
 	}
 }
 
@@ -181,8 +188,8 @@ private struct OpacitySetting: View {
 			step: 0.1
 		) {
 			Text("Opacity")
+				.explained(String(localized: "How far back the wallpaper sits. Browsing Mode always uses full opacity, whatever this says, because a page you are about to click should not be half transparent."))
 		}
-		.help("Browsing mode always uses full opacity.")
 	}
 }
 

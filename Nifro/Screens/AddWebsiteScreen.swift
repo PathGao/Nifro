@@ -221,29 +221,29 @@ struct AddWebsiteScreen: View {
 	@ViewBuilder
 	private var editingView: some View {
 		Section {
-			EnumPicker(String(localized: "Invert colors"), selection: website.invertColors2) {
-				Text($0.title)
+			Picker(selection: website.invertColors2) {
+				ForEach(Website.InvertColors.allCases, id: \.self) {
+					Text($0.title).tag($0)
+				}
+			} label: {
+				Text("Invert colors")
+					.explained(String(localized: "Creates a fake dark mode for websites without a native dark mode by inverting all the colors on the website."))
 			}
-			.help("Creates a fake dark mode for websites without a native dark mode by inverting all the colors on the website.")
-			Toggle("Use print styles", isOn: website.usePrintStyles)
-				.help("Forces the website to use its print styles (“@media print”) if any. Some websites have a simpler presentation for printing, for example, Google Calendar.")
+			Toggle(isOn: website.usePrintStyles) {
+				Text("Use print styles")
+					.explained(String(localized: "Forces the website to use its print styles (“@media print”) if any. Some websites have a simpler presentation for printing, for example, Google Calendar."))
+			}
 			// Its own panel rather than a fold. Both are empty for almost every website, so they should
 			// not be sitting open; and folding them open resizes the dialog, which reads as the window
 			// flinching rather than as something opening.
-			LabeledContent(String(localized: "Custom code")) {
+			LabeledContent {
 				Button(String(localized: "CSS and JavaScript…")) {
 					isCustomCodePresented = true
 				}
+			} label: {
+				Text("Custom code")
+					.explained(String(localized: "Inject your own CSS or JavaScript into this website. Most websites need neither."))
 			}
-			.help("Inject your own CSS or JavaScript into this website. Most websites need neither.")
-
-			LabeledContent(String(localized: "Report a problem")) {
-				Button(String(localized: "Copy Settings")) {
-					NSPasteboard.general.prepareForNewContents()
-					NSPasteboard.general.setString(website.wrappedValue.reportText, forType: .string)
-				}
-			}
-			.help("Copies this website's settings as text, ready to paste into an issue. Nearly every question about a wallpaper is decided by these, and it saves being asked for them one at a time. The address is included; the CSS and JavaScript are reported by size rather than by content, since a stylesheet can carry something private and this gets pasted in public.")
 		}
 		Section {
 			WebsiteAudioSetting(audio: website.audio)
@@ -254,7 +254,22 @@ struct AddWebsiteScreen: View {
 			ZoomSetting(zoom: website.zoom)
 		}
 		Section("Advanced") {
-			Toggle("Allow self-signed certificate", isOn: website.allowSelfSignedCertificate)
+			Toggle(isOn: website.allowSelfSignedCertificate) {
+				Text("Allow self-signed certificate")
+					.explained(String(localized: "Loads the page even though its certificate is not one macOS trusts. For a device on your own network — a router, a NAS, a dashboard on a Raspberry Pi — that is normal and this is the switch for it. On a page from the public internet an untrusted certificate means somebody may be reading or altering what you load, so leave it off there."))
+			}
+
+			// Last, because it copies everything above it. A button that gathers the settings should
+			// come after the settings, not before them.
+			LabeledContent {
+				Button(String(localized: "Copy Settings")) {
+					NSPasteboard.general.prepareForNewContents()
+					NSPasteboard.general.setString(website.wrappedValue.reportText, forType: .string)
+				}
+			} label: {
+				Text("Report a problem")
+					.explained(String(localized: "Copies this website's settings as text, ready to paste into an issue. Nearly every question about a wallpaper is decided by these, and it saves being asked for them one at a time. The address is included; the CSS and JavaScript are reported by size rather than by content, since a stylesheet can carry something private and this gets pasted in public."))
+			}
 		}
 	}
 

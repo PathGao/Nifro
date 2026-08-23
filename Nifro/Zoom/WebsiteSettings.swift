@@ -14,7 +14,7 @@ struct ZoomSetting: View {
 	@Binding var zoom: Zoom?
 
 	var body: some View {
-		LabeledContent(String(localized: "Region")) {
+		LabeledContent {
 			HStack {
 				Text(summary)
 					.foregroundStyle(.secondary)
@@ -24,8 +24,10 @@ struct ZoomSetting: View {
 					}
 				}
 			}
+		} label: {
+			Text("Region")
+				.explained(String(localized: "Choose a region with “Choose Region…” in the Nifro menu: drag a rectangle over the wallpaper and that part fills the screen. The rectangle is locked to the shape of your screen, and it is remembered as a place and a magnification, so the same website works on a second display of a different shape."))
 		}
-		.help("Choose a region with “Choose Region…” in the Nifro menu: drag a rectangle over the wallpaper and that part fills the screen. The rectangle is locked to the shape of your screen, and it is remembered as a place and a magnification, so the same website works on a second display of a different shape.")
 	}
 
 	private var summary: String {
@@ -53,13 +55,15 @@ struct WebsiteDisplaySetting: View {
 
 	var body: some View {
 		if displays.wrappedValue.all.count > 1 {
-			Picker("Show on", selection: $display) {
+			Picker(selection: $display) {
 				Text("Default display").tag(nil as Display?)
 				ForEach(displays.wrappedValue.all) { candidate in
 					Text(candidate.localizedName).tag(candidate as Display?)
 				}
+			} label: {
+				Text("Show on")
+					.explained(String(localized: "Each website can live on its own screen. “Default display” follows the choice in Settings."))
 			}
-			.help("Each website can live on its own screen. “Default display” follows the choice in Settings.")
 		}
 	}
 }
@@ -84,8 +88,10 @@ struct WebsiteScheduleSetting: View {
 	}
 
 	var body: some View {
-		Toggle("Only show at certain hours", isOn: isEnabled)
-			.help("Useful with rotation. A news page in the morning, something calmer at night. A window that runs past midnight, 22 to 6, works.")
+		Toggle(isOn: isEnabled) {
+			Text("Only show at certain hours")
+				.explained(String(localized: "Useful with rotation. A news page in the morning, something calmer at night. A window that runs past midnight, 22 to 6, works."))
+		}
 
 		if startHour != nil, endHour != nil {
 			HStack {
@@ -114,12 +120,14 @@ struct WebsiteRenderingSetting: View {
 	@Binding var rendering: Website.Rendering
 
 	var body: some View {
-		Picker("Rendering", selection: $rendering) {
+		Picker(selection: $rendering) {
 			ForEach(Website.Rendering.allCases, id: \.self) { option in
 				Text(option.title).tag(option)
 			}
+		} label: {
+			Text("Rendering")
+				.explained(rendering.explanation)
 		}
-		.help(rendering.explanation)
 	}
 }
 
@@ -130,8 +138,10 @@ struct WebsiteInteractionSetting: View {
 	@Binding var allowsInteraction: Bool
 
 	var body: some View {
-		Toggle("Clickable on the desktop", isOn: $allowsInteraction)
-			.help("Lets you use the page without switching to Browsing Mode. The window then stops letting clicks through, so your desktop icons sit behind it, and the page has to keep rendering.")
+		Toggle(isOn: $allowsInteraction) {
+			Text("Clickable on the desktop")
+				.explained(String(localized: "Lets you use the page without switching to Browsing Mode. The window then stops letting clicks through, so your desktop icons sit behind it, and the page has to keep rendering."))
+		}
 	}
 }
 
@@ -142,11 +152,13 @@ struct WebsiteAudioSetting: View {
 	@Binding var audio: Website.Audio
 
 	var body: some View {
-		Picker("Audio", selection: $audio) {
+		Picker(selection: $audio) {
 			ForEach(Website.Audio.allCases, id: \.self) { option in
 				Text(option.title).tag(option)
 			}
+		} label: {
+			Text("Audio")
+				.explained(String(localized: "Whether this website may make noise. Remembered for this website, so a clock stays silent and a live stream does not, and it is the same setting as Sound in the Nifro menu — change it in either place. Muting works by holding every audio and video element on the page muted, so it covers media and not sound a page generates with the Web Audio API."))
 		}
-		.help("Whether this website may make noise. Remembered for this website, so a clock stays silent and a live stream does not, and it is the same setting as Sound in the Nifro menu — change it in either place. Muting works by holding every audio and video element on the page muted, so it covers media and not sound a page generates with the Web Audio API.")
 	}
 }
