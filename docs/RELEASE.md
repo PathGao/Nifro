@@ -172,20 +172,74 @@ Where to set them: repo → Settings → Secrets and variables → Actions → N
 ## 4. Releasing a version
 
 ```bash
-# 1. Change the version number (the tag has to match it, or the workflow fails outright)
+# 1. Change the version number. This is the only place it is written; the tag is derived from it.
 vim Config.xcconfig            # MARKETING_VERSION = 0.2.0
 
-# 2. Commit
-git commit -am "0.2.0" && git push
+# 2. Land it on main through a pull request. `main` requires one.
 
-# 3. Tag
-git tag -a v0.2.0 -m "v0.2.0" && git push origin v0.2.0
+# 3. Dry run first, if release.yml has been touched since the last release.
+gh workflow run release.yml --ref main -f dry_run=true
+
+# 4. Release.
+gh workflow run release.yml --ref main
 ```
 
-The workflow covers the rest: build, sign, notarize, package, create the Release, write back
-`Casks/nifro.rb`.
+The workflow covers the rest: build, sign, notarize, package, **create the tag**, create the Release,
+write back `Casks/nifro.rb` as a pull request.
 
-When it fails, start with the `xcodebuild-log` artifact in Actions.
+When it fails, start with the `xcodebuild-logs` artifact in Actions.
+
+### The tag is the last thing, not the first
+
+A tag used to be the trigger. That made pushing one both the request to release and the promise that
+the release happened, and the two are not the same event — the promise landed first, and it landed on
+a ref the `version tags` ruleset forbids moving or deleting.
+
+v0.1.1 spent that promise on a run that died at its last step. The build, the signing and the
+packaging had all passed; a shell syntax error in "Create the GitHub Release" killed it there. The tag
+was already frozen at a tree whose pipeline could not parse, so it could neither be moved onto the fix
+nor deleted, and the release had to be finished with `workflow_dispatch` from a branch. It worked —
+the two commits differed only in `.github/`, so the app is still byte-reproducible from the tag — but
+the tag no longer describes how the thing was made.
+
+So the order is reversed. `gh release create` is given `--target $GITHUB_SHA`, and GitHub creates the
+ref as part of creating the Release, so **the tag exists only once everything before it has passed**.
+A failed run leaves nothing behind: no tag, no Release, no spent version number. Fix the cause and
+dispatch again with the same number.
+
+What that buys, stated plainly: immutability stops being a constraint to work around. Every `v*` tag
+in this repository names a tree that shipped.
+
+The workflow refuses a version whose tag already exists, before it builds anything. If you see that,
+`MARKETING_VERSION` was not bumped.
+
+### The dry run
+
+`-f dry_run=true` runs the whole pipeline — both architectures built, signed, notarized where that
+applies, packaged, checksummed — and stops before the tag. The disk images come out as a
+`dry-run-disk-images` artifact.
+
+Worth doing whenever `release.yml` itself has changed. A `run:` block's shell is only parsed when the
+step runs, and nothing but a release runs this workflow, so an error in it sits behind every green CI
+run until a release finds it. CI now feeds every workflow's `run:` blocks to `bash -n`, which catches
+that class; the rest of the pipeline still only proves itself by running.
+
+### What the Release page ends up saying
+
+`--notes-file` writes a fixed skeleton — the first-launch instructions, the two install lines, the two
+checksums — and `--generate-notes` appends the titles of the pull requests merged since the last tag.
+**So the pull request titles are the entire changelog**, which makes a release pull request titled
+after its version number produce a release page whose only content is that version number. Title it
+after what it does.
+
+The skeleton is a starting point either way. Both releases so far were rewritten afterwards with
+
+```bash
+gh release edit v0.1.1 --notes-file notes.md
+```
+
+grouped by what a person would notice rather than by commit. It replaces the whole body, so the
+install and checksum blocks have to be carried into the new file by hand.
 
 ---
 
