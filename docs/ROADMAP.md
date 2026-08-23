@@ -238,6 +238,20 @@ of the answer.
 
 | **M6** | Keep the page instead of remembering it | **Complete within one run of the app, and nothing beyond it.** A page that is never torn down loses nothing — position, magnification, scroll, login, animation state, whatever the site keeps and wherever it keeps it. But it is memory, so quitting, a restart, or disabling ends it as surely as a reload does. It answers "switch away and come back", which is the case people hit hourly, and it answers K3 with it, since switching back is not a page load. It does not answer "open the Mac tomorrow". One more WebContent process for as long as a page is kept, which is why it should be a per-website switch rather than a policy |
 
+**Where this stands: nothing more for now.** M2 shipped, so position comes back and floor796's own
+magnification does not. The two ways past that are both real and neither is urgent, so they are
+written down rather than started:
+
+| | | Buys | Costs |
+|---|---|---|---|
+| **A** | Leave it | — | Position comes back, magnification never does |
+| **B** | M6, as a per-website switch | Everything survives a switch, and switching back becomes instant (K3) | One WebContent process while a page is kept; gone at quit |
+| **C** | `pageWorld: true` on a site entry | The site's own magnification survives a restart | That entry loses its isolation, and it depends on floor796's private fields, so a redesign there breaks it |
+
+B and C do not conflict. B is the better first move if either is taken: it depends on no website's
+internals, it helps every site rather than one, and it closes K3 on the way. C buys a narrower thing
+with a more fragile hook.
+
 **The one route that survives a restart, and what it costs.** Custom per-site JavaScript is injected
 into `.world(name: UUID())`, an isolated world, so it cannot see `window.floor796` or any other page
 global — which is why a site entry cannot read the zoom, let alone put it back. Injecting into the
