@@ -116,6 +116,15 @@ Small and focused beats large and complete. If you find a second problem while
 fixing the first, mention it in the description or open an issue — a pull
 request that does one thing gets reviewed; one that does four gets postponed.
 
+**Write commit messages, pull requests and issues in English.** Not because
+English is better, but because it is the one language everyone reading this
+repository has in common, and a commit message is read by whoever runs
+`git blame` on the line they are about to change — years later, by someone the
+author will never meet. The message is where the reasoning lives; a reader who
+cannot read it gets the diff and nothing else.
+
+Say why, not what. The diff already says what changed.
+
 ## Relationship to Plash
 
 Nifro is an independent fork of [Plash](https://github.com/sindresorhus/Plash)

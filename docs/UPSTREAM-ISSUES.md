@@ -109,7 +109,7 @@ The mechanism: `createCSSInjectScript` at `Utilities.swift:1626` attaches a `<st
 
 Note that the `SyntaxError: Can't create duplicate variable: 'style'` jiexiangfan reports in #173 **does not apply to us** — that is a regression in upstream 2.17.0, and the injection script on our baseline is wrapped in an IIFE (`Utilities.swift:1631`). That part is already OBSOLETE for us; do not follow it.
 
-Cost S–M. High return: custom CSS is a core way this app gets used, and section 4 of ROADMAP keeps both class names specifically for five years of community Plash CSS snippets. If injection itself is broken, that compatibility decision buys nothing.
+Cost S–M. High return: custom CSS is a core way this app gets used, and the app injects both `is-nifro-app` and `is-plash-app` specifically so five years of community Plash CSS snippets keep working. If injection itself is broken, that compatibility decision buys nothing.
 
 ### F11 user agent policy — #169
 
@@ -135,7 +135,7 @@ Cost S–M. Return: three issues, and the complaint in #127 is fatal for anyone 
 
 ### F1 / F2 cropping — #162 #93
 
-Both issues are direct evidence for the claim in section 6 of ROADMAP. Nothing left to argue, only to record:
+Both issues are direct evidence for the claim in ROADMAP's “The core judgement”. Nothing left to argue, only to record:
 
 - #162: the user shrank Google Calendar with the CSS the author gave in discussion #139, and "the blank space on the right still covers the desktop" — doing the page side without the window side is the same as not doing it.
 - #93: the user wants the page as a sidebar, and points out that changing `:root { width }` in CSS changes the container and not the window, so `@media` queries do not move and what he gets is still the desktop layout. **This is the part the CSS side can never solve**; only actually shrinking the window with `window.setFrame` does it. Two comments backing it.
@@ -146,7 +146,7 @@ Both issues are direct evidence for the claim in section 6 of ROADMAP. Nothing l
 
 The author opened this one himself in 2020, and the plan matches Backend A in ROADMAP word for word: load → screenshot → show the screenshot as the desktop → update on the reload interval. In the comments firrae asks whether taking screenshots costs more CPU, and the author answers that a shot is only taken on an interval tick, at most once a second and usually once a minute, so it costs less. Someone in the naming discussion proposed **Snapshot**.
 
-For us: this maps straight onto P5 / F4. The direction needs no further discussion, and the implementation path is in section 2 of ROADMAP. Cost L.
+For us: this maps straight onto P5 / F4. The direction needs no further discussion, and the implementation path is in ROADMAP's “The fix: two backends”. Cost L.
 
 ### F8 display selection in the main menu — #195
 
@@ -183,11 +183,11 @@ The reporter of #196 came back two days later to say that once he had played it 
 
 | # | Why not now |
 |---|---|
-| **#2 multi-display** | The most-requested item in the table: 47 👍, 36 comments, six years of people bumping it (the latest 2026-08-13). For five years the answer was a way around it — run several copies of Plash with different bundle ids — and the community ended up writing a `plash-cloner` script to clone the app. **But it depends on R1, the move to scenes**, and cannot be done while `AppState` is still a singleton with one window and one web view. In the order set out in section 11 of ROADMAP it is the first thing after R1, and it is our largest difference from upstream. Extra information in the comments: most people want **a different URL per screen** (ianiv's comment, +25), not the same page spread across all of them. |
+| **#2 multi-display** | The most-requested item in the table: 47 👍, 36 comments, six years of people bumping it (the latest 2026-08-13). For five years the answer was a way around it — run several copies of Plash with different bundle ids — and the community ended up writing a `plash-cloner` script to clone the app. **But it depends on R1, the move to scenes**, and cannot be done while `AppState` is still a singleton with one window and one web view. It is the first thing after R1, and it is our largest difference from upstream. Extra information in the comments: most people want **a different URL per screen** (ianiv's comment, +25), not the same page spread across all of them. |
 | **#4 playlist** | Needs R1 as well. The comments add a request the issue body does not state: scheduling by time of day (GitHub activity in the morning, something else at night). The author's 2021 answer was that Plash is scriptable and you can rotate it from bash yourself — we have App Intents, so the same answer works for us in the short term. |
-| **#182 the Mission Control gesture gives it away** | Section 2 of ROADMAP already names it. It follows directly from "it is not a real wallpaper", only P6/A2 solves it properly, and P6 is blocked on S1. Before A2, any `collectionBehavior` patch is guesswork. |
+| **#182 the Mission Control gesture gives it away** | ROADMAP's “Assumption two: it is not a real wallpaper” already names it. It follows directly from "it is not a real wallpaper", only P6/A2 solves it properly, and P6 is blocked on S1. Before A2, any `collectionBehavior` patch is guesswork. |
 | **#177 dim / desaturate when unfocused** | The idea is right, and macOS does the same thing to its own desktop widgets. The implementation is a twenty-line rider on P1: `OcclusionMonitor` already listens for app-activation and space-switch notifications, so once "the desktop is not the active focus" is known, set `alphaValue` and inject a `filter: grayscale(1)` rule. **Do P1 first; do not build a second detection path just for this.** |
-| **#193 backdrop-filter freezes** | See section 5. It is WebKit's own render throttling, not our code. It needs reproducing on our baseline first (the reporter gave a complete about:blank repro script), to confirm whether it is the other side of P4's snapshot-layer swap. No cost estimate before that. |
+| **#193 backdrop-filter freezes** | See “Issues that are really performance issues” below. It is WebKit's own render throttling, not our code. It needs reproducing on our baseline first (the reporter gave a complete about:blank repro script), to confirm whether it is the other side of P4's snapshot-layer swap. No cost estimate before that. |
 | **#183 URL scheme opens an app** | The closest thing in the table to a request we will not take, without crossing the line. A wallpaper page that can launch local apps is a clear attack surface, but the reporter proposed the right design himself: off by default, an allowlist, and a confirmation the first time; he also changed one line locally to check that it does not break the sandbox. It only affects people who turn the switch on. The return is small (1 👍), so it sits behind every S item. **If it is built, off by default is a hard requirement.** |
 | **#158 geolocation** | The author opened this one himself, and judged it himself: it would have to be implemented by hand, he does not plan to, and he hopes Apple supports it natively (it did not after WWDC24). The workable path is injecting a `navigator.geolocation` shim into the `.page` world, backed by CoreLocation. **But that means giving location permission to a process that renders arbitrary user URLs around the clock**, which is the same argument as #125, differing only in a one-off coarse location versus a live video stream. If it is built it has to be off by default with per-site permission. One person backing it. |
 | **#164 links navigating in place** | Needs more information. The request was written in 2024 (2.x), and in the current code `target=_blank` only opens a new window in browsing mode (`createWebViewWith` loads in place when `targetFrame == nil`), and back and forward gestures are already on (`allowsBackForwardNavigationGestures = true`). **The missing information**: whether what he hit was a window opening or something else. Either wait for a repro, or build it as a setting for "always navigate within the same view" (S). |
@@ -220,10 +220,10 @@ The same argument applies to #158 (location), but that one stays in LATER: a one
 
 | # | Why it is void |
 |---|---|
-| **#196 video autoplay** | The reporter's own conclusion two days later: play it once by hand and autoplay works from then on (WebKit's per-site autoplay quota), and the author could not reproduce it. The issue is a misunderstanding. The only thing to watch is that P2 does not turn it into a real bug; see the end of section 2. |
+| **#196 video autoplay** | The reporter's own conclusion two days later: play it once by hand and autoplay works from then on (WebKit's per-site autoplay quota), and the author could not reproduce it. The issue is a misunderstanding. The only thing to watch is that P2 does not turn it into a real bug; see the end of “DO” above. |
 | **#88 Alfred listing the configured websites** | The author's 2021 plan was to wait for Shortcuts for Mac and return the website list through App Intents. **Our baseline already has it**: `WebsiteAppEntity` in `Intents.swift` comes with an `EnumerableEntityQuery`, paired with `SetCurrentWebsiteIntent`, so Alfred and Shortcuts can list them and switch today. No deeplink needs building. |
 | **#76 more image wallpaper sources** | Upstream's approach was to invite people to each fork his `plash-bing-photo-of-the-day` repository. Our equivalent is the finished **C3 (the sites/ list, a schema and a way to submit)** and the pending **F6 (an in-app gallery)**, which is a better direction: one central list with one-click adding, rather than N scattered repositories. Void as an issue; as a request it has been absorbed into C3/F6. |
-| **#5 App Store copy** | We are not going on the Mac App Store (section 1 of ROADMAP), and E12 already removed every store link and the rating prompt. |
+| **#5 App Store copy** | We are not going on the Mac App Store (see ROADMAP, “What this is”), and E12 already removed every store link and the rating prompt. |
 
 ---
 
@@ -268,7 +268,7 @@ What the user sees                What is really going on                      O
 
 ## 7. New entries suggested for ROADMAP (ready to paste)
 
-### To add to the table in section 6, "Features (F series)"
+### Ready to paste into ROADMAP, as features
 
 | | Feature | Upstream issue | Status |
 |---|---|---|---|
@@ -293,13 +293,13 @@ What the user sees                What is really going on                      O
 | **P4** | Add a line: the snapshot-layer swap degrades pages that live on CSS animation and filters, so it has to be switchable off per site; the body of [#193](https://github.com/sindresorhus/Plash/issues/193) is a ready-made regression case | #193 |
 | **P2** | Add an acceptance check: video has to carry on playing by itself once the wallpaper is visible again | [#196](https://github.com/sindresorhus/Plash/issues/196) |
 
-### To add to section 7, "Engineering (E series)"
+### Ready to paste into ROADMAP, as engineering work
 
 | | Item | Status |
 |---|---|---|
 | **E15** | First-run welcome: the current copy still says "droplet icon" and still explains upstream's multi-display limits; both are wrong | To do, S. [#7](https://github.com/sindresorhus/Plash/issues/7) |
 
-### To add to section 10, "Explicitly not doing"
+### Ready to paste into ROADMAP, as things not to do
 
 | | Proposal | Why it is declined |
 |---|---|---|

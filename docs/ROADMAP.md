@@ -82,7 +82,56 @@ Upstream stops for three reasons only: manually disabled, screen locked, on batt
 
 ---
 
-## 5. Engineering (the E series)
+## 5. Regions: more than one page on a screen (the L series)
+
+Today a website gets a display. The next thing worth having is a website getting *part* of one, so a
+screen can hold several — left and right, or a full-height page on the left with two stacked on the
+right.
+
+Not free placement. Anything can go anywhere is a layout editor, and a layout editor is a bigger
+project than this whole app: drag handles, collision, z-order, snapping, persistence per display
+size, and a settings screen nobody can hold in their head. What is proposed instead is a small set of
+splits, chosen from a menu, each region behaving exactly like a display does now.
+
+```
+one              left / right        left, and right split
+┌───────────┐    ┌─────┬─────┐       ┌─────┬─────┐
+│           │    │     │     │       │     │  B  │
+│     A     │    │  A  │  B  │       │  A  ├─────┤
+│           │    │     │     │       │     │  C  │
+└───────────┘    └─────┴─────┘       └─────┴─────┘
+```
+
+**Why this is worth doing.** Combined with zooming, a region turns a website into a desktop tile. The
+case that makes it concrete: the number people actually want on their desktop — how much of this
+month's Codex or Claude usage is gone — exists only as a figure on a web page. There is no widget for
+it and there will not be one. Zoom to the figure, put it in a corner region, and the rest of the
+screen carries something else. That is a class of thing, not one example: a build dashboard, a
+deployment status, a countdown, a single number from a page nobody will ever ship an app for.
+
+| | Item | Status | Notes |
+|---|---|---|---|
+| **L1** | A website occupies a region of a display rather than the whole display | To do | The model change: `WallpaperScene` is keyed by `Display`, and a region means several per display. `Display` stops being the key |
+| **L2** | A fixed set of splits, offered in the menu | To do | Halves, thirds, and one-plus-two-stacked. Fixed fractions, so the same choice survives a different display size the way `Zoom` does |
+| **L3** | Which region takes a click | To do | Browsing Mode and hold-to-interact currently mean "the wallpaper". With regions they have to mean one of them |
+
+**The three things that make this harder than it looks**, named now so they are not discovered later:
+
+- **Two things sizing one window.** The occlusion policy owns the window's frame today
+  (`DesktopWindow.reducedRegion`). A region owns it too. That is the same collision that made cropping
+  and the visibility policy fight until cropping stopped moving the window at all — so a region has to
+  be the window's *base* frame, with occlusion shrinking inside it, never the other way round.
+- **One web process per region.** Three regions is three `WKWebView`s and three web processes. The
+  whole P series exists to avoid paying for rendering nobody is looking at, and this multiplies the
+  bill. It makes the snapshot backend more important, not less: a tile showing one number is the
+  clearest case in the app for photographing a page instead of running it.
+- **Regions are not a layout the user drew.** They are fractions of a display. Storing them as
+  fractions, like `Zoom` stores a centre and a magnification, is what keeps a two-region setup
+  working when the display changes or the laptop is unplugged from the monitor.
+
+---
+
+## 6. Engineering (the E series)
 
 | | Item | Status |
 |---|---|---|
@@ -90,7 +139,7 @@ Upstream stops for three reasons only: manually disabled, screen locked, on batt
 
 ---
 
-## 6. Signing and distribution
+## 7. Signing and distribution
 
 From looking into what [AeroSpace](https://github.com/nikitabobko/AeroSpace) actually does:
 
@@ -115,7 +164,7 @@ So while there is no account, the README's install section has to put brew first
 
 ---
 
-## 7. Explicitly not doing (do not raise again)
+## 8. Explicitly not doing (do not raise again)
 
 | | Proposal | Why it was turned down |
 |---|---|---|
@@ -128,7 +177,7 @@ So while there is no account, the README's install section has to put brew first
 
 ---
 
-## 8. Reviewed and deliberately left alone (with the data)
+## 9. Reviewed and deliberately left alone (with the data)
 
 The conclusions left behind by two rounds of machine review (the tidy gate, the duplication scan). **What was ruled out is easier to lose than what was built**, so this section matters as much as the work itself: it stops someone raising the same thing next round.
 The original reports, line numbers and all, exist only in git history (they were `docs/TIDY-REPORT.md` and `docs/DUPLICATION-REPORT.md`, deleted when this section was written), and the line numbers have gone stale from later refactoring, so do not change code against them.

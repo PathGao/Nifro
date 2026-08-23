@@ -130,6 +130,10 @@ Nifro/
 先看 [CONTRIBUTING.md](CONTRIBUTING.md)。最省力又最有用的贡献是加一条站点。如果你有一个当壁纸
 很好看的页面，那对这个项目的价值超过大部分代码。
 
+提交信息、PR 和 issue 请用英文——不是因为英文更好，而是因为它是所有读这个仓库的人唯一共有的
+语言。commit 信息是别人 `git blame` 到某一行时读到的东西，理由都写在那里；读不懂它的人就只剩
+一个 diff。
+
 ## 许可
 
 MIT，见 [license](license)。衍生自 [sindresorhus/Plash](https://github.com/sindresorhus/Plash)

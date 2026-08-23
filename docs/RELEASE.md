@@ -127,7 +127,7 @@ Where to set them: repo → Settings → Secrets and variables → Actions → N
   ```
 
   Then back `~/nifro-release.p12` up somewhere you will still find it in a year (see "Losing the
-  certificate means changing identity" in section 1). Do **not** keep this file in the repository.
+  certificate means changing identity”, above). Do **not** keep this file in the repository.
 
 **The following are only for after a paid account is bought. Skip them for now:**
 
