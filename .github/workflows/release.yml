@@ -342,12 +342,29 @@ jobs:
           git commit -m "cask: bump to $version" -- Casks/nifro.rb
           git push origin "$branch"
 
-          gh pr create \
+          body="$(printf '%s\n\n%s\n\n```\narm64   %s\nx86_64  %s\n```\n' \
+            "Written by the release workflow for [$tag]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$tag)." \
+            "Check the two checksums against the release assets before merging — a cask with the wrong ones installs nothing and looks like it worked." \
+            "$sha_arm" "$sha_intel")"
+
+          # Opening the pull request needs "Allow GitHub Actions to create and approve pull requests"
+          # in the repository's Actions settings, which is off by default and is a setting a fork
+          # cannot be assumed to have. The branch is already pushed either way, so when the API says
+          # no, say where to click instead of leaving a branch nobody knows about.
+          if ! gh pr create \
             --repo "$GITHUB_REPOSITORY" \
             --base main \
             --head "$branch" \
             --title "cask: bump to $version" \
-            --body "$(printf '%s\n\n%s\n\n```\narm64   %s\nx86_64  %s\n```\n' \
-              "Written by the release workflow for [$tag]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$tag)." \
-              "Check the two checksums against the release assets before merging — a cask with the wrong ones installs nothing and looks like it worked." \
-              "$sha_arm" "$sha_intel")"
+            --body "$body"
+          then
+            url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/compare/main...$branch?expand=1"
+            echo "::warning::could not open the pull request automatically. The branch is pushed; open it here: $url"
+            {
+              echo "### Cask bump needs a pull request"
+              echo
+              echo "\`$branch\` is pushed. Open it: $url"
+              echo
+              echo "To have this opened automatically, turn on Settings → Actions → General → Workflow permissions → **Allow GitHub Actions to create and approve pull requests**."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
