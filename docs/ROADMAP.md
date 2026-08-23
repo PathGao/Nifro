@@ -308,6 +308,38 @@ display attached rather than work to schedule.
 
 ---
 
+## 5.7 The site catalogue: nobody has reviewed it (the S series)
+
+Three lists, one pipeline, and a maintainer who has not looked at any of it. What is actually there
+today:
+
+```
+sites/CANDIDATES.md      119 links, of which 111 have never been made to work
+      ↓  somebody works out the settings and checks they hold
+sites/*.yml               38 entries, schema-checked, offered in the app's Site Gallery
+      ↓  picked as one of the few worth shipping
+featured: true             8 entries, installed on first launch
+```
+
+The pipeline is right and the numbers are the problem. Every one of the 38 was written by an agent
+from a link and a guess, and the 8 that install themselves on a stranger's first launch are the first
+impression of the whole app.
+
+| | Item | Status | Notes |
+|---|---|---|---|
+| **S1** | The maintainer reviews the 8 featured | To do. **This one first** | They are what a new user sees before deciding whether the app is any good. Eight pages is an evening, and it is the highest-value hour in this section |
+| **S2** | The maintainer reviews the other 30 | To do | Lower stakes — somebody has to go looking for these — but they carry the same claim, that the settings on them are right |
+| **S3** | 111 candidates have never been graduated | To do, forever | Not a backlog to burn down. A link is cheap and an entry is work, so the pool being larger than the catalogue is the normal state, not a debt |
+| **S4** | Which of the three lists is the source of truth for a reader | Unclear, and that is the "complicated" part | `CANDIDATES.md` is a pool, `sites/*.yml` is the catalogue, `NOT-INCLUDED.md` is the refusals, and the README's nav points at the directory rather than at any of them. A reader landing on `sites/` sees the contributor guide first and has to work out which of its neighbours is the list of what the app actually offers |
+
+**What would simplify S4 without another file.** The Site Gallery in the app already shows exactly the
+38, with their settings, filterable by tag — it is the readable list, and it is in the one place where
+picking something has an effect. So the repository does not need a fourth rendering of the same data;
+it needs the two markdown files to say plainly what they are for and to stop reading like alternatives
+to the app.
+
+---
+
 ## 6. Known and not yet fixed (the K series)
 
 Reported while using the app, reproduced, and left alone for now. Each is written down rather than
