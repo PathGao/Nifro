@@ -76,7 +76,7 @@
     "reloadInterval": {
       "type": "integer",
       "minimum": 1,
-      "description": "Seconds between reloads. For snapshot sites this is also the screenshot cadence. Omit if the page refreshes itself."
+      "description": "Seconds between reloads of the live page. Omit unless a reload is the only way the page shows anything new — a clock keeps its own time, and a drawing has nothing to show."
     },
     "css": {
       "type": "string",

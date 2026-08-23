@@ -9,6 +9,5 @@ backendNote: >-
   It is a drawing. It never changes, nothing on it animates, and it will say the same thing next
   week — so it is rendered once and kept as an image rather than held open in a browser. This is
   the case the automatic still detection exists for.
-reloadInterval: 86400
 source: The maintainer's own shortlist.
 featured: true

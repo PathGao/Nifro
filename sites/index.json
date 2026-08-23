@@ -55,7 +55,7 @@
   "featured": true,
   "javaScript": null,
   "name": "Calculating Empires",
-  "reloadInterval": 86400,
+  "reloadInterval": null,
   "requiresLogin": false,
   "tags": [
    "art",
@@ -71,7 +71,7 @@
   "featured": false,
   "javaScript": null,
   "name": "Cocktail Chart",
-  "reloadInterval": 86400,
+  "reloadInterval": null,
   "requiresLogin": false,
   "tags": [
    "data",
@@ -236,7 +236,7 @@
   "featured": false,
   "javaScript": null,
   "name": "Helvetictoc",
-  "reloadInterval": 60,
+  "reloadInterval": null,
   "requiresLogin": false,
   "tags": [
    "clock"
@@ -338,7 +338,7 @@
   "featured": false,
   "javaScript": null,
   "name": "Minimal Clock",
-  "reloadInterval": 60,
+  "reloadInterval": null,
   "requiresLogin": false,
   "tags": [
    "clock"
@@ -385,7 +385,7 @@
   "featured": false,
   "javaScript": null,
   "name": "Polish TV Clock",
-  "reloadInterval": 60,
+  "reloadInterval": null,
   "requiresLogin": false,
   "tags": [
    "clock",
@@ -484,7 +484,7 @@
   "featured": false,
   "javaScript": null,
   "name": "WebClock",
-  "reloadInterval": 60,
+  "reloadInterval": null,
   "requiresLogin": false,
   "tags": [
    "clock"
