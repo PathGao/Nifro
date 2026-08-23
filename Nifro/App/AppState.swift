@@ -90,15 +90,17 @@ final class AppState: ObservableObject {
 	}
 
 	/**
-	The overlay the user drags a crop region on, plus the crop that was in place before they started.
+	The overlay the user drags a crop region on.
 	*/
 	var cropSelectionView: CropSelectionView?
-	var cropSelectionPreviousZoom: Zoom?
 
 	/**
-	Which display the crop being framed belongs to, so finishing acts on the scene that started it.
+	Which display and which website the crop being framed belongs to, so finishing acts on the scene
+	that started it and writes to the website that was being framed rather than to whichever one
+	happens to be current when the drag ends.
 	*/
 	var croppingSceneDisplay: Display??
+	var croppingWebsiteID: Website.ID?
 
 	private var storedWebViewError: Error?
 

@@ -21,18 +21,13 @@ extension AppState {
 		}
 
 		croppingSceneDisplay = scene.display
+		croppingWebsiteID = website.id
 
-		cropSelectionPreviousZoom = website.zoom
-
-		if website.zoom != nil {
-			WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
-				$0.zoom = nil
-			}
-		}
-
-		// Put the live page back before the overlay goes on. The wallpaper may currently be a frozen
-		// still or a shrunk region, and framing a rectangle against a stale picture would record a
-		// region of something the page no longer shows.
+		// The whole page for the duration, so you are not framing a region of a region — but only on
+		// screen. The stored region is left alone: writing `nil` to it, which is what this used to do,
+		// destroyed the region the moment framing began. Escape put it back from a copy held in
+		// memory, and quitting or crashing in between did not. A region somebody framed should not
+		// depend on how they leave the mode.
 		scene.content = .live(zoom: nil)
 
 		// The window is normally click-through and behind everything. Neither helps while the user aims a rectangle at it.
@@ -65,12 +60,17 @@ extension AppState {
 			scene.applyOpacity(animated: false)
 		}
 
+		let websiteID = croppingWebsiteID
+		croppingWebsiteID = nil
+
 		guard
 			let selection,
-			let website = WebsitesController.shared.current
+			let websiteID,
+			let website = WebsitesController.shared.all[id: websiteID]
 		else {
-			// Cancelled: put back whatever zoom was there before.
-			restoreZoomAfterCancelledSelection()
+			// Cancelled, or the website went away while the overlay was up. The stored region was never
+			// touched, so putting the page back is the whole of undoing this.
+			installContentView()
 			return
 		}
 
@@ -84,25 +84,6 @@ extension AppState {
 			$0.zoom = Zoom(region: page, inPageOfSize: screen.pageFrame.size)
 		}
 
-		cropSelectionPreviousZoom = nil
-
-		installContentView()
-	}
-
-	private func restoreZoomAfterCancelledSelection() {
-		guard
-			let previous = cropSelectionPreviousZoom,
-			let website = WebsitesController.shared.current
-		else {
-			installContentView()
-			return
-		}
-
-		WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
-			$0.zoom = previous
-		}
-
-		cropSelectionPreviousZoom = nil
 		installContentView()
 	}
 }
