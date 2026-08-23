@@ -54,6 +54,14 @@ The bar comes from the entries this list started with — `Windy`, `World Monito
 - [Cornell Lab Bird Cams](https://www.allaboutbirds.org/cams/) — Long-running public streams of nests, migration and chicks being raised.
 - [Africam — Elephant Pan](https://africam.com/lodge/elephant-pan/) — A waterhole in the Khwai private reserve in Botswana; the page embeds a YouTube live stream, so it goes straight into Nifro.
 
+## Long-form scenery and sound
+
+> A long video is a different kind of virtual window: frame it as a landscape, then decide separately whether it should be heard. Check the page first, since YouTube playback and availability can change by region.
+
+- [Norway Nature 4K](https://www.youtube.com/watch?v=vLHD66WehlE) — Fjords, islands and a slow aerial coast; a quiet Nordic window for a large display.
+- [Antarctica 4K](https://www.youtube.com/watch?v=F09tnNH2SvY) — Ice, sea and mountain scale, with a much colder and sparer visual field.
+- [Lofi Girl — beats to relax/study to](https://www.youtube.com/watch?v=jfKfPfyJRdk) — The familiar 24/7 lo-fi room; turn on Nifro's per-site audio only when the desktop should also be a listening space.
+
 ## Digital spaces
 
 - [Floor796](https://floor796.com/) — A pixel building under permanent construction, less a picture than a city you can walk into whenever you feel like it.
