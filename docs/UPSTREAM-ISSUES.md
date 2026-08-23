@@ -3,12 +3,14 @@
 > **This file records analysis, not progress.**
 >
 > It says what each upstream issue is, which category it goes in, and why it goes there.
-> **Whether something is done is answered only in [ROADMAP.md](ROADMAP.md)**, and nowhere else.
-> "DO / LATER / REJECT / OBSOLETE" are categories, not to-do states.
+> "DO / LATER / REJECT / OBSOLETE" are categories, not to-do states, and none of them says whether
+> anything has been built. What Nifro does today is in the [README](../README.md); what shipped in
+> which version is in the [releases](https://github.com/PathGao/Nifro/releases); what is still
+> planned is in [ROADMAP.md](ROADMAP.md). This file answers a different question: why each request
+> got the call it got.
 >
-> The triage was done against the upstream issue list at one point in time. Line numbers and reaction counts are not updated afterwards.
-> An issue later implemented, overturned, or closed by upstream is not reflected here.
-> For the current state, read ROADMAP; for why a call was made at the time, read this.
+> The triage was done against the upstream issue list at one point in time. Reaction counts are not
+> updated afterwards, and an issue later closed or answered by upstream is not reflected here.
 
 
 ## 1. The full table

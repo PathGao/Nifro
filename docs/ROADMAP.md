@@ -38,7 +38,7 @@ It uses a resident WebContent process to show content that **changes once a minu
 
 ### Assumption two: it is not a real wallpaper
 
-It is a transparent borderless window on the `.desktop` layer. The consequence the upstream FAQ admits itself: the menu bar cannot pick up its colour. Downstream of that are Stage Manager (#177), the Launchpad gesture giving the game away (#182), and that run of `collectionBehavior` patches in `DesktopWindow.swift`.
+It is a transparent borderless window on the `.desktop` layer. The consequence the upstream FAQ admits itself: the menu bar cannot pick up its colour. Downstream of that are the Mission Control gesture giving the game away (#182), the way Stage Manager treats it as a window rather than as a background, and that run of `collectionBehavior` patches in `DesktopWindow.swift`.
 
 ### The fix: two backends
 
