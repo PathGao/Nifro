@@ -39,8 +39,21 @@ final class MenuBarBandWindow: NSWindow {
 		hasShadow = false
 		backgroundColor = .clear
 		contentView = bandView
+	}
 
-		orderBack(nil)
+	/**
+	Put it on screen, or take it off.
+
+	Not ordered in on creation. The band is built as soon as a scene exists, which is a second or so
+	before the first page is visible, and a band on screen ahead of the page meant the menu bar
+	changed colour on its own and the wallpaper arrived afterwards. It appears with the page instead.
+	*/
+	func setVisible(_ isVisible: Bool) {
+		if isVisible {
+			orderBack(nil)
+		} else {
+			orderOut(nil)
+		}
 	}
 
 	func follow(_ screen: NSScreen) {
@@ -110,6 +123,18 @@ extension WallpaperScene {
 		}
 
 		refreshMenuBarBandColor()
+		updateMenuBarBandVisibility()
+	}
+
+	/**
+	The band is on screen exactly while the page is.
+
+	One rule rather than two moments to keep in step. Anything that shows or hides the page calls
+	this, and the colour is sampled from the page it is standing in for — which is only worth looking
+	at once there is a page to sample.
+	*/
+	func updateMenuBarBandVisibility() {
+		menuBarBand?.setVisible(!webViewController.webView.isHidden)
 	}
 
 	/**

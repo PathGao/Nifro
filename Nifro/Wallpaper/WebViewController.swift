@@ -136,6 +136,10 @@ final class WebViewController: NSViewController {
 	func releaseWebView() {
 		view = NSView()
 		webView = createWebView()
+
+		// Hidden like the first one, and for the same reason: what comes back is a blank page until
+		// something is loaded into it. It also keeps the menu bar band down, which follows the page.
+		webView.isHidden = true
 	}
 
 

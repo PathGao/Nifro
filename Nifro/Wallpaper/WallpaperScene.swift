@@ -247,6 +247,11 @@ final class WallpaperScene {
 
 			webViewController.webView.isHidden = false
 			window.contentView?.isHidden = false
+
+			// The same moment for both. The band was going up as soon as the scene existed, so the menu
+			// bar changed colour on its own and the wallpaper turned up a second later.
+			refreshMenuBarBandColor()
+			updateMenuBarBandVisibility()
 		}
 	}
 
