@@ -221,6 +221,35 @@ makes it feel like moving a page rather than operating a control.
 
 ---
 
+## 5.5 What a page remembers, and who remembers it (the M series)
+
+Sound and the framed region belong to the website and are stored with it. Where the *page* was —
+floor796's camera, a map's viewport, how far down a dashboard is scrolled — belongs to the page, and
+there are four ways a page can hold it. Three of them already survive; knowing which is which is most
+of the answer.
+
+| | Where the page keeps its position | Survives a relaunch |
+|---|---|---|
+| **M1** | `localStorage` / IndexedDB | **Yes, already.** `WKWebViewConfiguration()` defaults to the persistent data store, so this is kept in the app's container and comes back on its own. floor796 is this case: it writes `last-pos` on every move. Settings → "Clear website data" is the one thing that throws it away |
+| **M2** | The URL fragment | **No.** Loading always uses the address stored on the website, deliberately — "always the URL the user specified rather than the current one", because it may be a redirect that resolves differently each time. So a page that says where it is in the fragment has that thrown away on every load. floor796 writes `#t0r0,444,443` as well, and a map or a dashboard with a deep link is the same shape |
+| **M3** | Document scroll | **On a reload, yes** — `ScrollRestoration` captures it just before reloading and puts it back after. A hard quit loses at most the last scroll, because nothing polls in the background to support it |
+| **M4** | Only in memory | **No, and there is nothing to be done.** A canvas that keeps its camera in a variable and writes it nowhere cannot be asked where it was |
+
+**M2 is the one worth building.** The manual version already exists — "Update Website to Current" in
+the menu points the stored website at the address currently loaded — which is proof both that people
+want it and that the mechanism works. The automatic version has to avoid the bug that item caused
+once: it fired on every website with a host page and turned one of them into a GitHub 404. So the
+last-loaded address is remembered *beside* the stored one rather than overwriting it, and is only
+used when it differs from the stored address in nothing but the fragment or the query. Anything more
+than that is a different page, and loading a different page than the one somebody typed is how the
+404 happened.
+
+Worth saying out loud in the app somewhere, too: **a website's own settings are remembered per
+website; where the page is inside itself is up to the page.** That is why two sites that look alike
+behave differently, and nothing currently explains it.
+
+---
+
 ## 6. Known and not yet fixed (the K series)
 
 Reported while using the app, reproduced, and left alone for now. Each is written down rather than
