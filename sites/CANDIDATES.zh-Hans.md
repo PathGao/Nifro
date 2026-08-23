@@ -51,6 +51,14 @@ featured      首次启动时装好，之后就是一个用户可编辑、可删
 - [Cornell Lab Bird Cams](https://www.allaboutbirds.org/cams/) — 鸟巢、迁徙和育雏的长期公开直播。
 - [Africam — Elephant Pan](https://africam.com/lodge/elephant-pan/) — 博茨瓦纳 Khwai 私人保护区的水坑直播；页面嵌入 YouTube Live，适合直接交给 Nifro。
 
+## 长视频风景与声音
+
+> 长视频是另一种虚拟窗景：先把它裁成风景，再单独决定是否让它发声。YouTube 的播放和地区可用性会变化，先在浏览器中确认页面。
+
+- [Norway Nature 4K](https://www.youtube.com/watch?v=vLHD66WehlE) — 峡湾、岛屿和缓慢掠过海岸的航拍画面，适合把大屏桌面打开成北欧窗景。
+- [Antarctica 4K](https://www.youtube.com/watch?v=F09tnNH2SvY) — 冰、海与山脉的尺度感，画面更冷也更克制。
+- [Lofi Girl — beats to relax/study to](https://www.youtube.com/watch?v=jfKfPfyJRdk) — 熟悉的 24/7 lo-fi 房间；只有希望桌面同时成为听音空间时，再打开 Nifro 的站点独立音频。
+
 ## 数字空间
 
 - [Floor796](https://floor796.com/) — 永远在扩建的像素大楼。作为桌面更像一座可以随时走进去的网络城市。
