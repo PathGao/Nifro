@@ -336,6 +336,12 @@ Plain `brew install --cask nifro`, with no tap at all, means being in Homebrew's
 That has a notability threshold — 75 stars, or 30 forks, or 30 watchers. Two stars today. It is a
 milestone to notice rather than a task to schedule.
 
+**Release immutability is off, on purpose for now.** The switch is in Settings → General, under a
+Releases heading that is not in the sidebar, and it forbids changing a published release's assets and
+tags. It is the right end state and the wrong one today: the two download links in the README only
+work because the v0.1.0 assets were *renamed* after publishing, to drop the version from the file
+name. Turn it on once a few releases have gone out without needing to be touched afterwards.
+
 ### Knowing there is a new version (the U series)
 
 Nothing in the app knows a release exists. There is no Sparkle, no check, no menu item — the only
