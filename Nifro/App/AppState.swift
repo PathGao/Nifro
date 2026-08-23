@@ -40,8 +40,6 @@ final class AppState: ObservableObject {
 		return scenes[0]
 	}
 
-	var desktopWindow: DesktopWindow { primaryScene.window }
-	var webViewController: WebViewController { primaryScene.webViewController }
 
 	var isBrowsingMode = false {
 		didSet {

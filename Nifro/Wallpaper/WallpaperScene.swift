@@ -91,6 +91,31 @@ final class WallpaperScene {
 		// The web view starts hidden so the first frame is not a flash of white.
 		webViewController.webView.isHidden = true
 
+		// The scene owns its own loading lifecycle. Wiring this app-wide meant only the first scene
+		// ever restored its zoom or reported its errors.
+		webViewController.didLoadPublisher
+			.convertToResult()
+			.sink { [weak self] result in
+				guard let self else {
+					return
+				}
+
+				switch result {
+				case .success:
+					// Reapplying the persisted zoom has to happen here, once `webView.url` is set.
+					let zoomLevel = webViewController.webView.zoomLevelWrapper
+
+					if zoomLevel != 1 {
+						webViewController.webView.zoomLevelWrapper = zoomLevel
+					}
+
+					AppState.shared.statusItemButton.toolTip = website?.tooltip
+				case .failure(let error):
+					AppState.shared.webViewError = error
+				}
+			}
+			.store(in: &cancellables)
+
 		occlusionMonitor.visibleRegionPublisher
 			.sink { [weak self] _ in
 				self?.applyVisibilityState()

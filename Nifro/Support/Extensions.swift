@@ -2574,15 +2574,18 @@ extension WKWebView {
 		evaluateJavaScript(js, in: nil, in: .defaultClient)
 	}
 }
-extension WKWebView {
+extension WKWebsiteDataStore {
 	/**
 	Clear all website data like cookies, local storage, caches, etc.
+
+	On the store rather than on a web view. It touches no web view and clears the shared store, so
+	hanging it off one made callers reach for a web view they had no other use for.
 	*/
-	func clearWebsiteData() async {
+	static func clearAllWebsiteData() async {
 		HTTPCookieStorage.shared.removeCookies(since: .distantPast)
 
-		let store = WKWebsiteDataStore.default()
-		let types = WKWebsiteDataStore.allWebsiteDataTypes()
+		let store = `default`()
+		let types = allWebsiteDataTypes()
 		let records = await store.dataRecords(ofTypes: types)
 		await store.removeData(ofTypes: types, for: records)
 	}

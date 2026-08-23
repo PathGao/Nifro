@@ -1,4 +1,5 @@
 import SwiftUI
+import WebKit
 import LaunchAtLogin
 import KeyboardShortcuts
 
@@ -304,7 +305,7 @@ private struct ClearWebsiteDataSetting: View {
 			Task {
 				hasCleared = true
 				WebsitesController.shared.thumbnailCache.removeAllImages()
-				await AppState.shared.webViewController.webView.clearWebsiteData()
+				await WKWebsiteDataStore.clearAllWebsiteData()
 			}
 		}
 		.help("Clears all cookies, local storage, caches, etc.")

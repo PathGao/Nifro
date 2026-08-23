@@ -9,10 +9,12 @@ extension AppState {
 	var isSelectingCrop: Bool { cropSelectionView != nil }
 
 	func beginCropSelection() {
+		let scene = primaryScene
+
 		guard
 			!isSelectingCrop,
 			let website = WebsitesController.shared.current,
-			let screen = desktopWindow.targetDisplay?.screen ?? .main
+			let screen = scene.screen
 		else {
 			return
 		}
@@ -28,31 +30,33 @@ extension AppState {
 		// Put the live page back before the overlay goes on. The wallpaper may currently be a frozen
 		// still or a shrunk region, and framing a rectangle against a stale picture would record a
 		// crop of something the page no longer shows.
-		primaryScene.content = .live(crop: nil)
+		scene.content = .live(crop: nil)
 
 		// The window is normally click-through and behind everything. Neither helps while the user aims a rectangle at it.
-		desktopWindow.isInteractive = true
-		desktopWindow.level = .floating
-		desktopWindow.alphaValue = 1
+		scene.window.isInteractive = true
+		scene.window.level = .floating
+		scene.window.alphaValue = 1
 		SSApp.forceActivate()
 
-		let view = CropSelectionView(frame: desktopWindow.contentLayoutRect)
+		let view = CropSelectionView(frame: scene.window.contentLayoutRect)
 		view.autoresizingMask = [.width, .height]
 		view.onFinish = { [weak self] selection in
 			self?.finishCropSelection(with: selection, on: screen)
 		}
 
 		cropSelectionView = view
-		desktopWindow.contentView?.addSubview(view)
-		desktopWindow.makeFirstResponder(view)
+		scene.window.contentView?.addSubview(view)
+		scene.window.makeFirstResponder(view)
 	}
 
 	private func finishCropSelection(with selection: CGRect?, on screen: NSScreen) {
+		let scene = primaryScene
+
 		cropSelectionView?.removeFromSuperview()
 		cropSelectionView = nil
 
-		desktopWindow.level = .desktop
-		desktopWindow.isInteractive = Defaults[.isBrowsingMode]
+		scene.window.level = .desktop
+		scene.window.isInteractive = Defaults[.isBrowsingMode]
 		for scene in scenes {
 			scene.applyOpacity(animated: false)
 		}
@@ -67,8 +71,8 @@ extension AppState {
 		}
 
 		// View coordinates → screen coordinates → page coordinates.
-		let inWindow = desktopWindow.contentView?.convert(selection, to: nil) ?? selection
-		let onScreen = desktopWindow.convertToScreen(inWindow)
+		let inWindow = scene.window.contentView?.convert(selection, to: nil) ?? selection
+		let onScreen = scene.window.convertToScreen(inWindow)
 		let page = onScreen.pageFrame(inScreen: screen.pageFrame).integral
 
 		WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
