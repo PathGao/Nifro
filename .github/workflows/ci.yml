@@ -9,6 +9,12 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Nothing here writes anything: it builds, tests, lints and scans. Declared rather than inherited so
+# the job keeps a read-only token whatever the repository default is set to. Release signing and
+# publishing live in release.yml, which asks for the writes it needs.
+permissions:
+  contents: read
+
 jobs:
   build:
     name: Build
