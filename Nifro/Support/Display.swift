@@ -199,9 +199,10 @@ extension NSScreen {
 	Both the size the page is given and the origin its coordinates are measured from have to come
 	from here. They were separate answers to one question once, and a crop stored against one and
 	displayed against the other lands a menu bar height away from where it was framed.
+
+	Never the strip behind the menu bar. Anything the page puts up there cannot be read and cannot be
+	clicked; the menu bar's tint is handled by a band of solid colour instead, which is the only part
+	of being up there that was ever worth having.
 	*/
-	@MainActor
-	var pageFrame: CGRect {
-		Defaults[.extendBelowMenuBar] ? frame : frameWithoutStatusBar
-	}
+	var pageFrame: CGRect { frameWithoutStatusBar }
 }

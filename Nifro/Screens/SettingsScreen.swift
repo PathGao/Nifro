@@ -62,7 +62,6 @@ private struct AdvancedSettings: View {
 				Defaults.Toggle("Deactivate while on battery", key: .deactivateOnBattery)
 				ContentRulesSetting()
 				FreezeWhenCoveredSetting()
-				SolidColorUnderMenuBarSetting()
 				PlaylistIntervalSetting()
 				Defaults.Toggle("Restore scroll position after reload", key: .restoreScrollPosition)
 				Defaults.Toggle("Reload when the Mac wakes", key: .reloadOnWake)
@@ -86,19 +85,6 @@ private struct FreezeWhenCoveredSetting: View {
 			key: .freezeWhenCovered
 		)
 		.help("When other windows cover most of the wallpaper, Nifro shrinks the window to whatever is still visible, such as the strip behind the Dock, and keeps rendering only that. When nothing is visible it holds the last frame. Turn this off to keep drawing the whole page.")
-	}
-}
-
-private struct SolidColorUnderMenuBarSetting: View {
-	@Default(.extendBelowMenuBar) private var extendBelowMenuBar
-
-	var body: some View {
-		Defaults.Toggle(
-			"Solid colour behind the menu bar",
-			key: .solidColorUnderMenuBar
-		)
-		.disabled(!extendBelowMenuBar)
-		.help("The menu bar tints itself from whatever is behind it, so extending the wallpaper up there is the only way to make it match. The page's own text and edges then show through. This fills that strip with the page's average colour instead, which keeps the tint without the content.")
 	}
 }
 

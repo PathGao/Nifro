@@ -33,9 +33,7 @@ extension Defaults.Keys {
 	static let bringBrowsingModeToFront = Key<Bool>("bringBrowsingModeToFront", default: false)
 	static let openExternalLinksInBrowser = Key<Bool>("openExternalLinksInBrowser", default: false)
 
-	static let extendBelowMenuBar = Key<Bool>("extendBelowMenuBar", default: false)
 	static let freezeWhenCovered = Key<Bool>("freezeWhenCovered", default: true)
-	static let solidColorUnderMenuBar = Key<Bool>("solidColorUnderMenuBar", default: false)
 	static let restoreScrollPosition = Key<Bool>("restoreScrollPosition", default: true)
 	static let reloadOnWake = Key<Bool>("reloadOnWake", default: true)
 	static let dimWhenUnfocused = Key<Bool>("dimWhenUnfocused", default: false)

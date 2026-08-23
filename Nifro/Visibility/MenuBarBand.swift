@@ -3,13 +3,63 @@ import CoreImage
 import WebKit
 
 /**
-An opaque band filling the strip of the wallpaper that sits behind the menu bar.
+A strip of solid colour behind the menu bar, in the average colour of the top of the page.
 
-macOS tints the menu bar from whatever is behind it, so extending the wallpaper up there is the only way to get a menu bar that matches. It tints from the content, so text and borders along the top edge of the page show through as well.
+macOS tints the menu bar from whatever is rendered behind it, so a wallpaper that stops below the
+menu bar leaves the menu bar tinted by the desktop picture underneath — a different colour from the
+wallpaper the user is actually looking at. Extending the page up there fixes the colour and creates a
+worse problem: the page's own headings, buttons and borders sit under the menu bar where they cannot
+be read and cannot be clicked.
 
-The band keeps the tint and drops the rest. It is filled with the average colour of the strip it covers, so the menu bar picks up the same colour it would have anyway, and the page underneath stops showing through.
+The band takes the tint and drops the content. It is its own window rather than a view inside the
+wallpaper: the wallpaper window moves and resizes — a zoomed page, a window shrunk to whatever the
+covering windows left visible — and the tint should not come and go with it.
 */
-final class MenuBarBandView: NSView {
+final class MenuBarBandWindow: NSWindow {
+	private let bandView = MenuBarBandView()
+
+	var color: NSColor {
+		get { bandView.color }
+		set { bandView.color = newValue }
+	}
+
+	init(screen: NSScreen) {
+		super.init(
+			contentRect: Self.frame(on: screen),
+			styleMask: [.borderless],
+			backing: .buffered,
+			defer: false
+		)
+
+		isReleasedWhenClosed = false
+		level = .desktop
+		collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle]
+		ignoresMouseEvents = true
+		isOpaque = true
+		hasShadow = false
+		backgroundColor = .clear
+		contentView = bandView
+
+		orderBack(nil)
+	}
+
+	func follow(_ screen: NSScreen) {
+		setFrame(Self.frame(on: screen), display: true)
+	}
+
+	static func frame(on screen: NSScreen) -> CGRect {
+		let height = screen.menuBarHeight
+
+		return CGRect(
+			x: screen.frame.minX,
+			y: screen.frame.maxY - height,
+			width: screen.frame.width,
+			height: height
+		)
+	}
+}
+
+private final class MenuBarBandView: NSView {
 	var color: NSColor = .clear {
 		didSet {
 			needsDisplay = true
@@ -23,56 +73,35 @@ final class MenuBarBandView: NSView {
 		dirtyRect.fill()
 	}
 
-	// The band is decoration sitting on top of a wallpaper. It must never take a click that belongs to the desktop.
+	// Decoration sitting over the desktop. It must never take a click that belongs there.
 	override func hitTest(_ point: CGPoint) -> NSView? { nil }
+}
+
+extension NSScreen {
+	/**
+	Height of the strip the menu bar occupies on this screen, or 0 when it has none.
+	*/
+	var menuBarHeight: CGFloat { frame.height - frameWithoutStatusBar.height }
 }
 
 extension WallpaperScene {
 	/**
-	Height of the strip the menu bar occupies on the wallpaper's screen, or 0 when there is none.
-	*/
-	var menuBarHeight: CGFloat {
-		guard let screen else {
-			return 0
-		}
-
-		return screen.frame.height - screen.frameWithoutStatusBar.height
-	}
-
-	private var shouldShowMenuBarBand: Bool {
-		Defaults[.extendBelowMenuBar]
-			&& Defaults[.solidColorUnderMenuBar]
-			&& menuBarHeight > 0
-	}
-
-	/**
-	Add or remove the band to match the current setting.
+	Add or remove the band to match the screen the scene is on.
 	*/
 	func installMenuBarBandIfNeeded() {
-		guard shouldShowMenuBarBand else {
-			menuBarBand?.removeFromSuperview()
+		guard
+			let screen,
+			screen.menuBarHeight > 0
+		else {
+			menuBarBand?.close()
 			menuBarBand = nil
 			return
 		}
 
-		guard let contentView = window.contentView else {
-			return
-		}
-
-		let band = menuBarBand ?? MenuBarBandView()
-		menuBarBand = band
-
-		band.frame = CGRect(
-			x: 0,
-			y: contentView.bounds.maxY - menuBarHeight,
-			width: contentView.bounds.width,
-			height: menuBarHeight
-		)
-		band.autoresizingMask = [.width, .minYMargin]
-
-		if band.superview !== contentView {
-			band.removeFromSuperview()
-			contentView.addSubview(band)
+		if let band = menuBarBand {
+			band.follow(screen)
+		} else {
+			menuBarBand = MenuBarBandWindow(screen: screen)
 		}
 
 		refreshMenuBarBandColor()
@@ -81,21 +110,25 @@ extension WallpaperScene {
 	/**
 	Sample the top strip of the page and paint the band with its average colour.
 
-	Re-sampled on every load rather than once, because the wallpaper changes and the menu bar has to keep matching it.
+	Re-sampled on every load rather than once, because the wallpaper changes and the menu bar has to
+	keep matching it.
 	*/
 	func refreshMenuBarBandColor() {
 		guard
 			let band = menuBarBand,
-			shouldShowMenuBarBand
+			let screen
 		else {
 			return
 		}
 
 		let webView = webViewController.webView
 		let configuration = WKSnapshotConfiguration()
-		configuration.rect = CGRect(x: 0, y: 0, width: webView.bounds.width, height: menuBarHeight)
+		configuration.rect = CGRect(x: 0, y: 0, width: webView.bounds.width, height: screen.menuBarHeight)
 
-		guard configuration.rect.width > 0, configuration.rect.height > 0 else {
+		guard
+			configuration.rect.width > 0,
+			configuration.rect.height > 0
+		else {
 			return
 		}
 

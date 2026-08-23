@@ -54,7 +54,7 @@ final class WallpaperScene {
 	/**
 	Opaque band covering the strip of wallpaper behind the menu bar, when the user asked for colour without content.
 	*/
-	var menuBarBand: MenuBarBandView?
+	var menuBarBand: MenuBarBandWindow?
 
 	/**
 	The replacement page being loaded out of sight, and the task driving it.
@@ -177,8 +177,8 @@ final class WallpaperScene {
 	/**
 	Re-derive the window from the content it already has.
 
-	Needed when something outside `content` changes what it means: the page layout size and the menu
-	bar band both depend on `extendBelowMenuBar`, and neither is part of the value.
+	Needed when something outside `content` changes what it means, such as the scene moving to a
+	screen of a different size.
 	*/
 	func reapplyContent() {
 		applyContent()
@@ -437,6 +437,10 @@ final class WallpaperScene {
 		pendingLoad?.cancel()
 		window.orderOut(nil)
 		content = .empty
+
+		// Its own window, so nothing else takes it off screen.
+		menuBarBand?.close()
+		menuBarBand = nil
 	}
 }
 
