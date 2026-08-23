@@ -12,6 +12,7 @@
 
 <p align="center">
   <a href="https://github.com/PathGao/Nifro/releases/latest"><img alt="最新版本" src="https://img.shields.io/github/v/release/PathGao/Nifro?label=release&color=0453ab"></a>
+  <a href="https://github.com/PathGao/Nifro/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/PathGao/Nifro/actions/workflows/ci.yml/badge.svg"></a>
   <a href="license"><img alt="许可" src="https://img.shields.io/badge/license-MIT-blue"></a>
   <img alt="macOS 15+" src="https://img.shields.io/badge/macOS-15%2B-black?logo=apple">
   <img alt="Apple silicon 与 Intel" src="https://img.shields.io/badge/builds-arm64%20%C2%B7%20x86__64-lightgrey">

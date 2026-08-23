@@ -75,8 +75,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Pinned. `brew install swiftlint` takes whatever is current, and a minor bump changes the
+      # rule set — which turns this job red on a pull request that changed nothing, and points the
+      # contributor at their own diff. Bump it here, on purpose, and fix the fallout in one commit.
       - name: Install SwiftLint
-        run: brew install swiftlint
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/swiftlint.zip https://github.com/realm/SwiftLint/releases/download/${SWIFTLINT_VERSION}/portable_swiftlint.zip
+          unzip -q -o /tmp/swiftlint.zip -d /tmp/swiftlint
+          echo "/tmp/swiftlint" >> "$GITHUB_PATH"
+        env:
+          SWIFTLINT_VERSION: "0.65.1"
 
       # The Xcode build runs SwiftLint too, but only after compiling. Running it separately puts style feedback on a PR in under a minute.
       - name: Lint
@@ -99,8 +108,16 @@ jobs:
           major="$(xcodebuild -version | sed -n '1s/Xcode \([0-9]*\).*/\1/p')"
           [ "$major" -ge 26 ] || { echo "::error::Xcode $major is too old; this project needs 26 or newer"; exit 1; }
 
+      # Pinned, for the same reason as SwiftLint: a new version finds new things, and it should find
+      # them when somebody bumped it rather than on an unrelated pull request.
       - name: Install Periphery
-        run: brew install peripheryapp/periphery/periphery
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/periphery.zip https://github.com/peripheryapp/periphery/releases/download/${PERIPHERY_VERSION}/periphery-${PERIPHERY_VERSION}.zip
+          unzip -q -o /tmp/periphery.zip -d /tmp/periphery
+          echo "/tmp/periphery" >> "$GITHUB_PATH"
+        env:
+          PERIPHERY_VERSION: "2.21.2"
 
       # Config, retentions and the reasoning behind each one live in .periphery.yml.
       # This inherited a 5,700-line utilities file copied wholesale from another
@@ -131,6 +148,32 @@ jobs:
       # Cross-target identifiers no compiler compares. See the script for why.
       - name: Check the URL scheme matches in both targets
         run: python3 Tools/check-url-scheme.py
+
+      # The README promises the app is in English and Simplified Chinese. Nothing else stops a pull
+      # request adding a string in one language only, and a half-translated menu is the kind of thing
+      # nobody notices until somebody who reads the other language opens it.
+      - name: Check every string is translated
+        run: |
+          python3 - <<'CHECK'
+          import json, pathlib, sys
+
+          catalogue = json.loads(pathlib.Path("Nifro/Localizable.xcstrings").read_text())
+          missing = [
+              key
+              for key, entry in catalogue["strings"].items()
+              # The empty string and a bare format placeholder have nothing to translate.
+              if key and key != "%@"
+              and not entry.get("localizations", {}).get("zh-Hans", {}).get("stringUnit", {}).get("value")
+          ]
+
+          if missing:
+              print(f"::error::{len(missing)} strings have no zh-Hans translation")
+              for key in missing[:20]:
+                  print(f"  {key[:100]}")
+              sys.exit(1)
+
+          print(f"{len(catalogue['strings'])} strings, all translated")
+          CHECK
 
       - name: Check the generated catalogue is current
         run: |

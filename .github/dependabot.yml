@@ -1,0 +1,31 @@
+# Dependabot, for GitHub Actions only.
+#
+# Not for Swift. Dependabot's `swift` ecosystem reads a `Package.swift`
+# manifest, and the one in this repository declares no dependencies — it exists
+# only so `swift test` can compile the pure-logic files. The app's four real
+# dependencies (Defaults, KeyboardShortcuts, LaunchAtLogin-Modern,
+# swift-syntax) are resolved by the Xcode project, in
+# Nifro.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved,
+# which Dependabot does not parse. Adding a `swift` entry here would open no
+# pull requests and quietly imply coverage that does not exist. Those four are
+# bumped by hand in Xcode.
+#
+# Monthly, not weekly: the actions here are checkout, cache, setup-python and
+# upload-artifact, all pinned to a floating major, so an update is a major
+# version bump a few times a year rather than a stream of patches.
+
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: "ci"
+    labels:
+      - "dependencies"
+      - "github_actions"
+    groups:
+      actions:
+        patterns:
+          - "*"
