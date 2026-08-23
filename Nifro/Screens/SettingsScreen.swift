@@ -88,7 +88,7 @@ private struct FreezeWhenCoveredSetting: View {
 		Defaults.Toggle(key: .freezeWhenCovered) {
 			Text("Only render what is on show")
 				.explained(String(localized: "When other windows cover most of the wallpaper, Nifro shrinks the window to whatever is still visible, such as the strip behind the Dock, and keeps rendering only that. When nothing is visible it holds the last frame. Turn this off to keep drawing the whole page."))
-	}
+  }
 	}
 }
 
@@ -155,7 +155,7 @@ private struct ShowOnAllSpacesSetting: View {
 		Defaults.Toggle(key: .showOnAllSpaces) {
 			Text("Show on every Space")
 				.explained(String(localized: "Spaces are the desktops you switch between in Mission Control, not your displays. Off means the wallpaper stays on whichever Space was in front when Nifro started. Which display a website goes on is set on the website itself, not here."))
-	}
+  }
 	}
 }
 
@@ -165,7 +165,7 @@ private struct BringBrowsingModeToFrontSetting: View {
 		Defaults.Toggle(key: .bringBrowsingModeToFront) {
 			Text("Bring browsing mode to the front")
 				.explained(String(localized: "Keep the website above all other windows while browsing mode is active."))
-	}
+  }
 	}
 }
 
@@ -174,7 +174,7 @@ private struct OpenExternalLinksInBrowserSetting: View {
 		Defaults.Toggle(key: .openExternalLinksInBrowser) {
 			Text("Open external links in default browser")
 				.explained(String(localized: "If a website requires login, you should disable this setting while logging in as the website might require you to navigate to a different page, and you don't want that to open in a browser instead of Nifro."))
-	}
+  }
 	}
 }
 
