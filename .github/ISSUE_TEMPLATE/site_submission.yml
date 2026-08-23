@@ -7,7 +7,7 @@ body:
       value: |
         This is the easiest way to contribute to Nifro, and it is a real contribution: the site list is how people find something worth putting on their desktop. You need no Swift, no Xcode, no build and no git — the app writes the hard part for you.
 
-        **In Nifro: open the website for editing and press “Copy Settings”, then paste it below.** That block carries the address, the rendering mode, sound, region, display and hours as you actually have them, on a page you have actually been looking at. It is worth more than the same values retyped, because it is a configuration known to work rather than one somebody remembered.
+        **In Nifro: open the website for editing and press “Copy Settings”, then paste it below.** That block carries the address, sound, region, whether the page is clickable, inverted colours, print styles, display, hours, the size of any custom CSS and JavaScript, and the reload interval, as you actually have them, on a page you have actually been looking at. It is worth more than the same values retyped, because it is a configuration known to work rather than one somebody remembered.
 
         One site per issue, please.
 
@@ -21,13 +21,18 @@ body:
         Custom CSS and JavaScript are reported by size rather than by content, so nothing private ends up in a public issue. If yours matter to how the page looks, paste them in the boxes further down.
       render: text
       placeholder: |
-        Nifro 0.1.0 (1) · macOS 26.1 · MacBookAir15,2
+        Nifro 0.1.2 (1) · macOS 26.1 · MacBookAir15,2
         URL: https://example.com/live?theme=dark
-        Rendering: Refresh periodically
         Sound: Muted
         Region: 2.3× at 40%, 60%
         Clickable on the desktop: no
-        …
+        Invert colours: Never
+        Print styles: no
+        Display: default
+        Hours: 08:00–18:00
+        Custom CSS: 6 lines
+        Custom JavaScript: none
+        Reload every: 15 min (from Settings)
     validations:
       required: true
 
@@ -75,7 +80,7 @@ body:
     id: notes
     attributes:
       label: Anything the settings block does not cover
-      description: A reload interval you had to work out, a placeholder like `[[screenWidth]]` in the URL, the reason you chose the rendering mode you chose. Skip if there is nothing to add.
+      description: A reload interval you had to work out, a placeholder like `[[screenWidth]]` in the URL, why the region is framed where it is. Skip if there is nothing to add.
 
   - type: markdown
     attributes:

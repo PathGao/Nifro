@@ -1,4 +1,4 @@
-# The release pipeline, triggered by a tag.
+# The release pipeline, dispatched by hand from a branch. It creates the tag itself, at the end.
 #
 # Each architecture gets its own build, and there is no universal binary: one arm64, one x86_64.
 # A universal package means every user downloads the half they can never run.
@@ -340,8 +340,14 @@ jobs:
 
           \`\`\`
           brew tap PathGao/tap https://github.com/PathGao/Nifro
+          brew trust --cask PathGao/tap/nifro
           brew install --cask nifro
           \`\`\`
+
+          The middle line is not optional. Homebrew refuses to load a cask from outside its own
+          repositories until you say you trust it, because a cask can run code after installing.
+          This one runs a single command — it clears the "downloaded from the internet" mark macOS
+          puts on the app. Read it first: https://github.com/PathGao/Nifro/blob/main/Casks/nifro.rb
 
           \`\`\`
           Apple silicon  Nifro-arm64.dmg   sha256 ${{ steps.package.outputs.sha_arm64 }}

@@ -63,8 +63,9 @@ section 4, and it comes back around the live page rather than instead of it.
 ## 3. Status at a glance
 
 ```
-Upstream issue triage   35 → DO 17 / LATER 13 / REJECT 1 / OBSOLETE 4
-                        See UPSTREAM-ISSUES.md. The 35 compress into only 8 mechanisms
+Upstream issue triage   35 issues, compressing into 8 mechanisms
+                        The counts live in UPSTREAM-ISSUES.md, not here, because two copies
+                        of one number is how they came to disagree
 Blocked                 nothing
 ```
 
@@ -93,14 +94,9 @@ Blocked                 nothing
 >    version of this.
 > 3. A way for the user to turn it off that does not require understanding it.
 
+Upstream stops for three reasons only: manually disabled, screen locked, on battery. **Nothing about occlusion at all**, which is worth remembering as the baseline any of this has to beat.
 
-
-Upstream stops for three reasons only: manually disabled, screen locked, on battery (`AppState.swift:125`). **Nothing about occlusion at all.**
-
-| | Optimisation | Status | Notes |
-|---|---|---|---|
-| ~~P7~~ | ~~Go opaque when the content fills the screen~~ | **Not doing** | The saving cannot be measured, and it would need a user switch that turns the screen black on a page with a transparent background. Settings whose payoff is unclear do not get added |
-| ~~P9~~ | ~~Configurable reload strategy~~ | **Not doing** | No issue ever asked for it, I thought it up myself |
+**Two of the ideas are refused rather than deferred**, and they are the two that never had an issue behind them. *Go opaque when the content fills the screen*: the saving cannot be measured, and it needs a user switch that turns the screen black on a page with a transparent background. Settings whose payoff is unclear do not get added. *A configurable reload strategy*: nobody ever asked for it, it was thought up here, and it is a setting in search of a complaint.
 
 ---
 
@@ -319,7 +315,7 @@ Three lists, one pipeline, and a maintainer who has not looked at any of it. Wha
 today:
 
 ```
-sites/CANDIDATES.md      119 links, of which 111 have never been made to work
+sites/CANDIDATES.md      119 links across 110 hosts; 14 of those hosts have an entry
       ↓  somebody works out the settings and checks they hold
 sites/*.yml               38 entries, schema-checked, offered in the app's Site Gallery
       ↓  picked as one of the few worth shipping
@@ -334,8 +330,8 @@ impression of the whole app.
 |---|---|---|---|
 | **S1** | The maintainer reviews the 8 featured | To do. **This one first** | They are what a new user sees before deciding whether the app is any good. Eight pages is an evening, and it is the highest-value hour in this section |
 | **S2** | The maintainer reviews the other 30 | To do | Lower stakes — somebody has to go looking for these — but they carry the same claim, that the settings on them are right |
-| **S3** | 111 candidates have never been graduated | To do, forever | Not a backlog to burn down. A link is cheap and an entry is work, so the pool being larger than the catalogue is the normal state, not a debt |
-| **S4** | Which of the three lists is the source of truth for a reader | Unclear, and that is the "complicated" part | `CANDIDATES.md` is a pool, `sites/*.yml` is the catalogue, `NOT-INCLUDED.md` is the refusals, and the README's nav points at the directory rather than at any of them. A reader landing on `sites/` sees the contributor guide first and has to work out which of its neighbours is the list of what the app actually offers |
+| **S3** | Most of the candidate pool has never been graduated | To do, forever | Not a backlog to burn down. A link is cheap and an entry is work, so the pool being larger than the catalogue is the normal state, not a debt. The exact count is deliberately not written here: it moves with every contribution, and a number in prose is a number that goes wrong |
+| **S4** | Which of the three lists is the source of truth for a reader | Half answered | `CANDIDATES.md` is a pool, `sites/*.yml` is the catalogue, `NOT-INCLUDED.md` is the refusals. Both READMEs now link `CANDIDATES.md` directly, so a reader is no longer dropped on the directory to guess — that half is done. What is left is that a reader landing on `sites/` still sees the contributor guide first and has to work out which of its neighbours is the list of what the app actually offers |
 
 **What would simplify S4 without another file.** The Site Gallery in the app already shows exactly the
 38, with their settings, filterable by tag — it is the readable list, and it is in the one place where
@@ -371,7 +367,7 @@ fixed so that the first release is a thing that exists.
 | ~~E17~~ | ~~Three families of per-page `UserDefaults` keys grow without bound~~ | **Measured, and they do not.** On a real install after real use: `com.pathgao.nifro.plist` is 4378 bytes, 21 keys, and **zero** of all three families. The reasoning that said "one key per page ever visited" was wrong about every one of them — `scrollPosition_` is only written from `reload()` and only when the position is not `[0, 0]`, `lastAddress_` needs the page to carry a fragment, and `zoomLevel_` needs somebody to pick Zoom In from the context menu. Growth follows what the user does to a page, and a wallpaper is a thing nobody touches. No pruning, and the reason is now a number instead of a guess |
 | ~~E18~~ | ~~`forgetWherePagesWere` cannot be tested~~ | **Replaced with something that cannot be forgotten instead.** A test was the wrong tool: the failure to guard against is "a fourth kind of per-page record is added and the sweep is not told", and a test of the sweep's filter cannot see a prefix that was never handed to it. The three prefixes are now cases of `PerPageDefaults`, which also builds the keys, so a fourth kind has to be a case to get a key at all — and the sweep is `allCases`. `UserDefaults.standard` is still named directly and the sweep still has no test; it no longer needs one |
 | ~~E20~~ | ~~`nifro://reload` did nothing but put up an alert~~ | **Fixed.** `URLCommands` read `urlComponents.path`, and only `nifro:reload` puts the word there — `nifro://reload` puts it in the *host* with an empty path, so the command fell through to "The command “” is not supported". That message names nothing and is the same one a real typo gets, so there was no way to tell "wrong number of slashes" from "no such command". Both spellings are accepted now, plus `nifro:///reload`, and the extraction is a pure function in `Support/URLCommand.swift` with the three spellings pinned. Found by using it: the alert in the screenshot was four of these stacked up |
-| **E21** | `nifro://` is registered to stale copies of the app | LaunchServices has this scheme against at least five builds on this machine, including one in `~/.Trash` and several in derived-data directories. `open "nifro:reload"` picks one of them, not necessarily the installed app. Nothing in the repo causes it — it is what building a signed app repeatedly does — but anyone testing URL commands has to use `open -a <path>` or they will be driving a build from three weeks ago. Worth a line in whatever document tells someone how to test this |
+| **E21** | `nifro://` is registered to stale copies of the app | **Test URL commands with `open -a <path> "nifro:reload"`, never plain `open "nifro:reload"`.** LaunchServices holds this scheme against every build ever made on the machine, `~/.Trash` and derived-data copies included, and picks one of them rather than the installed app. Nothing in the repo causes it and nothing in the repo can fix it. Written down because the plain form cost real time once, driving a three-week-old build |
 | **E19** | The first page of the session is loaded by the content-rules subscription | Nothing in `didLaunch` loads anything. `Defaults.publisher(.contentRulesURL)` sends its current value on subscribe, and the handler is what puts the first wallpaper up. It happens to be the right order — pages come up with the blocklist already compiled — but nothing says so, and anyone changing that subscription takes the wallpaper away at launch with no clue pointing back here. Left alone rather than restructured because the ordering is load-bearing and cannot be checked without running the app; there is now a comment on the subscription saying it |
 
 ---
@@ -445,7 +441,7 @@ it well.
 |---|---|---|
 | **X1** | Change web engine (Electron / Tauri / CEF) | WKWebView is a system process shared with Safari; anything else costs more. The problem is scheduling, not the engine |
 | **X2** | Rewrite in pure SwiftUI | The `NSMenu` + `NSWindow` we have is fast and correct; moving to `MenuBarExtra` would be a step back |
-| **X3** | Tuist / XcodeGen | `project.pbxproj` is only 694 lines, nowhere near the size where conflicts become a disaster |
+| **X3** | Tuist / XcodeGen | `project.pbxproj` is 873 lines, nowhere near the size where conflicts become a disaster, and adding a file to it by hand is four lines |
 | **X4** | A dependency injection framework, a plugin system | There is no second implementation, so there is nothing to base the abstraction on |
 | **X5** | Use only the CLT as a type-checking gate | **Tried, failed**: KeyboardShortcuts uses `#Preview`, that macro plugin ships only with Xcode, and the Command Line Tools cannot build the dependency module. Xcode has to be installed |
 | **X7** | Camera / screen capture input (`getUserMedia`, `getDisplayMedia`) | The entitlement is per process, which means permanently giving a process that renders arbitrary user URLs around the clock the ability to reach the camera; the shorter a wallpaper app's permission list, the easier it is to check. Capture-card compositing belongs in OBS, surveillance in an NVR client. Upstream [#125](https://github.com/sindresorhus/Plash/issues/125). Note that it **is technically doable**; the reason for refusing is not difficulty |

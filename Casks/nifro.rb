@@ -1,10 +1,15 @@
 # Homebrew cask, for use from PathGao/homebrew-tap.
 #
 #   brew tap PathGao/tap https://github.com/PathGao/Nifro
-#   brew install --cask PathGao/tap/nifro
+#   brew trust --cask PathGao/tap/nifro
+#   brew install --cask nifro
 #
-# version and sha256 are written back automatically by .github/workflows/release.yml after every
-# release. Do not edit them by hand.
+# The `brew trust` line is needed because of the postflight block below: Homebrew will not load a
+# cask from outside its own repositories until the user says they trust it, since a cask can run
+# code after installing. Leave it out and `brew install` refuses.
+#
+# version and sha256 are written back by .github/workflows/release.yml after every release, as a
+# pull request somebody still has to merge. Do not edit them by hand.
 #
 # Each architecture ships a thin binary, and there is no universal package — a universal package
 # means every user downloads the half they can never run. brew picks the right one for the machine.

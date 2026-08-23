@@ -97,22 +97,24 @@ two assumptions worth revisiting:
 - It keeps a browser rendering continuously to display content that changes once a minute.
 - It is not really a wallpaper. It is a transparent window sitting just above one.
 
-Undoing those is what this fork is about. See [docs/ROADMAP.md](docs/ROADMAP.md) for the plan and
-[docs/UPSTREAM-ISSUES.md](docs/UPSTREAM-ISSUES.md) for a triage of every open upstream issue.
+Undoing those is what this fork is about, and the first one has been harder than it looks: two
+rendering backends, occlusion measurement and automatic still detection were all built, and every one
+of them turned out to own an answer that Browsing Mode also owns. They came back out — 811 lines — and
+go back in one piece at a time, each with a measurement first. [docs/ROADMAP.md](docs/ROADMAP.md) §4
+has what that cost and what has to be true before any of it returns;
+[docs/UPSTREAM-ISSUES.md](docs/UPSTREAM-ISSUES.md) triages every open upstream issue.
 
 ## What it does that Plash does not
 
-**Only renders what you can see.** A wallpaper keeps painting frames under every window you open.
-Nifro measures how much of it is actually visible and renders only that — down to the strip behind
-the Dock, which macOS itself never reports as hidden.
+**Frame part of a page by moving it.** Drag or two-finger scroll the wallpaper, pinch to zoom, and
+what you leave on screen is the region. You aim at the result rather than at the thing you are
+framing, and it starts from the region a website already has, so it adjusts as well as creates. The
+page still lays out at full size, so the site does not reflow into something you did not frame, and
+the region is re-rendered rather than scaled up, so text stays sharp.
 
-**Works out whether a page needs rendering at all.** Most wallpapers load, settle, and then are a
-picture. Nifro watches one for a minute; if nothing moves it photographs it on a schedule instead of
-keeping a browser open all day, and changes its mind if the page starts moving.
-
-**Zoom into part of a page.** Drag a rectangle over the wallpaper and that part fills the screen.
-The page still lays out at full size, so the site does not reflow into something you did not frame,
-and the region is re-rendered rather than scaled up, so text stays sharp.
+**A region survives moving to another display.** It is stored as a place and a magnification rather
+than a rectangle, so a screen of a different shape works out its own rectangle around the same part
+of the page.
 
 **One page per display.** Assign a website to a screen; each screen gets its own.
 
@@ -145,24 +147,12 @@ rather than signing a build by hand: re-signing an app after Xcode has already s
 the signature and drops the sandbox entitlement with it, and an un-sandboxed Nifro reads a
 different preferences file than a real install.
 
-The pure logic behind zooming, occlusion, scheduling, video embedding and the activity classifier
-has tests that run without an app bundle or a window server:
+The pure logic has tests that run without an app bundle or a window server — the crop and zoom
+geometry, the menu bar strip and what the colour band samples from it, schedule windows, which
+website is current on which display, video embedding, URL commands and menu word wrapping:
 
 ```sh
 swift test
-```
-
-## Layout
-
-```
-Nifro/
-├── App/          entry point, state, events, menus, Shortcuts
-├── Wallpaper/    the window, the web view, loading, snapshots
-├── Visibility/   how much to render, and when to stop
-├── Zoom/         zooming, the drag-to-frame overlay and per-website settings
-├── Sites/        the website model and the curated list
-├── Screens/      SwiftUI windows and settings
-└── Support/      geometry, scheduling and shared extensions
 ```
 
 ## Contributing

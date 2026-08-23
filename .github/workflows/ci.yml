@@ -71,7 +71,8 @@ jobs:
           major="$(xcodebuild -version | sed -n '1s/Xcode \([0-9]*\).*/\1/p')"
           [ "$major" -ge 26 ] || { echo "::error::Xcode $major is too old; this project needs 26 or newer"; exit 1; }
 
-      # The crop and coverage maths are pure functions, so they run without an app bundle or a window server.
+      # The crop, zoom, schedule and rotation rules are pure functions, so they run without an app
+      # bundle or a window server.
       - name: Test
         run: swift test
 
