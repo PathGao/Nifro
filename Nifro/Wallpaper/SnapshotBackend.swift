@@ -115,11 +115,14 @@ extension WallpaperScene {
 
 extension Website {
 	enum Rendering: String, CaseIterable, Codable, Sendable {
+		case automatic
 		case live
 		case snapshot
 
 		var title: String {
 			switch self {
+			case .automatic:
+				"Decide automatically"
 			case .live:
 				"Keep rendering"
 			case .snapshot:
@@ -129,6 +132,8 @@ extension Website {
 
 		var explanation: String {
 			switch self {
+			case .automatic:
+				"Watches what the page actually does for a minute, then keeps rendering it or switches to stills. It changes its mind again if the page starts moving."
 			case .live:
 				"The page keeps running. Necessary for anything that animates or that you want to click."
 			case .snapshot:

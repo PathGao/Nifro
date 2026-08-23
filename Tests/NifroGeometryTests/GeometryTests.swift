@@ -308,3 +308,84 @@ struct VideoEmbedTests {
 		#expect(VideoEmbed.playerURL(for: url) == nil)
 	}
 }
+
+/**
+Deciding what a page is from what it reports about itself.
+
+The classifier is deliberately biased towards `animated`. Calling a moving page still freezes
+something the user put there because it moves, which they notice immediately; calling a still page
+animated costs a rendering process they would not have noticed either way.
+*/
+@Suite("Page activity")
+struct PageActivityTests {
+	private func sample(
+		frames: Int = 0,
+		animations: Int = 0,
+		media: Bool = false,
+		mutations: Int = 0
+	) -> ActivitySample {
+		.init(
+			animationFrames: frames,
+			runningAnimations: animations,
+			isPlayingMedia: media,
+			mutations: mutations,
+			seconds: 10
+		)
+	}
+
+	@Test("A document that does nothing is still")
+	func staticDocument() {
+		#expect(classify(Array(repeating: sample(), count: 6)) == .still)
+	}
+
+	@Test("A page drawing every frame is animated")
+	func animating() {
+		#expect(classify(Array(repeating: sample(frames: 600), count: 6)) == .animated)
+	}
+
+	@Test("CSS animation counts even though it requests no frames")
+	func cssAnimation() {
+		// The trap this guards: a page animated entirely in CSS runs on the compositor and never
+		// calls requestAnimationFrame, so the frame counter reads zero while the page visibly moves.
+		#expect(classify(Array(repeating: sample(animations: 1), count: 6)) == .animated)
+	}
+
+	@Test("Playing media counts, however quiet the rest of the page is")
+	func media() {
+		#expect(classify(Array(repeating: sample(media: true), count: 6)) == .animated)
+	}
+
+	@Test("One burst of movement is enough to call the whole page animated")
+	func oneBusyWindow() {
+		var samples = Array(repeating: sample(), count: 5)
+		samples.append(sample(animations: 1))
+
+		#expect(classify(samples) == .animated)
+	}
+
+	@Test("A clock ticking seconds is animated, not something to photograph")
+	func secondsClock() {
+		#expect(classify(Array(repeating: sample(mutations: 12), count: 6)) == .animated)
+	}
+
+	@Test("A page that changes a few times a minute is periodic")
+	func slowFeed() {
+		#expect(classify(Array(repeating: sample(mutations: 1), count: 6)) == .periodic)
+	}
+
+	@Test("With nothing to go on, assume it moves")
+	func noSamples() {
+		#expect(classify([]) == .animated)
+	}
+
+	@Test("Refresh interval is at least a minute and never over an hour")
+	func refreshBounds() {
+		#expect(refreshInterval(forMutationRate: 0) == 60 * 30)
+		#expect(refreshInterval(forMutationRate: 10) == 60)
+		#expect(refreshInterval(forMutationRate: 0.0001) == 60 * 60)
+
+		// Twice the observed period, so a page seen changing every five minutes is not reloaded
+		// every five minutes to find it has not changed yet.
+		#expect(refreshInterval(forMutationRate: 1.0 / 300) == 600)
+	}
+}

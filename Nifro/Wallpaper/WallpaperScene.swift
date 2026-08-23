@@ -75,6 +75,16 @@ final class WallpaperScene {
 	*/
 	var snapshotTask: Task<Void, Never>?
 
+	/**
+	What watching the page said it is, once there has been enough of it to say. `nil` until then.
+	*/
+	var observedActivity: PageActivity?
+
+	/**
+	Readings collected since the page loaded, oldest first.
+	*/
+	var activitySamples: [ActivitySample] = []
+
 	let occlusionMonitor: OcclusionMonitor
 
 	private var cancellables = Set<AnyCancellable>()
@@ -135,6 +145,21 @@ final class WallpaperScene {
 	`renderOnly` used to answer this with `screen.frame.size` while `installContentView` answered with `screen.frameWithoutStatusBar.size`, so the same crop showed different content depending on which path installed it.
 	*/
 	var pageLayoutSize: CGSize? { screen?.pageFrame.size }
+
+	/**
+	Whether this website should be drawn from stills, either because it was told to or because
+	watching it said so.
+	*/
+	var wantsStills: Bool {
+		switch website?.rendering {
+		case .snapshot:
+			true
+		case .automatic:
+			observedActivity == .still || observedActivity == .periodic
+		default:
+			false
+		}
+	}
 
 
 	/**
@@ -251,6 +276,7 @@ final class WallpaperScene {
 
 	func load(_ url: URL?) {
 		AppState.shared.webViewError = nil
+		forgetObservedActivity()
 
 		guard
 			var url,
@@ -290,6 +316,58 @@ final class WallpaperScene {
 		return try url
 			.replacingPlaceholder("[[screenWidth]]", with: String(format: "%.0f", screen.frameWithoutStatusBar.width))
 			.replacingPlaceholder("[[screenHeight]]", with: String(format: "%.0f", screen.frameWithoutStatusBar.height))
+	}
+
+	// MARK: - Watching what the page does
+
+	/**
+	How long to watch before deciding. Six ten-second windows.
+	*/
+	private static let samplesBeforeDeciding = 6
+
+	/**
+	Take one reading from the page and act on it once there are enough.
+	*/
+	func record(_ sample: ActivitySample) {
+		activitySamples.append(sample)
+
+		// Keep the window rolling so a page that starts moving later is noticed.
+		if activitySamples.count > Self.samplesBeforeDeciding {
+			activitySamples.removeFirst()
+		}
+
+		guard activitySamples.count >= Self.samplesBeforeDeciding else {
+			return
+		}
+
+		let verdict = classify(activitySamples)
+
+		guard verdict != observedActivity else {
+			return
+		}
+
+		observedActivity = verdict
+
+		if verdict == .periodic {
+			let rate = Double(activitySamples.reduce(0) { $0 + $1.mutations })
+				/ activitySamples.reduce(0) { $0 + $1.seconds }
+			Defaults[.reloadInterval] = refreshInterval(forMutationRate: rate)
+		}
+
+		applyVisibilityState()
+		resetTimer()
+
+		if wantsStills {
+			refreshSnapshot()
+		}
+	}
+
+	/**
+	Start watching again. A new page is a new question.
+	*/
+	func forgetObservedActivity() {
+		activitySamples.removeAll()
+		observedActivity = nil
 	}
 
 	// MARK: - Timing
@@ -429,7 +507,7 @@ extension WallpaperScene {
 		}
 
 		// Browsing Mode puts the page in front of the user to click, which a still cannot do.
-		if website?.rendering == .snapshot, !AppState.shared.isBrowsingMode {
+		if wantsStills, !AppState.shared.isBrowsingMode {
 			return .snapshot
 		}
 

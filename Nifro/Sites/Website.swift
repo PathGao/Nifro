@@ -160,7 +160,9 @@ extension Website.Audio: DecodableDefault.Source {
 }
 
 extension Website.Rendering: DecodableDefault.Source {
-	// Existing websites and anything typed in by hand keep rendering live. Switching a page to
-	// stills without being asked would stop animations people put there on purpose.
-	static let defaultValue = live
+	// Watching first is the right default because the answer is a property of the page, and asking
+	// the person who pasted a URL to know it in advance is asking them to guess. The watcher starts
+	// a page live and only moves it to stills after a minute of seeing nothing move, so a wrong
+	// answer costs a minute rather than a broken wallpaper.
+	static let defaultValue = automatic
 }
