@@ -187,7 +187,7 @@ gh workflow run release.yml --ref main
 The workflow covers the rest: build, sign, notarize, package, **create the tag**, create the Release,
 write back `Casks/nifro.rb` as a pull request.
 
-When it fails, start with the `xcodebuild-log` artifact in Actions.
+When it fails, start with the `xcodebuild-logs` artifact in Actions.
 
 ### The tag is the last thing, not the first
 

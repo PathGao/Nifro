@@ -282,12 +282,18 @@ jobs:
 
           rm -f "$RUNNER_TEMP/notary.p8"
 
+      # `include-hidden-files` because everything this workflow produces lives under `.release`, and a
+      # leading dot makes it hidden — which this action skips by default, with a warning nobody reads
+      # on a step that reports success. No run had ever produced an artifact. The one that mattered
+      # was the release that failed: RELEASE.md sends you to the xcodebuild log first, and there has
+      # never been one to open.
       - name: Upload the build logs
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: xcodebuild-logs
           path: .release/xcodebuild-*.log
+          include-hidden-files: true
           if-no-files-found: ignore
 
       # The dry run stops here with the disk images kept as artifacts, so the whole pipeline can be
@@ -298,6 +304,10 @@ jobs:
         with:
           name: dry-run-disk-images
           path: .release/*.dmg
+          include-hidden-files: true
+          # The disk images are the point of a dry run. Nothing to keep means the run proved less than
+          # it looks like it did, so this fails rather than warns.
+          if-no-files-found: error
 
       - name: Say what the dry run would have done
         if: inputs.dry_run
