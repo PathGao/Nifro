@@ -83,41 +83,32 @@ enum Shortcut: String, CaseIterable {
 	}
 
 	/**
-	What pressing it does, or `nil` when the shortcut is not a press-and-release at all.
+	The action it runs, or `nil` when the shortcut is not a press-and-release at all.
 
 	`holdToInteract` is the one exception: it acts on the key going down and again on it coming up, so
-	it is installed by `HoldToInteract` rather than driven from here. It still belongs in the table —
-	it needs a default and a row in Settings like every other one.
+	`HoldToInteract` installs it rather than driving it from here. It still belongs in the table — it
+	needs a default and a row in Settings like every other one.
 	*/
-	@MainActor
-	var action: (() -> Void)? {
+	var action: Action? {
 		switch self {
 		case .holdToInteract:
 			nil
 		case .toggleEnabled:
-			{ AppState.shared.isManuallyDisabled.toggle() }
+			.toggleEnabled
 		case .toggleBrowsingMode:
-			{ Defaults[.isBrowsingMode].toggle() }
+			.toggleBrowsingMode
 		case .toggleSound:
-			{
-				guard let website = WebsitesController.shared.current else {
-					return
-				}
-
-				WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
-					$0.audio = $0.audio == .unmuted ? .muted : .unmuted
-				}
-			}
+			.toggleSound
 		case .chooseRegion:
-			{ AppState.shared.beginCropSelection() }
+			.chooseRegion
 		case .reload:
-			{ AppState.shared.reloadWebsite() }
+			.reload
 		case .nextWebsite:
-			{ WebsitesController.shared.makeNextCurrent() }
+			.nextWebsite
 		case .previousWebsite:
-			{ WebsitesController.shared.makePreviousCurrent() }
+			.previousWebsite
 		case .randomWebsite:
-			{ WebsitesController.shared.makeRandomCurrent() }
+			.randomWebsite
 		}
 	}
 
@@ -131,7 +122,9 @@ enum Shortcut: String, CaseIterable {
 				continue
 			}
 
-			KeyboardShortcuts.onKeyUp(for: shortcut.name, action: action)
+			KeyboardShortcuts.onKeyUp(for: shortcut.name) {
+				action.run()
+			}
 		}
 	}
 

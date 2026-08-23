@@ -53,8 +53,8 @@ extension AppState {
 			menu.addCallbackItem(
 				String(localized: "Reload"),
 				isEnabled: WebsitesController.shared.current != nil
-			) { [weak self] in
-				self?.reloadWebsite()
+			) {
+				Action.reload.run()
 			}
 			.setShortcut(for: Shortcut.reload.name)
 
@@ -76,16 +76,7 @@ extension AppState {
 				isEnabled: WebsitesController.shared.current != nil,
 				isChecked: Defaults[.isBrowsingMode]
 			) {
-				Defaults[.isBrowsingMode].toggle()
-
-				SSApp.runOnce(identifier: "activatedBrowsingMode") {
-					DispatchQueue.main.async {
-						NSAlert.showModal(
-							title: String(localized: "Browsing Mode lets you temporarily interact with the website. For example, to log into an account or scroll to a specific position on the website."),
-							message: String(localized: "If you don't currently see the website, you might need to hide some windows to reveal the desktop.")
-						)
-					}
-				}
+				Action.toggleBrowsingMode.run()
 			}
 			.setShortcut(for: Shortcut.toggleBrowsingMode.name)
 
@@ -94,9 +85,7 @@ extension AppState {
 					String(localized: "Sound"),
 					isChecked: website.audio == .unmuted
 				) {
-					WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
-						$0.audio = $0.audio == .unmuted ? .muted : .unmuted
-					}
+					Action.toggleSound.run()
 				}
 				.setShortcut(for: Shortcut.toggleSound.name)
 
@@ -119,8 +108,8 @@ extension AppState {
 		if let website = WebsitesController.shared.current {
 			menu.addSeparator()
 
-			menu.addCallbackItem(String(localized: "Choose Region…")) { [self] in
-				beginCropSelection()
+			menu.addCallbackItem(String(localized: "Choose Region…")) {
+				Action.chooseRegion.run()
 			}
 			.setShortcut(for: Shortcut.chooseRegion.name)
 
@@ -141,17 +130,17 @@ extension AppState {
 
 		if WebsitesController.shared.all.count > 1 {
 			menu.addCallbackItem(String(localized: "Next")) {
-				WebsitesController.shared.makeNextCurrent()
+				Action.nextWebsite.run()
 			}
 			.setShortcut(for: Shortcut.nextWebsite.name)
 
 			menu.addCallbackItem(String(localized: "Previous")) {
-				WebsitesController.shared.makePreviousCurrent()
+				Action.previousWebsite.run()
 			}
 			.setShortcut(for: Shortcut.previousWebsite.name)
 
 			menu.addCallbackItem(String(localized: "Random")) {
-				WebsitesController.shared.makeRandomCurrent()
+				Action.randomWebsite.run()
 			}
 			.setShortcut(for: Shortcut.randomWebsite.name)
 
@@ -211,8 +200,8 @@ extension AppState {
 		if (isEnabled || isManuallyDisabled) || (!Defaults[.deactivateOnBattery] && powerSourceWatcher?.powerSource.isUsingBattery == false) {
 			menu.addCallbackItem(
 				isManuallyDisabled ? String(localized: "Enable") : String(localized: "Disable")
-			) { [self] in
-				isManuallyDisabled.toggle()
+			) {
+				Action.toggleEnabled.run()
 			}
 			.setShortcut(for: Shortcut.toggleEnabled.name)
 		}

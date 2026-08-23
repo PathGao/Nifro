@@ -290,8 +290,4 @@ final class AppState: ObservableObject {
 			scene.reload()
 		}
 	}
-
-	func toggleBrowsingMode() {
-		Defaults[.isBrowsingMode].toggle()
-	}
 }

@@ -34,18 +34,15 @@ extension AppState {
 			}
 
 			WebsitesController.shared.add(url, title: parameters["title"]?.trimmed.nilIfEmpty)
-		case "reload":
-			reloadWebsite()
-		case "next":
-			WebsitesController.shared.makeNextCurrent()
-		case "previous":
-			WebsitesController.shared.makePreviousCurrent()
-		case "random":
-			WebsitesController.shared.makeRandomCurrent()
-		case "toggle-browsing-mode":
-			toggleBrowsingMode()
 		default:
-			showMessage("The command “\(command)” is not supported.")
+			// Every other command is one of the actions, named by `Action.urlCommand`. "add" stays here
+			// because it is the only one that reads a parameter.
+			guard let action = Action.forURLCommand(command) else {
+				showMessage("The command “\(command)” is not supported.")
+				return
+			}
+
+			action.run()
 		}
 	}
 }

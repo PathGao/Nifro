@@ -88,7 +88,7 @@ struct SetEnabledStateIntent: AppIntent {
 		ensureRunning()
 
 		if shouldToggle {
-			AppState.shared.isManuallyDisabled.toggle()
+			Action.toggleEnabled.run()
 		} else {
 			AppState.shared.isManuallyDisabled = !isEnabled
 		}
@@ -158,7 +158,7 @@ struct ReloadWebsiteIntent: AppIntent {
 	@MainActor
 	func perform() async throws -> some IntentResult {
 		ensureRunning()
-		AppState.shared.reloadWebsite()
+		Action.reload.run()
 		return .result()
 	}
 }
@@ -171,7 +171,7 @@ struct NextWebsiteIntent: AppIntent {
 	@MainActor
 	func perform() async throws -> some IntentResult {
 		ensureRunning()
-		WebsitesController.shared.makeNextCurrent()
+		Action.nextWebsite.run()
 		return .result()
 	}
 }
@@ -184,7 +184,7 @@ struct PreviousWebsiteIntent: AppIntent {
 	@MainActor
 	func perform() async throws -> some IntentResult {
 		ensureRunning()
-		WebsitesController.shared.makePreviousCurrent()
+		Action.previousWebsite.run()
 		return .result()
 	}
 }
@@ -197,7 +197,7 @@ struct RandomWebsiteIntent: AppIntent {
 	@MainActor
 	func perform() async throws -> some IntentResult {
 		ensureRunning()
-		WebsitesController.shared.makeRandomCurrent()
+		Action.randomWebsite.run()
 		return .result()
 	}
 }
@@ -210,7 +210,7 @@ struct ToggleBrowsingModeIntent: AppIntent {
 	@MainActor
 	func perform() async throws -> some IntentResult {
 		ensureRunning()
-		AppState.shared.toggleBrowsingMode()
+		Action.toggleBrowsingMode.run()
 		return .result()
 	}
 }
