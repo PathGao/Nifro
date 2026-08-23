@@ -48,6 +48,47 @@ enum VideoEmbed {
 		return nil
 	}
 
+	/**
+	The page that has to host `url` for it to work, or `nil` when the address can be opened on its own.
+
+	YouTube's embed address is built to be framed by somebody else's page and refuses to be one:
+	opened directly it answers "error 153, player configuration error", which is what a Nifro
+	wallpaper pointed straight at it used to show. So it gets a page to be framed by.
+
+	Which address that page is loaded as matters, and not in the way you would guess: YouTube rejects
+	being framed by `youtube.com` too. This is the project's own page, which is also an honest answer
+	to who is asking.
+	*/
+	static func hostPage(for url: URL) -> (html: String, baseURL: URL)? {
+		guard
+			url.host?.lowercased().hasSuffix("youtube.com") == true,
+			url.path.hasPrefix("/embed/"),
+			let baseURL = URL(string: "https://github.com/PathGao/nifro")
+		else {
+			return nil
+		}
+
+		// The address is either one this file built out of a checked identifier or one the user
+		// typed. Escaped anyway, because the difference is not visible from here.
+		let source = url.absoluteString
+			.replacingOccurrences(of: "&", with: "&amp;")
+			.replacingOccurrences(of: "\"", with: "&quot;")
+			.replacingOccurrences(of: "<", with: "&lt;")
+
+		return (
+			"""
+			<!doctype html>
+			<meta name="viewport" content="width=device-width, initial-scale=1">
+			<style>
+				html, body { margin: 0; height: 100%; background: #000 }
+				iframe { border: 0; width: 100%; height: 100% }
+			</style>
+			<iframe src="\(source)" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+			""",
+			baseURL
+		)
+	}
+
 	private static func youTubeVideoID(url: URL, host: String) -> String? {
 		if host.hasSuffix("youtu.be") {
 			return sanitised(url.lastPathComponent)

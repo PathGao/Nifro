@@ -461,3 +461,37 @@ struct ZoomTests {
 		#expect(Zoom.identity.region(inPageOfSize: page) == CGRect(origin: .zero, size: page))
 	}
 }
+
+extension VideoEmbedTests {
+	@Test("A YouTube player address gets a page to be framed by")
+	func youTubeNeedsAHost() throws {
+		let watch = try #require(URL(string: "https://www.youtube.com/watch?v=jNQXAC9IVRw"))
+		let url = try #require(VideoEmbed.playerURL(for: watch))
+		let host = try #require(VideoEmbed.hostPage(for: url))
+
+		#expect(host.html.contains("<iframe"))
+		#expect(host.html.contains("/embed/jNQXAC9IVRw"))
+		// Framed by youtube.com it fails the same way as not being framed at all.
+		#expect(host.baseURL.host()?.hasSuffix("youtube.com") != true)
+	}
+
+	@Test("Anything that can be opened on its own is left alone")
+	func othersLoadDirectly() throws {
+		for source in [
+			"https://player.bilibili.com/player.html?bvid=BV1xx411c7mD&autoplay=1",
+			"https://www.youtube.com/@NASA/live",
+			"https://example.com"
+		] {
+			let url = try #require(URL(string: source))
+			#expect(VideoEmbed.hostPage(for: url) == nil, "\(source) should not be wrapped")
+		}
+	}
+
+	@Test("The framed address cannot break out of the attribute it sits in")
+	func hostEscapesTheAddress() throws {
+		let url = try #require(URL(string: #"https://www.youtube.com/embed/x?a="><script>alert(1)</script>"#))
+		let host = try #require(VideoEmbed.hostPage(for: url))
+
+		#expect(!host.html.contains("<script"))
+	}
+}

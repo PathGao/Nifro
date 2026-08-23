@@ -85,7 +85,7 @@ extension AppState {
 		}
 
 		cropSelectionPreviousZoom = nil
-		installContentView()
+		applyRenderingMode()
 	}
 
 	private func restoreZoomAfterCancelledSelection() {
@@ -93,7 +93,7 @@ extension AppState {
 			let previous = cropSelectionPreviousZoom,
 			let website = WebsitesController.shared.current
 		else {
-			installContentView()
+			applyRenderingMode()
 			return
 		}
 
@@ -102,6 +102,6 @@ extension AppState {
 		}
 
 		cropSelectionPreviousZoom = nil
-		installContentView()
+		applyRenderingMode()
 	}
 }

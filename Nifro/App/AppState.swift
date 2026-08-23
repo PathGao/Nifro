@@ -50,7 +50,7 @@ final class AppState: ObservableObject {
 			for scene in scenes {
 				scene.window.isInteractive = isBrowsingMode
 				scene.applyOpacity()
-				scene.applyVisibilityState()
+				scene.applyRenderingMode()
 				scene.resetTimer()
 			}
 
@@ -203,6 +203,19 @@ final class AppState: ObservableObject {
 	func installContentView() {
 		for scene in scenes {
 			scene.installContentView()
+		}
+	}
+
+	/**
+	Put every scene back to whatever it should be drawing, now that framing a region is over.
+
+	Not `installContentView`, which puts the live page up. A website drawn from stills has no live
+	page to put up: the still it is showing was taken with a web view that was dropped afterwards, so
+	installing it shows an empty one until something happens to reload it.
+	*/
+	func applyRenderingMode() {
+		for scene in scenes {
+			scene.applyRenderingMode()
 		}
 	}
 

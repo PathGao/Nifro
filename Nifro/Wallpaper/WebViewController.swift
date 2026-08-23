@@ -163,16 +163,7 @@ final class WebViewController: NSViewController {
 
 	// TODO: When Swift 6 is out, make this async and throw instead of using `onLoaded` handler.
 	func loadURL(_ url: URL) {
-		guard !url.isFileURL else {
-			_ = url.accessSandboxedURLByPromptingIfNeeded()
-			webView.loadFileURL(url.appendingPathComponent("index.html", isDirectory: false), allowingReadAccessTo: url)
-
-			return
-		}
-
-		var request = URLRequest(url: url)
-		request.cachePolicy = .reloadIgnoringLocalCacheData
-		webView.load(request)
+		webView.loadWallpaper(url)
 	}
 
 	private func internalOnLoaded(_ error: Error?) {

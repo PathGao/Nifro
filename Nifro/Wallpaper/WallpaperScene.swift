@@ -170,6 +170,37 @@ final class WallpaperScene {
 	}
 
 	/**
+	Make what is on screen match the way this scene should be drawing right now.
+
+	`renderingMode` is worked out from four things that change on their own — Browsing Mode, the
+	website's own choice, whether a region is being framed, whether the page takes clicks — so it
+	changes without anything having touched `content`.
+
+	The direction that goes wrong quietly is leaving snapshot rendering. What is on screen is a
+	still, and there is no page behind it: taking the still drops the web process, which is the whole
+	point of drawing that way. So turning on Browsing Mode over a snapshot website used to give a
+	picture that could not be clicked, and framing a region over one used to give a blank wallpaper
+	until something else happened to reload it.
+	*/
+	func applyRenderingMode() {
+		guard renderingMode != .snapshot else {
+			// The still may be of a region that is no longer the one to show.
+			snapshotTask?.cancel()
+			snapshotTask = nil
+			refreshSnapshot()
+			return
+		}
+
+		guard case .snapshot = content else {
+			applyVisibilityState()
+			return
+		}
+
+		stopSnapshotRendering()
+		loadWebsite()
+	}
+
+	/**
 	Put `content` on screen.
 
 	The only place that assigns `window.contentView` or `window.reducedRegion` for a wallpaper window, and the only place that installs the menu bar band.

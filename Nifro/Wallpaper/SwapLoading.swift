@@ -105,16 +105,7 @@ extension SSWebView {
 	*/
 	@MainActor
 	func loadAndWait(_ url: URL, timeout: Duration) async throws {
-		if url.isFileURL {
-			// Without this the sandbox refuses the read. Swap loading keeps the old page on failure,
-			// so the refusal would show up as a local website that silently stops updating.
-			_ = url.accessSandboxedURLByPromptingIfNeeded()
-			loadFileURL(url.appendingPathComponent("index.html", isDirectory: false), allowingReadAccessTo: url)
-		} else {
-			var request = URLRequest(url: url)
-			request.cachePolicy = .reloadIgnoringLocalCacheData
-			load(request)
-		}
+		loadWallpaper(url)
 
 		// Polling rather than racing the navigation delegate against a timer. The delegate belongs to the shared controller and reports for whichever web view is live, so a replacement loading out of sight cannot use it. `isLoading` flips false on both success and failure, and the URL check below tells them apart.
 		let step = Duration.milliseconds(100)
@@ -133,5 +124,31 @@ extension SSWebView {
 		guard self.url != nil else {
 			throw CocoaError(.fileNoSuchFile)
 		}
+	}
+}
+
+extension WKWebView {
+	/**
+	Start loading `url` the way that address has to be loaded.
+
+	Three addresses, three ways in. A local folder needs the sandbox opened for it first, or the read
+	is refused and a local website silently stops updating. A YouTube player has to be framed by a
+	page rather than be one. Everything else is a request.
+	*/
+	func loadWallpaper(_ url: URL) {
+		if url.isFileURL {
+			_ = url.accessSandboxedURLByPromptingIfNeeded()
+			loadFileURL(url.appendingPathComponent("index.html", isDirectory: false), allowingReadAccessTo: url)
+			return
+		}
+
+		if let host = VideoEmbed.hostPage(for: url) {
+			loadHTMLString(host.html, baseURL: host.baseURL)
+			return
+		}
+
+		var request = URLRequest(url: url)
+		request.cachePolicy = .reloadIgnoringLocalCacheData
+		load(request)
 	}
 }
