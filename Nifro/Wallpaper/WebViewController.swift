@@ -186,6 +186,20 @@ final class WebViewController: NSViewController {
 
 extension WebViewController: WKNavigationDelegate {
 	func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
+		// An address that has to be framed by a page must never become the page. YouTube's player
+		// answers "error 153, player configuration error" when it is the document rather than a frame
+		// in one, and there are several ways to end up there by accident: a link that opens in a new
+		// window, a script setting `top.location`, a reload of something that was already wrong. One
+		// guard here covers all of them, because they all arrive as a main-frame navigation.
+		if
+			navigationAction.targetFrame?.isMainFrame == true,
+			let url = navigationAction.request.url,
+			VideoEmbed.hostPage(for: url) != nil
+		{
+			webView.loadWallpaper(url)
+			return .cancel
+		}
+
 		// Holding Command or Option sends a link to the default browser whatever the settings say. That matches other Mac apps with an embedded web view, and it is the only way to open a same-site link externally without changing a setting first. Plash#140.
 		if
 			navigationAction.navigationType == .linkActivated,
@@ -201,12 +215,19 @@ extension WebViewController: WKNavigationDelegate {
 			return .cancel
 		}
 
+		// Compared against the website's own address rather than the document's. They are the same
+		// thing until the page needs a host page to be framed by, and then the document is the host
+		// and every link on the page counts as leaving the site — so clicking anything in a framed
+		// player opened a browser instead of doing what it does. Redirects move the document's
+		// address too, with the same result.
+		let siteHost = scene?.website?.url.host ?? webView.url?.host
+
 		if
 			Defaults[.openExternalLinksInBrowser],
 			navigationAction.navigationType == .linkActivated,
-			let originalURL = webView.url,
+			let siteHost,
 			let newURL = navigationAction.request.url,
-			originalURL.host != newURL.host
+			siteHost != newURL.host
 		{
 			// Hide Nifro if it's in front of everything.
 			if Defaults[.isBrowsingMode], Defaults[.bringBrowsingModeToFront] {
@@ -223,7 +244,15 @@ extension WebViewController: WKNavigationDelegate {
 		}
 
 		// Fix signing into Google Account. Google has some stupid protection against fake user agents for "accounts.google.com" and "docs.google.com".
-		if let host = navigationAction.request.url?.host {
+		//
+		// Main frame only. The user agent belongs to the web view, not to the frame being navigated,
+		// so a page that loads anything at all from a Google host in a subframe — which a YouTube
+		// player does, for consent and for ads — used to blank the user agent for the whole page and
+		// everything it loaded afterwards.
+		if
+			navigationAction.targetFrame?.isMainFrame == true,
+			let host = navigationAction.request.url?.host
+		{
 			let useBlankUserAgent = host == "google.com" || host.hasSuffix(".google.com")
 			webView.customUserAgent = useBlankUserAgent ? "" : SSWebView.safariUserAgent
 		}
