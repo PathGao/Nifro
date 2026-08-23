@@ -95,8 +95,8 @@ Self-signing needs only the first two. The last four are for notarization later.
 
 | Secret | What it holds | Where it comes from | Needed for self-signing |
 | --- | --- | --- | --- |
-| `MACOS_CERTIFICATE_P12` | The `.p12` with the certificate and private key, **base64-encoded** | `Tools/setup-signing.sh --export` prints it directly | Yes |
-| `MACOS_CERTIFICATE_PASSWORD` | The password for that `.p12` | Same as above, the script generates one at random and prints it | Yes |
+| `MACOS_CERTIFICATE_P12` | The `.p12` with the certificate and private key, **base64-encoded** | `Tools/setup-signing.sh --export … --upload` sets it | Yes |
+| `MACOS_CERTIFICATE_PASSWORD` | The password for that `.p12` | The same run of the same command. **These two have to come from one run** — see B0 | Yes |
 | `APPLE_TEAM_ID` | The 10-character Team ID, such as `ABCDE12345` | developer.apple.com → Membership | No |
 | `NOTARY_KEY_P8` | The App Store Connect API private key `AuthKey_XXXXXXXX.p8`, **base64-encoded** | See A3 below | No |
 | `NOTARY_KEY_ID` | The Key ID of that key (8 characters) | Shown on the page when the key is generated | No |
@@ -120,11 +120,20 @@ Where to set them: repo → Settings → Secrets and variables → Actions → N
 
 **To do now (self-signed, no Apple account needed):**
 
-- **B0** Run this once locally and put the two printed values into the repository secrets:
+- **B0** Run this once locally. It writes the certificate, sets both repository secrets with `gh`,
+  and prints neither value:
 
   ```bash
-  ./Tools/setup-signing.sh --export ~/nifro-release.p12
+  ./Tools/setup-signing.sh --export ~/nifro-release.p12 --upload
   ```
+
+  **Set them together or not at all.** Each run generates a fresh certificate and a fresh random
+  password, so a certificate from one run with a password from another opens nothing — and the only
+  place that shows up is ten minutes into a release, as
+  `MAC verification failed during PKCS12 import (wrong password?)`, which reads like a typo. That is
+  what happened on the first attempt. `--upload` pipes both straight from the run that made them, so
+  they cannot drift apart. Without it the script prints them for pasting by hand, and checks the pair
+  imports before it does.
 
   Then back `~/nifro-release.p12` up somewhere you will still find it in a year (see "Losing the
   certificate means changing identity”, above). Do **not** keep this file in the repository.
