@@ -247,13 +247,19 @@ final class AppState: ObservableObject {
 	}
 
 	/**
-	Whether two versions of the website list differ in nothing but the sound setting.
+	Whether two versions of the website list differ in nothing the page has to be rebuilt for.
 
-	The list is republished for every edit, and every edit but this one changes something that is
-	built into the page when the page is created. Telling them apart is what lets sound be changed
-	without the page starting over.
+	The list is republished for every edit, and most edits change something that is built into the
+	page when the page is created. Two do not. Sound is told to the page that is already up. So is the
+	framed region: it wraps the view the page is already in, and the page never learns about it.
+
+	Telling those two apart from the rest is what lets them be changed without the page starting over
+	— which matters most for the region, because framing one is something you do *after* getting the
+	page to show what you want. Reloading at that moment throws away a panned map, a scrolled
+	dashboard, or the corner of a canvas somebody spent a minute finding, and then frames whatever the
+	page looks like from cold.
 	*/
-	func differOnlyInAudio(_ old: [Website], _ new: [Website]) -> Bool {
+	func differOnlyInLiveSettings(_ old: [Website], _ new: [Website]) -> Bool {
 		guard old.count == new.count else {
 			return false
 		}
@@ -261,8 +267,21 @@ final class AppState: ObservableObject {
 		return zip(old, new).allSatisfy { before, after in
 			var matched = before
 			matched.audio = after.audio
+			matched.zoom = after.zoom
 			return matched == after
 		}
+	}
+
+	/**
+	Take up a change that the pages already on screen can absorb.
+	*/
+	func applyLiveSettings() {
+		for scene in scenes {
+			scene.website = WebsitesController.shared.scheduled(for: scene.display)
+			scene.installContentView()
+		}
+
+		applyAudioSetting()
 	}
 
 	/**

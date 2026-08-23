@@ -62,11 +62,11 @@ extension AppState {
 		Defaults.publisher(.websites, options: [])
 			.receive(on: DispatchQueue.main)
 			.sink { [self] in
-				// Sound is the one setting people change while looking at the thing it applies to, and
-				// it is the one the page can be told about without being rebuilt. Everything else is
+				// Sound and the framed region are the settings people change while looking at the thing
+				// they apply to, and they are the two the page already up can absorb. Everything else is
 				// baked into the page when it is created, so everything else needs a new one.
-				if differOnlyInAudio($0.oldValue, $0.newValue) {
-					applyAudioSetting()
+				if differOnlyInLiveSettings($0.oldValue, $0.newValue) {
+					applyLiveSettings()
 					return
 				}
 
