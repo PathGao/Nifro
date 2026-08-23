@@ -25,7 +25,7 @@
 <p align="center">
   <a href="https://github.com/PathGao/Nifro/releases">历史版本</a>
   ·
-  <a href="sites/">站点清单</a>
+  <a href="sites/">投稿站点</a>
   ·
   <a href="sites/CANDIDATES.zh-Hans.md">候选站点</a>
   ·

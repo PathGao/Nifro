@@ -25,7 +25,7 @@
 <p align="center">
   <a href="https://github.com/PathGao/Nifro/releases">Releases</a>
   ·
-  <a href="sites/">Site list</a>
+  <a href="sites/">Adding a site</a>
   ·
   <a href="sites/CANDIDATES.md">Candidate sites</a>
   ·

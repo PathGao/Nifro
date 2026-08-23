@@ -278,7 +278,7 @@ jobs:
           if [ "${{ steps.caps.outputs.notarize }}" = "true" ] && [ "${{ steps.identity.outputs.kind }}" = "developer-id" ]; then
             note="This build is signed with a Developer ID certificate and notarized by Apple, so it opens on a double-click."
           else
-            note="This build is self-signed and **not notarized by Apple**. Homebrew is the recommended route, since the cask strips the quarantine attribute for you. If you download the disk image directly, the first launch needs System Settings → Privacy & Security, then Open Anyway."
+            note=$'This build is self-signed and **not notarized by Apple**, so a disk image you download and open yourself will be turned away the first time with "Apple could not verify Nifro is free of malware". That dialog offers only Move to Trash and Cancel — the way through is somewhere else:\n\n1. Press **Cancel**. Do not move it to the trash.\n2. Open **System Settings → Privacy & Security** and scroll to the bottom.\n3. There is a line naming Nifro, with an **Open Anyway** button. Press it, and confirm with your password or Touch ID.\n4. Press **Open** in the last dialog. macOS remembers, and never asks again.\n\nInstalling with Homebrew skips all of that — the cask clears the mark for you.
           fi
 
           cat > "$RUNNER_TEMP/notes.md" <<EOF
