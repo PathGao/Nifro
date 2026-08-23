@@ -151,10 +151,6 @@ final class WebViewController: NSViewController {
 		webView = createWebView()
 	}
 
-	func recreateWebView() {
-		webView = createWebView()
-		view = webView
-	}
 
 	private(set) lazy var webView = createWebView()
 

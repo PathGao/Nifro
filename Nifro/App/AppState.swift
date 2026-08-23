@@ -219,12 +219,23 @@ final class AppState: ObservableObject {
 		}
 	}
 
-	func recreateWebViewAndReload() {
+	/**
+	Take up whatever the website list now says.
+
+	Through swap loading, so what is on screen stays there until the next page has arrived. It used
+	to install a blank web view first and then start loading into it, which showed the desktop for as
+	long as the new page took — and the menu bar band, which is only re-sampled once a page has
+	loaded, kept the old website's colour across that gap. Both of those are the same fix: do not take
+	the old page away before there is a new one.
+
+	Nothing needs a new web view here. Swap loading builds one for the replacement, and it is built
+	after the change, so the new website's scripts are in it.
+	*/
+	func applyWebsiteChanges() {
 		rebuildScenes()
 
 		for scene in scenes {
-			scene.recreateWebView()
-			scene.loadWebsite()
+			scene.reload()
 		}
 	}
 

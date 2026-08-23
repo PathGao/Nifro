@@ -44,7 +44,7 @@ extension AppState {
 			.sink { [self] _ in
 				Task {
 					await ContentRules.refresh()
-					recreateWebViewAndReload()
+					applyWebsiteChanges()
 				}
 			}
 			.store(in: &cancellables)
@@ -79,7 +79,7 @@ extension AppState {
 				}
 
 				resetTimer()
-				recreateWebViewAndReload()
+				applyWebsiteChanges()
 
 				// We never destroy the webview, so we have to make sure it's not in browsing mode when there are no websites.
 				if $0.newValue.isEmpty {

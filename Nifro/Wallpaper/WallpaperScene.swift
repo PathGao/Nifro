@@ -274,11 +274,6 @@ final class WallpaperScene {
 		return view
 	}
 
-	func recreateWebView() {
-		webViewController.recreateWebView()
-		installContentView()
-	}
-
 	/**
 	Drop the page and the process behind it.
 	*/
