@@ -55,7 +55,7 @@ final class WallpaperScene {
 	`website` is where the scene is heading; this is where it is. The two differ for as long as a
 	replacement takes to load out of sight, which is the whole point of swap loading.
 	*/
-	private var loadedWebsiteID: Website.ID?
+	private(set) var loadedWebsiteID: Website.ID?
 
 	/**
 	Whether the page for the current load has been put on screen yet.
@@ -66,6 +66,12 @@ final class WallpaperScene {
 	var playlistTimer: Timer?
 
 	private var cancellables = Set<AnyCancellable>()
+
+	/**
+	Watches the current web view's address. Its own property rather than one of `cancellables`,
+	because it has to be replaced when the web view is.
+	*/
+	private var addressObserver: AnyCancellable?
 
 	init(display: Display?) {
 		self.display = display
@@ -83,14 +89,7 @@ final class WallpaperScene {
 
 		// The scene owns its own loading lifecycle. Wiring this app-wide meant only the first scene
 		// ever restored its zoom or reported its errors.
-		// The page moving itself shows up as the address changing without a navigation, which is what a
-		// fragment change is. Debounced because a page that follows a drag writes one on every frame.
-		webViewController.webView.publisher(for: \.url)
-			.debounce(for: .seconds(2), scheduler: DispatchQueue.main)
-			.sink { [weak self] _ in
-				self?.captureNavigatedAddress()
-			}
-			.store(in: &cancellables)
+		observeAddressChanges()
 
 		webViewController.didLoadPublisher
 			.convertToResult()
@@ -216,6 +215,10 @@ final class WallpaperScene {
 	func reload() {
 		captureScrollPosition()
 
+		// Before the page goes, not two seconds after it last moved. Switching website reloads, and
+		// somebody who moves a map and immediately switches away would otherwise lose the move.
+		captureNavigatedAddress()
+
 		// The address the user specified rather than whatever is loaded now — that may be a redirect
 		// resolving differently each time — but moved to where the page last was, when the page says
 		// so in its fragment.
@@ -271,6 +274,24 @@ final class WallpaperScene {
 	wrapper would leave the real web view hidden for the rest of the session, which is a blank
 	wallpaper with no way back.
 	*/
+	/**
+	Follow the address of whichever web view is live.
+
+	The page moving itself shows up as the address changing without a navigation, which is what a
+	fragment change is. Debounced, because a page that follows a drag writes one on every frame.
+
+	Re-subscribed whenever the web view is replaced. Set up once in `init`, it watched the first web
+	view forever — and swap loading builds a new one for every website change, so after the first
+	switch nothing was being watched at all and no page position was ever recorded again.
+	*/
+	func observeAddressChanges() {
+		addressObserver = webViewController.webView.publisher(for: \.url)
+			.debounce(for: .seconds(2), scheduler: DispatchQueue.main)
+			.sink { [weak self] _ in
+				self?.captureNavigatedAddress()
+			}
+	}
+
 	func revealPage() {
 		guard !hasRevealedPage else {
 			return

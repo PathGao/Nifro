@@ -66,15 +66,19 @@ extension WallpaperScene {
 	func captureNavigatedAddress() {
 		guard
 			Defaults[.restoreScrollPosition],
-			let website,
-			let current = webViewController.webView.navigatedURL(for: website),
+			// The website whose page is on screen, not the one the scene is heading for. Switching
+			// website reassigns `website` before the old page has gone, so recording against it would
+			// file one site's position under another — and then reject it, because the addresses do not
+			// match, which is how the position was lost rather than misplaced.
+			let onScreen = loadedWebsiteID.flatMap({ WebsitesController.shared.all[id: $0] }),
+			let current = webViewController.webView.navigatedURL(for: onScreen),
 			current.fragment?.isEmpty == false,
-			current.normalized(removeFragment: true) == website.url.normalized(removeFragment: true)
+			current.normalized(removeFragment: true) == onScreen.url.normalized(removeFragment: true)
 		else {
 			return
 		}
 
-		Defaults[lastAddressKey(for: website.url)] = current.absoluteString
+		Defaults[lastAddressKey(for: onScreen.url)] = current.absoluteString
 	}
 
 	/**

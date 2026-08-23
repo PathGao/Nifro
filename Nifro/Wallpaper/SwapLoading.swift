@@ -101,8 +101,14 @@ extension WallpaperScene {
 	// change turns out to read as abrupt.
 	*/
 	private func adopt(_ replacement: SSWebView) {
+		// Before adopting, while the outgoing page is still the live one.
+		captureNavigatedAddress()
+
 		replacement.isHidden = false
 		webViewController.adopt(replacement)
+
+		// The observer was watching the web view that just went away.
+		observeAddressChanges()
 
 		// Before `installContentView`, which refuses to touch a page belonging to another website.
 		// This is the moment the page on screen becomes this one.
