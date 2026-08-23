@@ -36,7 +36,11 @@ env:
 
 jobs:
   release:
-    runs-on: macos-15
+    # The same image CI builds on. It was macos-15, whose default Xcode is 16.4, and the project does
+    # not compile with it — so the release pipeline could never have produced a build, while CI stayed
+    # green on macos-26 the whole time. Two workflows building the same project on two toolchains is
+    # not a difference worth having.
+    runs-on: macos-26
     permissions:
       contents: write
       # The cask bump arrives as a pull request rather than a push, because `main` requires one.
@@ -46,6 +50,15 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+
+      # Same floor as ci.yml. Asserted rather than selected by path: the image ships Xcode_26.6.app
+      # and the like, so naming a path rots on the next image update.
+      - name: Check the Xcode version
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          major="$(xcodebuild -version | sed -n '1s/Xcode \([0-9]*\).*/\1/p')"
+          [ "$major" -ge 26 ] || { echo "::error::Xcode $major is too old; this project needs 26 or newer"; exit 1; }
 
       - name: Resolve the version and reconcile it with Config.xcconfig
         id: version
@@ -179,7 +192,7 @@ jobs:
               ARCHS="$arch" \
               ONLY_ACTIVE_ARCH=NO \
               "${signing_args[@]}" \
-              | tee ".release/xcodebuild-$arch.log" | grep -E '^(\*\*|CodeSign|error:)' || true
+              | tee ".release/xcodebuild-$arch.log" | grep -E '(^\*\*|^CodeSign|error:)' || true
 
             src=".xcode-build/Build/Products/Release/$BUILT_APP_NAME"
             test -d "$src" || { echo "::error::$arch: $src not found"; exit 1; }
