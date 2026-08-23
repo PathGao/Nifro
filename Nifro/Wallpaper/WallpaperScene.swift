@@ -445,6 +445,46 @@ final class WallpaperScene {
 		}
 	}
 
+	/**
+	Leave nothing of this scene on screen or running.
+
+	Disabling is meant to be indistinguishable from having quit, apart from the menu bar icon still
+	being there — so everything this scene puts on screen has to go, not just the wallpaper window.
+	The colour band is its own window, which is what keeps it steady while the wallpaper moves and
+	resizes, and is also why nothing was taking it down: it stayed, tinting the menu bar with the
+	colour of a page that was no longer being shown.
+
+	One method rather than a list of four things at the call site, because the next thing a scene
+	starts will have to be stopped here too, and a list is where that gets forgotten.
+	*/
+	/**
+	Put back everything `suspend()` took away.
+	*/
+	func resume() {
+		occlusionMonitor.start()
+		installMenuBarBandIfNeeded()
+		window.makeKeyAndOrderFront(nil)
+	}
+
+	func suspend() {
+		occlusionMonitor.stop()
+		discardSnapshotInFlight()
+		reloadTimer?.invalidate()
+		reloadTimer = nil
+		playlistTimer?.invalidate()
+		playlistTimer = nil
+		pendingLoad?.cancel()
+
+		// Before the band: releasing installs an empty page, and installing content is one of the
+		// paths that puts the band back. It refuses to now that the app is disabled, but relying on
+		// the order here as well costs nothing.
+		releaseWebView()
+
+		window.orderOut(nil)
+		menuBarBand?.close()
+		menuBarBand = nil
+	}
+
 	func tearDown() {
 		occlusionMonitor.stop()
 		reloadTimer?.invalidate()

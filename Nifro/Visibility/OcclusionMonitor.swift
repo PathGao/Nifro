@@ -43,6 +43,22 @@ final class OcclusionMonitor {
 	}
 
 	init() {
+		start()
+	}
+
+	/**
+	Begin watching, or begin again after `stop()`.
+
+	Separate from `init` so that stopping is reversible. It has to be: disabling the wallpaper stops
+	every scene, and enabling it again reuses the same scene objects rather than building new ones —
+	a monitor that could only be started once would leave those scenes never measuring anything again,
+	which reads as the wallpaper simply not reacting to windows any more.
+	*/
+	func start() {
+		guard timer == nil else {
+			return
+		}
+
 		let workspaceNotifications: [NSNotification.Name] = [
 			NSWorkspace.didActivateApplicationNotification,
 			NSWorkspace.didHideApplicationNotification,

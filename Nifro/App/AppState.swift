@@ -65,15 +65,17 @@ final class AppState: ObservableObject {
 		didSet {
 			statusItemButton.appearsDisabled = !isEnabled
 
-			for scene in scenes {
-				if isEnabled {
-					scene.loadWebsite()
-					scene.window.makeKeyAndOrderFront(self)
-				} else {
-					scene.window.orderOut(self)
-					scene.releaseWebView()
+			guard isEnabled else {
+				for scene in scenes {
+					scene.suspend()
 				}
 
+				return
+			}
+
+			for scene in scenes {
+				scene.resume()
+				scene.loadWebsite()
 				scene.resetTimer()
 				scene.resetPlaylistTimer()
 			}

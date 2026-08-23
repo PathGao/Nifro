@@ -90,6 +90,11 @@ extension WallpaperScene {
 	*/
 	func installMenuBarBandIfNeeded() {
 		guard
+			// Disabled means nothing of this app is on screen but the menu bar icon, and the band is
+			// on screen. Checked here rather than by whoever takes it down, because installing runs
+			// from every content change — taking it down and then letting one of those put it back is
+			// how it survived being disabled in the first place.
+			AppState.shared.isEnabled,
 			let screen,
 			screen.menuBarHeight > 0
 		else {
