@@ -23,6 +23,11 @@ entry's `source` field.
 | `description` | string | yes | One sentence describing what the user ends up staring at. |
 | `tags` | string[] | yes | One or more of: `clock`, `weather`, `dashboard`, `art`, `data`, `calendar`, `ambient`, `photo`, `map`, `screensaver`, `news`, `personal`, `3d`. |
 | `backend` | `snapshot` \| `live` | yes | See below. This is the field that matters most. |
+
+> `backend` is recorded but not acted on at the moment. The two rendering backends were taken out
+> so that the interaction could be got right first; the field stays because it is a true thing about
+> the page and will be read again when they come back. See `docs/ROADMAP.md`.
+
 | `backendNote` | string | no | Why you chose that backend, when it is not obvious. Write one for every `live` entry. |
 | `reloadInterval` | integer | no | Seconds between reloads. For `snapshot` sites this is also how often the screenshot is retaken. Omit if the page refreshes itself. |
 | `zoom` | `{centerX, centerY, scale}` | no | Fill the wallpaper with one part of the page. `centerX`/`centerY` are fractions of the page from its top-left; `scale` is how many times that part is enlarged. Given this way rather than as a rectangle so the entry works on any screen shape. |

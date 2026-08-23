@@ -25,14 +25,6 @@ extension AppState {
 			}
 			.store(in: &cancellables)
 
-		Defaults.publisher(.freezeWhenCovered, options: [])
-			.sink { [self] _ in
-				for scene in scenes {
-					scene.applyVisibilityState()
-				}
-			}
-			.store(in: &cancellables)
-
 		// Plugging or unplugging a display changes how many wallpapers there should be.
 		NSScreen.publisher
 			.sink { [self] in

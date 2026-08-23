@@ -31,9 +31,7 @@ extension WallpaperScene {
 		switch content {
 		case .empty:
 			false
-		case .frozen(let image), .snapshot(let image):
-			image != nil
-		case .live, .reduced:
+		case .live:
 			webViewController.webView.url != nil
 		}
 	}

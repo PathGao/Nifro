@@ -112,9 +112,6 @@ struct SiteGalleryScreen: View {
 					Text(entry.name)
 						.fontWeight(.medium)
 
-					if entry.isLive {
-						badge("live", help: "Keeps rendering. Costs more than a page re-drawn every so often.")
-					}
 
 					if entry.requiresLogin {
 						badge("sign-in", help: "You will need to log in through Browsing Mode once.")

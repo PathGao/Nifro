@@ -39,19 +39,6 @@ final class WallpaperScene {
 	}
 
 	/**
-	Whether the live page has been replaced by its last frame because nothing of the wallpaper is on show.
-
-	A snapshot still is not frozen. It refreshes on its own timer and the page behind it is meant to be gone.
-	*/
-	var isFrozen: Bool {
-		if case .frozen = content {
-			true
-		} else {
-			false
-		}
-	}
-
-	/**
 	Opaque band covering the strip of wallpaper behind the menu bar, when the user asked for colour without content.
 	*/
 	var menuBarBand: MenuBarBandWindow?
@@ -62,40 +49,16 @@ final class WallpaperScene {
 	var pendingWebView: SSWebView?
 	var pendingLoad: Task<Void, Never>?
 
-	/**
-	A reload came due while frozen and still has to happen.
-	*/
-	var isReloadPending = false
-
 	private var reloadTimer: Timer?
 	var playlistTimer: Timer?
-
-	/**
-	The task producing the next still for the snapshot backend.
-	*/
-	var snapshotTask: Task<Void, Never>?
-
-	/**
-	What watching the page said it is, once there has been enough of it to say. `nil` until then.
-	*/
-	var observedActivity: PageActivity?
-
-	/**
-	Readings collected since the page loaded, oldest first.
-	*/
-	var activitySamples: [ActivitySample] = []
-
-	let occlusionMonitor: OcclusionMonitor
 
 	private var cancellables = Set<AnyCancellable>()
 
 	init(display: Display?) {
 		self.display = display
 		self.window = DesktopWindow(display: display)
-		self.occlusionMonitor = OcclusionMonitor()
 
 		webViewController.scene = self
-		occlusionMonitor.screen = display?.screen
 		applyContent()
 
 		// The web view starts hidden so the first frame is not a flash of white.
@@ -125,12 +88,6 @@ final class WallpaperScene {
 				}
 			}
 			.store(in: &cancellables)
-
-		occlusionMonitor.visibleRegionPublisher
-			.sink { [weak self] _ in
-				self?.applyVisibilityState()
-			}
-			.store(in: &cancellables)
 	}
 
 	// MARK: - Content
@@ -142,25 +99,8 @@ final class WallpaperScene {
 
 	A zoom magnifies one rectangle of a page that still believes it has the whole window. Laying it out at any other size reflows the site, and the region the user framed stops being the region they get. So this is always the frame `DesktopWindow` gives a window it has not shrunk: the screen without the menu bar strip.
 
-	`renderOnly` used to answer this with `screen.frame.size` while `installContentView` answered with `screen.frameWithoutStatusBar.size`, so the same region showed different content depending on which path installed it.
 	*/
 	var pageLayoutSize: CGSize? { screen?.pageFrame.size }
-
-	/**
-	Whether this website should be drawn from stills, either because it was told to or because
-	watching it said so.
-	*/
-	var wantsStills: Bool {
-		switch website?.rendering {
-		case .snapshot:
-			true
-		case .automatic:
-			observedActivity == .still || observedActivity == .periodic
-		default:
-			false
-		}
-	}
-
 
 	/**
 	Show the live page, magnified to a region when the website asks for one.
@@ -169,42 +109,7 @@ final class WallpaperScene {
 		content = .live(zoom: website?.zoom)
 	}
 
-	/**
-	Make what is on screen match the way this scene should be drawing right now.
-
-	`renderingMode` is worked out from four things that change on their own — Browsing Mode, the
-	website's own choice, whether a region is being framed, whether the page takes clicks — so it
-	changes without anything having touched `content`.
-
-	The direction that goes wrong quietly is leaving snapshot rendering. What is on screen is a
-	still, and there is no page behind it: taking the still drops the web process, which is the whole
-	point of drawing that way. So turning on Browsing Mode over a snapshot website used to give a
-	picture that could not be clicked, and framing a region over one used to give a blank wallpaper
-	until something else happened to reload it.
-	*/
-	func applyRenderingMode() {
-		guard renderingMode != .snapshot else {
-			// Not cancelled and restarted. Turning Browsing Mode on and off again comes through here,
-			// and a snapshot is a whole page load — interrupting one to start the same one again means
-			// a website that refreshes slowly may never finish refreshing at all. `refreshSnapshot`
-			// does nothing while one is already running, which is the behaviour wanted here.
-			refreshSnapshot()
-			return
-		}
-
-		guard case .snapshot = content else {
-			applyVisibilityState()
-			return
-		}
-
-		// The still stays up until the live page is ready to take its place. Installing the live web
-		// view first — which is what `stopSnapshotRendering` does — shows the desktop through it for
-		// as long as the page takes to load, and that load is the whole reason there was a still.
-		discardSnapshotInFlight()
-		loadBySwapping(website?.url)
-	}
-
-	/**
+/**
 	Put `content` on screen.
 
 	The only place that assigns `window.contentView` or `window.reducedRegion` for a wallpaper window, and the only place that installs the menu bar band.
@@ -213,23 +118,15 @@ final class WallpaperScene {
 	private func applyContent() {
 		window.allowsPassiveInteraction = renderingMode == .interactive
 
-		var reduced: CGRect?
 		var view: NSView?
 
 		switch content {
 		case .empty:
 			break
 		case .live(let zoom):
-			view = pageView(zoom: zoom, clip: nil)
-		case .reduced(let region):
-			reduced = region
-			view = pageView(zoom: website?.zoom, clip: region)
-		case .frozen(let image), .snapshot(let image):
-			view = stillView(image)
+			view = pageView(zoom: zoom)
 		}
 
-		// The shrunk region goes first because it resizes the window, and the content view is laid out against the size it ends up with.
-		window.reducedRegion = reduced
 		window.contentView = view
 
 		installMenuBarBandIfNeeded()
@@ -241,11 +138,11 @@ final class WallpaperScene {
 	Bare when there is neither, because a page filling the window at its own size is what a wrapper
 	would work out anyway.
 	*/
-	private func pageView(zoom: Zoom?, clip: CGRect?) -> NSView {
+	private func pageView(zoom: Zoom?) -> NSView {
 		let webView = webViewController.webView
 
 		guard
-			zoom != nil || clip != nil,
+			let zoom,
 			let pageSize = pageLayoutSize
 		else {
 			webView.magnification = 1
@@ -255,18 +152,8 @@ final class WallpaperScene {
 		return PageView(
 			content: webView,
 			zoom: zoom,
-			clip: clip,
 			pageSize: pageSize
 		)
-	}
-
-	private func stillView(_ image: NSImage?) -> NSView {
-		let view = NSImageView(frame: window.contentLayoutRect)
-		view.imageScaling = .scaleAxesIndependently
-		view.image = image
-		view.autoresizingMask = [.width, .height]
-
-		return view
 	}
 
 	/**
@@ -282,23 +169,10 @@ final class WallpaperScene {
 	// MARK: - Loading
 
 	func loadWebsite() {
-		guard renderingMode != .snapshot else {
-			// Forced: this is "put this website up", and the web view may still be holding the
-			// previous one. Photographing what happens to be loaded would show the wrong website.
-			refreshSnapshot(forcingReload: true)
-			return
-		}
-
-		stopSnapshotRendering()
 		load(website?.url)
 	}
 
 	func reload() {
-		guard renderingMode != .snapshot else {
-			refreshSnapshot(forcingReload: true)
-			return
-		}
-
 		captureScrollPosition()
 
 		// Always the URL the user specified rather than the current one. It may be a redirect that resolves differently each time.
@@ -307,7 +181,6 @@ final class WallpaperScene {
 
 	func load(_ url: URL?) {
 		AppState.shared.webViewError = nil
-		forgetObservedActivity()
 
 		guard
 			var url,
@@ -351,57 +224,7 @@ final class WallpaperScene {
 
 	// MARK: - Watching what the page does
 
-	/**
-	How long to watch before deciding. Six ten-second windows.
-	*/
-	private static let samplesBeforeDeciding = 6
-
-	/**
-	Take one reading from the page and act on it once there are enough.
-	*/
-	func record(_ sample: ActivitySample) {
-		activitySamples.append(sample)
-
-		// Keep the window rolling so a page that starts moving later is noticed.
-		if activitySamples.count > Self.samplesBeforeDeciding {
-			activitySamples.removeFirst()
-		}
-
-		guard activitySamples.count >= Self.samplesBeforeDeciding else {
-			return
-		}
-
-		let verdict = classify(activitySamples)
-
-		guard verdict != observedActivity else {
-			return
-		}
-
-		observedActivity = verdict
-
-		if verdict == .periodic {
-			let rate = Double(activitySamples.reduce(0) { $0 + $1.mutations })
-				/ activitySamples.reduce(0) { $0 + $1.seconds }
-			Defaults[.reloadInterval] = refreshInterval(forMutationRate: rate)
-		}
-
-		applyVisibilityState()
-		resetTimer()
-
-		if wantsStills {
-			refreshSnapshot()
-		}
-	}
-
-	/**
-	Start watching again. A new page is a new question.
-	*/
-	func forgetObservedActivity() {
-		activitySamples.removeAll()
-		observedActivity = nil
-	}
-
-	// MARK: - Timing
+// MARK: - Timing
 
 	func resetTimer() {
 		reloadTimer?.invalidate()
@@ -413,12 +236,6 @@ final class WallpaperScene {
 			website != nil,
 			let reloadInterval = Defaults[.reloadInterval]
 		else {
-			return
-		}
-
-		// While frozen there is nothing to reload into. Remember that one came due so the thaw can settle it.
-		guard !isFrozen else {
-			isReloadPending = true
 			return
 		}
 
@@ -466,14 +283,11 @@ final class WallpaperScene {
 	Put back everything `suspend()` took away.
 	*/
 	func resume() {
-		occlusionMonitor.start()
 		installMenuBarBandIfNeeded()
 		window.makeKeyAndOrderFront(nil)
 	}
 
 	func suspend() {
-		occlusionMonitor.stop()
-		discardSnapshotInFlight()
 		reloadTimer?.invalidate()
 		reloadTimer = nil
 		playlistTimer?.invalidate()
@@ -491,10 +305,8 @@ final class WallpaperScene {
 	}
 
 	func tearDown() {
-		occlusionMonitor.stop()
 		reloadTimer?.invalidate()
 		playlistTimer?.invalidate()
-		snapshotTask?.cancel()
 		pendingLoad?.cancel()
 		window.orderOut(nil)
 		content = .empty
@@ -506,9 +318,7 @@ final class WallpaperScene {
 }
 
 /**
-What a wallpaper window is showing.
-
-Every rectangle here is in page coordinates with the origin at the top-left.
+What the window is showing.
 */
 enum WallpaperContent {
 	/**
@@ -520,82 +330,25 @@ enum WallpaperContent {
 	The live web view, magnified to one region of the page when the website asks for it.
 	*/
 	case live(zoom: Zoom?)
-
-	/**
-	The live web view with the window shrunk to the patch of wallpaper still on show.
-
-	Separate from `live` because the visibility policy owns this rectangle and the website owns the other one. Only this one gets handed back when the desktop is revealed again.
-	*/
-	case reduced(to: CGRect)
-
-	/**
-	The last frame of the live page, held while nothing of the wallpaper is on show.
-	*/
-	case frozen(NSImage?)
-
-	/**
-	A still from the snapshot backend, already showing whatever region the live page would have.
-
-	Separate from `frozen` because there is no live page waiting behind it. It refreshes on the reload timer and the visibility policy leaves it alone.
-	*/
-	case snapshot(NSImage?)
 }
 
 /**
-Which of the mutually exclusive ways of drawing a wallpaper applies to a scene right now.
-
-Snapshot rendering, passive clicks and freezing when covered cannot combine. A still cannot be clicked, and a page that has to accept clicks has to be there to accept them. The rules used to be spelled out as a separate `&&` chain in each of the three files that cared, so a rule that changed had to change in all of them.
+Whether the page has to take clicks straight off the desktop.
 */
 enum RenderingMode {
 	/**
-	Stills from an offscreen renderer. No web process runs between refreshes.
-	*/
-	case snapshot
-
-	/**
-	A live page that takes clicks straight off the desktop, so it always renders.
+	A live page that takes clicks without Browsing Mode, so it always renders.
 	*/
 	case interactive
 
 	/**
-	A live page that may shrink to the visible patch or freeze on its last frame.
-	*/
-	case managed
-
-	/**
-	A live page that keeps rendering in full.
+	A live page. The wallpaper renders it, always, which is the only thing this app promises to do.
 	*/
 	case full
 }
 
 extension WallpaperScene {
 	var renderingMode: RenderingMode {
-		// A still cannot be clicked, so this wins over the snapshot backend rather than sitting alongside it.
-		if website?.allowsInteraction == true {
-			return .interactive
-		}
-
-		// While the user is framing a region the window belongs to them. Anything that
-		// replaces the content view drops the selection overlay, and the occlusion poll runs every
-		// two seconds, so this is not a narrow window to lose.
-		if AppState.shared.isSelectingCrop {
-			return .full
-		}
-
-		// Browsing Mode puts the page in front of the user to click, which a still cannot do.
-		if wantsStills, !AppState.shared.isBrowsingMode {
-			return .snapshot
-		}
-
-		if
-			Defaults[.freezeWhenCovered],
-			AppState.shared.isEnabled,
-			!AppState.shared.isBrowsingMode,
-			website != nil
-		{
-			return .managed
-		}
-
-		return .full
+		website?.allowsInteraction == true ? .interactive : .full
 	}
 }

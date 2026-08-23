@@ -65,7 +65,6 @@ def main() -> int:
             "url": data["url"],
             "description": data["description"],
             "tags": data.get("tags", []),
-            "isLive": data.get("backend") == "live",
             "reloadInterval": data.get("reloadInterval"),
             "zoom": data.get("zoom"),
             "css": data.get("css"),
@@ -81,7 +80,6 @@ def main() -> int:
             f"\t\t\turl: {swift_string(data['url'])},\n"
             f"\t\t\tdescription: {swift_string(data['description'])},\n"
             f"\t\t\ttags: [{', '.join(swift_string(t) for t in data.get('tags', []))}],\n"
-            f"\t\t\tisLive: {'true' if data.get('backend') == 'live' else 'false'},\n"
             f"\t\t\treloadInterval: {data.get('reloadInterval') or 'nil'},\n"
             f"\t\t\tzoom: {swift_zoom(data.get('zoom'))},\n"
             f"\t\t\tcss: {swift_optional_string(data.get('css'))},\n"

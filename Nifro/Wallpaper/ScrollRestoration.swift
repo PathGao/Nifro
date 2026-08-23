@@ -34,8 +34,7 @@ extension WallpaperScene {
 	func captureScrollPosition() {
 		guard
 			Defaults[.restoreScrollPosition],
-			let url = webViewController.webView.url,
-			!isFrozen
+			let url = webViewController.webView.url
 		else {
 			return
 		}

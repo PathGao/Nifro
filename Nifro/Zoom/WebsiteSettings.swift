@@ -112,26 +112,6 @@ struct WebsiteScheduleSetting: View {
 }
 
 /**
-Whether a website keeps a browser running or gets photographed periodically.
-
-Per website rather than a global switch, because the answer belongs to the page. A clock is the same picture for a minute at a time. A screensaver is not.
-*/
-struct WebsiteRenderingSetting: View {
-	@Binding var rendering: Website.Rendering
-
-	var body: some View {
-		Picker(selection: $rendering) {
-			ForEach(Website.Rendering.allCases, id: \.self) { option in
-				Text(option.title).tag(option)
-			}
-		} label: {
-			Text("Rendering")
-				.explained(rendering.explanation)
-		}
-	}
-}
-
-/**
 Whether a website can be clicked without turning on Browsing Mode.
 */
 struct WebsiteInteractionSetting: View {

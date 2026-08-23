@@ -34,19 +34,6 @@ final class WebViewController: NSViewController {
 		configuration.userContentController = userContentController
 		configuration.applyContentRules()
 
-		// Only worth carrying when something is going to read it.
-		if let scene, scene.website?.rendering == .automatic {
-			userContentController.add(ActivityMessageProxy(scene: scene), name: ActivityWatcher.messageName)
-			userContentController.addUserScript(
-				WKUserScript(
-					source: ActivityWatcher.script,
-					injectionTime: .atDocumentEnd,
-					forMainFrameOnly: true,
-					in: .page
-				)
-			)
-		}
-
 
 
 		let preferences = WKPreferences()

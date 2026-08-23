@@ -63,7 +63,6 @@ private struct AdvancedSettings: View {
 				BringBrowsingModeToFrontSetting()
 				Defaults.Toggle(String(localized: "Deactivate while on battery"), key: .deactivateOnBattery)
 				ContentRulesSetting()
-				FreezeWhenCoveredSetting()
 				PlaylistIntervalSetting()
 				Defaults.Toggle(key: .restoreScrollPosition) {
 					Text("Restore scroll position after reload")
@@ -80,15 +79,6 @@ private struct AdvancedSettings: View {
 					.controlSize(.small)
 			}
 		}
-	}
-}
-
-private struct FreezeWhenCoveredSetting: View {
-	var body: some View {
-		Defaults.Toggle(key: .freezeWhenCovered) {
-			Text("Only render what is on show")
-				.explained(String(localized: "When other windows cover most of the wallpaper, Nifro shrinks the window to whatever is still visible, such as the strip behind the Dock, and keeps rendering only that. When nothing is visible it holds the last frame. Turn this off to keep drawing the whole page."))
-  }
 	}
 }
 

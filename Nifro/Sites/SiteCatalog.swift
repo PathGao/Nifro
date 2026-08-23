@@ -19,7 +19,6 @@ enum SiteCatalog {
 
 		Shown to the user, because a live page keeps a browser process running and a snapshot page does not.
 		*/
-		let isLive: Bool
 
 		let reloadInterval: Double?
 		let zoom: Zoom?
@@ -93,7 +92,6 @@ extension SiteCatalog.Entry {
 		binding.wrappedValue.css = css ?? ""
 		binding.wrappedValue.javaScript = javaScript ?? ""
 		binding.wrappedValue.zoom = zoom
-		binding.wrappedValue.rendering = isLive ? .live : .snapshot
 		// Everything the entry carries is a starting point. From here on the website is the user's:
 		// the Sound item in the menu writes to this same field, and nothing puts the entry's answer
 		// back. Whatever the menu shows a tick against is what the page is actually doing.

@@ -35,11 +35,6 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	var endHour: Int?
 
 	/**
-	Whether to keep a browser running behind this website or to photograph it periodically.
-	*/
-	@DecodableDefault.Custom<Rendering> var rendering
-
-	/**
 	Whether this website is allowed to make noise.
 
 	Per website because the answer is a property of the page. A clock should never make a sound; a
@@ -90,15 +85,6 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 
 		if zoom != nil {
 			symbols.append("viewfinder")
-		}
-
-		switch rendering {
-		case .snapshot:
-			symbols.append("camera")
-		case .automatic:
-			symbols.append("wand.and.stars")
-		case .live:
-			break
 		}
 
 		if startHour != nil, endHour != nil {
@@ -207,12 +193,4 @@ extension Website.Audio: DecodableDefault.Source {
 	// Every website that existed before this setting was silent, and a wallpaper that starts talking
 	// after an update is a bad surprise.
 	static let defaultValue = muted
-}
-
-extension Website.Rendering: DecodableDefault.Source {
-	// Watching first is the right default because the answer is a property of the page, and asking
-	// the person who pasted a URL to know it in advance is asking them to guess. The watcher starts
-	// a page live and only moves it to stills after a minute of seeing nothing move, so a wrong
-	// answer costs a minute rather than a broken wallpaper.
-	static let defaultValue = automatic
 }

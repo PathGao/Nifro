@@ -30,7 +30,11 @@ report_exclude:
 # Named retentions, each with the reason it is not really dead.
 retain_files: []
 
-# Nothing is reported today, and the scan runs with `--strict`, so anything new fails CI.
+# `Zoom.init(center:scale:)` is reported and kept. It is used by the tests in `Tests/`, which are an
+# SwiftPM target that this scan — configured against the Xcode project — cannot see. Deleting it on
+# the scan's word would break `swift test`, which is the check that would then go red instead.
+#
+# Everything else is reported by nothing, and the scan runs with `--strict`, so anything new fails CI.
 #
 # The three findings that used to be listed here were parameters that `#selector` signatures require
 # and nothing reads. They are written `_` now, which is what they always were — the scan was right,

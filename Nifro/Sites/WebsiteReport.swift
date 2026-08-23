@@ -19,7 +19,6 @@ extension Website {
 		var lines = [
 			"\(SSApp.name) \(SSApp.versionWithBuild) · macOS \(Device.osVersion) · \(Device.hardwareModel)",
 			"URL: \(url.absoluteString)",
-			"Rendering: \(rendering.title)",
 			"Sound: \(audio.title)",
 			"Region: \(zoom.map { "\(($0.scale * 10).rounded() / 10)× at \(Int(($0.center.x * 100).rounded()))%, \(Int(($0.center.y * 100).rounded()))%" } ?? "whole page")",
 			"Clickable on the desktop: \(allowsInteraction ? "yes" : "no")",

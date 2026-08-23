@@ -72,6 +72,29 @@ Blocked                 1 — P6, until setDesktopImageURL is verified under the
 
 ## 4. Power (the P series)
 
+> **All of this is currently out of the code.** Two rendering backends, occlusion measurement and
+> automatic still detection were built, and every one of them turned out to own the answer to "what
+> is being rendered right now" — which is the same answer Browsing Mode changes. Entering Browsing
+> Mode reloaded, leaving it reloaded again, and both showed the desktop while they did; a snapshot
+> finishing could take the page out from under someone reading it; disabling left a colour band
+> behind. Each was fixable and each fix exposed the next one, because the machinery was deciding
+> something the interaction also decides.
+>
+> So it came out — 811 lines, back to what upstream does: the page renders, and stops only when
+> disabled, when the screen is locked, or on battery. The interaction is the thing this app is; power
+> is an optimisation of it, and an optimisation whose benefit was never measured cleanly. It goes
+> back in one piece at a time, each with a measurement first and a way to turn it off.
+>
+> What has to be true before any of it returns:
+>
+> 1. A measurement of the cost it claims to remove, taken while the machine is otherwise idle, on the
+>    state it actually targets — a covered wallpaper, not a browsing session.
+> 2. One owner for "what is being rendered". Browsing Mode changing it is the case that broke every
+>    version of this.
+> 3. A way for the user to turn it off that does not require understanding it.
+
+
+
 Upstream stops for three reasons only: manually disabled, screen locked, on battery (`AppState.swift:125`). **Nothing about occlusion at all.**
 
 | | Optimisation | Status | Notes |
