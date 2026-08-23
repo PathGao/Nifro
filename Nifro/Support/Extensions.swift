@@ -1182,39 +1182,6 @@ extension NSResponder {
 
 // MARK: - NSStatusBar
 extension NSStatusBar {
-	/**
-	The actual thickness of the primary status bar. `.thickness` confusingly returns the thickness of the content area.
-
-	Keep in mind for screen calculations that the status bar has an additional 1 point padding below it (between it and windows).
-
-	- Note: This only returns the thickness of the menu bar on the primary screen.
-	*/
-	static var actualThicknessOfPrimary: Double {
-		let legacyHeight = 24.0
-
-		guard let screen = NSScreen.primary else {
-			return legacyHeight
-		}
-
-		return screen.hasNotch ? 33 : legacyHeight
-	}
-
-	/**
-	Whether the user has "Automatically hide and show the menu bar" enabled in system settings.
-	*/
-	static var isAutomaticallyToggled: Bool {
-		guard let screen = NSScreen.primary else {
-			return false
-		}
-
-		// There's a 1 point gap between the status bar and any maximized window.
-		let statusBarBottomPadding = 1.0
-
-		let menuBarHeight = actualThicknessOfPrimary + statusBarBottomPadding
-		let dockHeight = NSWorkspace.shared.dockHeight ?? 0
-
-		return (screen.frame.height - screen.visibleFrame.height - dockHeight) < menuBarHeight
-	}
 }
 
 // MARK: - NSToolbarItem

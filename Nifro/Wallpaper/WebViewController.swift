@@ -323,31 +323,28 @@ extension WebViewController: WKUIDelegate {
 	/**
 	Answers a page asking for a new window. Nifro never opens one.
 
-	Nifro is a background. A window of its own is the opposite of that, and one built this way was
-	worse than the general argument: an accessory app's window has no Dock icon, so a video that
+	Nifro is a background. A window of its own is the opposite of that, and one built the usual way
+	was worse than the general argument: an accessory app's window has no Dock icon, so a video that
 	opened in it kept playing with nowhere to go back to — disabling the wallpaper did not reach it,
 	and only quitting the app stopped the sound.
 
-	Loading it in the wallpaper instead is not the answer either. That silently replaces the website
-	the user chose with wherever a link pointed.
+	Handing it to the user's browser is not the answer either. A site's own flows go through this:
+	signing in, a player's controls, a confirmation step. Sent to a browser they complete somewhere
+	else, and the wallpaper is still signed out.
 
-	So: while the user is browsing, the request goes to their own browser, which is the application
-	for opening pages in windows. Outside browsing mode nobody clicked anything, and a page opening
-	the browser on its own is not something to allow.
+	So it opens where the user is already looking. Only while they are browsing, because outside
+	Browsing Mode nobody clicked anything, and a page moving the wallpaper on its own is not
+	something to allow.
 	*/
 	func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
 		guard
 			AppState.shared.isBrowsingMode,
-			let url = navigationAction.request.url
+			navigationAction.targetFrame == nil
 		else {
 			return nil
 		}
 
-		if Defaults[.bringBrowsingModeToFront] {
-			Defaults[.isBrowsingMode] = false
-		}
-
-		url.open()
+		webView.load(navigationAction.request)
 
 		return nil
 	}

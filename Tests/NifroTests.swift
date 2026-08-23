@@ -584,3 +584,39 @@ extension VideoEmbedTests {
 		#expect(VideoEmbed.hostPage(for: embed) != nil)
 	}
 }
+
+/**
+How much of a screen the menu bar takes.
+
+Worth its own tests because the previous answer was a guess checked against a constant — "33 points
+on a notched display, 24 otherwise, plus one" — and on a real machine the true value was 33 against a
+constant of 34. Being one point out flipped the conclusion to "the menu bar hides itself", so the page
+was laid out over the menu bar and the colour band was never built.
+*/
+@Suite("Menu bar strip")
+struct MenuBarStripTests {
+	@Test("The strip is the gap between the two top edges, wherever the Dock is")
+	func dockDoesNotMatter() {
+		let frame = CGRect(x: 0, y: 0, width: 1470, height: 956)
+
+		// Dock on the left: it takes width, and the top edge is untouched.
+		#expect(menuBarStripHeight(frame: frame, visibleFrame: CGRect(x: 55, y: 0, width: 1415, height: 923)) == 33)
+		// Dock at the bottom: it moves the origin up, and the top edge is still untouched.
+		#expect(menuBarStripHeight(frame: frame, visibleFrame: CGRect(x: 0, y: 70, width: 1470, height: 853)) == 33)
+	}
+
+	@Test("A menu bar that hides itself takes nothing")
+	func hiddenMenuBarTakesNothing() {
+		let frame = CGRect(x: 0, y: 0, width: 1470, height: 956)
+
+		#expect(menuBarStripHeight(frame: frame, visibleFrame: frame) == 0)
+	}
+
+	@Test("A screen with no menu bar at all takes nothing")
+	func secondaryScreensCanHaveNone() {
+		// A secondary screen's frame does not start at zero.
+		let frame = CGRect(x: 1470, y: 200, width: 1920, height: 1080)
+
+		#expect(menuBarStripHeight(frame: frame, visibleFrame: frame) == 0)
+	}
+}

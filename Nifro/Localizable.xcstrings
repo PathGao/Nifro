@@ -33,6 +33,16 @@
         }
       }
     },
+    "A page that reloads on a timer starts back at the top. This puts it back where it was, which matters for a long page you scrolled to a particular part of.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "定时刷新的网页会回到顶部。这个开关把它放回原来的位置——对一个你特意滚到某处的长页面有用。"
+          }
+        }
+      }
+    },
     "A video page is mostly navigation, recommendations and comments. This is the address of the player on its own, so the video fills the wallpaper without cropping or hiding anything.": {
       "localizations": {
         "zh-Hans": {
@@ -353,6 +363,16 @@
         }
       }
     },
+    "Choose region": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择区域"
+          }
+        }
+      }
+    },
     "Clear all website data": {
       "localizations": {
         "zh-Hans": {
@@ -419,6 +439,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "当前网站"
+          }
+        }
+      }
+    },
+    "Custom CSS and JavaScript": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自定义 CSS 与 JavaScript"
           }
         }
       }
@@ -534,11 +564,22 @@
       }
     },
     "Drag a rectangle over the wallpaper to keep only that part of the page.": {
+      "extractionState": "stale",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "在壁纸上拖一个框，只保留网页的那一部分。"
+          }
+        }
+      }
+    },
+    "Drag a rectangle over the wallpaper. That part fills the screen.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在壁纸上拖一个框，那一部分会铺满屏幕。"
           }
         }
       }
@@ -1523,6 +1564,16 @@
         }
       }
     },
+    "Show Whole Page": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示整页"
+          }
+        }
+      }
+    },
     "Show on": {
       "localizations": {
         "zh-Hans": {
@@ -1743,6 +1794,16 @@
         }
       }
     },
+    "Toggle sound": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换声音"
+          }
+        }
+      }
+    },
     "Toggles “Browsing Mode” for Nifro.": {
       "localizations": {
         "zh-Hans": {
@@ -1789,6 +1850,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "规则列表的网址"
+          }
+        }
+      }
+    },
+    "Undo the region and go back to the whole page.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消区域，回到整页。"
           }
         }
       }

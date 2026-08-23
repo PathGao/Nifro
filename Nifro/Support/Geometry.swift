@@ -248,3 +248,24 @@ extension Comparable {
 		min(max(self, range.lowerBound), range.upperBound)
 	}
 }
+
+/**
+How tall the menu bar's strip is on a screen, given the screen's two rectangles.
+
+`visibleFrame` is the screen minus the menu bar and minus the Dock. Only the menu bar is at the top,
+so the distance between the two top edges is the menu bar and nothing else — wherever the Dock is,
+and whatever the display's shape.
+
+The previous answer was a guess checked against a constant: "the menu bar is 33 points tall on a
+notched display, 24 otherwise, plus one point of padding — so if the space at the top is smaller than
+that, the menu bar must be set to hide itself". On this machine the space at the top is 33 and the
+constant said 34, so the app concluded the menu bar was hidden, laid the page out over it, and never
+built the colour band because it believed there was no menu bar to tint. Nothing else was wrong; the
+guess was one point out.
+
+Zero when the menu bar hides itself, which is the right answer for that case too: the space is the
+user's again, and a wallpaper should have it.
+*/
+func menuBarStripHeight(frame: CGRect, visibleFrame: CGRect) -> Double {
+	max(0, frame.maxY - visibleFrame.maxY)
+}

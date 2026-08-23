@@ -55,6 +55,8 @@ extension KeyboardShortcuts.Name {
 	static let all: [Self] = [
 		.toggleBrowsingMode,
 		.holdToInteract,
+		.toggleSound,
+		.chooseRegion,
 		.toggleEnabled,
 		.reload,
 		.nextWebsite,
@@ -74,6 +76,8 @@ extension KeyboardShortcuts.Name {
 	private static let defaultModifiers: NSEvent.ModifierFlags = [.control, .option, .command]
 
 	static let toggleBrowsingMode = Self("toggleBrowsingMode", default: .init(.b, modifiers: defaultModifiers))
+	static let toggleSound = Self("toggleSound", default: .init(.s, modifiers: defaultModifiers))
+	static let chooseRegion = Self("chooseRegion", default: .init(.c, modifiers: defaultModifiers))
 	static let holdToInteract = Self("holdToInteract", default: .init(.h, modifiers: defaultModifiers))
 	static let toggleEnabled = Self("toggleEnabled", default: .init(.w, modifiers: defaultModifiers))
 	static let reload = Self("reload", default: .init(.r, modifiers: defaultModifiers))

@@ -181,6 +181,20 @@ extension AppState {
 			Defaults[.isBrowsingMode].toggle()
 		}
 
+		KeyboardShortcuts.onKeyUp(for: .toggleSound) {
+			guard let website = WebsitesController.shared.current else {
+				return
+			}
+
+			WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
+				$0.audio = $0.audio == .unmuted ? .muted : .unmuted
+			}
+		}
+
+		KeyboardShortcuts.onKeyUp(for: .chooseRegion) { [self] in
+			beginCropSelection()
+		}
+
 		KeyboardShortcuts.onKeyUp(for: .toggleEnabled) { [self] in
 			isManuallyDisabled.toggle()
 		}

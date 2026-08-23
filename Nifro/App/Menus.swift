@@ -98,7 +98,9 @@ extension AppState {
 						$0.audio = $0.audio == .unmuted ? .muted : .unmuted
 					}
 				}
-				.toolTip = String(localized: "Whether this website is allowed to make noise. Remembered per website, so a clock stays silent and a live stream does not.")
+				.setShortcut(for: .toggleSound)
+
+				menu.items.last?.toolTip = String(localized: "Whether this website is allowed to make noise. Remembered per website, so a clock stays silent and a live stream does not.")
 			}
 
 			menu.addCallbackItem(
@@ -112,11 +114,27 @@ extension AppState {
 			}
 		}
 
-		if WebsitesController.shared.current != nil {
+		// Its own section. Framing a region is usually not a single attempt, so the way back has to sit
+		// next to the way in rather than in a settings window.
+		if let website = WebsitesController.shared.current {
+			menu.addSeparator()
+
 			menu.addCallbackItem(String(localized: "Choose Region…")) { [self] in
 				beginCropSelection()
 			}
-			.toolTip = String(localized: "Drag a rectangle over the wallpaper to keep only that part of the page.")
+			.setShortcut(for: .chooseRegion)
+
+			menu.items.last?.toolTip = String(localized: "Drag a rectangle over the wallpaper. That part fills the screen.")
+
+			menu.addCallbackItem(
+				String(localized: "Show Whole Page"),
+				isEnabled: website.zoom != nil
+			) {
+				WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
+					$0.zoom = nil
+				}
+			}
+			.toolTip = String(localized: "Undo the region and go back to the whole page.")
 		}
 
 		menu.addSeparator()

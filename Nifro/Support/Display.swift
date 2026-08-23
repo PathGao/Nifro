@@ -57,25 +57,15 @@ extension NSScreen {
 
 
 	/**
-	Whether the screen shows a status bar.
-
-	Returns `false` if the status bar is set to show/hide automatically as it then doesn't take up any screen space.
+	Whether the screen shows a status bar that takes up space.
 	*/
-	var hasStatusBar: Bool {
-		// When `screensHaveSeparateSpaces == true`, the menu bar shows on all the screens.
-		!NSStatusBar.isAutomaticallyToggled && (self == .primary || Self.screensHaveSeparateSpaces)
-	}
+	var hasStatusBar: Bool { statusBarThickness > 0 }
 
 	/**
-	The thickness of the status bar on the screen.
-
-	If the screen does not have a status bar, it returns `0`.
-
-	- Note: There is a 1 point gap between the status bar and a maximized window. You may want to handle that.
+	The thickness of the status bar on the screen, or `0` when it does not take up space.
 	*/
 	var statusBarThickness: Double {
-		let value = (frame.height - visibleFrame.height - (visibleFrame.origin.y - frame.origin.y) - 1).toDouble
-		return max(0, value)
+		menuBarStripHeight(frame: frame, visibleFrame: visibleFrame)
 	}
 
 	/**

@@ -39,11 +39,13 @@ cask "nifro" do
                    must_succeed: false
   end
 
-  # 沙盒 app，用户数据都在容器里
+  # 沙盒 app，用户数据都在容器里。最后一条只为保险：正常的沙盒构建永远不会写到那里，
+  # 但一个签名时丢掉了 entitlements 的构建会，而那种包用户也可能装过。
   zap trash: [
     "~/Library/Containers/com.pathgao.nifro",
     "~/Library/Containers/com.pathgao.nifro.ShareExtension",
     "~/Library/Application Scripts/com.pathgao.nifro",
     "~/Library/Application Scripts/com.pathgao.nifro.ShareExtension",
+    "~/Library/Preferences/com.pathgao.nifro.plist",
   ]
 end
