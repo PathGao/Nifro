@@ -82,8 +82,7 @@ final class SSWebView: WKWebView {
 
 		if
 			let website = WebsitesController.shared.current,
-			let url = url?.normalized(),
-			website.url.normalized() != url
+			let url = navigatedURL(for: website)
 		{
 			let menuItem = menu.addCallbackItem(String(localized: "Update Website to Current")) {
 				WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
@@ -165,5 +164,30 @@ extension SSWebView {
 				Defaults[zoomLevelDefaultsKey] = newValue
 			}
 		}
+	}
+}
+
+extension WKWebView {
+	/**
+	Where the page has ended up, when that is somewhere the user navigated to and not where the
+	website says it should be. `nil` when there is nothing worth offering to save.
+
+	Offered as "Update Website to Current", so the question it answers is "is this a page the user
+	found, that they might want to keep?".
+
+	A framed player is not. It is shown inside a page this app builds, and that page's address is
+	this app's, not anywhere anybody went — so the offer appeared for every video website, always,
+	and taking it replaced the website with our own scaffolding.
+	*/
+	func navigatedURL(for website: Website) -> URL? {
+		guard
+			VideoEmbed.hostPage(for: website.url) == nil,
+			let current = url?.normalized(),
+			website.url.normalized() != current
+		else {
+			return nil
+		}
+
+		return current
 	}
 }

@@ -58,11 +58,9 @@ extension AppState {
 			}
 			.setShortcut(for: .reload)
 
-			// TODO: DRY this up with the one in SSWebView when everything is in SwiftUI.
 			if
 				let website = WebsitesController.shared.current,
-				let url = primaryScene.webViewController.webView.url?.normalized(),
-				website.url.normalized() != url
+				let url = primaryScene.webViewController.webView.navigatedURL(for: website)
 			{
 				let menuItem = menu.addCallbackItem(String(localized: "Update Website to Current")) {
 					WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {

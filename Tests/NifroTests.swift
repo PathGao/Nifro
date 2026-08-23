@@ -573,3 +573,14 @@ struct WindowCoverageTests {
 		#expect(Coverage.hidesWallpaper(layer: 0, alpha: 1, bundleIdentifier: nil, processName: "something else", isOwnWindow: false))
 	}
 }
+
+extension VideoEmbedTests {
+	@Test("A website shown through a host page has no address worth saving")
+	func hostPagesHaveNothingToOffer() throws {
+		// "Update Website to Current" asks whether the page has ended up somewhere the user found.
+		// For a framed player the document is scaffolding this app built, so the answer is no — and
+		// answering yes replaced the website with the scaffolding's address.
+		let embed = try #require(URL(string: "https://www.youtube.com/embed/jNQXAC9IVRw?autoplay=1"))
+		#expect(VideoEmbed.hostPage(for: embed) != nil)
+	}
+}
