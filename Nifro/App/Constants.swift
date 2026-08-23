@@ -2,9 +2,9 @@ import SwiftUI
 import KeyboardShortcuts
 
 enum Constants {
-	static let repositoryURL = URL("https://github.com/PathGao/nifro")
-	static let siteGalleryURL = URL("https://github.com/PathGao/nifro/tree/main/sites")
-	static let siteSubmissionURL = URL("https://github.com/PathGao/nifro/issues/new?template=site_submission.yml")
+	static let repositoryURL = URL("https://github.com/PathGao/Nifro")
+	static let siteGalleryURL = URL("https://github.com/PathGao/Nifro/tree/main/sites")
+	static let siteSubmissionURL = URL("https://github.com/PathGao/Nifro/issues/new?template=site_submission.yml")
 
 	@MainActor
 	static func openSiteGalleryWindow() {

@@ -43,7 +43,7 @@ enum SiteCatalog {
 
 	The repository is the source of truth and the place submissions arrive, so the app reads it rather than keeping its own copy authoritative. What ships in the binary is a snapshot for when there is no network.
 	*/
-	private static let indexURL = URL("https://raw.githubusercontent.com/PathGao/nifro/main/sites/index.json")
+	private static let indexURL = URL("https://raw.githubusercontent.com/PathGao/Nifro/main/sites/index.json")
 
 	/**
 	The entries that ship with the app, in the order they are installed.

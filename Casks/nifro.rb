@@ -1,6 +1,6 @@
 # Homebrew cask，供 PathGao/homebrew-tap 使用。
 #
-#   brew tap PathGao/tap https://github.com/PathGao/nifro
+#   brew tap PathGao/tap https://github.com/PathGao/Nifro
 #   brew install --cask PathGao/tap/nifro
 #
 # version 和 sha256 由 .github/workflows/release.yml 在每次发布后自动回写，不要手改。
@@ -14,11 +14,11 @@ cask "nifro" do
   sha256 arm:   "0000000000000000000000000000000000000000000000000000000000000000",
          intel: "0000000000000000000000000000000000000000000000000000000000000000"
 
-  url "https://github.com/PathGao/nifro/releases/download/v#{version}/Nifro-#{version}-#{arch}.zip",
-      verified: "github.com/PathGao/nifro/"
+  url "https://github.com/PathGao/Nifro/releases/download/v#{version}/Nifro-#{version}-#{arch}.zip",
+      verified: "github.com/PathGao/Nifro/"
   name "Nifro"
   desc "Web page as your desktop wallpaper"
-  homepage "https://github.com/PathGao/nifro"
+  homepage "https://github.com/PathGao/Nifro"
 
   livecheck do
     url :url

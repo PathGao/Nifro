@@ -17,7 +17,7 @@ dismiss a banner.
 Adding one needs no Xcode, no Swift and no build. Two routes, both equally
 welcome:
 
-- Open a [Site submission issue](https://github.com/PathGao/nifro/issues/new?template=site_submission.yml)
+- Open a [Site submission issue](https://github.com/PathGao/Nifro/issues/new?template=site_submission.yml)
   and fill in the URL and your settings. Someone else will land it.
 - Or open a pull request against `sites/` directly. Copy an existing entry,
   change the values, done.
@@ -28,7 +28,7 @@ other people will paste into their own machine.
 
 ## Reporting a bug
 
-Use the [bug report form](https://github.com/PathGao/nifro/issues/new?template=bug_report.yml).
+Use the [bug report form](https://github.com/PathGao/Nifro/issues/new?template=bug_report.yml).
 The two fields people most often leave out are the URL it happens on and
 whether custom CSS or JavaScript is set on that site — those two answers
 resolve a large share of reports on their own, which is why the form asks for
@@ -43,8 +43,8 @@ You need Xcode. Nothing else is required to build — dependencies come in
 through Swift Package Manager and Xcode resolves them on first open.
 
 ```
-git clone https://github.com/PathGao/nifro.git
-open nifro/Nifro.xcodeproj
+git clone https://github.com/PathGao/Nifro.git
+open Nifro/Nifro.xcodeproj
 ```
 
 Then build and run the `Plash` scheme. (The Xcode project, its targets and the

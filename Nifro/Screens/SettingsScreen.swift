@@ -273,7 +273,7 @@ private struct DisplaySetting: View {
 			}
 		} label: {
 			Text("Show on")
-			Link("Multi-display support ›", destination: "https://github.com/PathGao/nifro/issues/2")
+			Link("Multi-display support ›", destination: "https://github.com/PathGao/Nifro/issues/2")
 		}
 		.task(id: chosenDisplay) {
 			guard chosenDisplay == nil else {

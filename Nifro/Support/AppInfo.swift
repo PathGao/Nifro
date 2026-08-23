@@ -51,7 +51,7 @@ enum SSApp {
 			"body": "\n\n---\n\n\(debugInfo)"
 		]
 
-		URL("https://github.com/PathGao/nifro/issues/new")
+		URL("https://github.com/PathGao/Nifro/issues/new")
 			.addingDictionaryAsQuery(query)
 			.open()
 	}

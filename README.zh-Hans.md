@@ -11,14 +11,14 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/PathGao/nifro/releases/latest"><img alt="最新版本" src="https://img.shields.io/github/v/release/PathGao/nifro?label=release&color=0453ab"></a>
+  <a href="https://github.com/PathGao/Nifro/releases/latest"><img alt="最新版本" src="https://img.shields.io/github/v/release/PathGao/Nifro?label=release&color=0453ab"></a>
   <a href="license"><img alt="许可" src="https://img.shields.io/badge/license-MIT-blue"></a>
   <img alt="macOS 15+" src="https://img.shields.io/badge/macOS-15%2B-black?logo=apple">
   <img alt="Apple silicon 与 Intel" src="https://img.shields.io/badge/builds-arm64%20%C2%B7%20x86__64-lightgrey">
 </p>
 
 <p align="center">
-  <a href="https://github.com/PathGao/nifro/releases/latest"><b>下载</b></a>
+  <a href="https://github.com/PathGao/Nifro/releases/latest"><b>下载</b></a>
   ·
   <a href="sites/">站点清单</a>
   ·
@@ -34,11 +34,11 @@
 ## 安装
 
 ```sh
-brew tap PathGao/tap https://github.com/PathGao/nifro
+brew tap PathGao/tap https://github.com/PathGao/Nifro
 brew install --cask nifro
 ```
 
-或者[下载最新版本](https://github.com/PathGao/nifro/releases/latest) —— Apple silicon 取
+或者[下载最新版本](https://github.com/PathGao/Nifro/releases/latest) —— Apple silicon 取
 `arm64`，Intel 取 `x86_64`。不做通用二进制，免得每个人都下载一份自己永远用不到的另一半。
 
 推荐用 Homebrew。构建包用的是本项目自己的证书而不是 Apple Developer ID，好处是签名身份跨版本
@@ -97,8 +97,8 @@ issue 的分诊见 [docs/UPSTREAM-ISSUES.md](docs/UPSTREAM-ISSUES.md)。
 ## 从源码构建
 
 ```sh
-git clone https://github.com/PathGao/nifro
-cd nifro
+git clone https://github.com/PathGao/Nifro
+cd Nifro
 open Nifro.xcodeproj
 ```
 

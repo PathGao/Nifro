@@ -136,7 +136,7 @@ base64 -i AuthKey_XXXXXXXX.p8   | pbcopy   # 贴进 NOTARY_KEY_P8
 **无论哪条路都要做：**
 
 - **B1** 创建 tap 仓库 `PathGao/homebrew-tap`，或者直接让用户 tap 本仓库
-  （`brew tap PathGao/tap https://github.com/PathGao/nifro`，cask 就在本仓库 `Casks/` 下，
+  （`brew tap PathGao/tap https://github.com/PathGao/Nifro`，cask 就在本仓库 `Casks/` 下，
   不用维护第二个仓库 —— 这是更省事的做法）。
 - **B2** 确认 `main` 分支保护规则允许 `github-actions[bot]` 推送，否则流水线最后一步
   「回写 cask」会失败（只是告警，Release 本身不受影响，可以手动改 cask）。

@@ -11,14 +11,14 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/PathGao/nifro/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/PathGao/nifro?label=release&color=0453ab"></a>
+  <a href="https://github.com/PathGao/Nifro/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/PathGao/Nifro?label=release&color=0453ab"></a>
   <a href="license"><img alt="License" src="https://img.shields.io/badge/license-MIT-blue"></a>
   <img alt="macOS 15+" src="https://img.shields.io/badge/macOS-15%2B-black?logo=apple">
   <img alt="Apple silicon and Intel" src="https://img.shields.io/badge/builds-arm64%20%C2%B7%20x86__64-lightgrey">
 </p>
 
 <p align="center">
-  <a href="https://github.com/PathGao/nifro/releases/latest"><b>Download</b></a>
+  <a href="https://github.com/PathGao/Nifro/releases/latest"><b>Download</b></a>
   ·
   <a href="sites/">Site list</a>
   ·
@@ -34,11 +34,11 @@
 ## Install
 
 ```sh
-brew tap PathGao/tap https://github.com/PathGao/nifro
+brew tap PathGao/tap https://github.com/PathGao/Nifro
 brew install --cask nifro
 ```
 
-Or [download the latest release](https://github.com/PathGao/nifro/releases/latest) — take the
+Or [download the latest release](https://github.com/PathGao/Nifro/releases/latest) — take the
 `arm64` build on Apple silicon and the `x86_64` build on Intel. There is no universal binary, so
 nobody downloads the half they cannot run.
 
@@ -108,8 +108,8 @@ waiting for a release.
 ## Build from source
 
 ```sh
-git clone https://github.com/PathGao/nifro
-cd nifro
+git clone https://github.com/PathGao/Nifro
+cd Nifro
 open Nifro.xcodeproj
 ```
 

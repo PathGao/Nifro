@@ -68,7 +68,7 @@ enum VideoEmbed {
 		guard
 			url.host?.lowercased().hasSuffix("youtube.com") == true,
 			url.path.hasPrefix("/embed/"),
-			let baseURL = URL(string: "https://github.com/PathGao/nifro"),
+			let baseURL = URL(string: "https://github.com/PathGao/Nifro"),
 			var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
 		else {
 			return nil
