@@ -18,8 +18,24 @@ The position is captured just before a reload rather than polled, so nothing run
 
 `WKWebView.interactionState` would restore history, form state and scroll in one property, and it is the fuller answer. It goes unused here because applying it drives a navigation, and a stale or rejected blob leaves a blank wallpaper with no obvious way back. Scrolling fails safe. If it does not work, the page is merely at the top.
 */
+extension AppState {
+	/**
+	Drop every remembered scroll position and page address.
+
+	Part of clearing website data, because that is what these are: where somebody had scrolled to and
+	what part of a map they were looking at. A button offered as a way to leave no trace should not
+	leave the most legible one.
+	*/
+	func forgetWherePagesWere() {
+		for key in UserDefaults.standard.dictionaryRepresentation().keys
+		where key.hasPrefix(WallpaperScene.scrollPositionKeyPrefix) || key.hasPrefix(WallpaperScene.lastAddressKeyPrefix) {
+			UserDefaults.standard.removeObject(forKey: key)
+		}
+	}
+}
+
 extension WallpaperScene {
-	private static let scrollPositionKeyPrefix = "scrollPosition_"
+	static let scrollPositionKeyPrefix = "scrollPosition_"
 
 	// Optional rather than an empty array on purpose: `nil` means no position was ever stored for this
 	// page, and an empty array would have to stand in for that as well as for a position, which the
@@ -38,7 +54,7 @@ extension WallpaperScene {
 
 	// MARK: - The address after the #
 
-	private static let lastAddressKeyPrefix = "lastAddress_"
+	static let lastAddressKeyPrefix = "lastAddress_"
 
 	/**
 	Keyed on the address with the fragment taken off, which is the page, so the fragment is what is

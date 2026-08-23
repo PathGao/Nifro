@@ -2466,10 +2466,11 @@ extension WKWebsiteDataStore {
 	static func clearAllWebsiteData() async {
 		HTTPCookieStorage.shared.removeCookies(since: .distantPast)
 
-		let store = `default`()
-		let types = allWebsiteDataTypes()
-		let records = await store.dataRecords(ofTypes: types)
-		await store.removeData(ofTypes: types, for: records)
+		// By date, not by record. Removing "for: records" only reaches what WebKit can attribute to an
+		// origin, and the disk cache is mostly not: measured after a clear, `Caches/WebKit/NetworkCache`
+		// still held 315MB in 1158 files, none of them rewritten since. A button that says it clears
+		// website data has to have cleared it.
+		await `default`().removeData(ofTypes: allWebsiteDataTypes(), modifiedSince: .distantPast)
 	}
 }
 extension WKWebView {

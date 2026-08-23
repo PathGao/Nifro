@@ -274,10 +274,11 @@ private struct ClearWebsiteDataSetting: View {
 			Task {
 				hasCleared = true
 				WebsitesController.shared.thumbnailCache.removeAllImages()
+				AppState.shared.forgetWherePagesWere()
 				await WKWebsiteDataStore.clearAllWebsiteData()
 			}
 		}
-		.help("Clears all cookies, local storage, caches, etc.")
+		.help("Clears cookies, local storage, caches, page thumbnails, and where each page had been scrolled or moved to. Your websites and their settings are kept.")
 		.disabled(hasCleared)
 	}
 }
