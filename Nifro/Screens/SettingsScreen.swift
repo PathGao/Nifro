@@ -189,57 +189,28 @@ private struct OpacitySetting: View {
 }
 
 private struct ReloadIntervalSetting: View {
-	private static let defaultReloadInterval = 60.0
-	private static let minimumReloadInterval = 0.1
+	private static let defaultReloadInterval = 60.0 * 60
 
 	@Default(.reloadInterval) private var reloadInterval
-	@FocusState private var isTextFieldFocused: Bool
 
 	// TODO: Improve VoiceOver accessibility for this control.
 	var body: some View {
-		LabeledContent("Reload every") {
-			HStack {
-				TextField(
-					"",
-					value: reloadIntervalInMinutes,
-					format: .number.grouping(.never).precision(.fractionLength(1))
-				)
-				.labelsHidden()
-				.focused($isTextFieldFocused)
-				.frame(width: 40)
-				.disabled(reloadInterval == nil)
-				Stepper(
-					"",
-					value: reloadIntervalInMinutes.didSet { _ in
-						// We have to unfocus the text field because sometimes it's in a state where it does not update the value. Some kind of bug with the formatter. (macOS 12.4)
-						isTextFieldFocused = false
-					},
-					in: Self.minimumReloadInterval...(.greatestFiniteMagnitude),
-					step: 1
-				)
-				.labelsHidden()
-				.disabled(reloadInterval == nil)
-				Text("minutes")
-					.textSelection(.disabled)
+		LabeledContent {
+			if reloadInterval != nil {
+				IntervalField(seconds: $reloadInterval.withDefaultValue(Self.defaultReloadInterval))
 			}
-			.contentShape(.rect)
+
 			Toggle("Reload every", isOn: $reloadInterval.isNotNil(trueSetValue: Self.defaultReloadInterval))
 				.labelsHidden()
 				.controlSize(.mini)
 				.toggleStyle(.switch)
+		} label: {
+			Text("Reload every")
+				.explained(String(localized: "For websites that do not set their own. A website with its own schedule — set in its settings — ignores this."))
 		}
-		.accessibilityLabel("Reload interval in minutes")
+		.accessibilityLabel("Reload interval")
 		.contentShape(.rect)
 	}
-
-	private var reloadIntervalInMinutes: Binding<Double> {
-		$reloadInterval.withDefaultValue(Self.defaultReloadInterval).secondsToMinutes
-	}
-
-	// TODO: We don't use this binding as it causes the toggle to not always work because of some weirdities with the formatter. (macOS 12.4)
-//	private var hasInterval: Binding<Bool> {
-//		$reloadInterval.isNotNil(trueSetValue: Self.defaultReloadInterval)
-//	}
 }
 
 private struct HideMenuBarIconSetting: View {

@@ -233,8 +233,7 @@ final class WallpaperScene {
 		guard
 			AppState.shared.isEnabled,
 			!AppState.shared.isBrowsingMode,
-			website != nil,
-			let reloadInterval = Defaults[.reloadInterval]
+			let reloadInterval = website?.effectiveReloadInterval
 		else {
 			return
 		}

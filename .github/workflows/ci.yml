@@ -172,7 +172,31 @@ jobs:
                   print(f"  {key[:100]}")
               sys.exit(1)
 
-          print(f"{len(catalogue['strings'])} strings, all translated")
+          # Every `String(localized:)` literal in the source has to be in the catalogue at all. The
+          # check above only looks at what is already in there, so a string added to the source and
+          # never extracted passes it — untranslated, and invisible until somebody reads the other
+          # language. Block comments are stripped first: the doc comments carry sample code.
+          import re
+
+          literals = set()
+          for path in pathlib.Path("Nifro").rglob("*.swift"):
+              source = re.sub(r"/\*.*?\*/", "", path.read_text(), flags=re.DOTALL)
+              for match in re.finditer(r'String\(localized: "((?:[^"\\]|\\.)*)"\)', source):
+                  literal = match.group(1)
+                  # Interpolated strings are stored under a placeholder key, not this text.
+                  if "\\(" not in literal:
+                      literals.add(literal.replace('\\"', '"').replace("\\n", "\n"))
+
+          absent = sorted(literals - set(catalogue["strings"]))
+
+          if absent:
+              print(f"::error::{len(absent)} strings are in the source but not in the catalogue")
+              for key in absent[:20]:
+                  print(f"  {key[:100]}")
+              print("Build the app in Xcode to extract them, then translate them.")
+              sys.exit(1)
+
+          print(f"{len(catalogue['strings'])} strings, all translated; {len(literals)} literals all present")
           CHECK
 
       - name: Check the generated catalogue is current

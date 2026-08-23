@@ -142,3 +142,34 @@ struct WebsiteAudioSetting: View {
 		}
 	}
 }
+
+/**
+How often a website reloads itself.
+
+Off follows Settings, which is the interval for everything that has no opinion. A page that does have
+one — a calendar, a departure board, a poster that never changes — sets it here, where it stays with
+the website rather than being imposed on every other one.
+*/
+struct WebsiteReloadSetting: View {
+	@Binding var reloadInterval: Double?
+
+	@Default(.reloadInterval) private var settingsInterval
+
+	private var isOverriding: Binding<Bool> {
+		.init(
+			get: { reloadInterval != nil },
+			set: { reloadInterval = $0 ? (settingsInterval ?? 60 * 60) : nil }
+		)
+	}
+
+	var body: some View {
+		Toggle(isOn: isOverriding) {
+			Text("Reload on its own schedule")
+				.explained(String(localized: "How often a page goes stale is a property of the page: a calendar is wrong after fifteen minutes, a poster never is. Off follows the interval in Settings."))
+		}
+
+		if reloadInterval != nil {
+			IntervalField(seconds: $reloadInterval.withDefaultValue(60 * 60))
+		}
+	}
+}

@@ -50,10 +50,25 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	@DecodableDefault.False var allowsInteraction
 
 	/**
+	How often to reload this website, in seconds. `nil` follows the interval in Settings.
+
+	Per website because how fast a page goes stale is a property of the page: a calendar is wrong
+	after fifteen minutes, a poster is never wrong. It used to be one app-wide number, so a catalogue
+	entry that wanted a daily reload set that for every website at once — which is how a wallpaper
+	nobody had touched came to be reloading every 1440 minutes.
+	*/
+	var reloadInterval: Double?
+
+	/**
 	The display this website actually appears on.
 	*/
 	@MainActor
 	var effectiveDisplay: Display? { display ?? Defaults[.display] }
+
+	/**
+	How often this website actually reloads.
+	*/
+	var effectiveReloadInterval: Double? { reloadInterval ?? Defaults[.reloadInterval] }
 
 	var subtitle: String { url.humanString }
 

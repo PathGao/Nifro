@@ -34,8 +34,10 @@ extension Website {
 		lines.append("Custom CSS: \(describe(css))")
 		lines.append("Custom JavaScript: \(describe(javaScript))")
 
-		if let reloadInterval = Defaults[.reloadInterval] {
-			lines.append("Reload every: \(Int(reloadInterval / 60)) min")
+		// The website's own interval when it has one, otherwise the one it inherits from Settings. The
+		// report has to say what this website does, not what the settings window says.
+		if let reloadInterval = effectiveReloadInterval {
+			lines.append("Reload every: \(Int(reloadInterval / 60)) min\(self.reloadInterval == nil ? " (from Settings)" : "")")
 		}
 
 		return lines.joined(separator: "\n")

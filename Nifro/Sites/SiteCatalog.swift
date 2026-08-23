@@ -96,11 +96,7 @@ extension SiteCatalog.Entry {
 		// the Sound item in the menu writes to this same field, and nothing puts the entry's answer
 		// back. Whatever the menu shows a tick against is what the page is actually doing.
 		binding.wrappedValue.audio = playsSound ? .unmuted : .muted
-
-		// The app has no per-site reload interval yet, so the catalogue's value goes to the global setting only when nothing has been chosen. That beats ignoring it, and beats overriding a choice the user made.
-		if let reloadInterval, Defaults[.reloadInterval] == nil {
-			Defaults[.reloadInterval] = reloadInterval
-		}
+		binding.wrappedValue.reloadInterval = reloadInterval
 	}
 }
 

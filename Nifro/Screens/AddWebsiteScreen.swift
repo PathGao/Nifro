@@ -250,6 +250,7 @@ struct AddWebsiteScreen: View {
 			WebsiteInteractionSetting(allowsInteraction: website.allowsInteraction)
 			WebsiteDisplaySetting(display: website.display)
 			WebsiteScheduleSetting(startHour: website.startHour, endHour: website.endHour)
+			WebsiteReloadSetting(reloadInterval: website.reloadInterval)
 			ZoomSetting(zoom: website.zoom)
 		}
 		Section("Advanced") {

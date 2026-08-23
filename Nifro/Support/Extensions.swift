@@ -139,21 +139,6 @@ extension Binding {
 		)
 	}
 }
-extension Binding {
-	/**
-	Listen to `didSet` of a Binding.
-	*/
-	func didSet(_ didSet: @escaping ((newValue: Value, oldValue: Value)) -> Void) -> Self {
-		.init(
-			get: { wrappedValue },
-			set: { newValue in
-				let oldValue = wrappedValue
-				wrappedValue = newValue
-				didSet((newValue, oldValue))
-			}
-		)
-	}
-}
 extension Binding<Double> {
 	// TODO: Maybe make a general `Binding#convert()` function that accepts a converter. Something like `binding.convert(.secondsToMinutes)`?
 	var secondsToMinutes: Self {
