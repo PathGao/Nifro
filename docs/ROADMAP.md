@@ -28,35 +28,35 @@ Nifro is an open-source fork of [sindresorhus/Plash](https://github.com/sindreso
 
 ---
 
-## 2. The core judgement
+## 2. The plan this project started with, and what happened to it
 
-The problem with this app is not code quality. It is two structural assumptions:
+It began from two structural complaints about upstream, and one design that was going to answer both.
 
-### Assumption one: a browser that never stops
+**One: a browser that never stops.** A resident WebContent process for content that changes once a
+minute — clocks, weather, calendars, dashboards.
 
-It uses a resident WebContent process to show content that **changes once a minute** (clocks, weather, calendars, dashboards).
+**Two: it is not a real wallpaper.** It is a transparent borderless window on the `.desktop` layer.
+Upstream's own FAQ admits the consequence: the menu bar cannot pick up its colour. Downstream of that
+are the Mission Control gesture giving the game away (Plash#182), Stage Manager treating it as a
+window, and the run of `collectionBehavior` patches in `DesktopWindow.swift`.
 
-### Assumption two: it is not a real wallpaper
+The answer was two backends: a `snapshot` one that renders a page offscreen, photographs it and lets
+the web process go — either into the window's layer, or (**A2**) through
+`NSWorkspace.setDesktopImageURL`, which would make it a genuine macOS wallpaper — and a `live` one,
+the resident web view we have now, kept for pages that really do animate.
 
-It is a transparent borderless window on the `.desktop` layer. The consequence the upstream FAQ admits itself: the menu bar cannot pick up its colour. Downstream of that are the Mission Control gesture giving the game away (#182), the way Stage Manager treats it as a window rather than as a background, and that run of `collectionBehavior` patches in `DesktopWindow.swift`.
+**None of it survived, and the reasons are worth keeping:**
 
-### The fix: two backends
+| What was claimed | What was found |
+|---|---|
+| A snapshot renderer can photograph any page | It cannot photograph the interesting ones. A window that is not on screen makes WebKit report `visibilityState: hidden`, so `requestAnimationFrame` never runs and anything drawing to a canvas photographs blank. Measured on one page: offscreen, `canvas=none`, 4 tiles, 232KB; on screen, `canvas=2790×1538`, 44 tiles, 2452KB. Overriding `document.hidden` in JavaScript does not help — the decision is below it |
+| Two backends can coexist | Each owned the answer to "what is being rendered right now", which is the same answer Browsing Mode changes. Entering Browsing Mode reloaded, leaving it reloaded again, both showed the desktop while they did, and a snapshot finishing could take the page out from under someone reading it. Every fix exposed the next |
+| The menu bar problem needs a real wallpaper | It did not. The page is kept out of the menu bar strip and an opaque band takes the website's colour, which is the part anyone actually wanted |
 
-```
-                    ┌─ Backend A "snapshot" ← the default
-                    │    offscreen WKWebView ──takeSnapshot──┬─→ A1 the desktop window's CALayer
-Website             │    web process suspended once drawn    │      (transparency / zoom / multiple displays kept)
-  backend: snapshot │                                        └─→ A2 NSWorkspace
-        or live ────┤                                               .setDesktopImageURL
-                    │                                               ↑ becomes a real wallpaper
-                    └─ Backend B "live" ← on demand
-                         the window + resident webview we have now
-                         left for the pages that really do need animation / interaction
-```
-
-A2 settles in one go: the menu bar picking up colour, Mission Control and Stage Manager behaviour, the picture surviving after the app quits, and idle power that really is 0. The price is no interaction and a floor on how often it can refresh. **This route has not been verified yet — it needs `setDesktopImageURL` tried under the sandbox.**
-
-The 24 real entries in sites/ are already sorted along this line: 18 snapshot, 6 live (screensavers, WebGL fluids, continuous 3D scenes).
+So the machinery came out — around 2400 lines across two removals — and the app went back to what
+upstream does: one live page that stops only when disabled, when the screen is locked, or on battery.
+**A2 is refused outright now; see X8.** Power comes back one piece at a time under the conditions in
+section 4, and it comes back around the live page rather than instead of it.
 
 ---
 
@@ -65,7 +65,7 @@ The 24 real entries in sites/ are already sorted along this line: 18 snapshot, 6
 ```
 Upstream issue triage   35 → DO 17 / LATER 13 / REJECT 1 / OBSOLETE 4
                         See UPSTREAM-ISSUES.md. The 35 compress into only 8 mechanisms
-Blocked                 1 — P6, until setDesktopImageURL is verified under the sandbox
+Blocked                 nothing
 ```
 
 ---
@@ -99,7 +99,6 @@ Upstream stops for three reasons only: manually disabled, screen locked, on batt
 
 | | Optimisation | Status | Notes |
 |---|---|---|---|
-| **P6** | The real-wallpaper route (A2) | **Blocked, until `setDesktopImageURL` is verified under the sandbox** | The biggest payoff and the biggest risk |
 | ~~P7~~ | ~~Go opaque when the content fills the screen~~ | **Not doing** | The saving cannot be measured, and it would need a user switch that turns the screen black on a page with a transparent background. Settings whose payoff is unclear do not get added |
 | ~~P9~~ | ~~Configurable reload strategy~~ | **Not doing** | No issue ever asked for it, I thought it up myself |
 
@@ -231,6 +230,7 @@ So while there is no account, the README's install section has to put brew first
 | **X4** | A dependency injection framework, a plugin system | There is no second implementation, so there is nothing to base the abstraction on |
 | **X5** | Use only the CLT as a type-checking gate | **Tried, failed**: KeyboardShortcuts uses `#Preview`, that macro plugin ships only with Xcode, and the Command Line Tools cannot build the dependency module. Xcode has to be installed |
 | **X7** | Camera / screen capture input (`getUserMedia`, `getDisplayMedia`) | The entitlement is per process, which means permanently giving a process that renders arbitrary user URLs around the clock the ability to reach the camera; the shorter a wallpaper app's permission list, the easier it is to check. Capture-card compositing belongs in OBS, surveillance in an NVR client. Upstream [#125](https://github.com/sindresorhus/Plash/issues/125). Note that it **is technically doable**; the reason for refusing is not difficulty |
+| **X8** | The real-wallpaper route: render the page to an image and hand it to `NSWorkspace.setDesktopImageURL` (was P6) | Never built, and now refused rather than blocked. It ends the app. A wallpaper set this way is a picture: no clicks, no Browsing Mode, no scrolling, no hold-to-interact, no logging into anything — and interaction is what this app is. Refreshing it means re-rendering and setting it again, which macOS cross-fades, so a clock would cross-fade the whole desktop once a minute. The renderer it needs is the offscreen one that photographs blank for exactly the pages worth putting up (see section 2). Against that: the menu bar colour, which is already solved; Mission Control and Stage Manager behaviour; the picture surviving after the app quits; and idle power, which nobody has measured. A tool that turns a web page into a wallpaper image is a real idea — it is just a different program, and it does not need a menu bar app at all |
 
 ---
 
