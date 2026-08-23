@@ -85,6 +85,13 @@ extension AppState {
 		}
 
 		cropSelectionPreviousZoom = nil
+
+		// The still on screen is of the old region, so this is one of the few places a snapshot in
+		// flight is worth interrupting: whatever it is producing is already out of date.
+		for scene in scenes {
+			scene.discardSnapshotInFlight()
+		}
+
 		applyRenderingMode()
 	}
 

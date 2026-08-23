@@ -184,9 +184,10 @@ final class WallpaperScene {
 	*/
 	func applyRenderingMode() {
 		guard renderingMode != .snapshot else {
-			// The still may be of a region that is no longer the one to show.
-			snapshotTask?.cancel()
-			snapshotTask = nil
+			// Not cancelled and restarted. Turning Browsing Mode on and off again comes through here,
+			// and a snapshot is a whole page load — interrupting one to start the same one again means
+			// a website that refreshes slowly may never finish refreshing at all. `refreshSnapshot`
+			// does nothing while one is already running, which is the behaviour wanted here.
 			refreshSnapshot()
 			return
 		}

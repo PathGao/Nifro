@@ -95,6 +95,18 @@ extension WallpaperScene {
 
 	Does not load anything, because the caller is on its way to doing that. Loading here too would make this and `loadWebsite` call each other. That terminates today only because of a guard, and would stop terminating the moment someone moved it.
 	*/
+	/**
+	Throw away a refresh in progress, because what it is producing is already wrong.
+
+	Only for a change to *what* should be photographed. A change to how the wallpaper is being shown —
+	Browsing Mode going on and off — is not one of those, and interrupting a page load for it means a
+	slow website may never finish refreshing.
+	*/
+	func discardSnapshotInFlight() {
+		snapshotTask?.cancel()
+		snapshotTask = nil
+	}
+
 	func stopSnapshotRendering() {
 		snapshotTask?.cancel()
 		snapshotTask = nil

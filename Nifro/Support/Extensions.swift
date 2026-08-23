@@ -1458,34 +1458,6 @@ extension StringProtocol {
 extension StringProtocol {
 	var nilIfEmptyOrWhitespace: Self? { isEmptyOrWhitespace ? nil : self }
 }
-extension StringProtocol {
-	/**
-	Word wrap the string at the given length.
-	*/
-	func wordWrapped(atLength length: Int) -> String {
-		var string = ""
-		var currentLineLength = 0
-
-		for word in components(separatedBy: .whitespaces) {
-			let wordLength = word.count
-
-			if currentLineLength + wordLength + 1 > length {
-				// Can't wrap as the word is longer than the line.
-				if wordLength >= length {
-					string += word
-				}
-
-				string += "\n"
-				currentLineLength = 0
-			}
-
-			currentLineLength += wordLength + 1
-			string += "\(word) "
-		}
-
-		return string
-	}
-}
 
 // MARK: - Timer
 

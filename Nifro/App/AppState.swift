@@ -99,27 +99,52 @@ final class AppState: ObservableObject {
 	*/
 	var croppingSceneDisplay: Display??
 
+	private var storedWebViewError: Error?
+
+	/**
+	The last thing that went wrong loading a page, or `nil`.
+
+	Cancellations are dropped rather than stored. Superseding a load cancels the one in flight, so a
+	cancelled task reports an error that is not one — and it reached the menu reading
+	"Swift.CancellationError error 1", which tells the reader nothing except that something is wrong
+	with the app.
+
+	Filtered here rather than at each `catch`, because there are four of them and the next one added
+	would have to remember.
+	*/
 	var webViewError: Error? {
-		didSet {
-			if let webViewError {
-				statusItemButton.toolTip = "Error: \(webViewError.localizedDescription)"
-
-				// TODO: There's a macOS bug that makes it black instead of a color.
-//				statusItemButton.contentTintColor = .systemRed
-
-				// TODO: Also present the error when the user just added it from the input box as then it's also "interactive".
-				if
-					isBrowsingMode,
-					!webViewError.localizedDescription.contains(String(localized: "No internet connection"))
-				{
-					webViewError.presentAsModal()
-				}
-
+		get { storedWebViewError }
+		set {
+			guard let newValue else {
+				storedWebViewError = nil
+				statusItemButton.contentTintColor = nil
 				return
 			}
 
-			statusItemButton.contentTintColor = nil
+			guard !isCancellation(newValue) else {
+				return
+			}
+
+			storedWebViewError = newValue
+			report(newValue)
 		}
+	}
+
+	private func report(_ webViewError: Error) {
+		statusItemButton.toolTip = "Error: \(webViewError.localizedDescription)"
+
+		// TODO: There's a macOS bug that makes it black instead of a color.
+//		statusItemButton.contentTintColor = .systemRed
+
+		// TODO: Also present the error when the user just added it from the input box as then it's also "interactive".
+		guard
+			isBrowsingMode,
+			!webViewError.localizedDescription.contains(String(localized: "No internet connection"))
+		else {
+			return
+		}
+
+		webViewError.presentAsModal()
 	}
 
 	private init() {
