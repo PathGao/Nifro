@@ -113,7 +113,6 @@ extension Binding {
 	}
 }
 extension Binding {
-
 	/**
 	Convert a binding with an optional value to a binding with a boolean value representing whether the original binding value is not `nil`.
 
@@ -618,7 +617,6 @@ extension Data {
 	func sha256() -> Self {
 		Data(SHA256.hash(data: self))
 	}
-
 }
 
 // MARK: - DecodableDefault
@@ -1077,7 +1075,6 @@ extension NSEvent {
 			// We remove `numericPad`/`function` as arrow keys trigger it, use `event.specialKeys` instead.
 			.subtracting([.capsLock, .numericPad, .function])
 	}
-
 }
 
 // MARK: - NSGestureRecognizer
@@ -1112,7 +1109,6 @@ extension NSItemProvider {
 		}
 		.value
 	}
-
 }
 extension NSItemProvider {
 	func getImage() async -> NSImage? {
@@ -1195,7 +1191,6 @@ extension NSWindow.Level {
 
 	static let desktop = level(for: .desktopWindow)
 	static let desktopIcon = level(for: .desktopIconWindow)
-
 }
 
 // MARK: - NSWorkspace
@@ -1218,7 +1213,6 @@ extension NSWorkspace {
 
 		return height
 	}
-
 }
 extension NSWorkspace {
 	/**
@@ -1246,9 +1240,6 @@ extension Notification.Name {
 
 // MARK: - Numeric
 extension Numeric {
-
-
-
 }
 
 // MARK: - ObjectAssociation
@@ -1360,8 +1351,6 @@ extension RangeReplaceableCollection where Element: Equatable {
 
 // MARK: - Sequence
 extension Sequence {
-
-
 	/**
 	Same as the above but supports returning optional values.
 
@@ -1400,7 +1389,6 @@ extension Sequence where Element: Equatable {
 
 // MARK: - SetAlgebra
 extension SetAlgebra {
-
 	/**
 	Insert the `value` if `shouldExist` is true, otherwise remove it.
 	*/
@@ -1496,7 +1484,6 @@ extension String {
 	func sha256() -> Self {
 		toData.sha256().hexEncodedString()
 	}
-
 }
 extension String: SimpleImageCacheKeyable {
 	var cacheKey: String { self }
@@ -1710,7 +1697,6 @@ extension URL {
 	}
 }
 extension URL {
-
 	/**
 	Accepts a file URL to a directory or file. If it's a file, it will prompt for permissions to its containing directory.
 
@@ -1965,7 +1951,6 @@ extension View {
 	}
 }
 extension View {
-
 	/**
 	This overload makes it possible to preserve the type. For example, doing an `if` in a chain of `Text`-only modifiers.
 
@@ -1985,7 +1970,6 @@ extension View {
 	}
 }
 extension View {
-
 }
 extension View {
 	/**
@@ -2155,8 +2139,6 @@ extension View {
 	}
 }
 extension View {
-
-
 }
 extension View {
 	/**
@@ -2214,7 +2196,6 @@ extension View {
 	}
 }
 extension View {
-
 }
 extension View {
 	/**
@@ -2576,7 +2557,7 @@ extension WKWebView {
 	}
 }
 extension WKWebView {
-	static nonisolated func createCSSInjectScript(_ css: String) -> String {
+	nonisolated static func createCSSInjectScript(_ css: String) -> String {
 		let textContent = css.addingPercentEncoding(withAllowedCharacters: .letters) ?? css
 
 		// Injected at document start, so the style element gets appended to a document the page has not finished building. Frameworks that swap out `documentElement` or clear `head` on mount take our style with them, and the user's CSS stops applying. People report this as "my CSS works in Safari but not here" (Plash#173).
@@ -2824,7 +2805,6 @@ extension WebViewController: WKUIDelegate {
 ```
 */
 extension WKWebView {
-
 	/**
 	Default handler for JavaScript `confirm()` to be used in `WKDelegate`.
 	*/
@@ -2996,7 +2976,6 @@ final class ObservableValue<Value>: ObservableObject {
 			}
 		)
 	}
-
 }
 /**
 A scrollable and editable text view.

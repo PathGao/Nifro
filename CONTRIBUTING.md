@@ -47,10 +47,7 @@ git clone https://github.com/PathGao/Nifro.git
 open Nifro/Nifro.xcodeproj
 ```
 
-Then build and run the `Plash` scheme. (The Xcode project, its targets and the
-source directory still carry the upstream name. Renaming them is a large,
-noisy, conflict-prone diff, so it is being done deliberately rather than in
-passing — don't rename them as part of an unrelated change.)
+Then build and run the `Nifro` scheme.
 
 - **Swift 6 language mode.** Concurrency errors are errors, not warnings. If
   you hit one, the fix is almost always to move the work onto the actor that
@@ -83,7 +80,7 @@ Nifro/
 ├── App/          entry point, state, events, menus, Shortcuts
 ├── Wallpaper/    the window, the web view, loading, snapshots
 ├── Visibility/   how much to render, and when to stop
-├── Crop/         cropping and the drag-to-frame overlay
+├── Zoom/         zooming, the drag-to-frame overlay and per-website settings
 ├── Sites/        the website model and the curated list
 ├── Screens/      SwiftUI windows and settings
 └── Support/      geometry, scheduling and shared extensions

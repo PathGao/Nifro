@@ -160,7 +160,6 @@ extension AppState {
 
 			menu.addSeparator()
 		}
-
 	}
 
 	/**

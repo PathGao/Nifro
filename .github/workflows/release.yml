@@ -246,7 +246,12 @@ jobs:
           cat > "$RUNNER_TEMP/notes.md" <<EOF
           $note
 
-          Install: \`brew install --cask PathGao/tap/nifro\`
+          Install:
+
+          \`\`\`
+          brew tap PathGao/tap https://github.com/PathGao/Nifro
+          brew install --cask nifro
+          \`\`\`
 
           \`\`\`
           Apple silicon  Nifro-$version-arm64.dmg   sha256 ${{ steps.package.outputs.sha_arm64 }}
@@ -274,7 +279,13 @@ jobs:
           git fetch origin main
           git checkout -B main origin/main
           sed -i '' -E "s/^  version \".*\"$/  version \"$version\"/" Casks/nifro.rb
-          sed -i '' -E "s/^    sha256 arm:   \".*\", intel: \".*\"$/    sha256 arm:   \"$sha_arm\", intel: \"$sha_intel\"/" Casks/nifro.rb
+          sed -i '' -E "s/^  sha256 arm: \".*\", intel: \".*\"$/  sha256 arm: \"$sha_arm\", intel: \"$sha_intel\"/" Casks/nifro.rb
+
+          # Both lines have to have changed. A sed that matches nothing exits 0, so without this the
+          # step would commit a cask carrying the new version number and the old checksums — which
+          # installs nothing and looks like a working release until somebody tries it.
+          grep -q "  version \"$version\"" Casks/nifro.rb || { echo "::error::the version writeback matched nothing"; exit 1; }
+          grep -q "sha256 arm: \"$sha_arm\"" Casks/nifro.rb || { echo "::error::the sha256 writeback matched nothing"; exit 1; }
 
           if git diff --quiet -- Casks/nifro.rb; then
             echo "cask unchanged, skipping"

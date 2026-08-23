@@ -171,7 +171,7 @@ func largestUncoveredRegion(
 /**
 Converts a rectangle reported by the window server, which measures down from the top of the whole display arrangement, into AppKit coordinates, which measure up from the bottom.
 */
-func flippingFromWindowServer(_ rect: CGRect, arrangementHeight: CGFloat) -> CGRect {
+func flippingFromWindowServer(_ rect: CGRect, arrangementHeight: Double) -> CGRect {
 	CGRect(
 		x: rect.minX,
 		y: arrangementHeight - rect.maxY,

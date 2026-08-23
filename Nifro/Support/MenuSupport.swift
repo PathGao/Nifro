@@ -66,7 +66,6 @@ final class CallbackMenuItem: NSMenuItem {
 	required init(coder decoder: NSCoder) {
 		fatalError(because: .notYetImplemented)
 	}
-
 }
 
 extension CallbackMenuItem {
@@ -283,5 +282,4 @@ extension NSMenuItem {
 		submenu = isEnabled ? menu() : NSMenu()
 		return self
 	}
-
 }

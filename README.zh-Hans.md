@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/icon.png" alt="Nifro" width="180">
+  <img src="assets/icon-256.png" alt="Nifro" width="180">
 </p>
 
 <h1 align="center">Nifro</h1>

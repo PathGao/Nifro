@@ -87,7 +87,6 @@ final class DesktopWindow: NSWindow {
 				self?.setFrame()
 			}
 			.store(in: &cancellables)
-
 	}
 
 	private func setFrame() {

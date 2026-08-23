@@ -16,8 +16,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_26.app
+      # No `xcode-select`. Pinning a path meant naming `/Applications/Xcode_26.app`, which the runner
+      # image does not have — it ships `Xcode_26.6.app`, `Xcode_26.5.app` and so on, so every job that
+      # selected it died on step two and CI never compiled anything. The default on `macos-26` is
+      # already the newest Xcode 26; assert the floor instead of naming a path that rots.
+      - name: Check the Xcode version
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          major="$(xcodebuild -version | sed -n '1s/Xcode \([0-9]*\).*/\1/p')"
+          [ "$major" -ge 26 ] || { echo "::error::Xcode $major is too old; this project needs 26 or newer"; exit 1; }
 
       - name: Cache SPM
         uses: actions/cache@v4
@@ -46,8 +54,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_26.app
+      # No `xcode-select`. Pinning a path meant naming `/Applications/Xcode_26.app`, which the runner
+      # image does not have — it ships `Xcode_26.6.app`, `Xcode_26.5.app` and so on, so every job that
+      # selected it died on step two and CI never compiled anything. The default on `macos-26` is
+      # already the newest Xcode 26; assert the floor instead of naming a path that rots.
+      - name: Check the Xcode version
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          major="$(xcodebuild -version | sed -n '1s/Xcode \([0-9]*\).*/\1/p')"
+          [ "$major" -ge 26 ] || { echo "::error::Xcode $major is too old; this project needs 26 or newer"; exit 1; }
 
       # The crop and coverage maths are pure functions, so they run without an app bundle or a window server.
       - name: Test
@@ -72,8 +88,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_26.app
+      # No `xcode-select`. Pinning a path meant naming `/Applications/Xcode_26.app`, which the runner
+      # image does not have — it ships `Xcode_26.6.app`, `Xcode_26.5.app` and so on, so every job that
+      # selected it died on step two and CI never compiled anything. The default on `macos-26` is
+      # already the newest Xcode 26; assert the floor instead of naming a path that rots.
+      - name: Check the Xcode version
+        run: |
+          set -euo pipefail
+          xcodebuild -version
+          major="$(xcodebuild -version | sed -n '1s/Xcode \([0-9]*\).*/\1/p')"
+          [ "$major" -ge 26 ] || { echo "::error::Xcode $major is too old; this project needs 26 or newer"; exit 1; }
 
       - name: Install Periphery
         run: brew install peripheryapp/periphery/periphery

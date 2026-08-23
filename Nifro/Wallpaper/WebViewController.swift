@@ -200,7 +200,7 @@ extension WebViewController: WKNavigationDelegate {
 		// Holding Command or Option sends a link to the default browser whatever the settings say. That matches other Mac apps with an embedded web view, and it is the only way to open a same-site link externally without changing a setting first. Plash#140.
 		if
 			navigationAction.navigationType == .linkActivated,
-			!NSEvent.modifiers.intersection([.command, .option]).isEmpty,
+			!NSEvent.modifiers.isDisjoint(with: [.command, .option]),
 			let newURL = navigationAction.request.url
 		{
 			if Defaults[.isBrowsingMode], Defaults[.bringBrowsingModeToFront] {
@@ -370,7 +370,6 @@ extension WebViewController: WKUIDelegate {
 
 		return await webView.defaultUploadPanelHandler(parameters: parameters)
 	}
-
 }
 
 extension WebViewController: WKDownloadDelegate {

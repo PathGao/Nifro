@@ -33,5 +33,4 @@ extension AppState {
 
 		return base * Defaults[.dimmedOpacityFactor]
 	}
-
 }

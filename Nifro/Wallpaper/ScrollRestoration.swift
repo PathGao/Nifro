@@ -13,6 +13,10 @@ The position is captured just before a reload rather than polled, so nothing run
 extension WallpaperScene {
 	private static let scrollPositionKeyPrefix = "scrollPosition_"
 
+	// Optional rather than an empty array on purpose: `nil` means no position was ever stored for this
+	// page, and an empty array would have to stand in for that as well as for a position, which the
+	// restore path already has to tell apart from [0, 0].
+	// swiftlint:disable:next discouraged_optional_collection
 	private func scrollPositionKey(for url: URL) -> Defaults.Key<[Double]?> {
 		let identifier = url
 			.normalized(removeFragment: true, removeQuery: false)

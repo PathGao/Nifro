@@ -11,7 +11,7 @@ build. You need a text editor and a website you like looking at.
 
 The seed entries come from five years of people sharing their setups in
 [Plash discussion #136](https://github.com/sindresorhus/Plash/discussions/136) and from the
-use-cases and tips in the pre-close [Plash readme](../readme.md). Credit stays with them in each
+use-cases and tips in the pre-close [Plash readme](https://github.com/sindresorhus/Plash#readme). Credit stays with them in each
 entry's `source` field.
 
 ## Fields

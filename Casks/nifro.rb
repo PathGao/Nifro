@@ -12,10 +12,9 @@ cask "nifro" do
   arch arm: "arm64", intel: "x86_64"
 
   version "0.1.0"
-  sha256 arm:   "0000000000000000000000000000000000000000000000000000000000000000",
-         intel: "0000000000000000000000000000000000000000000000000000000000000000"
+  sha256 arm: "0000000000000000000000000000000000000000000000000000000000000000", intel: "0000000000000000000000000000000000000000000000000000000000000000"
 
-  url "https://github.com/PathGao/Nifro/releases/download/v#{version}/Nifro-#{version}-#{arch}.zip",
+  url "https://github.com/PathGao/Nifro/releases/download/v#{version}/Nifro-#{version}-#{arch}.dmg",
       verified: "github.com/PathGao/Nifro/"
   name "Nifro"
   desc "Web page as your desktop wallpaper"

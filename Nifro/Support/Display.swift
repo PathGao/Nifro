@@ -29,7 +29,6 @@ extension NSScreen {
 }
 
 extension NSScreen {
-
 	/**
 	Returns a publisher that sends updates when anything related to screens change.
 

@@ -81,7 +81,7 @@ extension NSScreen {
 	/**
 	Height of the strip the menu bar occupies on this screen, or 0 when it has none.
 	*/
-	var menuBarHeight: CGFloat { frame.height - frameWithoutStatusBar.height }
+	var menuBarHeight: Double { frame.height - frameWithoutStatusBar.height }
 }
 
 extension WallpaperScene {

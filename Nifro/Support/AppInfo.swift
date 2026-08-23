@@ -80,7 +80,7 @@ extension SSApp {
 	static func showSettingsWindow() {
 		// Run in the next runloop so it doesn't conflict with SwiftUI if run at startup.
 		DispatchQueue.main.async {
-			SSApp.activateIfAccessory()
+			Self.activateIfAccessory()
 			EnvironmentValues().openSettings()
 		}
 	}
@@ -90,27 +90,27 @@ extension SSApp {
 extension SSApp {
 	@MainActor
 	static func setUpExternalEventListeners() {
-		DistributedNotificationCenter.default.publisher(for: .init("\(SSApp.idString):showSettings"))
+		DistributedNotificationCenter.default.publisher(for: .init("\(Self.idString):showSettings"))
 			.sink { _ in
 				DispatchQueue.main.async {
-					SSApp.showSettingsWindow()
+					Self.showSettingsWindow()
 				}
 			}
 			.storeForever()
 
-		DistributedNotificationCenter.default.publisher(for: .init("\(SSApp.idString):openSendFeedback"))
+		DistributedNotificationCenter.default.publisher(for: .init("\(Self.idString):openSendFeedback"))
 			.sink { _ in
 				DispatchQueue.main.async {
-					SSApp.openSendFeedbackPage()
+					Self.openSendFeedbackPage()
 				}
 			}
 			.storeForever()
 
-		DistributedNotificationCenter.default.publisher(for: .init("\(SSApp.idString):copyDebugInfo"))
+		DistributedNotificationCenter.default.publisher(for: .init("\(Self.idString):copyDebugInfo"))
 			.sink { _ in
 				DispatchQueue.main.async {
 					NSPasteboard.general.prepareForNewContents()
-					NSPasteboard.general.setString(SSApp.debugInfo, forType: .string)
+					NSPasteboard.general.setString(Self.debugInfo, forType: .string)
 				}
 			}
 			.storeForever()
@@ -171,7 +171,6 @@ extension SSApp {
 
 
 extension SSApp {
-
 }
 
 extension Bundle {

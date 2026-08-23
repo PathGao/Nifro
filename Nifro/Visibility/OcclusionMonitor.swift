@@ -10,8 +10,6 @@ We measure the uncovered area ourselves instead, over the whole screen frame. Th
 */
 @MainActor
 final class OcclusionMonitor {
-
-
 	/**
 	How often we re-check while the app is running.
 
