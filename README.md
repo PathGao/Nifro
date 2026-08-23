@@ -44,10 +44,10 @@ Or [download the latest release](https://github.com/PathGao/Nifro/releases/lates
 `arm64` build on Apple silicon and the `x86_64` build on Intel. There is no universal binary, so
 nobody downloads the half they cannot run.
 
-Homebrew is the recommended route. Builds are signed with the project's own certificate rather than
-an Apple Developer ID one, which keeps the signature stable across updates but does not get them
-notarized, so Gatekeeper stops a directly downloaded build until you allow it in System Settings.
-The cask does that step for you. See [docs/RELEASE.md](docs/RELEASE.md).
+Builds are signed with the project's own certificate rather than an Apple Developer ID one, so they
+are not notarized and Gatekeeper stops a directly downloaded one until you allow it in System
+Settings. The cask does that for you, which is why it is the recommended route.
+See [docs/RELEASE.md](docs/RELEASE.md).
 
 Requires macOS 15 or later.
 
@@ -71,24 +71,17 @@ Undoing those is what this fork is about. See [docs/ROADMAP.md](docs/ROADMAP.md)
 
 ## What it does that Plash does not
 
-**Only renders what you can see.** A wallpaper window covers the whole screen, so the page keeps
-painting frames under every maximised window you open. Nifro works out how much of the wallpaper is
-actually visible and shrinks the window to that, or holds the last frame when nothing shows. The
-common case, where the only wallpaper left is the strip behind the Dock, is one the system's own
-occlusion state never reports as hidden.
+**Only renders what you can see.** A wallpaper keeps painting frames under every window you open.
+Nifro measures how much of it is actually visible and renders only that — down to the strip behind
+the Dock, which macOS itself never reports as hidden.
 
-**Works out on its own whether a page needs rendering at all.** Most pages people use as wallpapers
-are documents, maps and dashboards: they load, they settle, and then they are a picture. Nifro
-watches what a page actually does for a minute, and if nothing moves it switches to loading,
-photographing and closing the page on a schedule instead of keeping a browser open all day. It
-changes its mind again if the page starts moving.
+**Works out whether a page needs rendering at all.** Most wallpapers load, settle, and then are a
+picture. Nifro watches one for a minute; if nothing moves it photographs it on a schedule instead of
+keeping a browser open all day, and changes its mind if the page starts moving.
 
-**Zoom into part of a page.** Frame a region by dragging over the wallpaper and it fills the screen,
-with the navigation, borders and margins around it gone. The page still lays out at the full size of
-the screen, so the site does not reflow into something other than what you framed, and the region is
-re-rendered rather than scaled up, so text stays sharp. The frame is locked to the shape of your
-screen, and it is stored as a place and a magnification rather than a rectangle, so the same website
-zoomed the same way works on a second display of a different shape.
+**Zoom into part of a page.** Drag a rectangle over the wallpaper and that part fills the screen.
+The page still lays out at full size, so the site does not reflow into something you did not frame,
+and the region is re-rendered rather than scaled up, so text stays sharp.
 
 **One page per display.** Assign a website to a screen; each screen gets its own.
 
@@ -100,10 +93,9 @@ wallpaper again.
 
 **Audio per website.** A clock should never make a sound, a live stream is pointless without one.
 
-**A curated site list.** [`sites/`](sites/) holds websites that work well as wallpapers, each with
-the settings that make it work. Adding one is a single YAML file, no Swift and no Xcode. The
-in-app gallery reads the list straight from this branch, so an entry merged here shows up without
-waiting for a release.
+**A curated site list.** Pages that work well as wallpapers, each carrying the settings that make it
+work. The in-app gallery reads it straight from this branch, so a merged entry appears without waiting
+for a release. Suggesting one takes a form and the app's Copy Settings button.
 
 **English and Simplified Chinese**, throughout the app.
 
