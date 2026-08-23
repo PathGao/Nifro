@@ -443,6 +443,16 @@
         }
       }
     },
+    "Click to edit this website." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "点这里编辑这个网站。"
+          }
+        }
+      }
+    },
     "Clickable on the desktop" : {
       "localizations" : {
         "zh-Hans" : {
@@ -682,16 +692,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "编辑"
-          }
-        }
-      }
-    },
-    "Edit…" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "编辑…"
           }
         }
       }
@@ -1215,6 +1215,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "没有网络连接"
+          }
+        }
+      }
+    },
+    "Not showing" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未显示"
           }
         }
       }
@@ -1821,6 +1831,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "在每个「桌面」上显示"
+          }
+        }
+      }
+    },
+    "Showing" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在显示"
           }
         }
       }

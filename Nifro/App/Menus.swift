@@ -1,25 +1,60 @@
 import Cocoa
 
 extension AppState {
+	/**
+	Which website this all applies to, and the way into its settings.
+
+	Under the switch, because the switch is about this website: "Disable" and the name of the thing
+	being disabled belong to each other.
+
+	A real item rather than a label. It was a disabled one, and disabled is drawn grey however the
+	title is coloured — grey says "you cannot have this" where the point is "this is the one you
+	have". Making it do something removes the argument: it opens this website's settings, which is
+	what a name in a menu invites you to click, and it takes the place of the separate "Edit…" that
+	used to sit four items below its own subject.
+
+	The dot is the state the switch above it is in — green while the wallpaper is showing, hollow while
+	it is not — so the pair reads as one statement instead of two.
+	*/
 	private func addInfoMenuItem() {
-		guard let website = WebsitesController.shared.current else {
+		guard
+			let website = WebsitesController.shared.current,
+			!website.menuTitle.isEmpty
+		else {
 			return
 		}
 
-		var url = website.url
 		do {
-			url = try primaryScene.replacePlaceholders(of: url) ?? url
+			_ = try primaryScene.replacePlaceholders(of: website.url)
 		} catch {
 			error.presentAsModal()
 			return
 		}
 
-		let maxLength = 30
+		let menuItem = menu.addCallbackItem(website.menuTitle.truncating(to: 30)) {
+			Constants.openWebsitesWindow()
 
-		if !website.menuTitle.isEmpty {
-			let menuItem = menu.addDisabled(website.menuTitle.truncating(to: maxLength))
-			menuItem.toolTip = website.tooltip
+			// TODO: Find a better way to do this.
+			NotificationCenter.default.post(name: .showEditWebsiteDialog, object: nil)
 		}
+
+		menuItem.image = Self.statusDot(isOn: isEnabled)
+		menuItem.toolTip = "\(website.tooltip)\n \n\(String(localized: "Click to edit this website."))"
+	}
+
+	/**
+	A dot the size of the text beside it, filled while the wallpaper is showing and outlined while it
+	is not.
+	*/
+	private static func statusDot(isOn: Bool) -> NSImage? {
+		let configuration = NSImage.SymbolConfiguration(pointSize: 9, weight: .regular)
+			.applying(NSImage.SymbolConfiguration(paletteColors: [isOn ? .systemGreen : .tertiaryLabelColor]))
+
+		return NSImage(
+			systemSymbolName: isOn ? "circle.fill" : "circle",
+			accessibilityDescription: isOn ? String(localized: "Showing") : String(localized: "Not showing")
+		)?
+		.withSymbolConfiguration(configuration)
 	}
 
 	private func createSwitchMenu() -> SSMenu {
@@ -44,10 +79,6 @@ extension AppState {
 			menu.addDisabled(String(localized: "Error: \(webViewError.localizedDescription)").wordWrapped(atLength: 36).toNSAttributedString)
 			menu.addSeparator()
 		}
-
-		addInfoMenuItem()
-
-		menu.addSeparator()
 
 		if !WebsitesController.shared.all.isEmpty {
 			menu.addCallbackItem(
@@ -90,16 +121,6 @@ extension AppState {
 				.setShortcut(for: Shortcut.toggleSound.name)
 
 				menu.items.last?.toolTip = String(localized: "Whether this website is allowed to make noise. Remembered per website, so a clock stays silent and a live stream does not.")
-			}
-
-			menu.addCallbackItem(
-				String(localized: "Edit…"),
-				isEnabled: WebsitesController.shared.current != nil
-			) {
-				Constants.openWebsitesWindow()
-
-				// TODO: Find a better way to do this.
-				NotificationCenter.default.post(name: .showEditWebsiteDialog, object: nil)
 			}
 		}
 
