@@ -49,6 +49,14 @@ final class WallpaperScene {
 	var pendingWebView: SSWebView?
 	var pendingLoad: Task<Void, Never>?
 
+	/**
+	The website whose page is actually on screen.
+
+	`website` is where the scene is heading; this is where it is. The two differ for as long as a
+	replacement takes to load out of sight, which is the whole point of swap loading.
+	*/
+	private var loadedWebsiteID: Website.ID?
+
 	private var reloadTimer: Timer?
 	var playlistTimer: Timer?
 
@@ -104,8 +112,22 @@ final class WallpaperScene {
 
 	/**
 	Show the live page, magnified to a region when the website asks for one.
+
+	Does nothing while the page on screen belongs to a different website. Switching website sets
+	`website` at once and only reaches the new page seconds later, when it has finished loading out of
+	sight — and installing the new website's region in between applied it to the old website's page,
+	so a framed wallpaper snapped back to the whole page and stayed there until the switch completed.
+	`adopt` calls this again once the new page is actually up.
 	*/
+	func adoptLoadedWebsite() {
+		loadedWebsiteID = website?.id
+	}
+
 	func installContentView() {
+		guard loadedWebsiteID == nil || loadedWebsiteID == website?.id else {
+			return
+		}
+
 		content = .live(zoom: website?.zoom)
 	}
 
@@ -163,6 +185,7 @@ final class WallpaperScene {
 		pendingLoad?.cancel()
 		pendingWebView = nil
 		webViewController.releaseWebView()
+		loadedWebsiteID = nil
 		content = .live(zoom: nil)
 	}
 
@@ -197,6 +220,13 @@ final class WallpaperScene {
 		}
 
 		webViewController.loadURL(url)
+
+		// The page on screen is this website's from here on, so it gets this website's region. Doing
+		// it here also covers coming back from disabled: suspending releases the page and leaves the
+		// window holding a bare, region-less view, and nothing on the way back put the region on
+		// again — so a framed wallpaper came back as the whole page.
+		loadedWebsiteID = website?.id
+		installContentView()
 
 		// The web view starts hidden so the first frame is not a flash of white. Unhide the web view itself, not whatever view happens to be installed a second from now. By then the visibility policy may have swapped in a still or a wrapper view, and unhiding that would leave the real web view hidden for the rest of the session. That is a blank wallpaper with no way back.
 		delay(.seconds(1)) { [weak self] in

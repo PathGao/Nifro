@@ -103,6 +103,10 @@ extension WallpaperScene {
 	private func adopt(_ replacement: SSWebView) {
 		replacement.isHidden = false
 		webViewController.adopt(replacement)
+
+		// Before `installContentView`, which refuses to touch a page belonging to another website.
+		// This is the moment the page on screen becomes this one.
+		adoptLoadedWebsite()
 		installContentView()
 
 		restoreScrollPosition(in: replacement)
