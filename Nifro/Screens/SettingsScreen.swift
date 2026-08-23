@@ -265,21 +265,92 @@ private struct DisplaySetting: View {
 	}
 }
 
+/**
+Clearing takes a moment and used to say nothing about it.
+
+The button disabled itself the instant it was pressed and stayed that way, with no sign of work
+happening, no sign of it finishing, and no way to tell whether anything had gone. It is a button whose
+whole purpose is an effect you cannot see, so it has to report one: it says how much it freed, which
+is the only answer to "did that do anything" that does not require taking the app's word for it.
+*/
 private struct ClearWebsiteDataSetting: View {
-	@State private var hasCleared = false
+	private enum Progress: Equatable {
+		case ready
+		case clearing
+		case cleared(bytes: Int64)
+	}
+
+	@State private var progress = Progress.ready
 
 	var body: some View {
-		// Not marked as destructive as it should mostly be used when it's together with other buttons.
-		Button("Clear all website data") {
-			Task {
-				hasCleared = true
-				WebsitesController.shared.thumbnailCache.removeAllImages()
-				AppState.shared.forgetWherePagesWere()
-				await WKWebsiteDataStore.clearAllWebsiteData()
+		HStack(spacing: 8) {
+			// Not marked as destructive as it should mostly be used when it's together with other buttons.
+			Button("Clear all website data") {
+				clear()
+			}
+			.disabled(progress == .clearing)
+
+			switch progress {
+			case .ready:
+				EmptyView()
+			case .clearing:
+				ProgressView()
+					.controlSize(.small)
+			case .cleared(let bytes):
+				// Zero is a real answer and a common one — pressing it twice frees nothing the second
+				// time — so it says "nothing left to clear" rather than "0 bytes freed", which reads
+				// like a failure.
+				Text(bytes > 0 ? String(localized: "Freed \(bytes.formatted(.byteCount(style: .file)))") : String(localized: "Nothing left to clear"))
+					.foregroundStyle(.secondary)
 			}
 		}
 		.help("Clears cookies, local storage, caches, page thumbnails, and where each page had been scrolled or moved to. Your websites and their settings are kept.")
-		.disabled(hasCleared)
+	}
+
+	private func clear() {
+		progress = .clearing
+
+		Task {
+			let before = await Self.storedBytes()
+
+			WebsitesController.shared.thumbnailCache.removeAllImages()
+			AppState.shared.forgetWherePagesWere()
+			await WKWebsiteDataStore.clearAllWebsiteData()
+
+			let after = await Self.storedBytes()
+			progress = .cleared(bytes: max(0, before - after))
+		}
+	}
+
+	/**
+	How much the app is keeping on disk.
+
+	The sandbox container is the app's home directory, so this is everything it has written — measured
+	either side of the clear rather than reported by it, because what WebKit actually removed is the
+	question, and only the disk can answer that.
+	*/
+	private static func storedBytes() async -> Int64 {
+		await Task.detached(priority: .utility) {
+			let keys: Set<URLResourceKey> = [.totalFileAllocatedSizeKey]
+
+			guard
+				let files = FileManager.default.enumerator(
+					at: URL.homeDirectory,
+					includingPropertiesForKeys: Array(keys)
+				)
+			else {
+				return 0
+			}
+
+			return files.reduce(into: Int64(0)) { total, item in
+				guard let url = item as? URL else {
+					return
+				}
+
+				total += Int64((try? url.resourceValues(forKeys: keys).totalFileAllocatedSize) ?? 0)
+			}
+		}
+		.value
 	}
 }
 

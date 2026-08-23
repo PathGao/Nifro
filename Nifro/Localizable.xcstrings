@@ -696,6 +696,7 @@
         }
       }
     },
+    "Edit…" : {},
     "Enable" : {
       "localizations" : {
         "zh-Hans" : {
@@ -773,6 +774,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "强制网站使用它的打印样式（「@media print」），如果有的话。有些网站的打印版式更简洁，比如 Google 日历。"
+          }
+        }
+      }
+    },
+    "Freed %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已释放 %@"
           }
         }
       }
@@ -1235,6 +1246,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "尚未实现。"
+          }
+        }
+      }
+    },
+    "Nothing left to clear" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已经没有可清的了"
           }
         }
       }
