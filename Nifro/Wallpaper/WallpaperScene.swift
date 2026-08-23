@@ -4,7 +4,7 @@ import Combine
 /**
 One wallpaper. A window on one display, the web view inside it, and everything that decides what that web view is doing.
 
-All of this used to be singletons on `AppState`, one window and one web view and one current website, which blocked every feature that needs more than one of anything. A different page per display, the most-asked-for thing in the upstream tracker, could not be built at all. A playlist could not run two pages at once. The snapshot backend needs a second, offscreen renderer alongside the live one.
+All of this used to be singletons on `AppState`, one window and one web view and one current website, which blocked every feature that needs more than one of anything. A different page per display, the most-asked-for thing in the upstream tracker, could not be built at all. A playlist could not run two pages at once.
 
 So the unit is the scene, and the app owns a list of them. A single-display setup has exactly one and behaves as before.
 */
@@ -28,9 +28,9 @@ final class WallpaperScene {
 	/**
 	What the window is showing right now.
 
-	`window.contentView` is one slot and four features want to fill it: the live page, the live page shrunk to the patch still on show, the still held while the wallpaper is covered, and the still the snapshot backend draws from. Each used to write the slot itself and keep a flag beside it, so every writer had to remember to clear the other three flags and pick the matching window size. Forgetting one shipped a blank wallpaper.
+	`window.contentView` is one slot, and it used to be written directly by whoever wanted it, with a flag kept beside it saying which of them had. Every writer had to remember to clear the other flags and pick the matching window size, and forgetting one shipped a blank wallpaper.
 
-	One value removes the flags instead of making them easier to clear. There is nothing left to forget because there is nothing left to clear.
+	One value removes the flags instead of making them easier to clear. There is nothing left to forget because there is nothing left to clear. Two cases today; the reason for the shape is that the count has changed before.
 	*/
 	var content = WallpaperContent.live(zoom: nil) {
 		didSet {
@@ -50,12 +50,18 @@ final class WallpaperScene {
 	var pendingLoad: Task<Void, Never>?
 
 	/**
-	The website whose page is actually on screen.
+	The website whose page is actually on screen, as it stood when the page was loaded.
 
 	`website` is where the scene is heading; this is where it is. The two differ for as long as a
 	replacement takes to load out of sight, which is the whole point of swap loading.
+
+	The whole value, not just the identity, so `applyWebsiteChanges` can tell "this scene already
+	shows exactly this" from "this scene shows an older version of it" and skip the reload in the
+	first case.
 	*/
-	private(set) var loadedWebsiteID: Website.ID?
+	private(set) var loadedWebsite: Website?
+
+	var loadedWebsiteID: Website.ID? { loadedWebsite?.id }
 
 	/**
 	Whether the page for the current load has been put on screen yet.
@@ -73,8 +79,9 @@ final class WallpaperScene {
 	*/
 	private var addressObserver: AnyCancellable?
 
-	init(display: Display?) {
+	init(display: Display?, website: Website?) {
 		self.display = display
+		self.website = website
 		self.window = DesktopWindow(display: display)
 
 		webViewController.scene = self
@@ -128,6 +135,13 @@ final class WallpaperScene {
 	var pageLayoutSize: CGSize? { screen?.pageFrame.size }
 
 	/**
+	Record that the page on screen is now this scene's website, exactly as the list has it.
+	*/
+	func adoptLoadedWebsite() {
+		loadedWebsite = website
+	}
+
+	/**
 	Show the live page, magnified to a region when the website asks for one.
 
 	Does nothing while the page on screen belongs to a different website. Switching website sets
@@ -136,10 +150,6 @@ final class WallpaperScene {
 	so a framed wallpaper snapped back to the whole page and stayed there until the switch completed.
 	`adopt` calls this again once the new page is actually up.
 	*/
-	func adoptLoadedWebsite() {
-		loadedWebsiteID = website?.id
-	}
-
 	func installContentView() {
 		guard loadedWebsiteID == nil || loadedWebsiteID == website?.id else {
 			return
@@ -148,14 +158,14 @@ final class WallpaperScene {
 		content = .live(zoom: website?.zoom)
 	}
 
-/**
+	/**
 	Put `content` on screen.
 
-	The only place that assigns `window.contentView` or `window.reducedRegion` for a wallpaper window, and the only place that installs the menu bar band.
+	The only place that assigns `window.contentView` for a wallpaper window, and the only place that
+	installs the menu bar band.
 	*/
-
 	private func applyContent() {
-		window.allowsPassiveInteraction = renderingMode == .interactive
+		window.allowsPassiveInteraction = website?.allowsInteraction == true
 
 		var view: NSView?
 
@@ -202,7 +212,7 @@ final class WallpaperScene {
 		pendingLoad?.cancel()
 		pendingWebView = nil
 		webViewController.releaseWebView()
-		loadedWebsiteID = nil
+		loadedWebsite = nil
 		content = .live(zoom: nil)
 	}
 
@@ -248,7 +258,7 @@ final class WallpaperScene {
 		// it here also covers coming back from disabled: suspending releases the page and leaves the
 		// window holding a bare, region-less view, and nothing on the way back put the region on
 		// again — so a framed wallpaper came back as the whole page.
-		loadedWebsiteID = website?.id
+		adoptLoadedWebsite()
 		installContentView()
 
 		hasRevealedPage = false
@@ -260,20 +270,6 @@ final class WallpaperScene {
 		}
 	}
 
-	/**
-	Put the page on screen, once there is a page.
-
-	It used to be a flat one-second delay, which is a guess about how long loading takes, and
-	measurement says the guess is short: the reveal ran, and the page finished afterwards. Everything
-	hung on this moment inherited that — most visibly the menu bar band, which went up wearing a
-	colour taken off a page that had not arrived, so the menu bar changed and the wallpaper followed a
-	second or two later.
-
-	Driven by the load finishing now, with a timeout behind it. Unhides the web view itself rather
-	than whatever view is installed by then: the page may be inside a wrapper, and unhiding the
-	wrapper would leave the real web view hidden for the rest of the session, which is a blank
-	wallpaper with no way back.
-	*/
 	/**
 	Follow the address of whichever web view is live.
 
@@ -292,6 +288,20 @@ final class WallpaperScene {
 			}
 	}
 
+	/**
+	Put the page on screen, once there is a page.
+
+	It used to be a flat one-second delay, which is a guess about how long loading takes, and
+	measurement says the guess is short: the reveal ran, and the page finished afterwards. Everything
+	hung on this moment inherited that — most visibly the menu bar band, which went up wearing a
+	colour taken off a page that had not arrived, so the menu bar changed and the wallpaper followed a
+	second or two later.
+
+	Driven by the load finishing now, with a timeout behind it. Unhides the web view itself rather
+	than whatever view is installed by then: the page may be inside a wrapper, and unhiding the
+	wrapper would leave the real web view hidden for the rest of the session, which is a blank
+	wallpaper with no way back.
+	*/
 	func revealPage() {
 		guard !hasRevealedPage else {
 			return
@@ -321,9 +331,7 @@ final class WallpaperScene {
 			.replacingPlaceholder("[[screenHeight]]", with: String(format: "%.0f", screen.frameWithoutStatusBar.height))
 	}
 
-	// MARK: - Watching what the page does
-
-// MARK: - Timing
+	// MARK: - Timing
 
 	func resetTimer() {
 		reloadTimer?.invalidate()
@@ -366,6 +374,14 @@ final class WallpaperScene {
 	}
 
 	/**
+	Put back everything `suspend()` took away.
+	*/
+	func resume() {
+		installMenuBarBandIfNeeded()
+		window.makeKeyAndOrderFront(nil)
+	}
+
+	/**
 	Leave nothing of this scene on screen or running.
 
 	Disabling is meant to be indistinguishable from having quit, apart from the menu bar icon still
@@ -377,14 +393,6 @@ final class WallpaperScene {
 	One method rather than a list of four things at the call site, because the next thing a scene
 	starts will have to be stopped here too, and a list is where that gets forgotten.
 	*/
-	/**
-	Put back everything `suspend()` took away.
-	*/
-	func resume() {
-		installMenuBarBandIfNeeded()
-		window.makeKeyAndOrderFront(nil)
-	}
-
 	func suspend() {
 		reloadTimer?.invalidate()
 		reloadTimer = nil
@@ -428,25 +436,4 @@ enum WallpaperContent {
 	The live web view, magnified to one region of the page when the website asks for it.
 	*/
 	case live(zoom: Zoom?)
-}
-
-/**
-Whether the page has to take clicks straight off the desktop.
-*/
-enum RenderingMode {
-	/**
-	A live page that takes clicks without Browsing Mode, so it always renders.
-	*/
-	case interactive
-
-	/**
-	A live page. The wallpaper renders it, always, which is the only thing this app promises to do.
-	*/
-	case full
-}
-
-extension WallpaperScene {
-	var renderingMode: RenderingMode {
-		website?.allowsInteraction == true ? .interactive : .full
-	}
 }

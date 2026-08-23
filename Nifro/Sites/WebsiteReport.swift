@@ -31,8 +31,8 @@ extension Website {
 			lines.append(String(format: "Hours: %02d:00–%02d:00", startHour, endHour))
 		}
 
-		lines.append("Custom CSS: \(describe(css))")
-		lines.append("Custom JavaScript: \(describe(javaScript))")
+		lines.append("Custom CSS: \(describe(customCSS))")
+		lines.append("Custom JavaScript: \(describe(customJavaScript))")
 
 		// The website's own interval when it has one, otherwise the one it inherits from Settings. The
 		// report has to say what this website does, not what the settings window says.
@@ -43,13 +43,11 @@ extension Website {
 		return lines.joined(separator: "\n")
 	}
 
-	private func describe(_ code: String) -> String {
-		let trimmed = code.trimmed
-
-		guard !trimmed.isEmpty else {
+	private func describe(_ code: String?) -> String {
+		guard let code else {
 			return "none"
 		}
 
-		return "\(trimmed.components(separatedBy: .newlines).count) lines"
+		return "\(code.trimmed.components(separatedBy: .newlines).count) lines"
 	}
 }

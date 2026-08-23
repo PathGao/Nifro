@@ -14,7 +14,7 @@ extension AppState {
 			return
 		}
 
-		let command = urlComponents.path
+		let command = urlCommand(from: urlComponents)
 		let parameters = urlComponents.queryDictionary
 
 		func showMessage(_ message: String) {

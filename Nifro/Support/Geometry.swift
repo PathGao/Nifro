@@ -1,10 +1,9 @@
 import CoreGraphics
 
-/**
-The geometry behind cropping and coverage detection.
-
-Kept free of AppKit so the tests can call it directly. Everything here is a pure function of rectangles. The views and windows that call it only supply the numbers.
-*/
+// The geometry behind cropping a page and placing it on a screen.
+//
+// Kept free of AppKit so the tests can call it directly. Everything here is a pure function of
+// rectangles. The views and windows that call it only supply the numbers.
 
 extension CGRect {
 	/**
@@ -75,6 +74,43 @@ struct Zoom: Codable, Hashable, Sendable {
 			y: (center.y * pageSize.height - size.height / 2).clamped(to: 0...(pageSize.height - size.height)),
 			width: size.width,
 			height: size.height
+		)
+	}
+
+	/**
+	How many times the page is drawn larger than life so that the region fills the wallpaper.
+
+	Derived from the region rather than read off `scale`, because `region(inPageOfSize:)` clamps and
+	`scale` does not, so the two disagree exactly when the region has been pushed back onto the page.
+	*/
+	func magnification(inPageOfSize pageSize: CGSize) -> Double {
+		let region = region(inPageOfSize: pageSize)
+		return region.width > 0 ? pageSize.width / region.width : 1
+	}
+
+	/**
+	The strip of the page that ends up along the top of the display, in the coordinates of the view
+	the page is drawn in.
+
+	`PageView` magnifies the page and then slides it so the top-left corner of the region lands in the
+	top-left corner of the window. So a point `(px, py)` on the page sits at `(px * scale, py * scale)`
+	in the view, and the strip on show at the top of the display starts at the region's own origin,
+	magnified.
+
+	The width and the height are not scaled. They are already measured in the magnified points the
+	view's coordinates are in, so scaling them again is the mistake this exists to make impossible to
+	make twice: the menu bar band worked this out on its own, got the top strip of the whole page
+	instead, and tinted the menu bar with a part of the page that is usually not even on screen.
+	*/
+	func topStrip(inPageOfSize pageSize: CGSize, height: Double) -> CGRect {
+		let region = region(inPageOfSize: pageSize)
+		let scale = magnification(inPageOfSize: pageSize)
+
+		return CGRect(
+			x: region.minX * scale,
+			y: region.minY * scale,
+			width: pageSize.width,
+			height: height
 		)
 	}
 

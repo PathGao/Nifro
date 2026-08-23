@@ -6,31 +6,17 @@ final class WebsitesController {
 	static let shared = WebsitesController()
 
 	private var cancellables = Set<AnyCancellable>()
-	private var _current: Website? { all.first(where: \.isCurrent) }
-	private var nextCurrent: Website? { all.elementAfterOrFirst(_current) }
-	private var previousCurrent: Website? { all.elementBeforeOrLast(_current) }
-
-	private var randomWebsiteIterator = Defaults[.websites].infiniteUniformRandomSequence().makeIterator()
-
-	@MainActor let thumbnailCache = SimpleImageCache<String>(diskCacheName: "websiteThumbnailCache")
 
 	/**
-	The current website.
+	One shuffled order per display, so Random on one screen leaves the other where it was.
+
+	Keyed by display rather than one iterator over the whole list, for the same reason `isCurrent` is
+	no longer read across displays: a website belongs to one screen, and a pick that can land on
+	another screen's website changes a wallpaper the person is not looking at.
 	*/
-	var current: Website? {
-		get { _current ?? all.first }
-		set {
-			guard let newValue else {
-				all = all.modifying {
-					$0.isCurrent = false
-				}
+	var randomIterators = [Display?: AnyIterator<Website>]()
 
-				return
-			}
-
-			makeCurrent(newValue)
-		}
-	}
+	@MainActor let thumbnailCache = SimpleImageCache<String>(diskCacheName: "websiteThumbnailCache")
 
 	/**
 	All websites.
@@ -56,29 +42,68 @@ final class WebsitesController {
 					return
 				}
 
-				// Ensures there's always a current website.
-				if
-					change.newValue.allSatisfy(!\.isCurrent),
-					let website = change.newValue.first
-				{
-					website.makeCurrent()
+				// Every display keeps exactly one marked website, not the list as a whole. A display
+				// with none is what `advance` reads as "start from the beginning", so it would never
+				// move past the first website in its list.
+				var marked = change.newValue
+				var didMark = false
+
+				for display in Set(marked.map(\.effectiveDisplay))
+				where !marked.contains(where: { $0.effectiveDisplay == display && $0.isCurrent }) {
+					guard let index = marked.firstIndex(where: { $0.effectiveDisplay == display }) else {
+						continue
+					}
+
+					marked[index].isCurrent = true
+					didMark = true
 				}
 
-				// We only reset the iterator if a website was added/removed.
+				if didMark {
+					all = marked
+				}
+
+				// We only reset the iterators if a website was added/removed.
 				if change.newValue.map(\.id) != change.oldValue.map(\.id) {
-					randomWebsiteIterator = all.infiniteUniformRandomSequence().makeIterator()
+					randomIterators = [:]
 				}
 			}
 			.store(in: &cancellables)
 	}
 
 	/**
-	Make a website the current one.
+	Make a website the current one on its own display.
+
+	Only the websites sharing that display lose the mark. Clearing it across the whole list is what
+	stopped rotation working on more than one screen: each tick of one display's playlist wiped the
+	other display's mark, so `advance` there found nothing current, started again from index 0, and
+	that screen sat on the first website in its list for good.
 	*/
 	func makeCurrent(_ website: Website) {
-		all = all.modifying {
-			$0.isCurrent = $0.id == website.id
+		guard let target = all.firstIndex(where: { $0.id == website.id }) else {
+			return
 		}
+
+		let flags = currentFlags(
+			displays: all.map(\.effectiveDisplay),
+			wasCurrent: all.map(\.isCurrent),
+			makingCurrent: target
+		)
+
+		all = zip(all, flags).map {
+			var updated = $0
+			updated.isCurrent = $1
+			return updated
+		}
+	}
+
+	/**
+	Change one website in place.
+
+	The read-modify-write around the stored list was spelled out at all seven call sites, which is
+	seven chances to write back a list built from a stale read.
+	*/
+	func update(_ id: Website.ID, _ change: (inout Website) -> Void) {
+		all = all.modifying(elementWithID: id, update: change)
 	}
 
 	/**
@@ -88,7 +113,7 @@ final class WebsitesController {
 	func add(_ website: Website) -> Binding<Website> {
 		// The order here is important.
 		all.append(website)
-		current = website
+		makeCurrent(website)
 
 		return allBinding[id: website.id]!
 	}
@@ -123,39 +148,6 @@ final class WebsitesController {
 	*/
 	func remove(_ website: Website) {
 		all = all.removingAll(website)
-	}
-
-	/**
-	Makes the next website the current one.
-	*/
-	func makeNextCurrent() {
-		guard let nextCurrent else {
-			return
-		}
-
-		makeCurrent(nextCurrent)
-	}
-
-	/**
-	Makes the previous website the current one.
-	*/
-	func makePreviousCurrent() {
-		guard let previousCurrent else {
-			return
-		}
-
-		makeCurrent(previousCurrent)
-	}
-
-	/**
-	Makes a random website in the list the current one.
-	*/
-	func makeRandomCurrent() {
-		guard let website = randomWebsiteIterator.next() else {
-			return
-		}
-
-		makeCurrent(website)
 	}
 
 	/**

@@ -14,7 +14,7 @@ extension AppState {
 	func beginCropSelection() {
 		guard
 			!isSelectingCrop,
-			let website = WebsitesController.shared.current,
+			let website = currentWebsite,
 			// The website being adjusted may live on a second display. Putting the overlay on the primary
 			// one would move a region on a page the user is not looking at.
 			let scene = scenes.first(where: { $0.website?.id == website.id }) ?? scenes.first,
@@ -54,14 +54,15 @@ extension AppState {
 	}
 
 	private func finishCropSelection(with zoom: Zoom?) {
-		let scene = scenes.first { $0.display == croppingSceneDisplay } ?? primaryScene
+		let croppedScene = scenes.first { $0.display == croppingSceneDisplay } ?? primaryScene
 		croppingSceneDisplay = nil
 
 		cropSelectionView?.removeFromSuperview()
 		cropSelectionView = nil
 
-		scene.window.level = .desktop
-		scene.window.isInteractive = Defaults[.isBrowsingMode]
+		croppedScene.window.level = .desktop
+		croppedScene.window.isInteractive = Defaults[.isBrowsingMode]
+
 		for scene in scenes {
 			scene.applyOpacity(animated: false)
 		}
@@ -82,7 +83,7 @@ extension AppState {
 
 		// Straight through, because the thing being adjusted is the thing being stored. The rectangle
 		// this used to convert from is where the region came back a point out from where it was drawn.
-		WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
+		WebsitesController.shared.update(website.id) {
 			$0.zoom = zoom.scale > 1 ? zoom : nil
 		}
 

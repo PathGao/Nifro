@@ -14,9 +14,13 @@ final class DesktopWindow: NSWindow {
 	}
 
 	/**
-	The patch of wallpaper still on show, when the visibility policy has shrunk the window to it.
+	The patch of desktop the window is shrunk to, giving the rest back.
 
-	`nil` puts the window back to the whole page area.
+	Always `nil` today. The visibility policy that used to set it came out with the rest of the power
+	machinery, and what is left is the half that has no owner: the property, the branch in `setFrame`
+	and `CGRect.screenFrame(inScreen:)`. Kept rather than deleted because putting a page on part of the
+	desktop is the L series, and this is the shape it needs — but nothing writes it, so anything
+	reasoning about where the wallpaper window is may assume it covers the whole page area.
 	*/
 	var reducedRegion: CGRect? {
 		didSet {

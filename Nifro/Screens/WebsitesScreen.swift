@@ -88,7 +88,7 @@ struct WebsitesScreen: View {
 			isAddWebsiteDialogPresented = true
 		}
 		.onNotification(.showEditWebsiteDialog) { _ in
-			editedWebsite = WebsitesController.shared.current?.id
+			editedWebsite = AppState.shared.currentWebsite?.id
 		}
 		.toolbar {
 			Button("Add Website", systemImage: "plus") {

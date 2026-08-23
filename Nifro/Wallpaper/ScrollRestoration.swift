@@ -20,55 +20,65 @@ The position is captured just before a reload rather than polled, so nothing run
 */
 extension AppState {
 	/**
-	Drop every remembered scroll position and page address.
+	Drop every remembered scroll position, page address and page zoom.
 
-	Part of clearing website data, because that is what these are: where somebody had scrolled to and
-	what part of a map they were looking at. A button offered as a way to leave no trace should not
-	leave the most legible one.
+	Part of clearing website data, because that is what these are: where somebody had scrolled to, what
+	part of a map they were looking at, and how far they had zoomed a page in. A button offered as a way
+	to leave no trace should not leave the most legible one.
+
+	All three families are keyed per page, and Browsing Mode writes them for pages the user only visited
+	once, so nothing else ever removes them.
 	*/
 	func forgetWherePagesWere() {
 		for key in UserDefaults.standard.dictionaryRepresentation().keys
-		where key.hasPrefix(WallpaperScene.scrollPositionKeyPrefix) || key.hasPrefix(WallpaperScene.lastAddressKeyPrefix) {
+		where PerPageDefaults.allCases.contains(where: { key.hasPrefix($0.rawValue) }) {
 			UserDefaults.standard.removeObject(forKey: key)
 		}
 	}
 }
 
-extension WallpaperScene {
-	static let scrollPositionKeyPrefix = "scrollPosition_"
+/**
+Every kind of thing the app remembers about one page, and the prefix its keys carry.
 
+One enum rather than three literals so the sweep above can be `allCases`. It was three, spelled out
+at the place that wrote each one and again at the place that cleared them, and the third was missing
+from the sweep — the button that promises to leave no trace left every page's zoom level behind.
+A fourth kind added now has to be a case here to get a key at all, and being a case is what gets it
+swept.
+*/
+enum PerPageDefaults: String, CaseIterable {
+	case scrollPosition = "scrollPosition_"
+	case lastAddress = "lastAddress_"
+	case zoomLevel = "zoomLevel_"
+
+	/**
+	The `UserDefaults` key this kind of record uses for `url`.
+
+	- Parameter removeQuery: Whether `?panel=2` is a different page. A property of what is being
+	remembered rather than of the address, so each kind answers it for itself.
+	*/
+	func key(for url: URL, removeQuery: Bool) -> String {
+		"\(rawValue)\(url.perPageDefaultsKeySuffix(removeQuery: removeQuery))"
+	}
+}
+
+extension WallpaperScene {
 	// Optional rather than an empty array on purpose: `nil` means no position was ever stored for this
 	// page, and an empty array would have to stand in for that as well as for a position, which the
 	// restore path already has to tell apart from [0, 0].
 	// swiftlint:disable:next discouraged_optional_collection
 	private func scrollPositionKey(for url: URL) -> Defaults.Key<[Double]?> {
-		let identifier = url
-			.normalized(removeFragment: true, removeQuery: false)
-			.absoluteString
-			.removingSchemeAndWWWFromURL
-			.toData
-			.base64EncodedString()
-
-		return .init("\(Self.scrollPositionKeyPrefix)\(identifier)")
+		.init(PerPageDefaults.scrollPosition.key(for: url, removeQuery: false))
 	}
 
 	// MARK: - The address after the #
-
-	static let lastAddressKeyPrefix = "lastAddress_"
 
 	/**
 	Keyed on the address with the fragment taken off, which is the page, so the fragment is what is
 	being remembered about it.
 	*/
 	private func lastAddressKey(for url: URL) -> Defaults.Key<String?> {
-		let identifier = url
-			.normalized(removeFragment: true, removeQuery: false)
-			.absoluteString
-			.removingSchemeAndWWWFromURL
-			.toData
-			.base64EncodedString()
-
-		return .init("\(Self.lastAddressKeyPrefix)\(identifier)")
+		.init(PerPageDefaults.lastAddress.key(for: url, removeQuery: false))
 	}
 
 	/**
@@ -182,5 +192,27 @@ extension WallpaperScene {
 			in: .defaultClient,
 			completionHandler: nil
 		)
+	}
+}
+
+extension URL {
+	/**
+	Which page a per-page value in `UserDefaults` belongs to.
+
+	The address itself would not do. The scheme and a leading `www.` are dropped so one page cannot end
+	up with four records, and the fragment always goes because it moves within a page rather than to
+	another one. Base64 because the result is pasted into a defaults key, and an address is free to
+	contain whatever the prefix and the key syntax use.
+
+	`removeQuery` has no default on purpose: whether `?panel=2` is a different page is a property of
+	what is being remembered, not of the address, and only the caller knows which of its records it
+	wants merged.
+	*/
+	func perPageDefaultsKeySuffix(removeQuery: Bool) -> String {
+		normalized(removeFragment: true, removeQuery: removeQuery)
+			.absoluteString
+			.removingSchemeAndWWWFromURL
+			.toData
+			.base64EncodedString()
 	}
 }

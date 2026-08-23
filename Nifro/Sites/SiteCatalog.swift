@@ -14,12 +14,6 @@ enum SiteCatalog {
 		let description: String
 		let tags: [String]
 
-		/**
-		Whether the page needs to keep rendering, as opposed to being re-drawn every so often.
-
-		Shown to the user, because a live page keeps a browser process running and a snapshot page does not.
-		*/
-
 		let reloadInterval: Double?
 		let zoom: Zoom?
 		let css: String?

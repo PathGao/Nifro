@@ -40,6 +40,15 @@ final class AppState: ObservableObject {
 		return scenes[0]
 	}
 
+	/**
+	The website the menu, the keyboard shortcuts, the URL commands and the Shortcuts actions act on.
+
+	The primary scene's, because a menu item has to mean one website and that is the screen Settings
+	points at. Every other display is reached through its own scene. There is deliberately no
+	list-wide answer to this any more: one existed, every one of those entry points used it, and on
+	two displays it meant they all silently acted on whichever screen happened to hold the mark.
+	*/
+	var currentWebsite: Website? { primaryScene.website }
 
 	var isBrowsingMode = false {
 		didSet {
@@ -199,7 +208,12 @@ final class AppState: ObservableObject {
 			if let existing = scenes.first(where: { $0.display == display }) {
 				kept.append(existing)
 			} else {
-				kept.append(WallpaperScene(display: display))
+				// The website is handed over at birth rather than assigned below, because the scene
+				// builds its web view in `init` and the web view is configured from the website: its
+				// custom CSS and JavaScript, whether colours are inverted, whether print styles apply.
+				// Assigned afterwards, every scene built its first page from some other website's
+				// settings.
+				kept.append(WallpaperScene(display: display, website: WebsitesController.shared.scheduled(for: display)))
 			}
 		}
 
@@ -241,11 +255,28 @@ final class AppState: ObservableObject {
 	after the change, so the new website's scripts are in it.
 	*/
 	func applyWebsiteChanges() {
+		// Only the scenes the change actually reached. Every edit republishes the whole list, and with
+		// one scene per display that meant one screen's playlist tick throwing away and re-fetching the
+		// page on every other screen — pages nothing about the edit had touched.
+		let upToDate = scenes.filter { $0.loadedWebsite == WebsitesController.shared.scheduled(for: $0.display) }
+
 		rebuildScenes()
 
-		for scene in scenes {
+		for scene in scenes where !upToDate.contains(where: { $0 === scene }) {
 			scene.reload()
 		}
+	}
+
+	/**
+	Rebuild every page, whatever the website list says.
+
+	For a change that is not in the list at all. A content-blocking rule list is compiled into the web
+	view when the web view is created, so a new one only reaches a page that is built again — and
+	`applyWebsiteChanges` would correctly decide that no website changed and reload nothing.
+	*/
+	func reloadEverything() {
+		rebuildScenes()
+		reloadWebsite()
 	}
 
 	/**
@@ -280,6 +311,14 @@ final class AppState: ObservableObject {
 	func applyLiveSettings() {
 		for scene in scenes {
 			scene.website = WebsitesController.shared.scheduled(for: scene.display)
+
+			// The page on screen is still the right page and it now carries the new setting, so record
+			// that. Left stale, the next ordinary edit would compare against the copy from before this
+			// one and reload a page that had already taken the change.
+			if scene.loadedWebsiteID == scene.website?.id {
+				scene.adoptLoadedWebsite()
+			}
+
 			scene.installContentView()
 		}
 
@@ -287,13 +326,14 @@ final class AppState: ObservableObject {
 	}
 
 	/**
-	Tell every page the sound setting it should be at.
+	Tell every page the sound setting its own website asks for.
+
+	Per scene. One answer read off the list-wide current website and sent to all of them muted a live
+	stream on the second display because the clock on the first was the marked one.
 	*/
 	func applyAudioSetting() {
-		let muted = WebsitesController.shared.current?.audio != .unmuted
-
 		for scene in scenes {
-			scene.webViewController.webView.setAudioMuted(muted)
+			scene.webViewController.webView.setAudioMuted(scene.website?.audio != .unmuted)
 		}
 	}
 

@@ -1,4 +1,5 @@
 import Cocoa
+import Combine
 import KeyboardShortcuts
 
 extension AppState {
@@ -32,11 +33,15 @@ extension AppState {
 			}
 			.store(in: &cancellables)
 
+		// Sends its current value on subscribe, which is also what puts the first page on screen at
+		// launch. Rebuilding everything is right either way: the compiled rule list is baked into a web
+		// view when the web view is made, so a new one only reaches a page that is made again — and no
+		// website changed, so `applyWebsiteChanges` would correctly reload nothing.
 		Defaults.publisher(.contentRulesURL)
 			.sink { [self] _ in
 				Task {
 					await ContentRules.refresh()
-					applyWebsiteChanges()
+					reloadEverything()
 				}
 			}
 			.store(in: &cancellables)
@@ -93,32 +98,15 @@ extension AppState {
 			}
 			.store(in: &cancellables)
 
-		Defaults.publisher(.opacity)
-			.sink { [self] _ in
-				for scene in scenes {
-					scene.applyOpacity()
-				}
-			}
-			.store(in: &cancellables)
-
-		Defaults.publisher(.dimWhenUnfocused, options: [])
-			.sink { [self] _ in
-				for scene in scenes {
-					scene.applyOpacity()
-				}
-			}
-			.store(in: &cancellables)
-
-		Defaults.publisher(.dimmedOpacityFactor, options: [])
-			.sink { [self] _ in
-				for scene in scenes {
-					scene.applyOpacity()
-				}
-			}
-			.store(in: &cancellables)
-
-		NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didActivateApplicationNotification)
-			.sink { [self] _ in
+		// Four things decide how see-through the wallpaper is, and the answer to all four is the same
+		// one line. Written out four times, a fifth input is a fifth chance to forget it.
+		Publishers.MergeMany(
+			Defaults.publisher(.opacity).map { _ in }.eraseToAnyPublisher(),
+			Defaults.publisher(.dimWhenUnfocused, options: []).map { _ in }.eraseToAnyPublisher(),
+			Defaults.publisher(.dimmedOpacityFactor, options: []).map { _ in }.eraseToAnyPublisher(),
+			NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didActivateApplicationNotification).map { _ in }.eraseToAnyPublisher()
+		)
+			.sink { [self] in
 				for scene in scenes {
 					scene.applyOpacity()
 				}

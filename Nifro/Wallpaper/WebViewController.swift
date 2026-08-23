@@ -34,8 +34,6 @@ final class WebViewController: NSViewController {
 		configuration.userContentController = userContentController
 		configuration.applyContentRules()
 
-
-
 		let preferences = WKPreferences()
 		preferences.javaScriptCanOpenWindowsAutomatically = false
 		preferences.isDeveloperExtrasEnabled = true
@@ -48,6 +46,7 @@ final class WebViewController: NSViewController {
 		configuration.preferences = preferences
 
 		let webView = SSWebView(frame: .zero, configuration: configuration)
+		webView.scene = scene
 
 		webView.publisher(for: \.title)
 			.sink { [weak webView] title in
@@ -69,7 +68,11 @@ final class WebViewController: NSViewController {
 		userContentController.addJavaScript("document.documentElement.classList.add('is-nifro-app', 'is-plash-app')")
 		userContentController.installAudioControl()
 
-		if let website = WebsitesController.shared.current {
+		// This scene's website, not the list-wide current one. Everything below is baked into the web
+		// view when it is created and never revisited, so reading the wrong website here put one
+		// display's custom CSS, custom JavaScript and inverted colours on another display's page for
+		// as long as that page was up.
+		if let website = scene?.website {
 			if website.invertColors2 != .never {
 				userContentController.invertColors(
 					onlyWhenInDarkMode: website.invertColors2 == .darkMode
@@ -80,22 +83,15 @@ final class WebViewController: NSViewController {
 				webView.mediaType = "print"
 			}
 
-			// An untouched starter template is all comments. Injecting it would add an empty style element to every page for nothing.
-			if
-				!website.css.trimmed.isEmpty,
-				website.css != Website.starterCSS
-			{
-				userContentController.addCSS(website.css)
+			if let css = website.customCSS {
+				userContentController.addCSS(css)
 			}
 
-			if
-				!website.javaScript.trimmed.isEmpty,
-				website.javaScript != Website.starterJavaScript
-			{
+			if let javaScript = website.customJavaScript {
 				userContentController.addJavaScript(
 					"""
 					try {
-						\(website.javaScript)
+						\(javaScript)
 					} catch (error) {
 						alert(`Custom JavaScript threw an error:\n\n${error}`);
 						throw error;
@@ -142,7 +138,6 @@ final class WebViewController: NSViewController {
 		view = NSView()
 		webView = createWebView()
 	}
-
 
 	private(set) lazy var webView = createWebView()
 
@@ -264,7 +259,7 @@ extension WebViewController: WKNavigationDelegate {
 		webView.centerAndAspectFillImage(mimeType: response?.mimeType)
 
 		// The script starts every page muted and waits to be told. This is the telling.
-		webView.setAudioMuted(WebsitesController.shared.current?.audio != .unmuted)
+		webView.setAudioMuted(scene?.website?.audio != .unmuted)
 
 		recordTitleIfNeeded(from: webView)
 
@@ -298,7 +293,7 @@ extension WebViewController: WKNavigationDelegate {
 		// We're intentionally allowing this in non-browsing mode as loading the URL would fail otherwise.
 		await webView.defaultAuthChallengeHandler(
 			challenge: challenge,
-			allowSelfSignedCertificate: WebsitesController.shared.current?.allowSelfSignedCertificate ?? false
+			allowSelfSignedCertificate: scene?.website?.allowSelfSignedCertificate ?? false
 		)
 	}
 
@@ -340,7 +335,6 @@ extension WebViewController: WKUIDelegate {
 
 		return nil
 	}
-
 
 	func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo) async -> Bool {
 		guard AppState.shared.isBrowsingMode else {
