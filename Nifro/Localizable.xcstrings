@@ -656,12 +656,12 @@
         }
       }
     },
-    "Drag or scroll to move · pinch to zoom · Return to keep · Esc to cancel" : {
+    "Drag or scroll to move the frame · pinch to resize · Return to keep · Esc to cancel" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "拖动或滚动来移动 · 捏合缩放 · 回车保留 · Esc 取消"
+            "value" : "拖动或滚动移动取景框 · 捏合改大小 · 回车保留 · Esc 取消"
           }
         }
       }
@@ -1113,7 +1113,7 @@
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "移动壁纸，直到它显示出你想要的部分。拖动或滚动来移动，捏合缩放。"
+            "value" : "在壁纸上摆一个取景框：拖动或滚动移动它，捏合改大小。框住的部分会填满整个屏幕。"
           }
         }
       }

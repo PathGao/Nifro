@@ -30,8 +30,11 @@ extension AppState {
 		// to do, destroyed the region the moment framing began; Escape put it back from a copy held in
 		// memory, and quitting or crashing in between did not. What the wallpaper shows while the mode
 		// is up is set directly on the scene instead, which is where a preview belongs.
+		// The whole page, unmoved, for the whole of this. The frame is drawn on top of it: a still page
+		// and a moving frame has one interpretation, where a moving page has two — its own movement and
+		// ours — and pages that pan and zoom themselves are exactly the ones worth framing.
 		let starting = website.zoom ?? Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 1)
-		scene.content = .live(zoom: starting)
+		scene.content = .live(zoom: nil)
 
 		// The window is normally click-through and behind everything. Neither helps while the user aims a rectangle at it.
 		scene.window.isInteractive = true
@@ -41,9 +44,6 @@ extension AppState {
 
 		let view = CropSelectionView(frame: scene.window.contentLayoutRect, zoom: starting)
 		view.autoresizingMask = [.width, .height]
-		view.onChange = { [weak scene] zoom in
-			scene?.content = .live(zoom: zoom)
-		}
 		view.onFinish = { [weak self] zoom in
 			self?.finishCropSelection(with: zoom)
 		}

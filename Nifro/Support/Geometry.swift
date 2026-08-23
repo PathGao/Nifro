@@ -90,56 +90,37 @@ struct Zoom: Codable, Hashable, Sendable {
 	/**
 	The same region moved by a distance in view points, with the region kept on the page.
 
-	The centre is clamped here rather than only in `region(inPageOfSize:)`. Clamping only the
-	rectangle lets the centre wander off the page while the picture stops moving, and then the
-	gesture has to be given back exactly as far before anything happens again — which reads as the
-	drag having stuck.
-	*/
-	func panned(byViewDelta delta: CGSize, inPageOfSize pageSize: CGSize) -> Self {
-		let scale = max(scale, 1)
+	The frame moves with the drag, not against it: the page underneath stays where it is, and what
+	moves is the rectangle picking a part of it.
 
-		return Self(
+	The centre is clamped here rather than only in `region(inPageOfSize:)`. Clamping only the
+	rectangle lets the centre wander off the page while the frame stops moving, and then the gesture
+	has to be given back exactly as far before anything happens again — which reads as the drag having
+	stuck.
+	*/
+	func movedFrame(byViewDelta delta: CGSize, inPageOfSize pageSize: CGSize) -> Self {
+		Self(
 			center: CGPoint(
 				// View coordinates run up from the bottom and page coordinates run down from the top,
-				// so the vertical sign is the opposite of the horizontal one. Dragging the page down
-				// shows what was above it.
-				x: center.x - (delta.width / scale) / pageSize.width,
-				y: center.y + (delta.height / scale) / pageSize.height
+				// so the vertical sign is the opposite of the horizontal one.
+				x: center.x + delta.width / pageSize.width,
+				y: center.y - delta.height / pageSize.height
 			),
-			scale: self.scale
+			scale: scale
 		)
 		.clampedToPage()
 	}
 
 	/**
-	The same region magnified by `factor`, keeping the part of the page under `anchor` where it is.
+	The same region resized by `factor`, around its own middle.
 
-	`anchor` is a point in a view the size of the page area, running up from the bottom left. Zooming
-	around the pointer rather than around the middle is the difference between moving a page and
-	operating a control.
+	Around its middle rather than around the pointer, because the page does not move here — only the
+	frame does. Anchoring the size change to the pointer would slide the frame out from under it,
+	which is the sort of thing that feels right when the picture is moving and wrong when it is not.
 	*/
-	func magnified(by factor: Double, around anchor: CGPoint, inPageOfSize pageSize: CGSize) -> Self {
-		let oldScale = max(scale, 1)
-		let newScale = (oldScale * factor).clamped(to: 1...Self.maximumScale)
-
-		// Where the pointer is across the region, from its middle, as a fraction of the region.
-		let acrossRegion = anchor.x / pageSize.width - 0.5
-		let downRegion = 0.5 - anchor.y / pageSize.height
-
-		// The point of the page under the pointer, which is what has to stay put.
-		let held = CGPoint(
-			x: center.x + acrossRegion / oldScale,
-			y: center.y + downRegion / oldScale
-		)
-
-		return Self(
-			center: CGPoint(
-				x: held.x - acrossRegion / newScale,
-				y: held.y - downRegion / newScale
-			),
-			scale: newScale
-		)
-		.clampedToPage()
+	func resizedFrame(by factor: Double) -> Self {
+		Self(center: center, scale: (max(scale, 1) * factor).clamped(to: 1...Self.maximumScale))
+			.clampedToPage()
 	}
 
 	/**

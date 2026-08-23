@@ -242,73 +242,54 @@ struct ZoomTests {
 		}
 	}
 
-	@Test("Dragging moves the region the way the page went")
-	func panning() {
+	@Test("Dragging moves the frame with the drag, not against it")
+	func movingTheFrame() {
 		let zoom = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 4)
 
-		// Dragging the page left shows what was to its right, so the region moves right.
-		let left = zoom.panned(byViewDelta: CGSize(width: -160, height: 0), inPageOfSize: page)
-		#expect(left.center.x > zoom.center.x)
+		// The page stays where it is; the rectangle picking a part of it is what moves.
+		let right = zoom.movedFrame(byViewDelta: CGSize(width: 160, height: 0), inPageOfSize: page)
+		#expect(right.center.x > zoom.center.x)
+		#expect(abs((right.center.x - zoom.center.x) * page.width - 160) < 0.001)
 
-		// One view point moves the region by one view point divided by the magnification.
-		#expect(abs((left.center.x - zoom.center.x) * page.width - 160 / 4) < 0.001)
-
-		// View coordinates run up, page coordinates run down: dragging the page up shows what was
-		// below it, and "below" is a larger page y.
-		let up = zoom.panned(byViewDelta: CGSize(width: 0, height: 100), inPageOfSize: page)
-		#expect(up.center.y > zoom.center.y)
+		// View coordinates run up, page coordinates run down.
+		let up = zoom.movedFrame(byViewDelta: CGSize(width: 0, height: 100), inPageOfSize: page)
+		#expect(up.center.y < zoom.center.y)
 	}
 
-	@Test("A drag cannot push the region off the page, or bank an offset while it looks stuck")
-	func panningStops() {
+	@Test("A drag cannot push the frame off the page, or bank an offset while it looks stuck")
+	func movingStops() {
 		let zoom = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 2)
 		var far = zoom
 
 		for _ in 0..<20 {
-			far = far.panned(byViewDelta: CGSize(width: -400, height: 0), inPageOfSize: page)
+			far = far.movedFrame(byViewDelta: CGSize(width: 400, height: 0), inPageOfSize: page)
 		}
 
 		// Hard against the right edge, and no further — a centre that had wandered past would have to
-		// be dragged all the way back before the picture moved again.
+		// be dragged all the way back before the frame moved again.
 		#expect(abs(far.center.x - 0.75) < 0.001)
 
-		let back = far.panned(byViewDelta: CGSize(width: 40, height: 0), inPageOfSize: page)
+		let back = far.movedFrame(byViewDelta: CGSize(width: -40, height: 0), inPageOfSize: page)
 		#expect(back.center.x < far.center.x)
 	}
 
-	@Test("Magnifying keeps the part of the page under the pointer where it is")
-	func magnifyingAroundAPoint() {
-		let zoom = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 2)
-		let pointer = CGPoint(x: page.width * 0.25, y: page.height * 0.25)
+	@Test("Resizing keeps the frame where it is")
+	func resizingHoldsTheCentre() {
+		let zoom = Zoom(center: CGPoint(x: 0.3, y: 0.7), scale: 2)
+		let smaller = zoom.resizedFrame(by: 1.5)
 
-		func pageFraction(under point: CGPoint, of zoom: Zoom) -> CGPoint {
-			let scale = max(zoom.scale, 1)
-			return CGPoint(
-				x: zoom.center.x + (point.x / page.width - 0.5) / scale,
-				y: zoom.center.y + (0.5 - point.y / page.height) / scale
-			)
-		}
-
-		let before = pageFraction(under: pointer, of: zoom)
-		let after = zoom.magnified(by: 1.5, around: pointer, inPageOfSize: page)
-
-		#expect(after.scale > zoom.scale)
-		#expect(abs(pageFraction(under: pointer, of: after).x - before.x) < 0.001)
-		#expect(abs(pageFraction(under: pointer, of: after).y - before.y) < 0.001)
+		#expect(smaller.scale > zoom.scale)
+		#expect(smaller.center == zoom.center)
 	}
 
-	@Test("Magnification stops at both ends")
-	func magnificationIsBounded() {
-		let middle = CGPoint(x: page.width / 2, y: page.height / 2)
-
-		let out = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 2)
-			.magnified(by: 0.001, around: middle, inPageOfSize: page)
+	@Test("The frame stops at both ends")
+	func sizeIsBounded() {
+		let out = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 2).resizedFrame(by: 0.001)
 		#expect(out.scale == 1)
 		// The whole page has only one possible centre.
 		#expect(out.center == CGPoint(x: 0.5, y: 0.5))
 
-		let deepIn = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 2)
-			.magnified(by: 1000, around: middle, inPageOfSize: page)
+		let deepIn = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 2).resizedFrame(by: 1000)
 		#expect(deepIn.scale == Zoom.maximumScale)
 	}
 

@@ -1,26 +1,22 @@
 import AppKit
 
 /**
-Move the wallpaper to choose what fills it.
+Move and resize a frame over the page to choose what fills the wallpaper.
 
-A region is stored as a centre and a magnification. It used to be *chosen* as a rectangle dragged
-over the page, and converting one shape into the other is where three problems came from: you were
-drawing on the thing you were framing rather than looking at the result, a rectangle drawn slightly
-wrong meant starting over, and what somebody drew and what they got did not agree to the pixel.
+**The page does not move.** That was tried the other way round — the wallpaper panned and zoomed
+under a fixed frame, the way Photos' crop works — and it is wrong here for a reason that does not
+apply to a photograph: a web page can pan and zoom itself. On floor796 or a map, a moving picture is
+ambiguous. You cannot tell whether the page moved or the frame did, and the page's own magnification
+multiplies with the frame's, so the same gesture appears to do two different amounts of the same
+thing. A still page and a moving frame has exactly one interpretation.
 
-Moving the page is the stored model rather than a conversion of it. Drag moves the centre, scroll or
-pinch changes the magnification, and there is nothing to convert at the end. Apple's own
-aspect-locked crops work this way — Photos, the iOS photo crop, every avatar picker: the frame stays
-still and the content moves underneath. Here the frame is the screen, so it could not move anyway.
-
-The overlay is transparent. Dimming the page would hide the one thing this mode exists to show.
+What the mode reads from and writes to is still the stored value itself — a centre and a
+magnification — rather than a rectangle converted at the end. The frame drawn here *is*
+`zoom.region(inPageOfSize:)`, so what is on screen and what will be saved cannot drift apart, which
+is the part of the earlier attempt worth keeping. It also starts from the region the website already
+has, so adjusting one is the same gesture as making one.
 */
 final class CropSelectionView: NSView {
-	/**
-	Called on every change, so the wallpaper behind can show it.
-	*/
-	var onChange: ((Zoom) -> Void)?
-
 	/**
 	Called with the region to keep, or `nil` if the user backed out.
 	*/
@@ -28,7 +24,6 @@ final class CropSelectionView: NSView {
 
 	private var zoom: Zoom {
 		didSet {
-			onChange?(zoom)
 			needsDisplay = true
 		}
 	}
@@ -68,88 +63,106 @@ final class CropSelectionView: NSView {
 	// MARK: - Gestures
 
 	override func mouseDragged(with event: NSEvent) {
-		zoom = zoom.panned(
-			byViewDelta: CGSize(width: event.deltaX, height: -event.deltaY),
-			inPageOfSize: pageSize
-		)
+		move(x: event.deltaX, y: -event.deltaY)
 	}
 
 	/**
-	Two-finger scroll on a trackpad moves the page; a wheel changes the magnification.
+	Two-finger scroll on a trackpad moves the frame; a wheel resizes it.
 
-	`hasPreciseScrollingDeltas` is what tells the two apart. A trackpad has a pinch for magnifying and
-	nothing else for panning, so scrolling has to pan. A wheel mouse has no pinch at all, and dragging
-	already pans, so the wheel is the only way it can reach the magnification.
+	`hasPreciseScrollingDeltas` is what tells the two apart. A trackpad has a pinch for resizing and
+	nothing else for moving, so scrolling has to move. A wheel mouse has no pinch at all, and dragging
+	already moves, so the wheel is the only way it can reach the size.
 	*/
 	override func scrollWheel(with event: NSEvent) {
 		guard event.hasPreciseScrollingDeltas else {
-			let steps = event.scrollingDeltaY
-			zoom = zoom.magnified(
-				by: pow(Self.wheelZoomPerLine, steps),
-				around: convert(event.locationInWindow, from: nil),
-				inPageOfSize: pageSize
-			)
+			zoom = zoom.resizedFrame(by: pow(Self.wheelZoomPerLine, event.scrollingDeltaY))
 			return
 		}
 
-		zoom = zoom.panned(
-			byViewDelta: CGSize(width: event.scrollingDeltaX, height: event.scrollingDeltaY),
-			inPageOfSize: pageSize
-		)
+		move(x: -event.scrollingDeltaX, y: -event.scrollingDeltaY)
 	}
 
 	/**
-	Pinch.
+	Pinch resizes the frame.
 
-	Swallowed here on purpose: the web view has `allowsMagnification` on, so a pinch that reached the
-	page would zoom the page instead of the frame — and the page's own magnification is not something
-	this mode records or can put back.
+	Swallowed here on purpose. The web view has `allowsMagnification` on, and the page may have its
+	own zoom besides — a pinch that reached either would change the thing being framed while it is
+	being framed, and neither is something this mode records or can put back.
 	*/
 	override func magnify(with event: NSEvent) {
-		zoom = zoom.magnified(
-			by: 1 + event.magnification,
-			around: convert(event.locationInWindow, from: nil),
-			inPageOfSize: pageSize
-		)
+		zoom = zoom.resizedFrame(by: 1 + event.magnification)
 	}
 
 	override func keyDown(with event: NSEvent) {
-		let pointer = CGPoint(x: bounds.midX, y: bounds.midY)
-
 		switch event.keyCode {
 		case 53: // Escape
 			onFinish?(nil)
 		case 36, 76: // Return, Enter
 			onFinish?(zoom)
 		case 123: // Left
-			pan(x: Self.keyboardStep)
+			move(x: -Self.keyboardStep)
 		case 124: // Right
-			pan(x: -Self.keyboardStep)
+			move(x: Self.keyboardStep)
 		case 125: // Down
-			pan(y: -Self.keyboardStep)
+			move(y: -Self.keyboardStep)
 		case 126: // Up
-			pan(y: Self.keyboardStep)
+			move(y: Self.keyboardStep)
 		default:
 			switch event.charactersIgnoringModifiers {
 			case "+", "=":
-				zoom = zoom.magnified(by: Self.keyboardZoomStep, around: pointer, inPageOfSize: pageSize)
+				zoom = zoom.resizedFrame(by: Self.keyboardZoomStep)
 			case "-", "_":
-				zoom = zoom.magnified(by: 1 / Self.keyboardZoomStep, around: pointer, inPageOfSize: pageSize)
+				zoom = zoom.resizedFrame(by: 1 / Self.keyboardZoomStep)
 			default:
 				super.keyDown(with: event)
 			}
 		}
 	}
 
-	private func pan(x: Double = 0, y: Double = 0) {
-		zoom = zoom.panned(byViewDelta: CGSize(width: x, height: y), inPageOfSize: pageSize)
+	private func move(x: Double = 0, y: Double = 0) {
+		zoom = zoom.movedFrame(byViewDelta: CGSize(width: x, height: y), inPageOfSize: pageSize)
 	}
 
-	// MARK: - The panel
+	// MARK: - Drawing
+
+	/**
+	Where the region sits in this view.
+
+	Page coordinates run down from the top and view coordinates run up from the bottom, which is the
+	whole of the conversion — the view is the size of the page area, so nothing is scaled.
+	*/
+	private func frame(inView bounds: CGRect) -> CGRect {
+		let region = zoom.region(inPageOfSize: bounds.size)
+
+		return CGRect(
+			x: region.minX,
+			y: bounds.height - region.maxY,
+			width: region.width,
+			height: region.height
+		)
+	}
 
 	override func draw(_ dirtyRect: CGRect) {
+		let frame = frame(inView: bounds)
+
+		// Dimmed outside, untouched inside. What is being framed has to be visible at full strength;
+		// what is being thrown away should look thrown away.
+		NSColor.black.withAlphaComponent(0.5).setFill()
+		dirtyRect.fill()
+		NSColor.clear.set()
+		frame.fill(using: .copy)
+
+		NSColor.white.setStroke()
+		let outline = NSBezierPath(rect: frame.insetBy(dx: 0.5, dy: 0.5))
+		outline.lineWidth = 1
+		outline.stroke()
+
+		drawPanel()
+	}
+
+	private func drawPanel() {
 		let magnification = String(format: "%.1f×", max(zoom.scale, 1))
-		let hint = String(localized: "Drag or scroll to move · pinch to zoom · Return to keep · Esc to cancel")
+		let hint = String(localized: "Drag or scroll to move the frame · pinch to resize · Return to keep · Esc to cancel")
 
 		let numberAttributes: [NSAttributedString.Key: Any] = [
 			.font: NSFont.monospacedDigitSystemFont(ofSize: 22, weight: .semibold),
