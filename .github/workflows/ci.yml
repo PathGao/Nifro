@@ -14,7 +14,7 @@ jobs:
     name: Build
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # No `xcode-select`. Pinning a path meant naming `/Applications/Xcode_26.app`, which the runner
       # image does not have — it ships `Xcode_26.6.app`, `Xcode_26.5.app` and so on, so every job that
@@ -28,7 +28,7 @@ jobs:
           [ "$major" -ge 26 ] || { echo "::error::Xcode $major is too old; this project needs 26 or newer"; exit 1; }
 
       - name: Cache SPM
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: .xcode-build/SourcePackages
           key: spm-${{ hashFiles('Nifro.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
@@ -52,7 +52,7 @@ jobs:
     name: Geometry tests
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # No `xcode-select`. Pinning a path meant naming `/Applications/Xcode_26.app`, which the runner
       # image does not have — it ships `Xcode_26.6.app`, `Xcode_26.5.app` and so on, so every job that
@@ -73,7 +73,7 @@ jobs:
     name: SwiftLint
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Pinned. `brew install swiftlint` takes whatever is current, and a minor bump changes the
       # rule set — which turns this job red on a pull request that changed nothing, and points the
@@ -95,7 +95,7 @@ jobs:
     name: Unused code
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # No `xcode-select`. Pinning a path meant naming `/Applications/Xcode_26.app`, which the runner
       # image does not have — it ships `Xcode_26.6.app`, `Xcode_26.5.app` and so on, so every job that
@@ -129,9 +129,9 @@ jobs:
     name: Site registry
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: '3.12'
 
