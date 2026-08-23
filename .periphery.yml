@@ -30,19 +30,12 @@ report_exclude:
 # Named retentions, each with the reason it is not really dead.
 retain_files: []
 
-# Known findings we keep, and why. Re-check these when the code around them changes: an entry for
-# something the scan no longer reports is a justification that has outlived its reason, which is the
-# thing this file exists to prevent.
+# Nothing is reported today, and the scan runs with `--strict`, so anything new fails CI.
 #
-# Reported today, and why each stays:
+# The three findings that used to be listed here were parameters that `#selector` signatures require
+# and nothing reads. They are written `_` now, which is what they always were — the scan was right,
+# and the honest fix was smaller than the paragraph explaining why it should be ignored.
 #
-#   `sender` (MenuSupport, x2)      Parameters the #selector signatures require. Unused by name and
-#   `replyEvent` (SystemEvents)     impossible to remove without breaking the selector.
-#
-# Previously listed, no longer reported, so no longer listed:
-#
-#   OcclusionMonitor.timer          stop() reads it now.
-#   ActionTrampoline.action         retain_objc_accessible covers them.
-#   ActionTrampoline.handleAction
-#   CallbackMenuItem.action
-#   SSEvents…handleEvent
+# When something does get reported, argue it here or delete it. An entry for a finding the scan no
+# longer reports is a justification that has outlived its reason, which is the thing this file exists
+# to prevent.

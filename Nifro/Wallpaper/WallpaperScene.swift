@@ -205,15 +205,6 @@ final class WallpaperScene {
 
 	The only place that assigns `window.contentView` or `window.reducedRegion` for a wallpaper window, and the only place that installs the menu bar band.
 	*/
-	/**
-	Re-derive the window from the content it already has.
-
-	Needed when something outside `content` changes what it means, such as the scene moving to a
-	screen of a different size.
-	*/
-	func reapplyContent() {
-		applyContent()
-	}
 
 	private func applyContent() {
 		window.allowsPassiveInteraction = renderingMode == .interactive

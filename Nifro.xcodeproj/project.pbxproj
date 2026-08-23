@@ -467,7 +467,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "PATH=\"/opt/homebrew/bin/:${PATH}\"\nswiftlint\n";
+			shellScript = "PATH=\"/opt/homebrew/bin/:${PATH}\"\n# Skipped rather than failed when it is not installed. Style is checked on CI, and a\n# contributor who has not installed SwiftLint should still be able to build and run the app.\nif command -v swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint is not installed, skipping. brew install swiftlint\"\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */

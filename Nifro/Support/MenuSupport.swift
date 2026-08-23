@@ -71,7 +71,7 @@ final class CallbackMenuItem: NSMenuItem {
 extension CallbackMenuItem {
 	// Reached through `#selector` in the initialiser above; nothing references it by name.
 	@objc
-	private func action(_ sender: NSMenuItem) {
+	private func action(_: NSMenuItem) {
 		callback()
 	}
 }
@@ -233,7 +233,7 @@ private final class ActionTrampoline {
 
 	// Reached through `#selector`, which no static analysis can see. Deleting it compiles fine and breaks every control callback at runtime.
 	@objc
-	fileprivate func handleAction(_ sender: AnyObject) {
+	fileprivate func handleAction(_: AnyObject) {
 		action(NSApp.currentEvent!)
 	}
 }

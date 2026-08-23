@@ -43,11 +43,6 @@ extension NSScreen {
 	}
 
 	/**
-	Get the screen that contains the menu bar and has origin at (0, 0).
-	*/
-	static var primary: NSScreen? { screens.first }
-
-	/**
 	This can be useful if you store a reference to a `NSScreen` instance as it may have been disconnected.
 	*/
 	var isConnected: Bool {
@@ -79,17 +74,6 @@ extension NSScreen {
 		}
 
 		return frame
-	}
-
-	/**
-	Whether the screen has a notch.
-	*/
-	var hasNotch: Bool {
-		guard let width = auxiliaryTopRightArea?.width else {
-			return false
-		}
-
-		return width < frame.width
 	}
 }
 

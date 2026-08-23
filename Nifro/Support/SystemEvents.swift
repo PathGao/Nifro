@@ -106,7 +106,7 @@ extension SSEvents {
 
 			// Installed with `NSAppleEventManager.setEventHandler`, which takes a selector. Nothing references it by name.
 			@objc
-			private func handleEvent(_ event: NSAppleEventDescriptor, withReplyEvent replyEvent: NSAppleEventDescriptor) {
+			private func handleEvent(_ event: NSAppleEventDescriptor, withReplyEvent _: NSAppleEventDescriptor) {
 				guard
 					let urlString = event.paramDescriptor(forKeyword: AEKeyword(keyDirectObject))?.stringValue,
 					let urlComponents = URLComponents(string: urlString)

@@ -3,6 +3,10 @@ excluded:
   - .xcode-build
   - .build
   - .venv
+  # Generated. `--fix` rewrote 21600 as 21_600 here, the generator wrote it back without the
+  # separator on the next run, and CI's "the catalogue is stale" check caught the two tools
+  # disagreeing forever. Nothing in a generated file is anyone's style to correct.
+  - Nifro/Sites/SiteCatalog.generated.swift
 
 only_rules:
   - accessibility_trait_for_button

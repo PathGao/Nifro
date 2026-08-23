@@ -200,13 +200,7 @@ final class AppState: ObservableObject {
 		}
 	}
 
-	func installContentView() {
-		for scene in scenes {
-			scene.installContentView()
-		}
-	}
-
-	/**
+/**
 	Put every scene back to whatever it should be drawing, now that framing a region is over.
 
 	Not `installContentView`, which puts the live page up. A website drawn from stills has no live

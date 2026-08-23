@@ -281,15 +281,6 @@ extension CFUUID {
 	}
 }
 
-// MARK: - CGFloat
-// swiftlint:disable:next no_cgfloat
-extension CGFloat {
-	/**
-	Get a Double from a CGFloat. This makes it easier to work with optionals.
-	*/
-	var toDouble: Double { Double(self) }
-}
-
 // MARK: - CGSize
 extension CGSize {
 	/**
@@ -1125,25 +1116,6 @@ extension NSItemProvider {
 // MARK: - NSObjectProtocol
 // MARK: - KVO utilities
 extension NSObjectProtocol where Self: NSObject {
-	/**
-	Bind the optional property of an object to the property of another object. If the optional property is `nil`, the given `default` value will be used.
-
-	```
-	webView.bind(\.title, to: window, at: \.title)
-		.store(forTheLifetimeOf: webView)
-	```
-	*/
-	func bind<Value, Target>(
-		_ sourceKeyPath: KeyPath<Self, Value?>,
-		to target: Target,
-		at targetKeyPath: ReferenceWritableKeyPath<Target, Value>,
-		default: Value
-	) -> AnyCancellable {
-		publisher(for: sourceKeyPath)
-			.sink {
-				target[keyPath: targetKeyPath] = $0 ?? `default`
-			}
-	}
 }
 
 // MARK: - NSResponder
@@ -1194,26 +1166,6 @@ extension NSWindow.Level {
 }
 
 // MARK: - NSWorkspace
-extension NSWorkspace {
-	/**
-	Returns the height of the Dock.
-
-	It's `nil` if there's no primary screen or if the Dock is set to be automatically hidden.
-	*/
-	var dockHeight: Double? {
-		guard let screen = NSScreen.primary else {
-			return nil
-		}
-
-		let height = screen.visibleFrame.origin.y - screen.frame.origin.y
-
-		guard height != 0 else {
-			return nil
-		}
-
-		return height
-	}
-}
 extension NSWorkspace {
 	/**
 	Bounces the Downloads folder in the Dock if present.
@@ -2643,21 +2595,6 @@ extension WKWebView {
 	static func canIgnoreError(_ error: Error) -> Bool {
 		// Ignore the request being cancelled which can happen if the user clicks on a link while a website is loading.
 		error.isCancelled || error.isWebViewPluginHandledLoad
-	}
-}
-
-// MARK: - WKWindowFeatures
-extension WKWindowFeatures {
-	/**
-	The size of the window.
-
-	Defaults to 600 for width/height if not specified.
-	*/
-	var size: CGSize {
-		.init(
-			width: Double(truncating: width ?? 600),
-			height: Double(truncating: height ?? 600)
-		)
 	}
 }
 
