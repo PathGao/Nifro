@@ -70,6 +70,14 @@ extension WallpaperScene {
 				return
 			}
 
+			// A page load takes as long as it takes, and the answer to "should this website be drawn
+			// from stills" can change while it runs — turning on Browsing Mode is exactly that. The
+			// page in the window is then the one the user is reading, and photographing it, showing
+			// the photograph and dropping the web view would take their place on the page with it.
+			guard renderingMode == .snapshot else {
+				return
+			}
+
 			// The region the live page would be showing, photographed at the width it would fill.
 			// Photographing the region at its own width and letting an image view stretch it would
 			// show the magnified page as a blur.
@@ -79,6 +87,11 @@ extension WallpaperScene {
 			configuration.snapshotWidth = NSNumber(value: size.width)
 
 			guard let image = try? await webView.takeSnapshot(configuration: configuration) else {
+				return
+			}
+
+			// Checked again: taking the photograph is itself a suspension point.
+			guard renderingMode == .snapshot else {
 				return
 			}
 
