@@ -1,2 +1,8 @@
 MARKETING_VERSION = 0.1.0
 CURRENT_PROJECT_VERSION = 1
+
+// Xcode adds `get-task-allow` to whatever the .entitlements file says, which lets any
+// debugger attach to the running app. That is what you want while developing and a hole
+// in anything shipped, so it stops at Release. Apple's notary service rejects a build
+// that carries it, which is the check that would otherwise find this at release time.
+CODE_SIGN_INJECT_BASE_ENTITLEMENTS[config=Release] = NO

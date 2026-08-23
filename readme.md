@@ -65,9 +65,10 @@ brew tap PathGao/tap https://github.com/PathGao/nifro
 brew install --cask nifro
 ```
 
-Homebrew is the recommended route. Until the project has an Apple Developer ID certificate, a
-directly downloaded build is unsigned and Gatekeeper will refuse to open it without a trip through
-System Settings; the cask handles that for you. See [docs/RELEASE.md](docs/RELEASE.md).
+Homebrew is the recommended route. Builds are signed with the project's own certificate rather
+than an Apple Developer ID one, which keeps the signature stable across updates but does not get
+them notarized, so Gatekeeper stops a directly downloaded build until you allow it in System
+Settings. The cask does that step for you. See [docs/RELEASE.md](docs/RELEASE.md).
 
 Requires macOS 15 or later. Separate builds for Apple silicon and Intel rather than one universal
 binary, so nobody downloads the half they cannot run.
@@ -81,6 +82,11 @@ open Nifro.xcodeproj
 ```
 
 Needs Xcode 26 or later. Swift 6 language mode, deployment target macOS 15.
+
+`./Tools/build-local.sh` builds and installs a test copy signed the way releases are. Do that
+rather than signing a build by hand: re-signing an app after Xcode has already signed it replaces
+the signature and drops the sandbox entitlement with it, and an un-sandboxed Nifro reads a
+different preferences file than a real install.
 
 The pure logic behind cropping, occlusion, scheduling, video embedding and the activity classifier
 has tests that run without an app bundle or a window server:

@@ -3,9 +3,14 @@
 # 每个架构单独出一份产物，不做通用二进制：一份 arm64、一份 x86_64。
 # 通用包等于让每个用户下载一份自己永远用不到的另一半。
 #
-# 两条路径，靠 secrets 是否存在自动选择：
-#   有 MACOS_CERTIFICATE_P12  → Developer ID 签名 + 公证 + staple（用户双击直接开）
-#   没有                      → ad-hoc 签名（codesign -s -），靠 cask postflight 去隔离属性
+# 签名靠 MACOS_CERTIFICATE_P12 这一个 secret，装什么证书就走什么路：
+#   Developer ID 证书 → 硬化运行时 + 公证 + staple（用户双击直接开）
+#   自签名证书        → 签名身份固定，不公证，靠 cask postflight 去隔离属性
+#   没有 secret       → ad-hoc，只为让没有证书的 fork 也能出包
+#
+# 自签名和 ad-hoc 在 Gatekeeper 眼里一样过不了，区别在签名身份稳不稳定：Nifro 是沙盒 app，
+# 用户选本地文件当壁纸时存的是安全作用域书签，书签绑在签名上。ad-hoc 每次构建签名都不同，
+# 用户每次升级都会丢掉已授权的文件。自签名证书让指定要求（designated requirement）跨版本不变。
 # 详见 docs/RELEASE.md。
 
 name: release
@@ -63,7 +68,8 @@ jobs:
           if [ -n "${CERT:-}" ]; then echo "sign=true" >> "$GITHUB_OUTPUT"; else echo "sign=false" >> "$GITHUB_OUTPUT"; fi
           if [ -n "${NOTARY_KEY:-}" ]; then echo "notarize=true" >> "$GITHUB_OUTPUT"; else echo "notarize=false" >> "$GITHUB_OUTPUT"; fi
 
-      - name: 导入 Developer ID 证书到临时钥匙串
+      - name: 导入签名证书到临时钥匙串
+        id: identity
         if: steps.caps.outputs.sign == 'true'
         env:
           CERT_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
@@ -86,6 +92,16 @@ jobs:
           rm -f "$RUNNER_TEMP/cert.p12"
           security find-identity -v -p codesigning "$keychain"
 
+          # 证书自己说明该走哪条路，不用再加一个 secret 来声明。
+          name="$(security find-identity -v -p codesigning "$keychain" | sed -n '1s/.*"\(.*\)"$/\1/p')"
+          test -n "$name" || { echo "::error::钥匙串里没有可用于代码签名的身份"; exit 1; }
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          case "$name" in
+            "Developer ID Application"*) echo "kind=developer-id" >> "$GITHUB_OUTPUT" ;;
+            *)                           echo "kind=self-signed"  >> "$GITHUB_OUTPUT" ;;
+          esac
+          echo "签名身份：$name"
+
       - name: 逐架构构建、公证、打包
         id: package
         env:
@@ -101,21 +117,21 @@ jobs:
           # 工程里默认写死了 CODE_SIGN_STYLE=Automatic / "Apple Development" / 上游的
           # DEVELOPMENT_TEAM，CI 上都不能用，这里全部用 Manual 覆盖掉。
           # ENABLE_HARDENED_RUNTIME 工程里已经是 YES，公证需要它。
-          if [ "${{ steps.caps.outputs.sign }}" = "true" ]; then
-            signing_args=(
-              CODE_SIGN_STYLE=Manual
-              CODE_SIGN_IDENTITY="Developer ID Application"
+          # 没有 secret 时退回 ad-hoc："-" 表示本机签名、没有身份。
+          identity="${{ steps.identity.outputs.name }}"
+          signing_args=(
+            CODE_SIGN_STYLE=Manual
+            CODE_SIGN_IDENTITY="${identity:--}"
+            DEVELOPMENT_TEAM=""
+            PROVISIONING_PROFILE_SPECIFIER=""
+          )
+
+          # 硬化运行时和时间戳只对 Developer ID 有意义：它们是公证的前置条件，
+          # 而自签名和 ad-hoc 都不可能公证。
+          if [ "${{ steps.identity.outputs.kind }}" = "developer-id" ]; then
+            signing_args+=(
               DEVELOPMENT_TEAM="$TEAM_ID"
               OTHER_CODE_SIGN_FLAGS="--timestamp --options=runtime"
-              PROVISIONING_PROFILE_SPECIFIER=""
-            )
-          else
-            # ad-hoc："-" 表示本机签名，没有身份。沙盒 entitlements 照样会被写进签名。
-            signing_args=(
-              CODE_SIGN_STYLE=Manual
-              CODE_SIGN_IDENTITY="-"
-              DEVELOPMENT_TEAM=""
-              PROVISIONING_PROFILE_SPECIFIER=""
             )
           fi
 
@@ -156,7 +172,7 @@ jobs:
               exit 1
             fi
 
-            if [ "${{ steps.caps.outputs.notarize }}" = "true" ]; then
+            if [ "${{ steps.caps.outputs.notarize }}" = "true" ] && [ "${{ steps.identity.outputs.kind }}" = "developer-id" ]; then
               # notarytool 只吃 zip/pkg/dmg，必须用 ditto 打包（保留符号链接和扩展属性）
               ditto -c -k --keepParent "$staged" "$RUNNER_TEMP/notarize-$arch.zip"
               xcrun notarytool submit "$RUNNER_TEMP/notarize-$arch.zip" \
@@ -166,7 +182,7 @@ jobs:
                 --wait
               xcrun stapler staple "$staged"
             else
-              echo "::warning::$arch 为 ad-hoc 签名、未公证。brew 用户由 cask 的 postflight 去掉隔离属性；直接下 zip 的用户需手动放行。"
+              echo "::warning::$arch 未公证（签名身份 ${identity:-ad-hoc}）。brew 用户由 cask 的 postflight 去掉隔离属性；直接下 zip 的用户需手动放行。"
             fi
 
             zip=".release/$APP_NAME-$version-$arch.zip"
@@ -195,10 +211,10 @@ jobs:
           set -euo pipefail
           tag="${{ steps.version.outputs.tag }}"
 
-          if [ "${{ steps.caps.outputs.notarize }}" = "true" ] && [ "${{ steps.caps.outputs.sign }}" = "true" ]; then
+          if [ "${{ steps.caps.outputs.notarize }}" = "true" ] && [ "${{ steps.identity.outputs.kind }}" = "developer-id" ]; then
             note="本次构建已用 Developer ID 签名并通过 Apple 公证，双击即可打开。"
           else
-            note="本次构建为 ad-hoc 签名、**未经 Apple 公证**。推荐用 Homebrew 安装（cask 会自动去掉隔离属性）；直接下载 zip 的话，首次打开需要在「系统设置 → 隐私与安全性」里点「仍要打开」。"
+            note="本次构建为自签名、**未经 Apple 公证**。推荐用 Homebrew 安装（cask 会自动去掉隔离属性）；直接下载 zip 的话，首次打开需要在「系统设置 → 隐私与安全性」里点「仍要打开」。"
           fi
 
           cat > "$RUNNER_TEMP/notes.md" <<EOF

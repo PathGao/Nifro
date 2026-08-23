@@ -7,25 +7,46 @@ Nifro 不上 Mac App Store，分发走 **GitHub Release + Homebrew cask**。
 | 文件 | 作用 |
 | --- | --- |
 | `.github/workflows/release.yml` | 打 `v*` tag 触发，构建 → 签名 →（公证）→ 打包 → 建 Release → 回写 cask |
+| `Tools/setup-signing.sh` | 生成自签名证书：装到本机钥匙串，或导出 `.p12` 给 CI |
+| `Tools/build-local.sh` | 本机出一份和发布版同样签名方式的测试包 |
 | `Casks/nifro.rb` | cask 定义，`version` / `sha256` 由流水线自动更新 |
 | `Config.xcconfig` | `MARKETING_VERSION`，必须和 tag 对得上，流水线会校验 |
 
 ---
 
-## 一、两条路径
+## 一、当前选定：自签名
 
-关键变量只有一个：**有没有付费 Apple Developer Program 账号（99 美元/年）**。没有账号就拿不到
-Developer ID 证书，拿不到证书就不能公证，这条链是死的，绕不过去。
+**Nifro 走自签名证书**，参照 AeroSpace。不买 Apple Developer Program，因此不公证。
 
-流水线通过「secrets 是否存在」自动选路，不需要改 YAML：
+流水线只看 `MACOS_CERTIFICATE_P12` 里装的是哪种证书，自己判断走哪条，YAML 不用改：
 
 ```
-                      ┌─ 有 MACOS_CERTIFICATE_P12 ─→ 路径 A：Developer ID 签名
-  push tag v* ─→ CI ──┤                                + notarytool 公证 + stapler staple
-                      └─ 没有 ──────────────────────→ 路径 B：ad-hoc 签名（codesign -s -）
+                                    ┌─ 证书是 Developer ID ─→ 硬化运行时 + 公证 + staple
+  push tag v* ─→ 导入证书 ─→ 看身份 ─┤
+                     │              └─ 证书是自签名 ───────→ 只签名，不公证   ← 现在走这条
+                     └─ 没有 secret ────────────────────────→ ad-hoc
 ```
 
-### 路径 A：有付费账号（推荐）
+### 自签名和 ad-hoc 差在哪
+
+对 Gatekeeper 完全一样：两者都没通过公证，下载来的包首次打开都会被拦。差别在**签名身份稳不稳定**。
+
+Nifro 是沙盒 app，用户把本地 HTML 文件设成壁纸时，存的是**安全作用域书签**
+（`Nifro/Support/Extensions.swift` 里的 `BookmarksUserDefaults`）。书签绑在 app 的代码签名上：
+
+```
+ad-hoc    v0.1 签名 A ──┐
+          v0.2 签名 B ──┴─→ 每次都是新签名 → 升级后书签失效 → 用户被重新弹文件选择器
+自签名    v0.1 ┐
+          v0.2 ┴─→ 指定要求恒为 certificate root = <同一张证书> → 授权跨版本保留
+```
+
+所以这里多做的一步不是为了「看起来更正规」，是为了升级不掉用户设置。
+
+**证书丢了等于换身份。** 导出的 `.p12` 是唯一一份，丢了之后所有后续版本的指定要求都会变，
+等同于对每个用户做了一次 ad-hoc 升级。备份它。
+
+### 若将来买了账号：Developer ID + 公证
 
 ```
 xcodebuild (CODE_SIGN_IDENTITY="Developer ID Application", hardened runtime)
@@ -41,34 +62,36 @@ spctl -a -vvv --type exec           （门禁自检，不过就 fail，不发坏
 Nifro-x.y.z.zip  →  GitHub Release  →  cask 回写 version/sha256
 ```
 
-### 路径 B：没有付费账号
+### 现在走的：自签名
 
 ```
-xcodebuild (CODE_SIGN_IDENTITY="-")   ← ad-hoc，无身份，但沙盒 entitlements 照样生效
+Tools/setup-signing.sh --export nifro-release.p12   ← 一次性，本机 openssl 生成，不需要任何账号
+   ↓  base64 后存进仓库 secret
+xcodebuild (CODE_SIGN_IDENTITY="Nifro Signing")     ← 沙盒 entitlements 正常写进签名
    ↓
 Nifro-x.y.z.zip  →  GitHub Release  →  cask 回写 version/sha256
                                         cask 的 postflight 去掉 com.apple.quarantine
 ```
 
-路径 B 下 `spctl` 检查会被跳过，流水线只打 warning，Release 说明里会自动标注「未公证」。
+`spctl` 检查会被跳过，流水线只打 warning，Release 说明里自动标注「未公证」。
 
 **免费 Apple ID 不算数**：免费账号只能签 `Apple Development` 证书，7 天过期、只在本机有效，
-不能用于分发。所以「没有付费账号」的唯一可行方案就是 ad-hoc。
+不能用于分发。自签名证书反而没有这些限制，因为它压根不经过 Apple。
 
 ---
 
 ## 二、需要的 GitHub Secrets
 
-路径 B 一个都不需要，直接打 tag 就能发。以下全部是路径 A 用的：
+自签名只要前两个，后四个是将来公证才用的。
 
-| Secret | 内容 | 从哪来 |
-| --- | --- | --- |
-| `MACOS_CERTIFICATE_P12` | Developer ID Application 证书 + 私钥的 `.p12`，**base64 编码** | 见下方 A1/A2 |
-| `MACOS_CERTIFICATE_PASSWORD` | 导出 `.p12` 时设的密码 | 自己设，自己记 |
-| `APPLE_TEAM_ID` | 10 位 Team ID，如 `ABCDE12345` | developer.apple.com → Membership |
-| `NOTARY_KEY_P8` | App Store Connect API 私钥 `AuthKey_XXXXXXXX.p8`，**base64 编码** | 见下方 A3 |
-| `NOTARY_KEY_ID` | 该 key 的 Key ID（8 位） | 生成 key 时页面上显示 |
-| `NOTARY_ISSUER_ID` | Issuer ID（UUID 格式） | App Store Connect → Integrations → Keys 页顶部 |
+| Secret | 内容 | 从哪来 | 自签名要吗 |
+| --- | --- | --- | --- |
+| `MACOS_CERTIFICATE_P12` | 证书 + 私钥的 `.p12`，**base64 编码** | `Tools/setup-signing.sh --export` 直接打印 | 要 |
+| `MACOS_CERTIFICATE_PASSWORD` | 该 `.p12` 的密码 | 同上，脚本随机生成后打印 | 要 |
+| `APPLE_TEAM_ID` | 10 位 Team ID，如 `ABCDE12345` | developer.apple.com → Membership | 不要 |
+| `NOTARY_KEY_P8` | App Store Connect API 私钥 `AuthKey_XXXXXXXX.p8`，**base64 编码** | 见下方 A3 | 不要 |
+| `NOTARY_KEY_ID` | 该 key 的 Key ID（8 位） | 生成 key 时页面上显示 | 不要 |
+| `NOTARY_ISSUER_ID` | Issuer ID（UUID 格式） | App Store Connect → Integrations → Keys 页顶部 | 不要 |
 
 > 用 App Store Connect API key 而不是「Apple ID + app-specific password」：不受 2FA 影响、
 > 可单独吊销、不绑个人账号密码。
@@ -86,9 +109,18 @@ base64 -i AuthKey_XXXXXXXX.p8   | pbcopy   # 贴进 NOTARY_KEY_P8
 
 ## 三、维护者本人必须手动做的事（agent 做不了）
 
-这些都要 Apple 账号登录或本机钥匙串操作。
+**现在要做的（自签名，不需要 Apple 账号）：**
 
-**路径 A 专属：**
+- **B0** 本机跑一次，把打印出来的两个值填进仓库 secret：
+
+  ```bash
+  ./Tools/setup-signing.sh --export ~/nifro-release.p12
+  ```
+
+  然后把 `~/nifro-release.p12` 备份到一个一年后还找得到的地方（见第一节「证书丢了等于换身份」），
+  仓库里**不要**放这个文件。
+
+**以下是将来买了付费账号才做的，现在跳过：**
 
 - **A1** 在 Xcode → Settings → Accounts → Manage Certificates → `+` → **Developer ID Application**
   创建证书（或在 developer.apple.com → Certificates 里走 CSR 流程）。
@@ -98,18 +130,17 @@ base64 -i AuthKey_XXXXXXXX.p8   | pbcopy   # 贴进 NOTARY_KEY_P8
   **Developer Access / App Manager** 权限的 API Key，下载 `.p8`（**只能下载一次**）。
 - **A4** 把上表 6 个 secret 填进仓库。
 - **A5** 第一次发布成功后，把 `Casks/nifro.rb` 里的整个 `postflight` 块删掉（公证之后不需要
-  再去隔离属性，留着反而是负面信号）。
+  再去隔离属性，留着反而是负面信号）。换成 Developer ID 后签名身份会变一次，用户已授权的
+  本地文件壁纸会失效一次——这是从自签名迁到公证的一次性代价，写进那一版的 Release 说明。
 
-**两条路径都要做：**
+**无论哪条路都要做：**
 
 - **B1** 创建 tap 仓库 `PathGao/homebrew-tap`，或者直接让用户 tap 本仓库
   （`brew tap PathGao/tap https://github.com/PathGao/nifro`，cask 就在本仓库 `Casks/` 下，
   不用维护第二个仓库 —— 这是更省事的做法）。
 - **B2** 确认 `main` 分支保护规则允许 `github-actions[bot]` 推送，否则流水线最后一步
   「回写 cask」会失败（只是告警，Release 本身不受影响，可以手动改 cask）。
-- **B3** 首次发布前，把 `.github/workflows/release.yml` 顶部的 `XCODE_SCHEME` / `BUILT_APP_NAME`
-  和工程实际情况对齐。**当前工程的 scheme 和 target 还叫 `Plash`**，所以默认值就是 `Plash`
-  / `Plash.app`；等 target 改名成 Nifro 之后，把这两个值改掉即可，其余不用动。
+- **B3** ~~对齐 workflow 顶部的 `XCODE_SCHEME` / `BUILT_APP_NAME`~~ 已完成，两个值都是 `Nifro`。
 
 ---
 
@@ -134,21 +165,21 @@ git tag -a v0.2.0 -m "v0.2.0" && git push origin v0.2.0
 
 ## 五、用户拿到的东西长什么样
 
-### 路径 A（已公证）
+### 若将来公证了
 
 | 安装方式 | 用户体验 |
 | --- | --- |
 | `brew install --cask PathGao/tap/nifro` | 装完直接能开，无提示 |
 | 下载 zip 双击 | 首次弹「Nifro 是从互联网下载的，确定要打开吗？」→ 点「打开」→ 结束 |
 
-### 路径 B（ad-hoc，未公证）
+### 现在（自签名，未公证）
 
 | 安装方式 | 用户体验 |
 | --- | --- |
 | `brew install --cask PathGao/tap/nifro` | 装完直接能开，无提示（cask 的 `postflight` 已去掉隔离属性） |
 | 下载 zip 双击 | **被拦**：「无法打开 Nifro，因为 Apple 无法检查其是否包含恶意软件」，只有「移到废纸篓 / 取消」两个按钮 |
 
-路径 B 下直接下载 zip 的用户需要额外一步。放进 README 安装章节的说明：
+直接下载 zip 的用户需要额外一步。放进 README 安装章节的说明：
 
 > 首次打开时 macOS 会提示「无法打开 Nifro，因为 Apple 无法检查其是否包含恶意软件」。
 > 这是因为 Nifro 没有经过 Apple 公证（公证需要 99 美元/年的开发者账号）。
@@ -173,6 +204,8 @@ git tag -a v0.2.0 -m "v0.2.0" && git push origin v0.2.0
 - **签名**：`build-release.sh` 里 `codesign -s "aerospace-codesign-certificate"`，是维护者本机
   钥匙串里的一张**自签名证书**，不是 Developer ID。CI (`build.yml`) 上用
   `./build-release.sh --codesign-identity -`，注释直说「GH Actions 上没有那张证书」。
+  Nifro 这里做得更进一步：证书导出成 `.p12` 存进仓库 secret，CI 也拿得到同一张，
+  所以正式发布不会因为「在谁的机器上打的包」而换签名身份。
 - **公证**：不做。README 里明确说不公证。
 - **发布**：**没有 release workflow**。`.github/workflows/` 下只有 `build.yml` 和两个 issue 机器人。
   真正发版靠维护者本机跑 `script/publish-release.sh`：打 tag、`open` 浏览器、**手动把 zip 拖进
@@ -186,8 +219,8 @@ Nifro 的偏离：
 | 项 | AeroSpace | Nifro | 原因 |
 | --- | --- | --- | --- |
 | 发布触发 | 本机脚本 + 手动上传 | tag 触发 GitHub Actions | 本机发版要求维护者机器状态正确，且不可复现 |
-| 签名 | 自签名证书（本机） | Developer ID（有账号）/ ad-hoc（没有） | 自签名证书对 Gatekeeper 和 ad-hoc 等价，白多一步；不如直接留出公证位 |
-| 公证 | 不做 | 有账号就做 | Nifro 是沙盒 GUI app，用户群不像 tiling WM 用户那样习惯敲 `xattr` |
+| 签名 | 自签名证书（只在本机） | 自签名证书（本机 + CI 共用一张） | 对 Gatekeeper 两者等价，但固定身份能让沙盒书签跨版本存活；CI 也拿得到才谈得上「固定」 |
+| 公证 | 不做 | 现在不做，留好开关 | 现阶段一样不公证；流水线按证书类型自动切，将来买账号只换一个 secret |
 | cask 版本 | 手动生成后 cp | CI `sed` 回写本仓库 `Casks/` | 少维护一个 tap 仓库，少一步人工 |
 | livecheck | 无 | 有 | 4 行，让 `brew livecheck` 能自查，将来若上游到 homebrew-cask 也用得上 |
 | CLI / manpage / shell completion | 有 | 无 | Nifro 只有 GUI app + ShareExtension |

@@ -13,3 +13,8 @@ xcuserdata/
 
 # Local virtualenv for the site registry scripts
 .venv/
+
+# Signing material. The release certificate is a private key; it belongs in a backup and a
+# repo secret, never in the tree.
+*.p12
+*.keychain-db
