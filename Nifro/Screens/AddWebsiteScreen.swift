@@ -75,7 +75,7 @@ struct AddWebsiteScreen: View {
 			submit()
 		}
 		.confirmationDialog2(
-			"Keep changes?",
+			String(localized: "Keep changes?"),
 			isPresented: $isApplyConfirmationPresented
 		) {
 			Button("Keep") {
@@ -217,7 +217,7 @@ struct AddWebsiteScreen: View {
 	@ViewBuilder
 	private var editingView: some View {
 		Section {
-			EnumPicker("Invert colors", selection: website.invertColors2) {
+			EnumPicker(String(localized: "Invert colors"), selection: website.invertColors2) {
 				Text($0.title)
 			}
 			.help("Creates a fake dark mode for websites without a native dark mode by inverting all the colors on the website.")
@@ -322,9 +322,9 @@ struct AddWebsiteScreen: View {
 		panel.canChooseFiles = false
 		panel.canChooseDirectories = true
 		panel.canCreateDirectories = false
-		panel.title = "Choose Local Website"
-		panel.message = "Choose a directory with a “index.html” file."
-		panel.prompt = "Choose"
+		panel.title = String(localized: "Choose Local Website")
+		panel.message = String(localized: "Choose a directory with a “index.html” file.")
+		panel.prompt = String(localized: "Choose")
 
 		// Ensure it's above the window when in "Browsing Mode".
 		panel.level = .modalPanel
@@ -350,7 +350,7 @@ struct AddWebsiteScreen: View {
 		}
 
 		guard url.appendingPathComponent("index.html", isDirectory: false).exists else {
-			await NSAlert.show(title: "Please choose a directory that contains a “index.html” file.")
+			await NSAlert.show(title: String(localized: "Please choose a directory that contains a “index.html” file."))
 			return await chooseLocalWebsite()
 		}
 

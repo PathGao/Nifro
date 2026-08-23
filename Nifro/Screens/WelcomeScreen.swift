@@ -9,7 +9,7 @@ extension AppState {
 		SSApp.forceActivate()
 
 		NSAlert.showModal(
-			title: "Welcome to Nifro!",
+			title: String(localized: "Welcome to Nifro!"),
 			message:
 				"""
 				Nifro lives in the menu bar, towards the right of the screen. Click its icon and choose “Add Website…” to get started.
@@ -19,19 +19,19 @@ extension AppState {
 				Not sure what to put up there? “Site Gallery…” in the same menu lists pages that work well as wallpapers, each with the settings that make it work.
 				""",
 			buttonTitles: [
-				"Continue"
+				String(localized: "Continue")
 			],
 			defaultButtonIndex: -1
 		)
 
 		NSAlert.showModal(
-			title: "Feedback Welcome",
+			title: String(localized: "Feedback Welcome"),
 			message:
 				"""
 				Nifro is open source and its issue tracker is open. If something is broken, missing, or just annoying, the feedback button in the app goes straight there.
 				""",
 			buttonTitles: [
-				"Get Started with Nifro"
+				String(localized: "Get Started with Nifro")
 			]
 		)
 

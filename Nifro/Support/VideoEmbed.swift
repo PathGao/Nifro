@@ -98,7 +98,7 @@ enum VideoEmbed {
 				html, body { margin: 0; height: 100%; background: #000 }
 				iframe { border: 0; width: 100%; height: 100% }
 			</style>
-			<iframe src="\(source)" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+			<iframe src="\(source)" allow="autoplay; encrypted-media"></iframe>
 			""",
 			baseURL
 		)

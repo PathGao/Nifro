@@ -2,7 +2,7 @@ import SwiftUI
 
 
 struct FatalReason: CustomStringConvertible {
-	static let notYetImplemented = Self("Not yet implemented.")
+	static let notYetImplemented = Self(String(localized: "Not yet implemented."))
 
 	let reason: String
 

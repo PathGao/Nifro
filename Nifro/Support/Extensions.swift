@@ -2936,7 +2936,7 @@ extension WKWebView {
 
 		let alert = NSAlert()
 		alert.messageText = "Log in to \(host)"
-		alert.addButton(withTitle: "Log In")
+		alert.addButton(withTitle: String(localized: "Log In"))
 		alert.addButton(withTitle: "Cancel")
 
 		let view = NSView(frame: CGRect(x: 0, y: 0, width: 200, height: 54))
@@ -2944,12 +2944,12 @@ extension WKWebView {
 
 		let username = AutofocusedTextField(frame: CGRect(x: 0, y: 32, width: 200, height: 22))
 		username.contentType = .username
-		username.placeholderString = "Username"
+		username.placeholderString = String(localized: "Username")
 		view.addSubview(username)
 
 		let password = NSSecureTextField(frame: CGRect(x: 0, y: 0, width: 200, height: 22))
 		password.contentType = .password
-		password.placeholderString = "Password"
+		password.placeholderString = String(localized: "Password")
 		view.addSubview(password)
 
 		// TODO: It doesn't continue tabbing to the buttons after the password field.
@@ -3040,7 +3040,7 @@ struct ContentView: View {
 
 	var body: some View {
 		VStack {
-			Text("Custom CSS:")
+			Text(String(localized: "Custom CSS:"))
 			ScrollableTextView(text: $text)
 				.frame(height: 100)
 		}
@@ -3168,7 +3168,7 @@ enum SecurityScopedBookmarkManager {
 		func panel(_ sender: Any, validate url: URL) throws {
 			if url != currentURL {
 				throw NSError.appError(
-					"Incorrect directory.",
+					String(localized: "Incorrect directory."),
 					recoverySuggestion: "Select the directory “\(currentURL.tildePath)”."
 				)
 			}
@@ -3241,9 +3241,9 @@ enum SecurityScopedBookmarkManager {
 			$0.canChooseDirectories = true
 			$0.canChooseFiles = false
 			$0.canCreateDirectories = false
-			$0.title = "Permission"
+			$0.title = String(localized: "Permission")
 			$0.message = message ?? "\(SSApp.name) needs access to the “\(directoryURL.lastPathComponent)” directory. Click “Allow” to proceed."
-			$0.prompt = "Allow"
+			$0.prompt = String(localized: "Allow")
 		}
 
 		SSApp.activateIfAccessory()

@@ -101,7 +101,7 @@ final class SSWebView: WKWebView {
 		}
 
 		if Defaults[.hideMenuBarIcon] {
-			menu.addCallbackItem("Show Menu Bar Icon") {
+			menu.addCallbackItem(String(localized: "Show Menu Bar Icon")) {
 				AppState.shared.handleMenuBarIcon()
 			}
 		}

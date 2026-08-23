@@ -53,7 +53,12 @@ final class WebViewController: NSViewController {
 		let preferences = WKPreferences()
 		preferences.javaScriptCanOpenWindowsAutomatically = false
 		preferences.isDeveloperExtrasEnabled = true
-		preferences.isElementFullscreenEnabled = true
+		// A wallpaper is already the size of the screen, so a page's fullscreen button has nothing to
+		// offer, and taking it breaks the wallpaper: WebKit moves the web view into a window of its
+		// own, while the visibility policy carries on reinstalling the content view every couple of
+		// seconds. Coming back out then finds nowhere to come back to, and the wallpaper is black
+		// with no way to fix it from inside the app.
+		preferences.isElementFullscreenEnabled = false
 		configuration.preferences = preferences
 
 		let webView = SSWebView(frame: .zero, configuration: configuration)

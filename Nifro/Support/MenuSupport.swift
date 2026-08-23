@@ -202,7 +202,7 @@ extension NSMenu {
 	@MainActor
 	@discardableResult
 	func addSettingsItem() -> NSMenuItem {
-		addCallbackItem("Settings…", key: ",") {
+		addCallbackItem(String(localized: "Settings…"), key: ",") {
 			SSApp.showSettingsWindow()
 		}
 	}
@@ -216,7 +216,7 @@ extension NSMenu {
 	func addQuitItem() -> NSMenuItem {
 		addSeparator()
 
-		return addCallbackItem("Quit \(SSApp.name)", key: "q") {
+		return addCallbackItem(String(localized: "Quit \(SSApp.name)"), key: "q") {
 			SSApp.quit()
 		}
 	}

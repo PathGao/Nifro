@@ -59,12 +59,12 @@ private struct AdvancedSettings: View {
 		Form {
 			Section {
 				BringBrowsingModeToFrontSetting()
-				Defaults.Toggle("Deactivate while on battery", key: .deactivateOnBattery)
+				Defaults.Toggle(String(localized: "Deactivate while on battery"), key: .deactivateOnBattery)
 				ContentRulesSetting()
 				FreezeWhenCoveredSetting()
 				PlaylistIntervalSetting()
-				Defaults.Toggle("Restore scroll position after reload", key: .restoreScrollPosition)
-				Defaults.Toggle("Reload when the Mac wakes", key: .reloadOnWake)
+				Defaults.Toggle(String(localized: "Restore scroll position after reload"), key: .restoreScrollPosition)
+				Defaults.Toggle(String(localized: "Reload when the Mac wakes"), key: .reloadOnWake)
 				DimWhenUnfocusedSetting()
 				OpenExternalLinksInBrowserSetting()
 				HideMenuBarIconSetting()
@@ -81,7 +81,7 @@ private struct AdvancedSettings: View {
 private struct FreezeWhenCoveredSetting: View {
 	var body: some View {
 		Defaults.Toggle(
-			"Only render what is on show",
+			String(localized: "Only render what is on show"),
 			key: .freezeWhenCovered
 		)
 		.help("When other windows cover most of the wallpaper, Nifro shrinks the window to whatever is still visible, such as the strip behind the Dock, and keeps rendering only that. When nothing is visible it holds the last frame. Turn this off to keep drawing the whole page.")
@@ -122,7 +122,7 @@ private struct DimWhenUnfocusedSetting: View {
 	@Default(.dimmedOpacityFactor) private var factor
 
 	var body: some View {
-		Defaults.Toggle("Dim while another app is in front", key: .dimWhenUnfocused)
+		Defaults.Toggle(String(localized: "Dim while another app is in front"), key: .dimWhenUnfocused)
 			.help("Fades the wallpaper back while you work elsewhere, and brings it up again when you click the desktop. A page bright enough to enjoy when you look at it is often too loud behind a document you are reading.")
 
 		if isEnabled {
@@ -140,7 +140,7 @@ private struct DimWhenUnfocusedSetting: View {
 private struct ShowOnAllSpacesSetting: View {
 	var body: some View {
 		Defaults.Toggle(
-			"Show on all spaces",
+			String(localized: "Show on all spaces"),
 			key: .showOnAllSpaces
 		)
 		.help("While disabled, Nifro will display the website on the space that is active at launch.")
@@ -151,7 +151,7 @@ private struct BringBrowsingModeToFrontSetting: View {
 	var body: some View {
 		// TODO: Find a better title for this.
 		Defaults.Toggle(
-			"Bring browsing mode to the front",
+			String(localized: "Bring browsing mode to the front"),
 			key: .bringBrowsingModeToFront
 		)
 		.help("Keep the website above all other windows while browsing mode is active.")
@@ -161,7 +161,7 @@ private struct BringBrowsingModeToFrontSetting: View {
 private struct OpenExternalLinksInBrowserSetting: View {
 	var body: some View {
 		Defaults.Toggle(
-			"Open external links in default browser",
+			String(localized: "Open external links in default browser"),
 			key: .openExternalLinksInBrowser
 		)
 		.help("If a website requires login, you should disable this setting while logging in as the website might require you to navigate to a different page, and you don't want that to open in a browser instead of Nifro.")
@@ -241,12 +241,12 @@ private struct HideMenuBarIconSetting: View {
 	@State private var isShowingAlert = false
 
 	var body: some View {
-		Defaults.Toggle("Hide menu bar icon", key: .hideMenuBarIcon)
+		Defaults.Toggle(String(localized: "Hide menu bar icon"), key: .hideMenuBarIcon)
 			.onChange {
 				isShowingAlert = $0
 			}
 			.alert2(
-				"If you need to access the Nifro menu, launch the app again to reveal the menu bar icon for 5 seconds.",
+				String(localized: "If you need to access the Nifro menu, launch the app again to reveal the menu bar icon for 5 seconds."),
 				isPresented: $isShowingAlert
 			)
 	}

@@ -29,7 +29,7 @@ extension AppState {
 				let url = URL(string: urlString, encodingInvalidCharacters: false),
 				url.isValid
 			else {
-				showMessage("Invalid URL for the “add” command.")
+				showMessage(String(localized: "Invalid URL for the “add” command."))
 				return
 			}
 

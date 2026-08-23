@@ -110,7 +110,7 @@ final class AppState: ObservableObject {
 				// TODO: Also present the error when the user just added it from the input box as then it's also "interactive".
 				if
 					isBrowsingMode,
-					!webViewError.localizedDescription.contains("No internet connection")
+					!webViewError.localizedDescription.contains(String(localized: "No internet connection"))
 				{
 					webViewError.presentAsModal()
 				}

@@ -27,9 +27,9 @@ struct ZoomSetting: View {
 
 		if zoom != nil {
 			HStack {
-				field("Centre X", value: binding(\.center.x), format: .percent)
-				field("Centre Y", value: binding(\.center.y), format: .percent)
-				field("Zoom", value: binding(\.scale), format: .magnification)
+				field(String(localized: "Centre X"), value: binding(\.center.x), format: .percent)
+				field(String(localized: "Centre Y"), value: binding(\.center.y), format: .percent)
+				field(String(localized: "Zoom"), value: binding(\.scale), format: .magnification)
 			}
 			.help("The centre is a position on the page, from its top-left corner. The zoom is how many times that part is enlarged.")
 		}
@@ -137,8 +137,8 @@ struct WebsiteScheduleSetting: View {
 
 		if startHour != nil, endHour != nil {
 			HStack {
-				hourPicker("From", selection: $startHour)
-				hourPicker("Until", selection: $endHour)
+				hourPicker(String(localized: "From"), selection: $startHour)
+				hourPicker(String(localized: "Until"), selection: $endHour)
 			}
 		}
 	}
