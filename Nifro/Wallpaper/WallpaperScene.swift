@@ -67,10 +67,14 @@ final class WallpaperScene {
 		self.window = DesktopWindow(display: display)
 
 		webViewController.scene = self
-		applyContent()
 
-		// The web view starts hidden so the first frame is not a flash of white.
-		webViewController.webView.isHidden = true
+		// After the web view exists and before anything is on screen. `applyContent` installs the menu
+		// bar band, and the band follows the page — so the page has to already be hidden by then, or
+		// the band goes up on a scene that has not loaded anything and the menu bar changes colour a
+		// second before the wallpaper arrives. The web view hides itself now; this only forces it to
+		// exist first.
+		_ = webViewController.webView
+		applyContent()
 
 		// The scene owns its own loading lifecycle. Wiring this app-wide meant only the first scene
 		// ever restored its zoom or reported its errors.

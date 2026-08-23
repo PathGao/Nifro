@@ -110,6 +110,11 @@ final class WebViewController: NSViewController {
 			}
 		}
 
+		// Hidden from birth. A fresh web view is a blank page, and showing one is a flash of white
+		// before the wallpaper and, since the menu bar band follows the page, a menu bar that changes
+		// colour ahead of it. Whoever loads something is the one that shows it.
+		webView.isHidden = true
+
 		return webView
 	}
 
@@ -136,10 +141,6 @@ final class WebViewController: NSViewController {
 	func releaseWebView() {
 		view = NSView()
 		webView = createWebView()
-
-		// Hidden like the first one, and for the same reason: what comes back is a blank page until
-		// something is loaded into it. It also keeps the menu bar band down, which follows the page.
-		webView.isHidden = true
 	}
 
 

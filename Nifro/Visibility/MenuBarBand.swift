@@ -18,9 +18,21 @@ covering windows left visible — and the tint should not come and go with it.
 final class MenuBarBandWindow: NSWindow {
 	private let bandView = MenuBarBandView()
 
+	/**
+	Whether a colour has ever been taken off a page for this band.
+
+	Until one has, the band has nothing to say. It is built as soon as a scene exists, which is before
+	anything has loaded, and showing it then means the menu bar takes a colour off a blank page — a
+	menu bar that changes before the wallpaper it is supposed to be matching.
+	*/
+	private(set) var hasSampledColor = false
+
 	var color: NSColor {
 		get { bandView.color }
-		set { bandView.color = newValue }
+		set {
+			bandView.color = newValue
+			hasSampledColor = true
+		}
 	}
 
 	init(screen: NSScreen) {
@@ -134,7 +146,11 @@ extension WallpaperScene {
 	at once there is a page to sample.
 	*/
 	func updateMenuBarBandVisibility() {
-		menuBarBand?.setVisible(!webViewController.webView.isHidden)
+		guard let band = menuBarBand else {
+			return
+		}
+
+		band.setVisible(!webViewController.webView.isHidden && band.hasSampledColor)
 	}
 
 	/**
@@ -162,12 +178,17 @@ extension WallpaperScene {
 			return
 		}
 
-		webView.takeSnapshot(with: configuration) { image, _ in
+		webView.takeSnapshot(with: configuration) { [weak self] image, _ in
 			guard let color = image?.averageColor else {
 				return
 			}
 
 			band.color = color
+
+			// The first colour is also what lets the band on screen, so this is the moment to ask
+			// again. Sampling is asynchronous, and it is the later of the two things the band waits
+			// for — a page can be on screen a frame before there is a colour taken off it.
+			self?.updateMenuBarBandVisibility()
 		}
 	}
 }

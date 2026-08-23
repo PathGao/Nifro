@@ -34,15 +34,15 @@ final class CropSelectionView: NSView {
 	private static let keyboardStep = 40.0
 
 	/**
-	How much one key press changes the magnification.
+	How much one key press grows the frame. `+` bigger, `-` smaller, like everything else here.
 	*/
-	private static let keyboardZoomStep = 1.1
+	private static let keyboardGrowthStep = 1.1
 
 	/**
 	A wheel notch is a bigger, coarser thing than a trackpad's continuous scroll, so it maps to a step
 	rather than to a distance.
 	*/
-	private static let wheelZoomPerLine = 1.06
+	private static let wheelGrowthPerLine = 1.06
 
 	init(frame: CGRect, zoom: Zoom) {
 		self.zoom = zoom
@@ -75,7 +75,7 @@ final class CropSelectionView: NSView {
 	*/
 	override func scrollWheel(with event: NSEvent) {
 		guard event.hasPreciseScrollingDeltas else {
-			zoom = zoom.resizedFrame(by: pow(Self.wheelZoomPerLine, event.scrollingDeltaY))
+			zoom = zoom.resizedFrame(byGrowing: pow(Self.wheelGrowthPerLine, event.scrollingDeltaY))
 			return
 		}
 
@@ -90,7 +90,9 @@ final class CropSelectionView: NSView {
 	being framed, and neither is something this mode records or can put back.
 	*/
 	override func magnify(with event: NSEvent) {
-		zoom = zoom.resizedFrame(by: 1 + event.magnification)
+		// `magnification` is positive when the fingers spread, and spreading makes the thing under
+		// them bigger. The frame is the thing under them.
+		zoom = zoom.resizedFrame(byGrowing: 1 + event.magnification)
 	}
 
 	override func keyDown(with event: NSEvent) {
@@ -110,9 +112,9 @@ final class CropSelectionView: NSView {
 		default:
 			switch event.charactersIgnoringModifiers {
 			case "+", "=":
-				zoom = zoom.resizedFrame(by: Self.keyboardZoomStep)
+				zoom = zoom.resizedFrame(byGrowing: Self.keyboardGrowthStep)
 			case "-", "_":
-				zoom = zoom.resizedFrame(by: 1 / Self.keyboardZoomStep)
+				zoom = zoom.resizedFrame(byGrowing: 1 / Self.keyboardGrowthStep)
 			default:
 				super.keyDown(with: event)
 			}

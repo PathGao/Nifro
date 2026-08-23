@@ -273,23 +273,28 @@ struct ZoomTests {
 		#expect(back.center.x < far.center.x)
 	}
 
-	@Test("Resizing keeps the frame where it is")
+	@Test("Growing the frame lowers the magnification, and does not move it")
 	func resizingHoldsTheCentre() {
-		let zoom = Zoom(center: CGPoint(x: 0.3, y: 0.7), scale: 2)
-		let smaller = zoom.resizedFrame(by: 1.5)
+		let zoom = Zoom(center: CGPoint(x: 0.3, y: 0.7), scale: 4)
+		let bigger = zoom.resizedFrame(byGrowing: 2)
 
-		#expect(smaller.scale > zoom.scale)
-		#expect(smaller.center == zoom.center)
+		// A frame twice as wide shows twice as much, which is half the magnification. Spreading two
+		// fingers makes the frame bigger; writing this the other way round is what shipped backwards.
+		#expect(bigger.scale == 2)
+		#expect(bigger.center == zoom.center)
+
+		let smaller = zoom.resizedFrame(byGrowing: 0.5)
+		#expect(smaller.scale == 8)
 	}
 
 	@Test("The frame stops at both ends")
 	func sizeIsBounded() {
-		let out = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 2).resizedFrame(by: 0.001)
+		let out = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 2).resizedFrame(byGrowing: 1000)
 		#expect(out.scale == 1)
 		// The whole page has only one possible centre.
 		#expect(out.center == CGPoint(x: 0.5, y: 0.5))
 
-		let deepIn = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 2).resizedFrame(by: 1000)
+		let deepIn = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 2).resizedFrame(byGrowing: 0.001)
 		#expect(deepIn.scale == Zoom.maximumScale)
 	}
 

@@ -112,14 +112,23 @@ struct Zoom: Codable, Hashable, Sendable {
 	}
 
 	/**
-	The same region resized by `factor`, around its own middle.
+	The same region with the frame made `factor` times bigger, around its own middle.
+
+	Stated as the frame growing rather than as the magnification rising, because the frame is the
+	thing under the fingers: spreading two of them makes what they are on bigger. Magnification is the
+	inverse of frame size — a frame half as wide is twice the magnification — so a gesture written the
+	other way round comes out backwards, which is exactly how it shipped the first time.
 
 	Around its middle rather than around the pointer, because the page does not move here — only the
 	frame does. Anchoring the size change to the pointer would slide the frame out from under it,
 	which is the sort of thing that feels right when the picture is moving and wrong when it is not.
 	*/
-	func resizedFrame(by factor: Double) -> Self {
-		Self(center: center, scale: (max(scale, 1) * factor).clamped(to: 1...Self.maximumScale))
+	func resizedFrame(byGrowing factor: Double) -> Self {
+		guard factor > 0 else {
+			return self
+		}
+
+		return Self(center: center, scale: (max(scale, 1) / factor).clamped(to: 1...Self.maximumScale))
 			.clampedToPage()
 	}
 
