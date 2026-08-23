@@ -43,6 +43,7 @@
 		4BA49C1538F7FCF45D0FC315 /* WebsiteSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375CB4FD5AF2291C2B0D99D0 /* WebsiteSettings.swift */; };
 		FC11C05F76D3F4DD4871E11A /* PageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 868FFECC725D3D54F254BEF5 /* PageView.swift */; };
 		66A8D44DC83A0DDD8B0E89D7 /* OcclusionMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA31C0FAF40DE6D9B9300FD /* OcclusionMonitor.swift */; };
+		66A8D44DC83A0DDD8B0E89E1 /* Coverage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2BA31C0FAF40DE6D9B9301F1 /* Coverage.swift */; };
 		E3294F7E255783A800D4172F /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = E3294F7D255783A800D4172F /* Defaults */; };
 		E32AD6AE26D2718B0008D900 /* ShareController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E32AD6AD26D2718B0008D900 /* ShareController.swift */; };
 		E32AD6BD26D275070008D900 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = E32AD6BC26D275070008D900 /* Utilities.swift */; };
@@ -127,6 +128,7 @@
 		375CB4FD5AF2291C2B0D99D0 /* WebsiteSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = WebsiteSettings.swift; sourceTree = "<group>"; usesTabs = 1; };
 		868FFECC725D3D54F254BEF5 /* PageView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = PageView.swift; sourceTree = "<group>"; usesTabs = 1; };
 		2BA31C0FAF40DE6D9B9300FD /* OcclusionMonitor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = OcclusionMonitor.swift; sourceTree = "<group>"; usesTabs = 1; };
+		2BA31C0FAF40DE6D9B9301F1 /* Coverage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Coverage.swift; sourceTree = "<group>"; usesTabs = 1; };
 		E32AD6A926D2718B0008D900 /* Share Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Share Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		E32AD6AD26D2718B0008D900 /* ShareController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareController.swift; sourceTree = "<group>"; };
 		E32AD6BC26D275070008D900 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
@@ -273,6 +275,7 @@
 				DB494D7D82CDA92E0D71731F /* MenuBarBand.swift */,
 				E7D1774A2E51E303343371E8 /* VisibilityPolicy.swift */,
 				2BA31C0FAF40DE6D9B9300FD /* OcclusionMonitor.swift */,
+				2BA31C0FAF40DE6D9B9301F1 /* Coverage.swift */,
 			);
 			path = Visibility;
 			sourceTree = "<group>";
@@ -500,6 +503,7 @@
 				4BA49C1538F7FCF45D0FC315 /* WebsiteSettings.swift in Sources */,
 				FC11C05F76D3F4DD4871E11A /* PageView.swift in Sources */,
 				66A8D44DC83A0DDD8B0E89D7 /* OcclusionMonitor.swift in Sources */,
+				66A8D44DC83A0DDD8B0E89E1 /* Coverage.swift in Sources */,
 				E3494C26297D38CC00983648 /* Intents.swift in Sources */,
 				E32421342384E9D700D28A91 /* AppState.swift in Sources */,
 				E32421472384EB4E00D28A91 /* DesktopWindow.swift in Sources */,

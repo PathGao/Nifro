@@ -6,7 +6,7 @@ Tells whether other windows cover the desktop window enough that rendering a liv
 
 `NSWindow.occlusionState` cannot answer this. The system calls a window visible if any sliver of it shows through, and two slivers almost always show. One is the menu bar strip. The other is the Dock, which is translucent, so the wallpaper behind it keeps rendering. A maximized window leaves the desktop window `.visible` forever, so anything keyed off `occlusionState` never fires.
 
-We measure the uncovered area ourselves instead, over the whole screen frame. Those two strips are where the wallpaper survives when everything else is covered, so they count as visible rather than being excluded.
+We measure the uncovered area ourselves instead, over the whole screen frame. Those two strips are where the wallpaper survives when everything else is covered, so they count as visible rather than being excluded. Which windows count as coverage is `Coverage.hidesWallpaper`.
 */
 @MainActor
 final class OcclusionMonitor {
@@ -18,20 +18,6 @@ final class OcclusionMonitor {
 	Window moves and resizes by *other* apps post no notification we can observe without the Accessibility API, so the notifications below cannot be the only trigger.
 	*/
 	private static let pollInterval = 2.0
-
-	/**
-	Windows that do not hide the wallpaper, either because they paint nothing or because you can see straight through them.
-
-	The Dock is the interesting one. Its window is fully opaque as far as the window server is concerned, but what it draws is translucent, so the page carries on showing through it. Counting it as coverage would throw that sliver away.
-	*/
-	private static let ignoredOwners: Set<String> = [
-		"Window Server", // Menu bar, and various full-screen scaffolding.
-		"Dock",
-		"WallpaperAgent",
-		"Notification Center",
-		"Control Center",
-		"Spotlight"
-	]
 
 	private let subject = CurrentValueSubject<CGRect, Never>(.zero)
 	private(set) var largestVisibleRegion: (rect: CGRect, area: Double) = (.zero, 0)
@@ -137,21 +123,37 @@ final class OcclusionMonitor {
 		let ownPID = ProcessInfo.processInfo.processIdentifier
 		let arrangementHeight = NSScreen.screens.map(\.frame).reduce(CGRect.null) { $0.union($1) }.maxY
 
+		// One lookup per process rather than per window. A busy desktop reports the same handful of
+		// applications over and over, and this runs every two seconds.
+		var bundleIdentifiers = [Int32: String?]()
+
 		var coveringRects = [CGRect]()
 
 		for window in windowList {
 			guard
 				let layer = window[kCGWindowLayer as String] as? Int,
-				// Below zero is the desktop, the desktop icons, and the wallpaper itself. None of those hide us.
-				layer >= 0,
 				let alpha = window[kCGWindowAlpha as String] as? Double,
-				alpha > 0.9,
 				let pid = window[kCGWindowOwnerPID as String] as? Int32,
-				pid != ownPID,
-				let owner = window[kCGWindowOwnerName as String] as? String,
-				!Self.ignoredOwners.contains(owner),
 				let boundsDict = window[kCGWindowBounds as String] as? [String: Any],
 				let cgBounds = CGRect(dictionaryRepresentation: boundsDict as CFDictionary)
+			else {
+				continue
+			}
+
+			let bundleIdentifier = bundleIdentifiers[pid] ?? {
+				let resolved = NSRunningApplication(processIdentifier: pid)?.bundleIdentifier
+				bundleIdentifiers[pid] = resolved
+				return resolved
+			}()
+
+			guard
+				Coverage.hidesWallpaper(
+					layer: layer,
+					alpha: alpha,
+					bundleIdentifier: bundleIdentifier,
+					processName: window[kCGWindowOwnerName as String] as? String,
+					isOwnWindow: pid == ownPID
+				)
 			else {
 				continue
 			}

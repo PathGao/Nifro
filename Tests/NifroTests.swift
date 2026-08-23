@@ -495,3 +495,62 @@ extension VideoEmbedTests {
 		#expect(!host.html.contains("<script"))
 	}
 }
+
+/**
+Which windows count as hiding the wallpaper.
+
+The first version of this matched the system windows by the name the window list reports, which is
+the localised application name. On an English Mac it worked. On a Chinese one "Dock" never matched
+程序坞, so the Dock's full-screen window counted as coverage and every wallpaper was judged
+completely hidden from the moment it appeared. These tests are the reason that cannot come back.
+*/
+@Suite("Window coverage")
+struct WindowCoverageTests {
+	@Test("The Dock does not hide the wallpaper, whatever its name is in")
+	func dockIsIgnoredInEveryLanguage() {
+		for name in ["Dock", "程序坞", "Anclaje", "ドック"] {
+			#expect(
+				!Coverage.hidesWallpaper(
+					layer: 0,
+					alpha: 1,
+					bundleIdentifier: "com.apple.dock",
+					processName: name,
+					isOwnWindow: false
+				),
+				"the Dock counted as coverage when it reports itself as \(name)"
+			)
+		}
+	}
+
+	@Test("An ordinary application window hides the wallpaper")
+	func ordinaryWindowsCover() {
+		#expect(
+			Coverage.hidesWallpaper(
+				layer: 0,
+				alpha: 1,
+				bundleIdentifier: "com.google.Chrome",
+				processName: "Google Chrome",
+				isOwnWindow: false
+			)
+		)
+	}
+
+	@Test("Nothing below the desktop, see-through, or ours counts")
+	func theThreeExemptions() {
+		let chrome = (bundle: "com.google.Chrome", name: "Google Chrome")
+
+		// Desktop icons and the wallpaper itself live below zero.
+		#expect(!Coverage.hidesWallpaper(layer: -1, alpha: 1, bundleIdentifier: chrome.bundle, processName: chrome.name, isOwnWindow: false))
+		// You can see the page through it.
+		#expect(!Coverage.hidesWallpaper(layer: 0, alpha: 0.5, bundleIdentifier: chrome.bundle, processName: chrome.name, isOwnWindow: false))
+		// The wallpaper cannot hide itself.
+		#expect(!Coverage.hidesWallpaper(layer: 0, alpha: 1, bundleIdentifier: chrome.bundle, processName: chrome.name, isOwnWindow: true))
+	}
+
+	@Test("A process with no bundle identifier is matched by name")
+	func processesWithoutABundle() {
+		// WindowServer is not an application, so it has no bundle identifier and no localised name.
+		#expect(!Coverage.hidesWallpaper(layer: 0, alpha: 1, bundleIdentifier: nil, processName: "Window Server", isOwnWindow: false))
+		#expect(Coverage.hidesWallpaper(layer: 0, alpha: 1, bundleIdentifier: nil, processName: "something else", isOwnWindow: false))
+	}
+}

@@ -16,7 +16,7 @@ let package = Package(
 		.target(
 			name: "NifroLogic",
 			path: "Nifro",
-			sources: ["Support/Geometry.swift", "Support/Schedule.swift", "Support/VideoEmbed.swift", "Support/PageActivity.swift"]
+			sources: ["Support/Geometry.swift", "Support/Schedule.swift", "Support/VideoEmbed.swift", "Support/PageActivity.swift", "Visibility/Coverage.swift"]
 		),
 		.testTarget(
 			name: "NifroTests",
