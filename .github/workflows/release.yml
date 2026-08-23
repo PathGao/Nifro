@@ -235,7 +235,10 @@ jobs:
             cp -R "$staged" "$image_root/"
             ln -s /Applications "$image_root/Applications"
 
-            dmg=".release/$APP_NAME-$version-$arch.dmg"
+            # No version in the file name. It is already in the tag the asset hangs under, and
+            # leaving it out is what makes /releases/latest/download/Nifro-arm64.dmg a link that
+            # keeps working — the README can point straight at a build instead of at a page.
+            dmg=".release/$APP_NAME-$arch.dmg"
             rm -f "$dmg"
             hdiutil create \
               -volname "$APP_NAME" \
@@ -289,8 +292,8 @@ jobs:
           \`\`\`
 
           \`\`\`
-          Apple silicon  Nifro-$version-arm64.dmg   sha256 ${{ steps.package.outputs.sha_arm64 }}
-          Intel          Nifro-$version-x86_64.dmg  sha256 ${{ steps.package.outputs.sha_x86_64 }}
+          Apple silicon  Nifro-arm64.dmg   sha256 ${{ steps.package.outputs.sha_arm64 }}
+          Intel          Nifro-x86_64.dmg  sha256 ${{ steps.package.outputs.sha_x86_64 }}
           \`\`\`
           EOF
 

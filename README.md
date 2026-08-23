@@ -19,7 +19,12 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/PathGao/Nifro/releases/latest"><b>Download</b></a>
+  <a href="https://github.com/PathGao/Nifro/releases/latest/download/Nifro-arm64.dmg"><img alt="Download for Apple silicon" src="https://img.shields.io/badge/Download-Apple%20silicon-0453ab?style=for-the-badge&logo=apple&logoColor=white"></a>
+  <a href="https://github.com/PathGao/Nifro/releases/latest/download/Nifro-x86_64.dmg"><img alt="Download for Intel" src="https://img.shields.io/badge/Download-Intel-4a4a4a?style=for-the-badge&logo=apple&logoColor=white"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/PathGao/Nifro/releases">Releases</a>
   ·
   <a href="sites/">Site list</a>
   ·
@@ -37,13 +42,16 @@
 ## Install
 
 ```sh
-brew tap PathGao/tap https://github.com/PathGao/Nifro
-brew install --cask nifro
+brew tap PathGao/tap https://github.com/PathGao/Nifro && brew install --cask nifro
 ```
 
-Or [download the latest release](https://github.com/PathGao/Nifro/releases/latest) — take the
-`arm64` build on Apple silicon and the `x86_64` build on Intel. There is no universal binary, so
-nobody downloads the half they cannot run.
+Or take a disk image straight from the buttons at the top: `arm64` on Apple silicon, `x86_64` on
+Intel. There is no universal binary, so nobody downloads the half they cannot run. Those two links
+always point at the newest build.
+
+The tap is spelled out because the cask lives in this repository rather than in a separate
+`homebrew-tap` one. Plain `brew install --cask nifro` needs Nifro to be in Homebrew's own cask
+repository, which has a popularity threshold this project has not reached.
 
 Builds are signed with the project's own certificate rather than an Apple Developer ID one, so they
 are not notarized and Gatekeeper stops a directly downloaded one until you allow it in System

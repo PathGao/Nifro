@@ -19,7 +19,12 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/PathGao/Nifro/releases/latest"><b>下载</b></a>
+  <a href="https://github.com/PathGao/Nifro/releases/latest/download/Nifro-arm64.dmg"><img alt="下载 Apple silicon 版" src="https://img.shields.io/badge/%E4%B8%8B%E8%BD%BD-Apple%20silicon-0453ab?style=for-the-badge&logo=apple&logoColor=white"></a>
+  <a href="https://github.com/PathGao/Nifro/releases/latest/download/Nifro-x86_64.dmg"><img alt="下载 Intel 版" src="https://img.shields.io/badge/%E4%B8%8B%E8%BD%BD-Intel-4a4a4a?style=for-the-badge&logo=apple&logoColor=white"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/PathGao/Nifro/releases">历史版本</a>
   ·
   <a href="sites/">站点清单</a>
   ·
@@ -37,12 +42,14 @@
 ## 安装
 
 ```sh
-brew tap PathGao/tap https://github.com/PathGao/Nifro
-brew install --cask nifro
+brew tap PathGao/tap https://github.com/PathGao/Nifro && brew install --cask nifro
 ```
 
-或者[下载最新版本](https://github.com/PathGao/Nifro/releases/latest) —— Apple silicon 取
-`arm64`，Intel 取 `x86_64`。不做通用二进制，免得每个人都下载一份自己永远用不到的另一半。
+或者直接点上面那两个按钮下载磁盘映像：Apple silicon 取 `arm64`，Intel 取 `x86_64`。不做通用二
+进制，免得每个人都下载一份自己永远用不到的另一半。那两个链接永远指向最新版。
+
+这里要写出 tap 的地址，是因为 cask 放在本仓库而不是单独的 `homebrew-tap` 仓库。想要直接
+`brew install --cask nifro`，得先进 Homebrew 官方的 cask 仓库，那有一道本项目还没够到的热度门槛。
 
 构建包用的是本项目自己的证书而不是 Apple Developer ID，所以没有经过公证，直接下载的包首次打开
 会被门禁拦下，需要去「系统设置 → 隐私与安全性」放行。用 cask 安装这一步已经替你做了，所以它是
