@@ -206,12 +206,9 @@ extension AppState {
 			.setShortcut(for: Shortcut.toggleEnabled.name)
 		}
 
-		menu.addSeparator()
-
-		// Right under the on/off switch, where someone with nothing set up yet looks first. It opens in the app rather than the browser because each catalogue entry carries the settings that make the page work. A web page would leave people copying those in by hand.
-		menu.addCallbackItem(String(localized: "Site Gallery…")) {
-			Constants.openSiteGalleryWindow()
-		}
+		// Under the switch, because the switch is about this website: "Disable" and the name of the
+		// thing being disabled belong to each other.
+		addInfoMenuItem()
 
 		menu.addSeparator()
 
@@ -238,6 +235,13 @@ extension AppState {
 		addDisplayItemIfNeeded()
 
 		menu.addSeparator()
+
+		// Next to Settings: both open a window of the app rather than doing something to the wallpaper.
+		// It opens in the app rather than in a browser because each entry carries the settings that make
+		// its page work.
+		menu.addCallbackItem(String(localized: "Site Gallery…")) {
+			Constants.openSiteGalleryWindow()
+		}
 
 		menu.addSettingsItem()
 
