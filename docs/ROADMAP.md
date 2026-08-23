@@ -232,6 +232,24 @@ Plain `brew install --cask nifro`, with no tap at all, means being in Homebrew's
 That has a notability threshold — 75 stars, or 30 forks, or 30 watchers. Two stars today. It is a
 milestone to notice rather than a task to schedule.
 
+### Knowing there is a new version (the U series)
+
+Nothing in the app knows a release exists. There is no Sparkle, no check, no menu item — the only
+upgrade path is `brew upgrade`, and only for people who installed that way. Somebody who took a disk
+image from the README stays on the version they took until they happen to visit the repository
+again. For a menu bar app that runs from login and is rarely opened on purpose, "they happen to
+visit" is close to never.
+
+| | Item | Status | Notes |
+|---|---|---|---|
+| **U1** | Check for a new version and say so | To do. **Do this one first** | One request to `/repos/PathGao/Nifro/releases/latest`, compare `tag_name` against `SSApp.version`, and put "Version 0.2.0 is available" in the menu, linking to the release. No dependency, no entitlement, no keys, no infrastructure — the release API is public and already there. It tells a brew user to run `brew upgrade` and a direct-download user that there is anything to download. Needs a cadence that is not a poll on every menu open, and a way to turn it off |
+| **U2** | Download and install it too (Sparkle) | Not now | Much more than U1 looks. Sparkle needs an appcast feed to publish and an EdDSA key pair to sign updates with — a second signing identity to keep for the life of the app, on top of the certificate. A sandboxed app cannot replace itself either; that goes through Sparkle's installer XPC service, which is more entitlements on an app whose short entitlement list is a feature |
+| **U3** | Tell Homebrew the app updates itself | Only with U2 | The moment the app can replace its own bundle, the cask has to say `auto_updates true`. Without it `brew upgrade` and the app fight over the same bundle, and brew's idea of the installed version goes stale. U1 alone does not need this, which is another reason to start there |
+
+The first version to benefit from U1 is the one after it ships — 0.1.0 users will not be told about
+0.2.0 by an app that could not check. That is an argument for doing it early rather than for doing
+it well.
+
 ---
 
 ## 9. Explicitly not doing (do not raise again)
