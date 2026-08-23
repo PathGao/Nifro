@@ -170,7 +170,21 @@ owner.
 
 ---
 
-## 6. Engineering (the E series)
+## 6. Known and not yet fixed (the K series)
+
+Reported while using the app, reproduced, and left alone for now. Each is written down rather than
+fixed so that the first release is a thing that exists.
+
+| | What happens | What is known about it |
+|---|---|---|
+| **K1** | A YouTube video cannot be shrunk back into the YouTube page, so there is no way to sign in | The address is rewritten to the player-only page and framed by a host page, because YouTube's player answers "error 153" when it is the document rather than a frame in one. That gets the video on the wallpaper and takes the site with it: there is no page around the player to navigate, and Browsing Mode has nothing to click into. Bilibili's player is a normal page and does not have this problem, which is why the two behave differently. Whatever the fix is, it has to keep 153 away |
+| **K2** | A framed region does not land exactly where it was framed, and part of it can end up under the menu bar | The page lays out in the screen minus the menu bar strip, and the selection is drawn over that same area, so the two should agree exactly. They do not: `DesktopWindow.setFrame` adds a point of height on purpose, and the overlay measures against the window while the region is measured against the page. The edges of what somebody drew are the whole point of drawing it — this is the one to fix first |
+| **K3** | Switching website can take several seconds | It is a page load, and swap loading keeps the previous page up for all of it, so nothing is broken — but nothing tells the user it is working either, and a few seconds of an unchanged wallpaper after choosing a website reads as the choice not having registered |
+| **K4** | Nothing is done to reduce what the app costs when nobody is looking at it | Deliberate, for now. See the note under "Power" — the machinery came out because it owned an answer the interaction also owns, and it comes back one piece at a time, each with a measurement first |
+
+---
+
+## 7. Engineering (the E series)
 
 | | Item | Status |
 |---|---|---|
@@ -178,7 +192,7 @@ owner.
 
 ---
 
-## 7. Signing and distribution
+## 8. Signing and distribution
 
 From looking into what [AeroSpace](https://github.com/nikitabobko/AeroSpace) actually does:
 
@@ -203,7 +217,7 @@ So while there is no account, the README's install section has to put brew first
 
 ---
 
-## 8. Explicitly not doing (do not raise again)
+## 9. Explicitly not doing (do not raise again)
 
 | | Proposal | Why it was turned down |
 |---|---|---|
@@ -216,7 +230,7 @@ So while there is no account, the README's install section has to put brew first
 
 ---
 
-## 9. Reviewed and deliberately left alone (with the data)
+## 10. Reviewed and deliberately left alone (with the data)
 
 The conclusions left behind by two rounds of machine review (the tidy gate, the duplication scan). **What was ruled out is easier to lose than what was built**, so this section matters as much as the work itself: it stops someone raising the same thing next round.
 The original reports, line numbers and all, exist only in git history (they were `docs/TIDY-REPORT.md` and `docs/DUPLICATION-REPORT.md`, deleted when this section was written), and the line numbers have gone stale from later refactoring, so do not change code against them.
