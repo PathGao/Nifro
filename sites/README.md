@@ -130,14 +130,14 @@ source: >-
 ## Generated files
 
 `index.json` and `../Nifro/Sites/SiteCatalog.generated.swift` are produced from the YAML
-files here by `scripts/generate-site-catalog.py`. Do not edit them by hand.
+files here by `Tools/generate-site-catalog.py`. Do not edit them by hand.
 
 The app reads `index.json` straight from this branch, so an entry merged here shows
 up in the in-app gallery without waiting for a release. The Swift file is the copy
 compiled into the app, used when there is no network.
 
 ```sh
-python3 scripts/generate-site-catalog.py
+python3 Tools/generate-site-catalog.py
 ```
 
 CI fails if the YAML and the generated files disagree.

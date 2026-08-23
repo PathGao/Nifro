@@ -99,20 +99,20 @@ jobs:
 
       # A site entry is the lowest-barrier contribution we accept, so its gate has to be fast and say exactly what is wrong.
       - name: Validate every entry against the schema
-        run: python3 scripts/validate-sites.py
+        run: python3 Tools/validate-sites.py
 
       # The app reads sites/index.json directly from this branch, and falls back to a
       # snapshot compiled into the binary. Both are generated, so a YAML change that
       # forgets to regenerate them would silently never reach anyone.
       # Cross-target identifiers no compiler compares. See the script for why.
       - name: Check the URL scheme matches in both targets
-        run: python3 scripts/check-url-scheme.py
+        run: python3 Tools/check-url-scheme.py
 
       - name: Check the generated catalogue is current
         run: |
-          python3 scripts/generate-site-catalog.py
+          python3 Tools/generate-site-catalog.py
           if ! git diff --quiet -- sites/index.json Nifro/Sites/SiteCatalog.generated.swift; then
-            echo "::error::sites/ changed without regenerating. Run scripts/generate-site-catalog.py and commit the result."
+            echo "::error::sites/ changed without regenerating. Run Tools/generate-site-catalog.py and commit the result."
             git diff --stat -- sites/index.json Nifro/Sites/SiteCatalog.generated.swift
             exit 1
           fi

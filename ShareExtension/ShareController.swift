@@ -11,7 +11,7 @@ final class ShareController: ExtensionController {
 
 		var components = URLComponents()
 		// This target cannot read the app's Info.plist, so the scheme is repeated here. It is the one
-		// copy, and scripts/check-url-scheme.py fails the build if it drifts from the declaration.
+		// copy, and Tools/check-url-scheme.py fails the build if it drifts from the declaration.
 		components.scheme = "nifro"
 		components.path = "add"
 

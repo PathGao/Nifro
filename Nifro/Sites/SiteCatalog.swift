@@ -5,7 +5,7 @@ The curated list of pages that work well as wallpapers, compiled into the app.
 
 Shipping it beats linking to it. The work is finding a good page, working out that it needs a 15-minute reload and three lines of CSS to hide its navigation, then typing all that in. Somebody has already done that work once. A web page to copy settings from by hand would make each person redo it.
 
-The bundled copy is generated from the YAML files under `sites` by `scripts/generate-site-catalog.py`. It is a snapshot taken at release time; the live list is fetched from GitHub when the gallery opens, so entries contributed between releases show up without an app update.
+The bundled copy is generated from the YAML files under `sites` by `Tools/generate-site-catalog.py`. It is a snapshot taken at release time; the live list is fetched from GitHub when the gallery opens, so entries contributed between releases show up without an app update.
 */
 enum SiteCatalog {
 	struct Entry: Identifiable, Hashable, Decodable {
