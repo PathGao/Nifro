@@ -409,8 +409,29 @@ private struct CustomCodeScreen: View {
 	@Binding var css: String
 	@Binding var javaScript: String
 
+	private static let notes = String(localized: """
+		The page is laid out at the size of the wallpaper — your screen without the menu bar strip — so \
+		`100vw`, `100vh` and `@media (min-aspect-ratio: 16/9)` all mean that area. A rule written for a \
+		16:10 laptop and a rule written for a 16:9 monitor can live in the same stylesheet; branch on \
+		the aspect ratio rather than guessing.
+
+		Nifro adds two classes to `<html>` you can target: `is-nifro-app`, always, and \
+		`nifro-is-browsing-mode` while Browsing Mode is on — useful for showing controls only when the \
+		page can be clicked. Both also exist under their Plash names, so stylesheets written for Plash \
+		keep working.
+
+		Zooming into a region is not done with CSS and cannot be seen from CSS. It is the web view's \
+		own magnification, and the page is deliberately never told: if the layout changed when you \
+		zoomed, the part you framed would stop being the part you get.
+		""")
+
 	var body: some View {
 		VStack(alignment: .leading) {
+			Text(Self.notes)
+				.font(.callout)
+				.foregroundStyle(.secondary)
+				.fixedSize(horizontal: false, vertical: true)
+			Divider()
 				let cssHelpText = "This lets you modify the website with CSS. You could, for example, change some colors or hide some unnecessary elements."
 				VStack(alignment: .leading) {
 					HStack {
@@ -455,7 +476,7 @@ private struct CustomCodeScreen: View {
 				.accessibilityHint(Text(javaScriptHelpText))
 		}
 		.padding()
-		.frame(width: 460, height: 420)
+		.frame(width: 520, height: 560)
 		.toolbar {
 			ToolbarItem(placement: .confirmationAction) {
 				Button(String(localized: "Done")) {

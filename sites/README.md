@@ -45,6 +45,20 @@ entry's `source` field.
 site, and say why in `backendNote`. A clock that ticks in seconds is not a reason — drop the seconds
 and reload every 60s instead.
 
+### What the page is laid out at
+
+The page gets the size of the wallpaper — the screen without the menu bar strip — so `100vw`,
+`100vh` and `@media (min-aspect-ratio: …)` all refer to that area. Write for the ratio rather than
+for one screen: an entry framed on a 16:10 laptop is going to be opened on a 16:9 monitor.
+
+`zoom` does not change any of this. It is the web view's own magnification, and the page is
+deliberately never told about it — if the layout changed when the region was framed, the part that
+was framed would stop being the part that shows.
+
+Two classes are on `<html>` for CSS to target: `is-nifro-app` always, and `nifro-is-browsing-mode`
+while Browsing Mode is on. Both also exist under their Plash names, so stylesheets written for Plash
+keep working.
+
 ### `zoom` vs. `css`
 
 Prefer `css` when the site gives you a selector to hide (`header { display: none }`). Reach for

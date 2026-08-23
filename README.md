@@ -1,11 +1,53 @@
-# Nifro
+<p align="center">
+  <img src="docs/assets/icon.png" alt="Nifro" width="180">
+</p>
 
-**Make any website your Mac desktop wallpaper.**
+<h1 align="center">Nifro</h1>
 
-A clock, your calendar, a dashboard, a live map, a shader, a nature camera. Anything a browser can
-draw, drawn behind your windows.
+<p align="center">
+  <b>Make any website your Mac desktop wallpaper.</b><br>
+  A clock, your calendar, a dashboard, a live map, a shader, a nature camera.<br>
+  Anything a browser can draw, drawn behind your windows.
+</p>
+
+<p align="center">
+  <a href="https://github.com/PathGao/nifro/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/PathGao/nifro?label=release&color=0453ab"></a>
+  <a href="license"><img alt="License" src="https://img.shields.io/badge/license-MIT-blue"></a>
+  <img alt="macOS 15+" src="https://img.shields.io/badge/macOS-15%2B-black?logo=apple">
+  <img alt="Apple silicon and Intel" src="https://img.shields.io/badge/builds-arm64%20%C2%B7%20x86__64-lightgrey">
+</p>
+
+<p align="center">
+  <a href="https://github.com/PathGao/nifro/releases/latest"><b>Download</b></a>
+  ·
+  <a href="sites/">Site list</a>
+  ·
+  <a href="docs/ROADMAP.md">Roadmap</a>
+  ·
+  <a href="CONTRIBUTING.md">Contributing</a>
+  ·
+  <a href="README.zh-Hans.md">简体中文</a>
+</p>
 
 ---
+
+## Install
+
+```sh
+brew tap PathGao/tap https://github.com/PathGao/nifro
+brew install --cask nifro
+```
+
+Or [download the latest release](https://github.com/PathGao/nifro/releases/latest) — take the
+`arm64` build on Apple silicon and the `x86_64` build on Intel. There is no universal binary, so
+nobody downloads the half they cannot run.
+
+Homebrew is the recommended route. Builds are signed with the project's own certificate rather than
+an Apple Developer ID one, which keeps the signature stable across updates but does not get them
+notarized, so Gatekeeper stops a directly downloaded build until you allow it in System Settings.
+The cask does that step for you. See [docs/RELEASE.md](docs/RELEASE.md).
+
+Requires macOS 15 or later.
 
 ## Where this came from
 
@@ -39,12 +81,12 @@ watches what a page actually does for a minute, and if nothing moves it switches
 photographing and closing the page on a schedule instead of keeping a browser open all day. It
 changes its mind again if the page starts moving.
 
-**Zoom into part of a page.** Frame a region by dragging over the wallpaper and it fills the
-screen, with the navigation, borders and margins around it gone. The page still lays out at the full
-size of the screen, so the site does not reflow into something other than what you framed, and the
-region is re-rendered rather than scaled up, so text stays sharp. The frame is locked to the shape of
-your screen, and it is stored as a place and a magnification rather than a rectangle, so the same
-website zoomed the same way works on a second display of a different shape.
+**Zoom into part of a page.** Frame a region by dragging over the wallpaper and it fills the screen,
+with the navigation, borders and margins around it gone. The page still lays out at the full size of
+the screen, so the site does not reflow into something other than what you framed, and the region is
+re-rendered rather than scaled up, so text stays sharp. The frame is locked to the shape of your
+screen, and it is stored as a place and a magnification rather than a rectangle, so the same website
+zoomed the same way works on a second display of a different shape.
 
 **One page per display.** Assign a website to a screen; each screen gets its own.
 
@@ -61,20 +103,7 @@ the settings that make it work. Adding one is a single YAML file, no Swift and n
 in-app gallery reads the list straight from this branch, so an entry merged here shows up without
 waiting for a release.
 
-## Install
-
-```sh
-brew tap PathGao/tap https://github.com/PathGao/nifro
-brew install --cask nifro
-```
-
-Homebrew is the recommended route. Builds are signed with the project's own certificate rather
-than an Apple Developer ID one, which keeps the signature stable across updates but does not get
-them notarized, so Gatekeeper stops a directly downloaded build until you allow it in System
-Settings. The cask does that step for you. See [docs/RELEASE.md](docs/RELEASE.md).
-
-Requires macOS 15 or later. Separate builds for Apple silicon and Intel rather than one universal
-binary, so nobody downloads the half they cannot run.
+**English and Simplified Chinese**, throughout the app.
 
 ## Build from source
 
