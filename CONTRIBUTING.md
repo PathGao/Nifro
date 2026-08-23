@@ -76,6 +76,26 @@ swift test
 Everything else has no automated coverage, so the burden of showing a change works
 falls on the description of what you ran. See below.
 
+## Where things live
+
+```
+Nifro/
+├── App/          entry point, state, events, menus, Shortcuts
+├── Wallpaper/    the window, the web view, loading, snapshots
+├── Visibility/   how much to render, and when to stop
+├── Crop/         cropping and the drag-to-frame overlay
+├── Sites/        the website model and the curated list
+├── Screens/      SwiftUI windows and settings
+└── Support/      geometry, scheduling and shared extensions
+```
+
+`Support/` is mostly inherited from Plash and shared across the author's apps. Changing it makes
+future comparison with upstream harder, so prefer adding beside it over editing inside it.
+
+Adding a file means adding it to the Xcode project as well. The project uses old-style file
+references, so a file has to appear in four places in `project.pbxproj`. Xcode does this for you;
+adding the file on disk alone compiles nothing and reports no error.
+
 ## Pull requests
 
 Write the description as prose about the change, not a log of your afternoon.
