@@ -23,12 +23,38 @@
       }
     },
     "%@": {},
+    "%@× at %lld%%, %lld%%": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@× at %2$lld%%, %3$lld%%"
+          }
+        },
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@× 位于 %lld%%, %lld%%"
+          }
+        }
+      }
+    },
     "%lld minutes": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "%lld 分钟"
+          }
+        }
+      }
+    },
+    "A WebKit content-blocking rule list, for hiding cookie banners and ads. Paste the address of a `.json` file and Nifro compiles it once and applies it to every website.\n\nNifro keeps no rules of its own: a blocklist goes stale within weeks, and keeping one working is a full-time job somebody else is already doing. Lists in WebKit's format are published by the content-blocker projects — the one your Safari extension uses can usually be exported, and several are on GitHub as a single raw `.json` file. The address has to be the raw file, not the page it is displayed on.\n\nLeave it empty for no rules at all.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WebKit 的内容拦截规则列表，用来挡掉 Cookie 横幅和广告。粘贴一个 `.json` 文件的地址，Nifro 编译一次，然后应用到所有网站。\n\nNifro 自己不维护规则：拦截列表几周就会过期，让它一直有效是一份全职工作，而已经有人在做了。WebKit 格式的列表由那些内容拦截项目发布——你在 Safari 里用的那个扩展通常可以导出，GitHub 上也有若干现成的单个 raw `.json` 文件。地址必须是原始文件本身，不是显示它的那个网页。\n\n留空表示不使用任何规则。"
           }
         }
       }
@@ -1052,6 +1078,16 @@
         }
       }
     },
+    "More information": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更多说明"
+          }
+        }
+      }
+    },
     "Moves to the next website on each display in turn. Websites with hours set are skipped outside them.": {
       "localizations": {
         "zh-Hans": {
@@ -1305,6 +1341,7 @@
       }
     },
     "Points at a WebKit content-blocking rule list somebody else maintains, for hiding cookie banners and ads. Nifro keeps no rules of its own, because blocklists go stale within weeks and keeping one working is a full-time job.": {
+      "extractionState": "stale",
       "localizations": {
         "zh-Hans": {
           "stringUnit": {

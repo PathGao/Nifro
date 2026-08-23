@@ -56,7 +56,7 @@ extension AppState {
 			) { [weak self] in
 				self?.reloadWebsite()
 			}
-			.setShortcut(for: .reload)
+			.setShortcut(for: Shortcut.reload.name)
 
 			if
 				let website = WebsitesController.shared.current,
@@ -87,7 +87,7 @@ extension AppState {
 					}
 				}
 			}
-			.setShortcut(for: .toggleBrowsingMode)
+			.setShortcut(for: Shortcut.toggleBrowsingMode.name)
 
 			if let website = WebsitesController.shared.current {
 				menu.addCallbackItem(
@@ -98,7 +98,7 @@ extension AppState {
 						$0.audio = $0.audio == .unmuted ? .muted : .unmuted
 					}
 				}
-				.setShortcut(for: .toggleSound)
+				.setShortcut(for: Shortcut.toggleSound.name)
 
 				menu.items.last?.toolTip = String(localized: "Whether this website is allowed to make noise. Remembered per website, so a clock stays silent and a live stream does not.")
 			}
@@ -122,7 +122,7 @@ extension AppState {
 			menu.addCallbackItem(String(localized: "Choose Region…")) { [self] in
 				beginCropSelection()
 			}
-			.setShortcut(for: .chooseRegion)
+			.setShortcut(for: Shortcut.chooseRegion.name)
 
 			menu.items.last?.toolTip = String(localized: "Drag a rectangle over the wallpaper. That part fills the screen.")
 
@@ -143,17 +143,17 @@ extension AppState {
 			menu.addCallbackItem(String(localized: "Next")) {
 				WebsitesController.shared.makeNextCurrent()
 			}
-			.setShortcut(for: .nextWebsite)
+			.setShortcut(for: Shortcut.nextWebsite.name)
 
 			menu.addCallbackItem(String(localized: "Previous")) {
 				WebsitesController.shared.makePreviousCurrent()
 			}
-			.setShortcut(for: .previousWebsite)
+			.setShortcut(for: Shortcut.previousWebsite.name)
 
 			menu.addCallbackItem(String(localized: "Random")) {
 				WebsitesController.shared.makeRandomCurrent()
 			}
-			.setShortcut(for: .randomWebsite)
+			.setShortcut(for: Shortcut.randomWebsite.name)
 
 			menu.addItem(String(localized: "Switch"))
 				.withSubmenu(createSwitchMenu())
@@ -214,7 +214,7 @@ extension AppState {
 			) { [self] in
 				isManuallyDisabled.toggle()
 			}
-			.setShortcut(for: .toggleEnabled)
+			.setShortcut(for: Shortcut.toggleEnabled.name)
 		}
 
 		menu.addSeparator()

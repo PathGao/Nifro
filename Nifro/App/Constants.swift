@@ -49,49 +49,6 @@ extension Defaults.Keys {
 	static let hasInstalledFeaturedWebsites = Key<Bool>("hasInstalledFeaturedWebsites", default: false)
 }
 
-extension KeyboardShortcuts.Name {
-	/**
-	Every shortcut the app registers.
-
-	Listed so the menu can turn them all off while it is open. `NSMenu` puts the thread in tracking
-	mode, which stops the global hotkeys from being delivered and buffers the key events instead.
-	They then all fire at once when the menu closes, which reads as the app doing something nobody
-	asked for.
-	*/
-	static let all: [Self] = [
-		.toggleBrowsingMode,
-		.holdToInteract,
-		.toggleSound,
-		.chooseRegion,
-		.toggleEnabled,
-		.reload,
-		.nextWebsite,
-		.previousWebsite,
-		.randomWebsite
-	]
-
-	/**
-	The modifier every default uses.
-
-	These are global hotkeys: they fire whatever app is in front, so a default is a claim on a key
-	combination in every app the user owns. Control-Option-Command is the one region macOS itself
-	barely uses and almost no app defaults into, which makes it the only place a default can be set
-	without taking something away. A shortcut that shipped as nothing is a shortcut nobody discovers,
-	because the menu has nothing to show next to the command.
-	*/
-	private static let defaultModifiers: NSEvent.ModifierFlags = [.control, .option, .command]
-
-	static let toggleBrowsingMode = Self("toggleBrowsingMode", default: .init(.b, modifiers: defaultModifiers))
-	static let toggleSound = Self("toggleSound", default: .init(.s, modifiers: defaultModifiers))
-	static let chooseRegion = Self("chooseRegion", default: .init(.c, modifiers: defaultModifiers))
-	static let holdToInteract = Self("holdToInteract", default: .init(.h, modifiers: defaultModifiers))
-	static let toggleEnabled = Self("toggleEnabled", default: .init(.w, modifiers: defaultModifiers))
-	static let reload = Self("reload", default: .init(.r, modifiers: defaultModifiers))
-	static let nextWebsite = Self("nextWebsite", default: .init(.rightBracket, modifiers: defaultModifiers))
-	static let previousWebsite = Self("previousWebsite", default: .init(.leftBracket, modifiers: defaultModifiers))
-	static let randomWebsite = Self("randomWebsite", default: .init(.k, modifiers: defaultModifiers))
-}
-
 extension Notification.Name {
 	static let showAddWebsiteDialog = Self("showAddWebsiteDialog")
 	static let showEditWebsiteDialog = Self("showEditWebsiteDialog")

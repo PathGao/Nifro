@@ -9,19 +9,32 @@ in the website dialog needs one — none of them is guessable from three words, 
 have a cost that is invisible until you have paid it, like a page that has to keep rendering because
 it was made clickable.
 
-The round `?` is what macOS uses for this. The tooltip is kept as well, so hovering still works for
-anyone who expects that.
+An `info.circle` rather than the round `?`. The `?` bezel is AppKit's help button, which in Apple's
+own apps opens the Help book — so a row of them promises documentation that does not exist here. The
+ⓘ is what a modern settings pane uses for "there is more to say about this one", and it is what
+people reach for. The tooltip is kept as well, so hovering still works for anyone who expects that.
 */
 struct SettingHelp: View {
 	let text: String
 
+	@State private var isPresented = false
+
 	var body: some View {
-		InfoPopoverButton {
-			Text(text)
-				.frame(maxWidth: 320, alignment: .leading)
+		Button {
+			isPresented = true
+		} label: {
+			Image(systemName: "info.circle")
+				.foregroundStyle(.secondary)
 		}
-		.controlSize(.small)
+		.buttonStyle(.plain)
 		.help(text)
+		.popover(isPresented: $isPresented) {
+			Text(text)
+				.frame(width: 300, alignment: .leading)
+				.multilineText()
+				.padding()
+		}
+		.accessibilityLabel("More information")
 	}
 }
 

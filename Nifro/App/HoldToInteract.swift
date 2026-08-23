@@ -20,11 +20,11 @@ final class HoldToInteract {
 	private var flagsMonitor: Any?
 
 	func install() {
-		KeyboardShortcuts.onKeyDown(for: .holdToInteract) { [weak self] in
+		KeyboardShortcuts.onKeyDown(for: Shortcut.holdToInteract.name) { [weak self] in
 			self?.begin()
 		}
 
-		KeyboardShortcuts.onKeyUp(for: .holdToInteract) { [weak self] in
+		KeyboardShortcuts.onKeyUp(for: Shortcut.holdToInteract.name) { [weak self] in
 			self?.end()
 		}
 	}
@@ -39,7 +39,7 @@ final class HoldToInteract {
 		}
 
 		isHolding = true
-		requiredModifiers = KeyboardShortcuts.getShortcut(for: .holdToInteract)?.modifiers ?? []
+		requiredModifiers = KeyboardShortcuts.getShortcut(for: Shortcut.holdToInteract.name)?.modifiers ?? []
 		Defaults[.isBrowsingMode] = true
 
 		watchForReleasedModifiers()

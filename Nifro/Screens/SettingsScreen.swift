@@ -43,15 +43,9 @@ private struct GeneralSettings: View {
 private struct ShortcutsSettings: View {
 	var body: some View {
 		Form {
-			KeyboardShortcuts.Recorder("Toggle enabled state", name: .toggleEnabled)
-			KeyboardShortcuts.Recorder("Toggle browsing mode", name: .toggleBrowsingMode)
-			KeyboardShortcuts.Recorder("Hold to use the page", name: .holdToInteract)
-			KeyboardShortcuts.Recorder("Toggle sound", name: .toggleSound)
-			KeyboardShortcuts.Recorder("Choose region", name: .chooseRegion)
-			KeyboardShortcuts.Recorder("Reload website", name: .reload)
-			KeyboardShortcuts.Recorder("Next website", name: .nextWebsite)
-			KeyboardShortcuts.Recorder("Previous website", name: .previousWebsite)
-			KeyboardShortcuts.Recorder("Random website", name: .randomWebsite)
+			ForEach(Shortcut.allCases, id: \.self) {
+				KeyboardShortcuts.Recorder($0.title, name: $0.name)
+			}
 		}
 	}
 }
@@ -91,7 +85,18 @@ private struct ContentRulesSetting: View {
 				.labelsHidden()
 		} label: {
 			Text("Content blocking rules")
-				.explained(String(localized: "Points at a WebKit content-blocking rule list somebody else maintains, for hiding cookie banners and ads. Nifro keeps no rules of its own, because blocklists go stale within weeks and keeping one working is a full-time job."))
+				.explained(String(localized: """
+					A WebKit content-blocking rule list, for hiding cookie banners and ads. Paste the address of a \
+					`.json` file and Nifro compiles it once and applies it to every website.
+
+					Nifro keeps no rules of its own: a blocklist goes stale within weeks, and keeping one working \
+					is a full-time job somebody else is already doing. Lists in WebKit's format are published by \
+					the content-blocker projects — the one your Safari extension uses can usually be exported, \
+					and several are on GitHub as a single raw `.json` file. The address has to be the raw file, \
+					not the page it is displayed on.
+
+					Leave it empty for no rules at all.
+					"""))
 		}
 	}
 }

@@ -8,11 +8,11 @@ extension AppState {
 		}
 
 		menu.onOpen = {
-			KeyboardShortcuts.disable(KeyboardShortcuts.Name.all)
+			KeyboardShortcuts.disable(Shortcut.allNames)
 		}
 
 		menu.onClose = {
-			KeyboardShortcuts.enable(KeyboardShortcuts.Name.all)
+			KeyboardShortcuts.enable(Shortcut.allNames)
 		}
 
 		powerSourceWatcher?.didChangePublisher
@@ -169,42 +169,6 @@ extension AppState {
 
 		holdToInteract.install()
 
-		KeyboardShortcuts.onKeyUp(for: .toggleBrowsingMode) {
-			Defaults[.isBrowsingMode].toggle()
-		}
-
-		KeyboardShortcuts.onKeyUp(for: .toggleSound) {
-			guard let website = WebsitesController.shared.current else {
-				return
-			}
-
-			WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
-				$0.audio = $0.audio == .unmuted ? .muted : .unmuted
-			}
-		}
-
-		KeyboardShortcuts.onKeyUp(for: .chooseRegion) { [self] in
-			beginCropSelection()
-		}
-
-		KeyboardShortcuts.onKeyUp(for: .toggleEnabled) { [self] in
-			isManuallyDisabled.toggle()
-		}
-
-		KeyboardShortcuts.onKeyUp(for: .reload) { [self] in
-			reloadWebsite()
-		}
-
-		KeyboardShortcuts.onKeyUp(for: .nextWebsite) {
-			WebsitesController.shared.makeNextCurrent()
-		}
-
-		KeyboardShortcuts.onKeyUp(for: .previousWebsite) {
-			WebsitesController.shared.makePreviousCurrent()
-		}
-
-		KeyboardShortcuts.onKeyUp(for: .randomWebsite) {
-			WebsitesController.shared.makeRandomCurrent()
-		}
+		Shortcut.install()
 	}
 }
