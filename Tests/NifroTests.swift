@@ -256,7 +256,20 @@ struct VideoEmbedTests {
 
 		#expect(player.absoluteString.hasPrefix("https://www.youtube.com/embed/jNQXAC9IVRw"))
 		#expect(player.absoluteString.contains("autoplay=1"))
-		#expect(player.absoluteString.contains("mute=1"))
+	}
+
+	@Test("The address says nothing about sound")
+	func soundIsNotBakedIn() throws {
+		// Muting is a per-website setting that outlives this URL. A `mute` parameter here would be a
+		// second answer to the same question, and the one the user cannot change.
+		for source in [
+			"https://www.youtube.com/watch?v=jNQXAC9IVRw",
+			"https://www.bilibili.com/video/BV1xx411c7mD"
+		] {
+			let url = try #require(URL(string: source))
+			let player = try #require(VideoEmbed.playerURL(for: url))
+			#expect(!player.absoluteString.contains("mute"), "\(source) still carries a mute parameter")
+		}
 	}
 
 	@Test("Short links and shorts work too")

@@ -1,0 +1,13 @@
+name: World Monitor
+url: https://worldmonitor.app/
+description: >-
+  Conflicts, disasters, markets, shipping, flights and headlines on one wall. The state of the
+  world as a single picture rather than six tabs.
+tags: [data, news, map]
+backend: snapshot
+backendNote: >-
+  A dashboard's value is what it currently says, not the redraw. Half-hourly stills carry all of
+  it and cost nothing to keep on screen.
+reloadInterval: 1800
+source: The maintainer's own shortlist.
+featured: true

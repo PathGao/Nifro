@@ -46,6 +46,20 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
+			isFeatured: false
+		),
+		.init(
+			name: "Calculating Empires",
+			url: "https://calculatingempires.net/",
+			description: "Kate Crawford and Vladan Joler's genealogy of technology and power since 1500, as one enormous navigable diagram. A wall map you can read for a year.",
+			tags: ["art", "data"],
+			isLive: false,
+			reloadInterval: 86400,
+			crop: nil,
+			css: nil,
+			javaScript: nil,
+			requiresLogin: false,
+			playsSound: false,
 			isFeatured: true
 		),
 		.init(
@@ -85,6 +99,48 @@ extension SiteCatalog {
 			reloadInterval: nil,
 			crop: nil,
 			css: "header, footer, nav, .subscribe-banner { display: none !important; }\n",
+			javaScript: nil,
+			requiresLogin: false,
+			playsSound: false,
+			isFeatured: false
+		),
+		.init(
+			name: "Faroe Islands in 4K HDR",
+			url: "https://player.bilibili.com/player.html?bvid=BV1NY411f7rf&autoplay=1&danmaku=0",
+			description: "Linksphotograph's first Faroe Islands episode. Cliffs, turf houses and weather, shot in 4K HDR and 24 minutes long.",
+			tags: ["nature", "ambient"],
+			isLive: true,
+			reloadInterval: nil,
+			crop: nil,
+			css: nil,
+			javaScript: nil,
+			requiresLogin: false,
+			playsSound: false,
+			isFeatured: true
+		),
+		.init(
+			name: "Flightradar24",
+			url: "https://www.flightradar24.com/",
+			description: "Every aircraft in the air right now, moving across the map. The shape of global traffic, drawn by the traffic.",
+			tags: ["map", "data", "live"],
+			isLive: true,
+			reloadInterval: nil,
+			crop: nil,
+			css: nil,
+			javaScript: nil,
+			requiresLogin: false,
+			playsSound: false,
+			isFeatured: true
+		),
+		.init(
+			name: "Floor796",
+			url: "https://floor796.com/",
+			description: "A pixel-art cutaway of an endlessly growing space station floor, drawn one animated scene at a time. Everything on it moves, and none of it needs you.",
+			tags: ["art", "ambient"],
+			isLive: true,
+			reloadInterval: nil,
+			crop: nil,
+			css: nil,
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
@@ -158,7 +214,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: true
+			isFeatured: false
 		),
 		.init(
 			name: "Hoodmaps",
@@ -301,6 +357,20 @@ extension SiteCatalog {
 			isFeatured: false
 		),
 		.init(
+			name: "Svalbard — A Journey to the North Pole",
+			url: "https://www.youtube.com/embed/AQ79_eDLg4w?autoplay=1&playsinline=1",
+			description: "Denis Barbas's cinematic short of Svalbard. Slow aerial shots of ice and rock, long enough to live behind your windows.",
+			tags: ["nature", "ambient"],
+			isLive: true,
+			reloadInterval: nil,
+			crop: nil,
+			css: nil,
+			javaScript: nil,
+			requiresLogin: false,
+			playsSound: false,
+			isFeatured: true
+		),
+		.init(
 			name: "Twitch",
 			url: "https://www.twitch.tv/directory",
 			description: "Twitch's live directory. Replace the path with a channel name to pin one stream.",
@@ -371,10 +441,38 @@ extension SiteCatalog {
 			isFeatured: false
 		),
 		.init(
+			name: "WindowSwap",
+			url: "https://www.window-swap.com/",
+			description: "Somebody else's window, somewhere else, for a few minutes at a time. Video of a real view with nothing asked of you.",
+			tags: ["nature", "ambient"],
+			isLive: true,
+			reloadInterval: nil,
+			crop: nil,
+			css: nil,
+			javaScript: nil,
+			requiresLogin: false,
+			playsSound: false,
+			isFeatured: true
+		),
+		.init(
 			name: "Windy",
 			url: "https://www.windy.com/",
 			description: "A live weather map. wind, rain, temperature and pressure layers over the whole globe.",
 			tags: ["weather", "map", "data"],
+			isLive: false,
+			reloadInterval: 1800,
+			crop: nil,
+			css: nil,
+			javaScript: nil,
+			requiresLogin: false,
+			playsSound: false,
+			isFeatured: true
+		),
+		.init(
+			name: "World Monitor",
+			url: "https://worldmonitor.app/",
+			description: "Conflicts, disasters, markets, shipping, flights and headlines on one wall. The state of the world as a single picture rather than six tabs.",
+			tags: ["data", "news", "map"],
 			isLive: false,
 			reloadInterval: 1800,
 			crop: nil,

@@ -39,7 +39,7 @@
   "crop": null,
   "css": null,
   "description": "Bing's daily featured photograph, aspect-filled to the screen.",
-  "featured": true,
+  "featured": false,
   "isLive": false,
   "javaScript": null,
   "name": "Bing Photo of the Day",
@@ -50,6 +50,23 @@
    "ambient"
   ],
   "url": "https://bing-photo-of-the-day.netlify.app"
+ },
+ {
+  "audio": "muted",
+  "crop": null,
+  "css": null,
+  "description": "Kate Crawford and Vladan Joler's genealogy of technology and power since 1500, as one enormous navigable diagram. A wall map you can read for a year.",
+  "featured": true,
+  "isLive": false,
+  "javaScript": null,
+  "name": "Calculating Empires",
+  "reloadInterval": 86400,
+  "requiresLogin": false,
+  "tags": [
+   "art",
+   "data"
+  ],
+  "url": "https://calculatingempires.net/"
  },
  {
   "audio": "muted",
@@ -90,7 +107,7 @@
   "crop": null,
   "css": "header, footer, nav, .subscribe-banner { display: none !important; }\n",
   "description": "A wall of live nature cameras. Bears, puffins, reefs, aurora, running around the clock.",
-  "featured": true,
+  "featured": false,
   "isLive": true,
   "javaScript": null,
   "name": "Explore.org Live Cams",
@@ -102,6 +119,58 @@
    "live"
   ],
   "url": "https://explore.org/livecams"
+ },
+ {
+  "audio": "muted",
+  "crop": null,
+  "css": null,
+  "description": "Linksphotograph's first Faroe Islands episode. Cliffs, turf houses and weather, shot in 4K HDR and 24 minutes long.",
+  "featured": true,
+  "isLive": true,
+  "javaScript": null,
+  "name": "Faroe Islands in 4K HDR",
+  "reloadInterval": null,
+  "requiresLogin": false,
+  "tags": [
+   "nature",
+   "ambient"
+  ],
+  "url": "https://player.bilibili.com/player.html?bvid=BV1NY411f7rf&autoplay=1&danmaku=0"
+ },
+ {
+  "audio": "muted",
+  "crop": null,
+  "css": null,
+  "description": "Every aircraft in the air right now, moving across the map. The shape of global traffic, drawn by the traffic.",
+  "featured": true,
+  "isLive": true,
+  "javaScript": null,
+  "name": "Flightradar24",
+  "reloadInterval": null,
+  "requiresLogin": false,
+  "tags": [
+   "map",
+   "data",
+   "live"
+  ],
+  "url": "https://www.flightradar24.com/"
+ },
+ {
+  "audio": "muted",
+  "crop": null,
+  "css": null,
+  "description": "A pixel-art cutaway of an endlessly growing space station floor, drawn one animated scene at a time. Everything on it moves, and none of it needs you.",
+  "featured": true,
+  "isLive": true,
+  "javaScript": null,
+  "name": "Floor796",
+  "reloadInterval": null,
+  "requiresLogin": false,
+  "tags": [
+   "art",
+   "ambient"
+  ],
+  "url": "https://floor796.com/"
  },
  {
   "audio": "muted",
@@ -179,7 +248,7 @@
   "crop": null,
   "css": "body.day, body.night {\n  background-color: transparent;\n  color: white\n}\n\ndiv.screen {\n  margin: 4%;\n  font-size: 100px !important;\n  bottom: 0;\n  top: auto;\n}\n\n#colophon { display: none }\n",
   "description": "A Helvetica word clock that spells out the time in prose.",
-  "featured": true,
+  "featured": false,
   "isLive": false,
   "javaScript": null,
   "name": "Helvetictoc",
@@ -370,6 +439,23 @@
  {
   "audio": "muted",
   "crop": null,
+  "css": null,
+  "description": "Denis Barbas's cinematic short of Svalbard. Slow aerial shots of ice and rock, long enough to live behind your windows.",
+  "featured": true,
+  "isLive": true,
+  "javaScript": null,
+  "name": "Svalbard — A Journey to the North Pole",
+  "reloadInterval": null,
+  "requiresLogin": false,
+  "tags": [
+   "nature",
+   "ambient"
+  ],
+  "url": "https://www.youtube.com/embed/AQ79_eDLg4w?autoplay=1&playsinline=1"
+ },
+ {
+  "audio": "muted",
+  "crop": null,
   "css": ".top-nav, .side-nav, .channel-info-content { display: none !important; }\n",
   "description": "Twitch's live directory. Replace the path with a channel name to pin one stream.",
   "featured": false,
@@ -459,6 +545,23 @@
   "audio": "muted",
   "crop": null,
   "css": null,
+  "description": "Somebody else's window, somewhere else, for a few minutes at a time. Video of a real view with nothing asked of you.",
+  "featured": true,
+  "isLive": true,
+  "javaScript": null,
+  "name": "WindowSwap",
+  "reloadInterval": null,
+  "requiresLogin": false,
+  "tags": [
+   "nature",
+   "ambient"
+  ],
+  "url": "https://www.window-swap.com/"
+ },
+ {
+  "audio": "muted",
+  "crop": null,
+  "css": null,
   "description": "A live weather map. wind, rain, temperature and pressure layers over the whole globe.",
   "featured": true,
   "isLive": false,
@@ -472,6 +575,24 @@
    "data"
   ],
   "url": "https://www.windy.com/"
+ },
+ {
+  "audio": "muted",
+  "crop": null,
+  "css": null,
+  "description": "Conflicts, disasters, markets, shipping, flights and headlines on one wall. The state of the world as a single picture rather than six tabs.",
+  "featured": true,
+  "isLive": false,
+  "javaScript": null,
+  "name": "World Monitor",
+  "reloadInterval": 1800,
+  "requiresLogin": false,
+  "tags": [
+   "data",
+   "news",
+   "map"
+  ],
+  "url": "https://worldmonitor.app/"
  },
  {
   "audio": "muted",

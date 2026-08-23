@@ -1,0 +1,12 @@
+name: Flightradar24
+url: https://www.flightradar24.com/
+description: >-
+  Every aircraft in the air right now, moving across the map. The shape of global traffic, drawn
+  by the traffic.
+tags: [map, data, live]
+backend: live
+backendNote: >-
+  The aircraft moving is the information. A still of this is a map with dots on it.
+audio: muted
+source: The maintainer's own shortlist.
+featured: true

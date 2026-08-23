@@ -1,0 +1,13 @@
+name: Svalbard — A Journey to the North Pole
+url: https://www.youtube.com/embed/AQ79_eDLg4w?autoplay=1&playsinline=1
+description: >-
+  Denis Barbas's cinematic short of Svalbard. Slow aerial shots of ice and rock, long enough to
+  live behind your windows.
+tags: [nature, ambient]
+backend: live
+backendNote: >-
+  Video. The address is YouTube's player-only page rather than the watch page, so there is no
+  sidebar, no comments and nothing to crop away.
+audio: muted
+source: The maintainer's own shortlist.
+featured: true

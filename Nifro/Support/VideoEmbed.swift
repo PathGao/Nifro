@@ -21,23 +21,28 @@ enum VideoEmbed {
 	/**
 	The player-only address for `url`, or `nil` if this is not a video page we recognise.
 
-	- Parameter autoplayMuted: adds the parameters a browser requires before it will start a video on
-	  its own. Unmuted autoplay is blocked by every engine, so a wallpaper that wants sound has to
-	  start silent and be unmuted by hand.
+	The address asks the player to start and says nothing about sound. Whether a website is muted is
+	a setting on that website, changed long after this URL was produced and stored, so a `mute`
+	parameter baked in here would be a second answer to the same question and would win — the
+	website could be set to play audio and stay silent. The mute script runs at document start and
+	watches for elements the player inserts later, so the setting is enforced without the URL's help.
+
+	`WKWebView` is configured with no user-gesture requirement for playback, so autoplay works here
+	whether or not there is sound. That is not true of a normal browser tab.
 	*/
-	static func playerURL(for url: URL, autoplayMuted: Bool = true) -> URL? {
+	static func playerURL(for url: URL) -> URL? {
 		guard let host = url.host?.lowercased() else {
 			return nil
 		}
 
 		if let identifier = youTubeVideoID(url: url, host: host) {
-			let parameters = autoplayMuted ? "?autoplay=1&mute=1&playsinline=1" : "?playsinline=1"
-			return URL(string: "https://www.youtube.com/embed/\(identifier)\(parameters)")
+			return URL(string: "https://www.youtube.com/embed/\(identifier)?autoplay=1&playsinline=1")
 		}
 
 		if let identifier = bilibiliVideoID(url: url, host: host) {
-			let parameters = autoplayMuted ? "&autoplay=1&muted=1&danmaku=0" : "&autoplay=0&danmaku=0"
-			return URL(string: "https://player.bilibili.com/player.html?bvid=\(identifier)\(parameters)")
+			// Danmaku is the scrolling comment overlay. On a wallpaper it is text moving across the
+			// picture that nobody is reading.
+			return URL(string: "https://player.bilibili.com/player.html?bvid=\(identifier)&autoplay=1&danmaku=0")
 		}
 
 		return nil

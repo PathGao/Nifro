@@ -1,0 +1,13 @@
+name: Faroe Islands in 4K HDR
+url: https://player.bilibili.com/player.html?bvid=BV1NY411f7rf&autoplay=1&danmaku=0
+description: >-
+  Linksphotograph's first Faroe Islands episode. Cliffs, turf houses and weather, shot in 4K HDR
+  and 24 minutes long.
+tags: [nature, ambient]
+backend: live
+backendNote: >-
+  Video, from Bilibili's player-only page with the danmaku overlay turned off. The wallpaper is the
+  picture, not scrolling comments across it.
+audio: muted
+source: The maintainer's own shortlist.
+featured: true

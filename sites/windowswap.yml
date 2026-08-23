@@ -1,0 +1,12 @@
+name: WindowSwap
+url: https://www.window-swap.com/
+description: >-
+  Somebody else's window, somewhere else, for a few minutes at a time. Video of a real view with
+  nothing asked of you.
+tags: [nature, ambient]
+backend: live
+backendNote: >-
+  Video. Stills would turn a window into a photograph, which is a different thing.
+audio: muted
+source: The maintainer's own shortlist.
+featured: true
