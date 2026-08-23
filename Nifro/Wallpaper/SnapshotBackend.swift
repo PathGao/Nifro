@@ -28,7 +28,15 @@ extension WallpaperScene {
 	/**
 	Refresh the still. Loads the page out of sight, photographs it, and drops the renderer.
 	*/
-	func refreshSnapshot() {
+	/**
+	Refresh the still.
+
+	- Parameter forcingReload: load the page again even if one is already on screen. What the reload
+	  timer and the Reload command want, and the opposite of what leaving Browsing Mode wants — there
+	  the page is already up and reloading it would throw away what the user was reading, to produce a
+	  picture of the thing it just threw away.
+	*/
+	func refreshSnapshot(forcingReload: Bool = false) {
 		guard
 			renderingMode == .snapshot,
 			let url = website?.url,
@@ -47,24 +55,29 @@ extension WallpaperScene {
 			// The same layout size the live page gets, because the crop below is a rectangle of that layout.
 			let size = pageLayoutSize ?? CGSize(width: 1920, height: 1080)
 
-			// Puts the page in the window, which is what makes it render at all.
-			content = .live(zoom: website?.zoom)
-
 			let webView = webViewController.webView
 
-			do {
-				var resolved = url
-				if let replaced = try replacePlaceholders(of: url) {
-					resolved = replaced
+			// Photograph the page that is already up, unless the caller wants a fresh one.
+			let alreadyLoaded = !forcingReload && webView.url != nil && !webView.isLoading
+
+			if !alreadyLoaded {
+				// Puts the page in the window, which is what makes it render at all.
+				content = .live(zoom: website?.zoom)
+
+				do {
+					var resolved = url
+					if let replaced = try replacePlaceholders(of: url) {
+						resolved = replaced
+					}
+
+					try await webView.loadAndWait(resolved, timeout: .seconds(30))
+				} catch {
+					AppState.shared.webViewError = error
+					return
 				}
 
-				try await webView.loadAndWait(resolved, timeout: .seconds(30))
-			} catch {
-				AppState.shared.webViewError = error
-				return
+				try? await Task.sleep(for: Self.settleDelay)
 			}
-
-			try? await Task.sleep(for: Self.settleDelay)
 
 			guard !Task.isCancelled else {
 				return

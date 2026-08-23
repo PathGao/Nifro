@@ -21,6 +21,24 @@ extension WallpaperScene {
 	private static let swapTimeout = Duration.seconds(30)
 
 	/**
+	Whether there is anything on the wallpaper worth keeping while the next page loads.
+
+	A still counts. It used to be only a live page with a URL, which is why entering Browsing Mode on
+	a website drawn from stills showed the desktop: the still was on screen, the live page behind it
+	had been dropped, and "no live page" was read as "nothing to protect".
+	*/
+	private var hasSomethingOnScreen: Bool {
+		switch content {
+		case .empty:
+			false
+		case .frozen(let image), .snapshot(let image):
+			image != nil
+		case .live, .reduced:
+			webViewController.webView.url != nil
+		}
+	}
+
+	/**
 	Load `url`, keeping the current page visible until the new one is ready.
 
 	Falls back to loading in place when there is nothing on screen worth protecting.
@@ -28,8 +46,7 @@ extension WallpaperScene {
 	func loadBySwapping(_ url: URL?) {
 		guard
 			let url,
-			webViewController.webView.url != nil,
-			!isFrozen
+			hasSomethingOnScreen
 		else {
 			load(url)
 			return

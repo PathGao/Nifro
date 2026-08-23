@@ -126,7 +126,13 @@ extension WallpaperScene {
 	}
 
 	private func settlePendingReload() {
-		guard isReloadPending else {
+		guard
+			isReloadPending,
+			// Not while the user is on the page. A reload that came due while the wallpaper was frozen
+			// has waited this long; it can wait until they are finished, rather than pulling the page
+			// out from under someone who just asked to interact with it.
+			!AppState.shared.isBrowsingMode
+		else {
 			resetTimer()
 			return
 		}

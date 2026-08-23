@@ -197,8 +197,11 @@ final class WallpaperScene {
 			return
 		}
 
-		stopSnapshotRendering()
-		loadWebsite()
+		// The still stays up until the live page is ready to take its place. Installing the live web
+		// view first — which is what `stopSnapshotRendering` does — shows the desktop through it for
+		// as long as the page takes to load, and that load is the whole reason there was a still.
+		discardSnapshotInFlight()
+		loadBySwapping(website?.url)
 	}
 
 	/**
@@ -280,7 +283,9 @@ final class WallpaperScene {
 
 	func loadWebsite() {
 		guard renderingMode != .snapshot else {
-			refreshSnapshot()
+			// Forced: this is "put this website up", and the web view may still be holding the
+			// previous one. Photographing what happens to be loaded would show the wrong website.
+			refreshSnapshot(forcingReload: true)
 			return
 		}
 
@@ -290,7 +295,7 @@ final class WallpaperScene {
 
 	func reload() {
 		guard renderingMode != .snapshot else {
-			refreshSnapshot()
+			refreshSnapshot(forcingReload: true)
 			return
 		}
 
