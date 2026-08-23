@@ -10,7 +10,7 @@ final class WebsitesController {
 	private var nextCurrent: Website? { all.elementAfterOrFirst(_current) }
 	private var previousCurrent: Website? { all.elementBeforeOrLast(_current) }
 
-	var randomWebsiteIterator = Defaults[.websites].infiniteUniformRandomSequence().makeIterator()
+	private var randomWebsiteIterator = Defaults[.websites].infiniteUniformRandomSequence().makeIterator()
 
 	@MainActor let thumbnailCache = SimpleImageCache<String>(diskCacheName: "websiteThumbnailCache")
 
@@ -42,7 +42,7 @@ final class WebsitesController {
 		}
 	}
 
-	let allBinding = Defaults.bindingCollection(for: .websites)
+	private let allBinding = Defaults.bindingCollection(for: .websites)
 
 	private init() {
 		setUpEvents()
@@ -205,7 +205,7 @@ final class WebsitesController {
 	/**
 	Fetch the title for a website in the background if the existing title is empty.
 	*/
-	func fetchTitleIfNeeded(for website: Binding<Website>) {
+	private func fetchTitleIfNeeded(for website: Binding<Website>) {
 		guard website.wrappedValue.title.isEmpty else {
 			return
 		}

@@ -39,7 +39,7 @@ extension WallpaperScene {
 		return screen.frame.height - screen.frameWithoutStatusBar.height
 	}
 
-	var shouldShowMenuBarBand: Bool {
+	private var shouldShowMenuBarBand: Bool {
 		Defaults[.extendBelowMenuBar]
 			&& Defaults[.solidColorUnderMenuBar]
 			&& menuBarHeight > 0
@@ -113,7 +113,7 @@ extension NSImage {
 	/**
 	The average colour of the whole image, or `nil` if it cannot be read.
 	*/
-	var averageColor: NSColor? {
+	fileprivate var averageColor: NSColor? {
 		guard
 			let tiff = tiffRepresentation,
 			let input = CIImage(data: tiff),

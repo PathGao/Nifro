@@ -10,7 +10,7 @@ Asked for in the context of Stage Manager, where the desktop is a place you swit
 extension AppState {
 	private static let finderBundleIdentifier = "com.apple.finder"
 
-	var isDesktopFocused: Bool {
+	private var isDesktopFocused: Bool {
 		NSWorkspace.shared.frontmostApplication?.bundleIdentifier == Self.finderBundleIdentifier
 	}
 

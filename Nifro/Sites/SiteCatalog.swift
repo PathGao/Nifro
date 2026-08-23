@@ -32,7 +32,7 @@ enum SiteCatalog {
 
 		var id: String { url }
 
-		var parsedURL: URL? { URL(string: url) }
+		private var parsedURL: URL? { URL(string: url) }
 	}
 
 	/**
@@ -40,7 +40,7 @@ enum SiteCatalog {
 
 	The repository is the source of truth and the place submissions arrive, so the app reads it rather than keeping its own copy authoritative. What ships in the binary is a snapshot for when there is no network.
 	*/
-	static let indexURL = URL("https://raw.githubusercontent.com/PathGao/nifro/main/sites/index.json")
+	private static let indexURL = URL("https://raw.githubusercontent.com/PathGao/nifro/main/sites/index.json")
 
 	static func allTags(in entries: [Entry]) -> [String] {
 		Array(Set(entries.flatMap(\.tags))).sorted()

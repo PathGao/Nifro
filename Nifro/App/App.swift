@@ -10,7 +10,7 @@ TODO macOS 16:
 */
 
 @main
-struct AppMain: App {
+private struct AppMain: App {
 	@NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
 	@StateObject private var appState = AppState.shared
 
@@ -52,7 +52,7 @@ struct AppMain: App {
 	}
 }
 
-final class AppDelegate: NSObject, NSApplicationDelegate {
+private final class AppDelegate: NSObject, NSApplicationDelegate {
 	// Without this, Nifro quits when the screen is locked. (macOS 13.2)
 	func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
 

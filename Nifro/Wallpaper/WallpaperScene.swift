@@ -67,7 +67,7 @@ final class WallpaperScene {
 	*/
 	var isReloadPending = false
 
-	var reloadTimer: Timer?
+	private var reloadTimer: Timer?
 	var playlistTimer: Timer?
 
 	/**

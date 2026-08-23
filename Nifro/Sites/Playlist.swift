@@ -11,7 +11,7 @@ extension Website {
 	/**
 	Whether this website is allowed to be showing at `date`.
 	*/
-	func isScheduled(at date: Date, calendar: Calendar = .current) -> Bool {
+	fileprivate func isScheduled(at date: Date, calendar: Calendar = .current) -> Bool {
 		guard
 			let startHour,
 			let endHour
@@ -27,7 +27,7 @@ extension WebsitesController {
 	/**
 	The websites on `display` that are allowed to be showing right now, in list order.
 	*/
-	func eligible(for display: Display?, at date: Date = .now) -> [Website] {
+	private func eligible(for display: Display?, at date: Date = .now) -> [Website] {
 		let onDisplay = all.filter { $0.effectiveDisplay == display }
 		let scheduled = onDisplay.filter { $0.isScheduled(at: date) }
 
@@ -39,7 +39,7 @@ extension WebsitesController {
 	Move `display` to the next website in its rotation.
 	*/
 	@discardableResult
-	func advance(on display: Display?, at date: Date = .now) -> Website? {
+	fileprivate func advance(on display: Display?, at date: Date = .now) -> Website? {
 		let candidates = eligible(for: display, at: date)
 
 		guard candidates.count > 1 else {
@@ -57,7 +57,7 @@ extension WebsitesController {
 	/**
 	The website that should be showing on `display` right now, taking the schedule into account.
 	*/
-	func scheduled(for display: Display?, at date: Date = .now) -> Website? {
+	fileprivate func scheduled(for display: Display?, at date: Date = .now) -> Website? {
 		let candidates = eligible(for: display, at: date)
 		return candidates.first { $0.isCurrent } ?? candidates.first
 	}
@@ -93,7 +93,7 @@ extension WallpaperScene {
 
 	- Parameter rotating: `true` advances to the next website; `false` only corrects a website that has fallen out of its hours.
 	*/
-	func advancePlaylist(rotating: Bool) {
+	private func advancePlaylist(rotating: Bool) {
 		let controller = WebsitesController.shared
 
 		if rotating {

@@ -156,7 +156,7 @@ extension SSWebView {
 		return .init("zoomLevel_\(keyPart)")
 	}
 
-	var zoomLevelDefaultsValue: Double? {
+	private var zoomLevelDefaultsValue: Double? {
 		guard
 			let zoomLevelDefaultsKey,
 			let zoomLevel = Defaults[zoomLevelDefaultsKey]
