@@ -116,22 +116,22 @@ extension Website {
 		var title: String {
 			switch self {
 			case .automatic:
-				"Decide automatically"
+				String(localized: "Decide automatically")
 			case .live:
-				"Keep rendering"
+				String(localized: "Keep rendering")
 			case .snapshot:
-				"Refresh periodically"
+				String(localized: "Refresh periodically")
 			}
 		}
 
 		var explanation: String {
 			switch self {
 			case .automatic:
-				"Watches what the page actually does for a minute, then keeps rendering it or switches to stills. It changes its mind again if the page starts moving."
+				String(localized: "Watches what the page actually does for a minute, then keeps rendering it or switches to stills. It changes its mind again if the page starts moving.")
 			case .live:
-				"The page keeps running. Necessary for anything that animates or that you want to click."
+				String(localized: "The page keeps running. Necessary for anything that animates or that you want to click.")
 			case .snapshot:
-				"The page is loaded, photographed and closed again on each refresh. Costs almost nothing between refreshes, but nothing moves."
+				String(localized: "The page is loaded, photographed and closed again on each refresh. Costs almost nothing between refreshes, but nothing moves.")
 			}
 		}
 	}

@@ -124,11 +124,11 @@ extension Website {
 		var title: String {
 			switch self {
 			case .never:
-				"Never"
+				String(localized: "Never")
 			case .always:
-				"Always"
+				String(localized: "Always")
 			case .darkMode:
-				"When in dark mode"
+				String(localized: "When in dark mode")
 			}
 		}
 	}
@@ -146,9 +146,9 @@ extension Website {
 		var title: String {
 			switch self {
 			case .muted:
-				"Muted"
+				String(localized: "Muted")
 			case .unmuted:
-				"Plays sound"
+				String(localized: "Plays sound")
 			}
 		}
 	}

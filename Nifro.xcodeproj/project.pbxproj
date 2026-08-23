@@ -60,6 +60,7 @@
 		E384F28224C3B3CD002FD21B /* Menus.swift in Sources */ = {isa = PBXBuildFile; fileRef = E384F28124C3B3CD002FD21B /* Menus.swift */; };
 		0A4F153DC890C7DFA2A7A8E0 /* HoldToInteract.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD930160F48AB39B7B757FE2 /* HoldToInteract.swift */; };
 		E3EC5A86250D7A0C00ABE1A1 /* WelcomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3EC5A85250D7A0C00ABE1A1 /* WelcomeScreen.swift */; };
+		66A8D44DC83A0DDD8B0E8AA1 /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 2BA31C0FAF40DE6D9B93FFA1 /* Localizable.xcstrings */; };
 		E3FA21AD23C74E6B00059E43 /* InternetAccessPolicy.json in Resources */ = {isa = PBXBuildFile; fileRef = E3FA21AC23C74E6B00059E43 /* InternetAccessPolicy.json */; };
 		E3FAF815264333D300CF7963 /* Website.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3FAF814264333D300CF7963 /* Website.swift */; };
 /* End PBXBuildFile section */
@@ -96,6 +97,7 @@
 		E32421372384E9D900D28A91 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E324213A2384E9D900D28A91 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		E324213F2384E9D900D28A91 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2BA31C0FAF40DE6D9B93FFA1 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		E32421402384E9D900D28A91 /* Nifro.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Nifro.entitlements; sourceTree = "<group>"; };
 		E32421462384EB4E00D28A91 /* DesktopWindow.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = DesktopWindow.swift; sourceTree = "<group>"; usesTabs = 1; };
 		E32421552384F09D00D28A91 /* Constants.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Constants.swift; sourceTree = "<group>"; usesTabs = 1; };
@@ -232,6 +234,7 @@
 			children = (
 				E324213F2384E9D900D28A91 /* Info.plist */,
 				E32421402384E9D900D28A91 /* Nifro.entitlements */,
+				2BA31C0FAF40DE6D9B93FFA1 /* Localizable.xcstrings */,
 				E3FA21AC23C74E6B00059E43 /* InternetAccessPolicy.json */,
 			);
 			name = Other;
@@ -402,6 +405,7 @@
 			knownRegions = (
 				en,
 				Base,
+				"zh-Hans",
 			);
 			mainGroup = E32421272384E9D700D28A91;
 			minimizedProjectReferenceProxies = 1;
@@ -427,6 +431,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E3FA21AD23C74E6B00059E43 /* InternetAccessPolicy.json in Resources */,
+				66A8D44DC83A0DDD8B0E8AA1 /* Localizable.xcstrings in Resources */,
 				E324213B2384E9D900D28A91 /* Preview Assets.xcassets in Resources */,
 				E32421382384E9D900D28A91 /* Assets.xcassets in Resources */,
 			);
@@ -679,9 +684,7 @@
 				INFOPLIST_FILE = Nifro/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License © Sindre Sorhus";
-				INFOPLIST_KEY_NSLocationUsageDescription = dfsdfsdf;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = sdf;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License. Derived from Plash © Sindre Sorhus.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -708,15 +711,14 @@
 				INFOPLIST_FILE = Nifro/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License © Sindre Sorhus";
-				INFOPLIST_KEY_NSLocationUsageDescription = dfsdfsdf;
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = sdf;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License. Derived from Plash © Sindre Sorhus.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.pathgao.nifro;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
 			name = Release;
 		};

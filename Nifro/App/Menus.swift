@@ -41,7 +41,7 @@ extension AppState {
 
 	private func addWebsiteItems() {
 		if let webViewError {
-			menu.addDisabled("Error: \(webViewError.localizedDescription)".wordWrapped(atLength: 36).toNSAttributedString)
+			menu.addDisabled(String(localized: "Error: \(webViewError.localizedDescription)").wordWrapped(atLength: 36).toNSAttributedString)
 			menu.addSeparator()
 		}
 
@@ -51,7 +51,7 @@ extension AppState {
 
 		if !WebsitesController.shared.all.isEmpty {
 			menu.addCallbackItem(
-				"Reload",
+				String(localized: "Reload"),
 				isEnabled: WebsitesController.shared.current != nil
 			) { [weak self] in
 				self?.reloadWebsite()
@@ -64,17 +64,17 @@ extension AppState {
 				let url = primaryScene.webViewController.webView.url?.normalized(),
 				website.url.normalized() != url
 			{
-				let menuItem = menu.addCallbackItem("Update Website to Current") {
+				let menuItem = menu.addCallbackItem(String(localized: "Update Website to Current")) {
 					WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
 						$0.url = url
 					}
 				}
 
-				menuItem.toolTip = "Points the stored website at the URL currently loaded"
+				menuItem.toolTip = String(localized: "Points the stored website at the URL currently loaded")
 			}
 
 			menu.addCallbackItem(
-				"Browsing Mode",
+				String(localized: "Browsing Mode"),
 				isEnabled: WebsitesController.shared.current != nil,
 				isChecked: Defaults[.isBrowsingMode]
 			) {
@@ -83,8 +83,8 @@ extension AppState {
 				SSApp.runOnce(identifier: "activatedBrowsingMode") {
 					DispatchQueue.main.async {
 						NSAlert.showModal(
-							title: "Browsing Mode lets you temporarily interact with the website. For example, to log into an account or scroll to a specific position on the website.",
-							message: "If you don't currently see the website, you might need to hide some windows to reveal the desktop."
+							title: String(localized: "Browsing Mode lets you temporarily interact with the website. For example, to log into an account or scroll to a specific position on the website."),
+							message: String(localized: "If you don't currently see the website, you might need to hide some windows to reveal the desktop.")
 						)
 					}
 				}
@@ -93,18 +93,18 @@ extension AppState {
 
 			if let website = WebsitesController.shared.current {
 				menu.addCallbackItem(
-					"Sound",
+					String(localized: "Sound"),
 					isChecked: website.audio == .unmuted
 				) {
 					WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
 						$0.audio = $0.audio == .unmuted ? .muted : .unmuted
 					}
 				}
-				.toolTip = "Whether this website is allowed to make noise. Remembered per website, so a clock stays silent and a live stream does not."
+				.toolTip = String(localized: "Whether this website is allowed to make noise. Remembered per website, so a clock stays silent and a live stream does not.")
 			}
 
 			menu.addCallbackItem(
-				"Edit…",
+				String(localized: "Edit…"),
 				isEnabled: WebsitesController.shared.current != nil
 			) {
 				Constants.openWebsitesWindow()
@@ -115,31 +115,31 @@ extension AppState {
 		}
 
 		if WebsitesController.shared.current != nil {
-			menu.addCallbackItem("Choose Region…") { [self] in
+			menu.addCallbackItem(String(localized: "Choose Region…")) { [self] in
 				beginCropSelection()
 			}
-			.toolTip = "Drag a rectangle over the wallpaper to keep only that part of the page."
+			.toolTip = String(localized: "Drag a rectangle over the wallpaper to keep only that part of the page.")
 		}
 
 		menu.addSeparator()
 
 		if WebsitesController.shared.all.count > 1 {
-			menu.addCallbackItem("Next") {
+			menu.addCallbackItem(String(localized: "Next")) {
 				WebsitesController.shared.makeNextCurrent()
 			}
 			.setShortcut(for: .nextWebsite)
 
-			menu.addCallbackItem("Previous") {
+			menu.addCallbackItem(String(localized: "Previous")) {
 				WebsitesController.shared.makePreviousCurrent()
 			}
 			.setShortcut(for: .previousWebsite)
 
-			menu.addCallbackItem("Random") {
+			menu.addCallbackItem(String(localized: "Random")) {
 				WebsitesController.shared.makeRandomCurrent()
 			}
 			.setShortcut(for: .randomWebsite)
 
-			menu.addItem("Switch")
+			menu.addItem(String(localized: "Switch"))
 				.withSubmenu(createSwitchMenu())
 
 			menu.addSeparator()
@@ -167,7 +167,7 @@ extension AppState {
 		let submenu = SSMenu()
 
 		submenu.addCallbackItem(
-			"Default display",
+			String(localized: "Default display"),
 			isChecked: website.display == nil
 		) {
 			WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
@@ -186,7 +186,7 @@ extension AppState {
 			}
 		}
 
-		menu.addItem("Show on")
+		menu.addItem(String(localized: "Show on"))
 			.withSubmenu(submenu)
 	}
 
@@ -195,7 +195,7 @@ extension AppState {
 
 		if (isEnabled || isManuallyDisabled) || (!Defaults[.deactivateOnBattery] && powerSourceWatcher?.powerSource.isUsingBattery == false) {
 			menu.addCallbackItem(
-				isManuallyDisabled ? "Enable" : "Disable"
+				isManuallyDisabled ? String(localized: "Enable") : String(localized: "Disable")
 			) { [self] in
 				isManuallyDisabled.toggle()
 			}
@@ -205,7 +205,7 @@ extension AppState {
 		menu.addSeparator()
 
 		// Right under the on/off switch, where someone with nothing set up yet looks first. It opens in the app rather than the browser because each catalogue entry carries the settings that make the page work. A web page would leave people copying those in by hand.
-		menu.addCallbackItem("Site Gallery…") {
+		menu.addCallbackItem(String(localized: "Site Gallery…")) {
 			Constants.openSiteGalleryWindow()
 		}
 
@@ -214,20 +214,20 @@ extension AppState {
 		if isEnabled {
 			addWebsiteItems()
 		} else if !isManuallyDisabled {
-			menu.addDisabled("Deactivated While on Battery")
+			menu.addDisabled(String(localized: "Deactivated While on Battery"))
 		}
 
 		// Adding and managing websites works whether or not the wallpaper is showing. Leaving these out while disabled left the app with no way to set anything up until you turned it back on.
 		menu.addSeparator()
 
-		menu.addCallbackItem("Add Website…") {
+		menu.addCallbackItem(String(localized: "Add Website…")) {
 			Constants.openWebsitesWindow()
 
 			// TODO: Find a better way to do this.
 			NotificationCenter.default.post(name: .showAddWebsiteDialog, object: nil)
 		}
 
-		menu.addCallbackItem("Manage Websites…") {
+		menu.addCallbackItem(String(localized: "Manage Websites…")) {
 			Constants.openWebsitesWindow()
 		}
 

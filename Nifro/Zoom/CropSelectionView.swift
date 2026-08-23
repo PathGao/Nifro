@@ -50,7 +50,7 @@ final class CropSelectionView: NSView {
 	}
 
 	private func drawHint() {
-		let text = "Drag to choose the part of the page to fill the screen with.  Esc to cancel."
+		let text = String(localized: "Drag to choose the part of the page to fill the screen with.  Esc to cancel.")
 		let attributes: [NSAttributedString.Key: Any] = [
 			.font: NSFont.systemFont(ofSize: 15, weight: .medium),
 			.foregroundColor: NSColor.white

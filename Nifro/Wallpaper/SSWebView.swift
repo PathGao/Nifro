@@ -32,39 +32,28 @@ final class SSWebView: WKWebView {
 	}
 
 	override func willOpenMenu(_ menu: NSMenu, with event: NSEvent) {
+		// A wallpaper has no windows to open things in, so the items that say "in New Window" are
+		// renamed to what they actually do here.
+		//
+		// Matched on the identifier alone. The previous version also checked the title against the
+		// English wording, which is WebKit's own localised string: on a Mac running in any other
+		// language nothing matched and every item kept saying "in New Window".
+		let renamed: [MenuItemIdentifier: String] = [
+			.openImageInNewWindow: String(localized: "Open Image"),
+			.openMediaInNewWindow: String(localized: "Open Video"),
+			.openFrameInNewWindow: String(localized: "Open Frame"),
+			.openLinkInNewWindow: String(localized: "Open Link")
+		]
+
 		for menuItem in menu.items {
-			// Debug menu items
-			// print("Menu Item:", menuItem.title, menuItem.identifier?.rawValue ?? "")
-
-			if let identifier = MenuItemIdentifier(menuItem) {
-				if
-					identifier == .openImageInNewWindow,
-					menuItem.title == "Open Image in New Window"
-				{
-					menuItem.title = "Open Image"
-				}
-
-				if
-					identifier == .openMediaInNewWindow,
-					menuItem.title == "Open Video in New Window"
-				{
-					menuItem.title = "Open Video"
-				}
-
-				if
-					identifier == .openFrameInNewWindow,
-					menuItem.title == "Open Frame in New Window"
-				{
-					menuItem.title = "Open Frame"
-				}
-
-				if
-					identifier == .openLinkInNewWindow,
-					menuItem.title == "Open Link in New Window"
-				{
-					menuItem.title = "Open Link"
-				}
+			guard
+				let identifier = MenuItemIdentifier(menuItem),
+				let title = renamed[identifier]
+			else {
+				continue
 			}
+
+			menuItem.title = title
 		}
 
 		menu.items.removeAll {
@@ -77,15 +66,15 @@ final class SSWebView: WKWebView {
 
 		menu.addSeparator()
 
-		menu.addCallbackItem("Actual Size", isEnabled: pageZoom != 1) { [weak self] in
+		menu.addCallbackItem(String(localized: "Actual Size"), isEnabled: pageZoom != 1) { [weak self] in
 			self?.zoomLevelWrapper = 1
 		}
 
-		menu.addCallbackItem("Zoom In") { [weak self] in
+		menu.addCallbackItem(String(localized: "Zoom In")) { [weak self] in
 			self?.zoomLevelWrapper += 0.2
 		}
 
-		menu.addCallbackItem("Zoom Out") { [weak self] in
+		menu.addCallbackItem(String(localized: "Zoom Out")) { [weak self] in
 			self?.zoomLevelWrapper -= 0.2
 		}
 
@@ -96,13 +85,13 @@ final class SSWebView: WKWebView {
 			let url = url?.normalized(),
 			website.url.normalized() != url
 		{
-			let menuItem = menu.addCallbackItem("Update Website to Current") {
+			let menuItem = menu.addCallbackItem(String(localized: "Update Website to Current")) {
 				WebsitesController.shared.all = WebsitesController.shared.all.modifying(elementWithID: website.id) {
 					$0.url = url
 				}
 			}
 
-			menuItem.toolTip = "Points the stored website at the URL currently loaded"
+			menuItem.toolTip = String(localized: "Points the stored website at the URL currently loaded")
 		}
 
 		menu.addSeparator()
