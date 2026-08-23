@@ -218,6 +218,20 @@ The difference for users:
 
 So while there is no account, the README's install section has to put brew first. The full manual is in `docs/RELEASE.md`.
 
+**Two things about the tap, both deliberate for now:**
+
+The cask lives in this repository, so installing means naming the tap URL: `brew tap PathGao/tap
+https://github.com/PathGao/Nifro && brew install --cask nifro`. The shorthand `brew install --cask
+PathGao/tap/nifro` resolves to a repository literally named `homebrew-tap`, which would be a second
+repository to own, plus a token here with write access to it. Worth doing for one reason rather than
+for the shorthand: tapping clones this repository, all 6 MB of source and images, onto every user's
+machine and refetches it on every `brew update`. A dedicated tap repository is a few kilobytes. Do it
+when there are enough users for that to be somebody else's bandwidth rather than a tidiness argument.
+
+Plain `brew install --cask nifro`, with no tap at all, means being in Homebrew's own cask repository.
+That has a notability threshold — 75 stars, or 30 forks, or 30 watchers. Two stars today. It is a
+milestone to notice rather than a task to schedule.
+
 ---
 
 ## 9. Explicitly not doing (do not raise again)
