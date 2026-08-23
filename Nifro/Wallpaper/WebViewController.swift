@@ -267,6 +267,10 @@ extension WebViewController: WKNavigationDelegate {
 		webView.setAudioMuted(WebsitesController.shared.current?.audio != .unmuted)
 
 		recordTitleIfNeeded(from: webView)
+
+		// The page is here, so this is the moment it goes on screen — not a fixed delay after asking for
+		// it. `revealPage` refreshes the band itself, and does nothing if the page is already up.
+		scene?.revealPage()
 		scene?.refreshMenuBarBandColor()
 		scene?.restoreScrollPosition(in: webView)
 

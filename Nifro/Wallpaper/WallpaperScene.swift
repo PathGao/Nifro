@@ -57,6 +57,11 @@ final class WallpaperScene {
 	*/
 	private var loadedWebsiteID: Website.ID?
 
+	/**
+	Whether the page for the current load has been put on screen yet.
+	*/
+	private(set) var hasRevealedPage = false
+
 	private var reloadTimer: Timer?
 	var playlistTimer: Timer?
 
@@ -243,20 +248,43 @@ final class WallpaperScene {
 		loadedWebsiteID = website?.id
 		installContentView()
 
-		// The web view starts hidden so the first frame is not a flash of white. Unhide the web view itself, not whatever view happens to be installed a second from now. By then the visibility policy may have swapped in a still or a wrapper view, and unhiding that would leave the real web view hidden for the rest of the session. That is a blank wallpaper with no way back.
-		delay(.seconds(1)) { [weak self] in
-			guard let self else {
-				return
-			}
+		hasRevealedPage = false
 
-			webViewController.webView.isHidden = false
-			window.contentView?.isHidden = false
-
-			// The same moment for both. The band was going up as soon as the scene existed, so the menu
-			// bar changed colour on its own and the wallpaper turned up a second later.
-			refreshMenuBarBandColor()
-			updateMenuBarBandVisibility()
+		// A page that never finishes still has to turn up. Long enough that an ordinary page has
+		// loaded and revealed itself first, so this is the exception rather than the schedule.
+		delay(.seconds(5)) { [weak self] in
+			self?.revealPage()
 		}
+	}
+
+	/**
+	Put the page on screen, once there is a page.
+
+	It used to be a flat one-second delay, which is a guess about how long loading takes, and
+	measurement says the guess is short: the reveal ran, and the page finished afterwards. Everything
+	hung on this moment inherited that — most visibly the menu bar band, which went up wearing a
+	colour taken off a page that had not arrived, so the menu bar changed and the wallpaper followed a
+	second or two later.
+
+	Driven by the load finishing now, with a timeout behind it. Unhides the web view itself rather
+	than whatever view is installed by then: the page may be inside a wrapper, and unhiding the
+	wrapper would leave the real web view hidden for the rest of the session, which is a blank
+	wallpaper with no way back.
+	*/
+	func revealPage() {
+		guard !hasRevealedPage else {
+			return
+		}
+
+		hasRevealedPage = true
+
+		webViewController.webView.isHidden = false
+		window.contentView?.isHidden = false
+
+		// In this order, and only now: the band stands in for the top of the page, so there has to be
+		// a page for it to stand in for.
+		refreshMenuBarBandColor()
+		updateMenuBarBandVisibility()
 	}
 
 	/**

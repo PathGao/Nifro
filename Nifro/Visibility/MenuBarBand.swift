@@ -162,7 +162,11 @@ extension WallpaperScene {
 	func refreshMenuBarBandColor() {
 		guard
 			let band = menuBarBand,
-			let screen
+			let screen,
+			// Measured: sampling ran twice before the page was ever shown, off a hidden blank web view,
+			// and that colour is what let the band on screen early. There is nothing worth taking a
+			// colour off until the page is up.
+			hasRevealedPage
 		else {
 			return
 		}
