@@ -25,8 +25,9 @@ cask "nifro" do
     strategy :github_latest
   end
 
-  # The project's MACOSX_DEPLOYMENT_TARGET = 15.0
-  depends_on macos: ">= :sequoia"
+  # The project's MACOSX_DEPLOYMENT_TARGET = 15.0. The symbol form means this version or newer; the
+  # string form that says so out loud is deprecated, and printed a warning on every `brew tap`.
+  depends_on macos: :sequoia
 
   app "Nifro.app"
 
