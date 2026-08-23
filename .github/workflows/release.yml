@@ -39,6 +39,8 @@ jobs:
     runs-on: macos-15
     permissions:
       contents: write
+      # The cask bump arrives as a pull request rather than a push, because `main` requires one.
+      pull-requests: write
 
     steps:
       - uses: actions/checkout@v4
@@ -265,14 +267,22 @@ jobs:
             --generate-notes \
             --notes-file "$RUNNER_TEMP/notes.md"
 
-      # The version / sha256 in the cask change on every release, so CI writes them back to main
-      # and nobody has to do it by hand. If branch protection on main makes the push fail, this step
-      # warns but leaves the release itself alone.
-      - name: Write the new version back to Casks/nifro.rb
+      # The version and the two checksums change on every release, so they are written back rather
+      # than typed. As a pull request, not a push: `main` requires one, and this step used to be the
+      # thing that silently published a cask carrying a new version number and the old checksums —
+      # which installs nothing and looks like a working release until somebody tries it. A pull
+      # request makes that visible before it lands, which is worth the one click it costs.
+      #
+      # `continue-on-error` because a failure here must not take the release with it. The release is
+      # already published by this point; the cask can be fixed afterwards.
+      - name: Open a pull request with the new cask version
         continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           version="${{ steps.version.outputs.version }}"
+          tag="${{ steps.version.outputs.tag }}"
           sha_arm="${{ steps.package.outputs.sha_arm64 }}"
           sha_intel="${{ steps.package.outputs.sha_x86_64 }}"
 
@@ -291,7 +301,20 @@ jobs:
             echo "cask unchanged, skipping"
             exit 0
           fi
+
+          branch="cask/$version"
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
           git commit -m "cask: bump to $version" -- Casks/nifro.rb
-          git push origin main
+          git push origin "$branch"
+
+          gh pr create \
+            --repo "$GITHUB_REPOSITORY" \
+            --base main \
+            --head "$branch" \
+            --title "cask: bump to $version" \
+            --body "$(printf '%s\n\n%s\n\n```\narm64   %s\nx86_64  %s\n```\n' \
+              "Written by the release workflow for [$tag]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/tag/$tag)." \
+              "Check the two checksums against the release assets before merging — a cask with the wrong ones installs nothing and looks like it worked." \
+              "$sha_arm" "$sha_intel")"
