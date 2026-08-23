@@ -3,6 +3,8 @@ import SwiftUI
 
 final class SSMenu: NSMenu, NSMenuDelegate {
 	var onUpdate: (() -> Void)?
+	var onOpen: (() -> Void)?
+	var onClose: (() -> Void)?
 
 	private(set) var isOpen = false
 
@@ -19,10 +21,12 @@ final class SSMenu: NSMenu, NSMenuDelegate {
 
 	func menuWillOpen(_ menu: NSMenu) {
 		isOpen = true
+		onOpen?()
 	}
 
 	func menuDidClose(_ menu: NSMenu) {
 		isOpen = false
+		onClose?()
 	}
 
 	func menuNeedsUpdate(_ menu: NSMenu) {

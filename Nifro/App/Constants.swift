@@ -46,6 +46,24 @@ extension Defaults.Keys {
 }
 
 extension KeyboardShortcuts.Name {
+	/**
+	Every shortcut the app registers.
+
+	Listed so the menu can turn them all off while it is open. `NSMenu` puts the thread in tracking
+	mode, which stops the global hotkeys from being delivered and buffers the key events instead.
+	They then all fire at once when the menu closes, which reads as the app doing something nobody
+	asked for.
+	*/
+	static let all: [Self] = [
+		.toggleBrowsingMode,
+		.holdToInteract,
+		.toggleEnabled,
+		.reload,
+		.nextWebsite,
+		.previousWebsite,
+		.randomWebsite
+	]
+
 	static let toggleBrowsingMode = Self("toggleBrowsingMode")
 	static let holdToInteract = Self("holdToInteract")
 	static let toggleEnabled = Self("toggleEnabled")

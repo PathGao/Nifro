@@ -7,6 +7,14 @@ extension AppState {
 			updateMenu()
 		}
 
+		menu.onOpen = {
+			KeyboardShortcuts.disable(KeyboardShortcuts.Name.all)
+		}
+
+		menu.onClose = {
+			KeyboardShortcuts.enable(KeyboardShortcuts.Name.all)
+		}
+
 		powerSourceWatcher?.didChangePublisher
 			.sink { [self] _ in
 				guard Defaults[.deactivateOnBattery] else {

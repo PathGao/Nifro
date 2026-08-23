@@ -187,6 +187,7 @@ extension AppState {
 			) { [self] in
 				isManuallyDisabled.toggle()
 			}
+			.setShortcut(for: .toggleEnabled)
 		}
 
 		menu.addSeparator()
