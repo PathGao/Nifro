@@ -8,7 +8,6 @@ final class WebViewController: NSViewController {
 	*/
 	weak var scene: WallpaperScene?
 
-	private var popupWindow: NSWindow?
 	private let didLoadSubject = PassthroughSubject<Void, Error>()
 	private var currentDownloadFile: URL?
 
@@ -321,52 +320,36 @@ extension WebViewController: WKNavigationDelegate {
 }
 
 extension WebViewController: WKUIDelegate {
+	/**
+	Answers a page asking for a new window. Nifro never opens one.
+
+	Nifro is a background. A window of its own is the opposite of that, and one built this way was
+	worse than the general argument: an accessory app's window has no Dock icon, so a video that
+	opened in it kept playing with nowhere to go back to — disabling the wallpaper did not reach it,
+	and only quitting the app stopped the sound.
+
+	Loading it in the wallpaper instead is not the answer either. That silently replaces the website
+	the user chose with wherever a link pointed.
+
+	So: while the user is browsing, the request goes to their own browser, which is the application
+	for opening pages in windows. Outside browsing mode nobody clicked anything, and a page opening
+	the browser on its own is not something to allow.
+	*/
 	func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
 		guard
 			AppState.shared.isBrowsingMode,
-			NSEvent.modifiers != .option
+			let url = navigationAction.request.url
 		else {
-			// This makes it so that requests to open something in a new window just opens in the existing web view.
-			if navigationAction.targetFrame == nil {
-				webView.load(navigationAction.request)
-			}
-
 			return nil
 		}
 
-		let webView = WKWebView(frame: .zero, configuration: configuration)
-		webView.navigationDelegate = self
-		webView.uiDelegate = self
-		webView.customUserAgent = WKWebView.safariUserAgent
-
-		var styleMask: NSWindow.StyleMask = [
-			.titled,
-			.closable,
-			.resizable
-		]
-
-		// We default the window to be resizable to make it user-friendly.
-		if windowFeatures.allowsResizing?.boolValue == false {
-			styleMask.remove(.resizable)
+		if Defaults[.bringBrowsingModeToFront] {
+			Defaults[.isBrowsingMode] = false
 		}
 
-		let window = NSWindow(
-			contentRect: CGRect(origin: .zero, size: windowFeatures.size),
-			styleMask: styleMask,
-			backing: .buffered,
-			defer: false
-		)
-		window.isReleasedWhenClosed = false // Since we manually release it.
-		window.contentView = webView
-		view.window?.addChildWindow(window, ordered: .above)
-		window.center()
-		window.makeKeyAndOrderFront(self)
-		popupWindow = window
+		url.open()
 
-		webView.bind(\.title, to: window, at: \.title, default: "")
-			.store(forTheLifetimeOf: webView)
-
-		return webView
+		return nil
 	}
 
 
@@ -395,12 +378,6 @@ extension WebViewController: WKUIDelegate {
 		return await webView.defaultUploadPanelHandler(parameters: parameters)
 	}
 
-	func webViewDidClose(_ webView: WKWebView) {
-		if webView.window == popupWindow {
-			popupWindow?.close()
-			popupWindow = nil
-		}
-	}
 }
 
 extension WebViewController: WKDownloadDelegate {

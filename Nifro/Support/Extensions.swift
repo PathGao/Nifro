@@ -2376,16 +2376,20 @@ extension WKUserContentController {
 			let muted = true;
 			let rescanQueued = false;
 
+			const adopt = element => {
+				element.muted = muted;
+
+				// A player that was only allowed to start because it was muted stays paused when the
+				// mute comes off, and a wallpaper showing a paused video looks exactly like a
+				// wallpaper showing a still. Starting it is part of turning the sound on.
+				if (!muted && element.paused) {
+					element.play().catch(() => {});
+				}
+			};
+
 			const apply = () => {
 				for (const element of document.querySelectorAll(selector)) {
-					element.muted = muted;
-
-					// A player that was only allowed to start because it was muted stays paused when
-					// the mute comes off, and a wallpaper showing a paused video looks exactly like a
-					// wallpaper showing a still. Starting it is part of turning the sound on.
-					if (!muted && element.paused) {
-						element.play().catch(() => {});
-					}
+					adopt(element);
 				}
 			};
 
@@ -2403,10 +2407,10 @@ extension WKUserContentController {
 				for (const mutation of mutations) {
 					for (const node of mutation.addedNodes) {
 						if ('matches' in node && node.matches(selector)) {
-							node.muted = muted;
+							adopt(node);
 						} else if ('querySelectorAll' in node) {
 							for (const element of node.querySelectorAll(selector)) {
-								element.muted = muted;
+								adopt(element);
 							}
 						}
 					}
@@ -2418,14 +2422,14 @@ extension WKUserContentController {
 				}
 			});
 
-			// Only watched while muted. With sound on there is nothing to keep enforcing, and a page
-			// that mutates constantly should not pay for a listener that would do nothing.
+			// Watched in both states. Only watching while muted looks like a saving and is a bug: a
+			// player inserts its media element well after the page has loaded, so with the sound on
+			// the element arrives after the app has already spoken, finds nobody watching, and keeps
+			// whatever the player set — which for a framed YouTube player is muted, because being
+			// muted is the only way it was allowed to start. Turning the sound off and on again then
+			// fixed it, because by then the element existed.
 			const watch = () => {
-				if (muted) {
-					observer.observe(document, { childList: true, subtree: true });
-				} else {
-					observer.disconnect();
-				}
+				observer.observe(document, { childList: true, subtree: true });
 			};
 
 			const tellChildren = () => {

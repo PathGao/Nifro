@@ -28,6 +28,7 @@ entry's `source` field.
 | `zoom` | `{centerX, centerY, scale}` | no | Fill the wallpaper with one part of the page. `centerX`/`centerY` are fractions of the page from its top-left; `scale` is how many times that part is enlarged. Given this way rather than as a rectangle so the entry works on any screen shape. |
 | `css` | string | no | Custom CSS injected into the page. Usually hides chrome or makes the background transparent. |
 | `js` | string | no | Custom JavaScript injected after load. |
+| `audio` | `muted` \| `unmuted` | no | The sound setting the site **starts** with. Only a starting value: once added, the website belongs to the user and the Sound item in the menu owns this. Omit for muted, which is what a wallpaper wants unless it is a stream. |
 | `requiresLogin` | boolean | no | `true` if the site shows nothing useful unless the user is signed in. |
 | `screenshot` | string | no | Preview image. Leave it out — we will add images later. |
 | `source` | string | yes | Where the entry came from. Credit the person, and link the upstream thread if you took their CSS or JS. |

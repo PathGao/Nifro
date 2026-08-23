@@ -106,7 +106,7 @@
         "muted",
         "unmuted"
       ],
-      "description": "Whether the site should be allowed to make sound. Omit for muted, which is what a wallpaper wants unless it is a stream."
+      "description": "The sound setting a site starts with when it is added. Only a starting value: from then on it belongs to the user's copy of the website and is changed from the Sound item in the menu, which this never overrides. Omit for muted, which is what a wallpaper wants unless it is a stream."
     },
     "featured": {
       "type": "boolean",
