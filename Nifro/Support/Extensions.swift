@@ -2379,7 +2379,19 @@ extension WKUserContentController {
 			const apply = () => {
 				for (const element of document.querySelectorAll(selector)) {
 					element.muted = muted;
+
+					// A player that was only allowed to start because it was muted stays paused when
+					// the mute comes off, and a wallpaper showing a paused video looks exactly like a
+					// wallpaper showing a still. Starting it is part of turning the sound on.
+					if (!muted && element.paused) {
+						element.play().catch(() => {});
+					}
 				}
+			};
+
+			const rescan = () => {
+				rescanQueued = false;
+				apply();
 			};
 
 			// A full rescan is needed as well as muting on insertion: players reuse and reparent their
@@ -2406,11 +2418,6 @@ extension WKUserContentController {
 				}
 			});
 
-			const rescan = () => {
-				rescanQueued = false;
-				apply();
-			};
-
 			// Only watched while muted. With sound on there is nothing to keep enforcing, and a page
 			// that mutates constantly should not pay for a listener that would do nothing.
 			const watch = () => {
@@ -2421,14 +2428,46 @@ extension WKUserContentController {
 				}
 			};
 
-			window.\(audioSetterName) = value => {
-				muted = value;
-				apply();
-				watch();
+			const tellChildren = () => {
+				for (let index = 0; index < window.frames.length; index++) {
+					try {
+						window.frames[index].postMessage({ \(audioMessageKey): muted }, '*');
+					} catch (error) {}
+				}
 			};
+
+			window.addEventListener('message', event => {
+				const data = event.data;
+
+				if (!data) {
+					return;
+				}
+
+				if (typeof data.\(audioMessageKey) === 'boolean') {
+					muted = data.\(audioMessageKey);
+					apply();
+					watch();
+					tellChildren();
+					return;
+				}
+
+				// Only the top frame is spoken to by the app, so only it knows the answer.
+				if (data.\(audioAskKey) === true && window === window.top) {
+					tellChildren();
+				}
+			});
 
 			apply();
 			watch();
+
+			// A frame that loaded after the app last spoke never heard it. That is the normal case for
+			// a framed video player: the page finishes, the app answers, and the player's frame arrives
+			// afterwards and would sit muted with the sound turned on.
+			if (window !== window.top) {
+				try {
+					window.top.postMessage({ \(audioAskKey): true }, '*');
+				} catch (error) {}
+			}
 		})();
 		"""
 
@@ -2449,9 +2488,15 @@ extension WKUserContentController {
 }
 
 /**
-The name the audio script answers to. One definition, used by the script and by whoever calls it.
+The name on the message the audio script answers to. One definition, used by the script and by the
+broadcast that reaches it.
 */
-private let audioSetterName = "__nifroSetAudioMuted"
+private let audioMessageKey = "__nifroAudioMuted"
+
+/**
+The name on the message a frame sends when it arrives too late to have heard the answer.
+*/
+private let audioAskKey = "__nifroAudioAsk"
 
 extension WKWebView {
 	/**
@@ -2459,9 +2504,17 @@ extension WKWebView {
 
 	Muting is done by holding every audio and video element muted rather than by silencing the web
 	view, so it covers media elements and not sound a page generates with the Web Audio API.
+
+	Said once, to the main frame. The script passes it down: the app cannot reach a subframe —
+	`evaluateJavaScript` runs in the main frame only — and a video is very often not in the main
+	frame, because a framed player puts it one frame down on another origin.
 	*/
 	func setAudioMuted(_ muted: Bool) {
-		evaluateJavaScript("window.\(audioSetterName) && window.\(audioSetterName)(\(muted))")
+		evaluateJavaScript(
+			"window.postMessage({ \(audioMessageKey): \(muted) }, '*')",
+			in: nil,
+			in: .defaultClient
+		)
 	}
 }
 // MARK: - WKWebView

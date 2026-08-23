@@ -258,18 +258,37 @@ struct VideoEmbedTests {
 		#expect(player.absoluteString.contains("autoplay=1"))
 	}
 
-	@Test("The address says nothing about sound")
-	func soundIsNotBakedIn() throws {
-		// Muting is a per-website setting that outlives this URL. A `mute` parameter here would be a
-		// second answer to the same question, and the one the user cannot change.
+	@Test("The stored address says nothing about sound")
+	func soundIsNotBakedIntoTheAddress() throws {
+		// Muting is a per-website setting that outlives this URL. An answer here would be the one the
+		// user cannot change.
 		for source in [
 			"https://www.youtube.com/watch?v=jNQXAC9IVRw",
 			"https://www.bilibili.com/video/BV1xx411c7mD"
 		] {
 			let url = try #require(URL(string: source))
 			let player = try #require(VideoEmbed.playerURL(for: url))
-			#expect(!player.absoluteString.contains("mute"), "\(source) still carries a mute parameter")
+			#expect(!player.absoluteString.contains("mute"), "\(source) carries a mute parameter")
 		}
+	}
+
+	@Test("The framed player is asked to start muted, because that is the only way it starts")
+	func framedPlayerStartsMuted() throws {
+		// Not a decision about sound: YouTube's player will not autoplay unless it is muted, and the
+		// audio script unmutes it afterwards. Without this the video sits paused on its first frame.
+		let watch = try #require(URL(string: "https://www.youtube.com/watch?v=jNQXAC9IVRw"))
+		let player = try #require(VideoEmbed.playerURL(for: watch))
+		let host = try #require(VideoEmbed.hostPage(for: player))
+
+		#expect(host.html.contains("mute=1"))
+	}
+
+	@Test("A player address stored before that was known still gets it")
+	func olderAddressesAreFixedOnTheWayIn() throws {
+		let stored = try #require(URL(string: "https://www.youtube.com/embed/jNQXAC9IVRw?autoplay=1&playsinline=1"))
+		let host = try #require(VideoEmbed.hostPage(for: stored))
+
+		#expect(host.html.contains("mute=1"))
 	}
 
 	@Test("Short links and shorts work too")

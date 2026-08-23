@@ -21,14 +21,11 @@ enum VideoEmbed {
 	/**
 	The player-only address for `url`, or `nil` if this is not a video page we recognise.
 
-	The address asks the player to start and says nothing about sound. Whether a website is muted is
-	a setting on that website, changed long after this URL was produced and stored, so a `mute`
-	parameter baked in here would be a second answer to the same question and would win — the
-	website could be set to play audio and stay silent. The mute script runs at document start and
-	watches for elements the player inserts later, so the setting is enforced without the URL's help.
+	Says nothing about sound. Whether a website is muted is a setting on that website, changed long
+	after this URL was stored, so an answer baked in here would be the one the user cannot change.
 
-	`WKWebView` is configured with no user-gesture requirement for playback, so autoplay works here
-	whether or not there is sound. That is not true of a normal browser tab.
+	YouTube does need one condition to start at all, but that belongs to loading the player rather
+	than to its address, so it lives in `hostPage(for:)`.
 	*/
 	static func playerURL(for url: URL) -> URL? {
 		guard let host = url.host?.lowercased() else {
@@ -58,15 +55,33 @@ enum VideoEmbed {
 	Which address that page is loaded as matters, and not in the way you would guess: YouTube rejects
 	being framed by `youtube.com` too. This is the project's own page, which is also an honest answer
 	to who is asking.
+
+	The framed address is made to say `mute=1`, which reads like a decision about sound and is not
+	one: YouTube's player refuses to start at all unless it is muted, whatever the web view allows.
+	It is the price of autoplay. The website's own sound setting is applied to the player afterwards
+	by the audio script, which unmutes it and starts it playing. Measured: with `mute=1` the player
+	runs, without it the video sits paused on its first frame, which looks identical to a still until
+	you wait for it. Added here rather than in the address above so that a player address stored
+	before this was known still starts.
 	*/
 	static func hostPage(for url: URL) -> (html: String, baseURL: URL)? {
 		guard
 			url.host?.lowercased().hasSuffix("youtube.com") == true,
 			url.path.hasPrefix("/embed/"),
-			let baseURL = URL(string: "https://github.com/PathGao/nifro")
+			let baseURL = URL(string: "https://github.com/PathGao/nifro"),
+			var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
 		else {
 			return nil
 		}
+
+		var items = components.queryItems ?? []
+
+		if !items.contains(where: { $0.name == "mute" }) {
+			items.append(URLQueryItem(name: "mute", value: "1"))
+			components.queryItems = items
+		}
+
+		let url = components.url ?? url
 
 		// The address is either one this file built out of a checked identifier or one the user
 		// typed. Escaped anyway, because the difference is not visible from here.
