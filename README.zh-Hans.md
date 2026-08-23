@@ -42,18 +42,28 @@
 ## 安装
 
 ```sh
-brew tap PathGao/tap https://github.com/PathGao/Nifro && brew install --cask nifro
+brew tap PathGao/tap https://github.com/PathGao/Nifro
+brew trust --cask PathGao/tap/nifro
+brew install --cask nifro
 ```
+
+Homebrew 不会加载它自己仓库之外的 cask，除非你明说信任 —— 因为 cask 可以在安装后执行代码。这
+一个执行的是一条命令：删掉 macOS 给下载文件打的隔离标记，这正是让 app 能直接打开的原因。信任
+之前可以先把 [Casks/nifro.rb](Casks/nifro.rb) 整个读一遍。
 
 或者直接点上面那两个按钮下载磁盘映像：Apple silicon 取 `arm64`，Intel 取 `x86_64`。不做通用二
 进制，免得每个人都下载一份自己永远用不到的另一半。那两个链接永远指向最新版。
 
-这里要写出 tap 的地址，是因为 cask 放在本仓库而不是单独的 `homebrew-tap` 仓库。想要直接
-`brew install --cask nifro`，得先进 Homebrew 官方的 cask 仓库，那有一道本项目还没够到的热度门槛。
+想要不加 tap、不用信任、直接 `brew install --cask nifro`，得先进 Homebrew 官方的 cask 仓库，那
+有一道本项目还没够到的热度门槛。
 
-构建包用的是本项目自己的证书而不是 Apple Developer ID，所以没有经过公证，直接下载的包首次打开
-会被门禁拦下，需要去「系统设置 → 隐私与安全性」放行。用 cask 安装这一步已经替你做了，所以它是
-推荐路径。详见 [docs/RELEASE.md](docs/RELEASE.md)。
+构建包用的是本项目自己的证书而不是 Apple Developer ID，所以没有经过公证。**自己下载、自己拖进
+去的包会被拦下**，提示「Apple 无法验证 Nifro 是否包含恶意软件」——浏览器给文件打了「来自网络」
+的标记，而能解除这个标记的只有 Apple 的公证服务。打开**系统设置 → 隐私与安全性**，那里会有一个
+写着 Nifro 的**仍要打开**按钮。点一次，以后都不再问。
+
+用 brew 装则完全遇不到这一步 —— cask 里那一行代码干的就是这件事 —— 所以 brew 是推荐路径。详见
+[docs/RELEASE.md](docs/RELEASE.md)。
 
 需要 macOS 15 或更高版本。
 

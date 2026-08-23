@@ -42,21 +42,31 @@
 ## Install
 
 ```sh
-brew tap PathGao/tap https://github.com/PathGao/Nifro && brew install --cask nifro
+brew tap PathGao/tap https://github.com/PathGao/Nifro
+brew trust --cask PathGao/tap/nifro
+brew install --cask nifro
 ```
+
+Homebrew will not load a cask from outside its own repositories until you say you trust it, because
+a cask can run code after installing. This one runs one command: it removes the quarantine attribute
+macOS puts on downloaded files, which is what makes the app open without being turned away. You can
+read the whole thing in [Casks/nifro.rb](Casks/nifro.rb) before trusting it.
 
 Or take a disk image straight from the buttons at the top: `arm64` on Apple silicon, `x86_64` on
 Intel. There is no universal binary, so nobody downloads the half they cannot run. Those two links
 always point at the newest build.
 
-The tap is spelled out because the cask lives in this repository rather than in a separate
-`homebrew-tap` one. Plain `brew install --cask nifro` needs Nifro to be in Homebrew's own cask
-repository, which has a popularity threshold this project has not reached.
+Plain `brew install --cask nifro`, with no tap and nothing to trust, needs Nifro to be in Homebrew's
+own cask repository, which has a popularity threshold this project has not reached.
 
 Builds are signed with the project's own certificate rather than an Apple Developer ID one, so they
-are not notarized and Gatekeeper stops a directly downloaded one until you allow it in System
-Settings. The cask does that for you, which is why it is the recommended route.
-See [docs/RELEASE.md](docs/RELEASE.md).
+are not notarized. **A build you download and drag across yourself will be stopped**, with "Apple
+could not verify Nifro is free of malware": your browser marks the file as downloaded, and only
+Apple's notary service can clear that. Open **System Settings → Privacy & Security**, and there will
+be an **Open Anyway** button naming Nifro. That is the whole of it, once, for good.
+
+Installing with brew avoids it entirely — that is what the cask's one line of code does — which is
+why brew is the recommended route. See [docs/RELEASE.md](docs/RELEASE.md).
 
 Requires macOS 15 or later.
 
