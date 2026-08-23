@@ -3,6 +3,7 @@ url: https://explore.org/livecams
 description: A wall of live nature cameras. Bears, puffins, reefs, aurora, running around the clock.
 tags: [ambient, nature, live]
 backend: live
+featured: true
 audio: muted
 css: |
   header, footer, nav, .subscribe-banner { display: none !important; }

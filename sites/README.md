@@ -131,3 +131,8 @@ CI fails if the YAML and the generated files disagree.
 
 `NOT-INCLUDED.md` records the live platforms that were considered and rejected, with the reason
 for each. Popularity is not the filter; working in a plain web view without an account is.
+
+## Candidates
+
+`CANDIDATES.md` is a pool of pages that look promising but that nobody has worked out the settings
+for yet. Moving one from there to a YAML file here is the contribution that carries weight.

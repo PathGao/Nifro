@@ -136,6 +136,10 @@
         "unmuted"
       ],
       "description": "Whether the site should be allowed to make sound. Omit for muted, which is what a wallpaper wants unless it is a stream."
+    },
+    "featured": {
+      "type": "boolean",
+      "description": "Ships with the app and is installed on first launch. Keep this list very short: it is what someone sees before they have chosen anything, and every entry is one they have to delete if they do not want it. Among featured entries the file name decides the order, and the first one is the wallpaper that shows."
     }
   }
 }

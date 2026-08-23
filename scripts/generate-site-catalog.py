@@ -72,6 +72,7 @@ def main() -> int:
             "javaScript": data.get("js") or data.get("javaScript"),
             "requiresLogin": bool(data.get("requiresLogin")),
             "audio": data.get("audio", "muted"),
+            "featured": bool(data.get("featured")),
         })
 
         entries.append(
@@ -86,7 +87,8 @@ def main() -> int:
             f"\t\t\tcss: {swift_optional_string(data.get('css'))},\n"
             f"\t\t\tjavaScript: {swift_optional_string(data.get('js') or data.get('javaScript'))},\n"
             f"\t\t\trequiresLogin: {'true' if data.get('requiresLogin') else 'false'},\n"
-            f"\t\t\tplaysSound: {'true' if data.get('audio') == 'unmuted' else 'false'}\n"
+            f"\t\t\tplaysSound: {'true' if data.get('audio') == 'unmuted' else 'false'},\n"
+            f"\t\t\tisFeatured: {'true' if data.get('featured') else 'false'}\n"
             "\t\t)"
         )
 

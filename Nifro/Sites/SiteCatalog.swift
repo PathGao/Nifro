@@ -30,6 +30,9 @@ enum SiteCatalog {
 		/// Whether the entry is one you would want to hear, which for a wallpaper is the exception.
 		let playsSound: Bool
 
+		/// Ships with the app and is installed on first launch.
+		let isFeatured: Bool
+
 		var id: String { url }
 
 		private var parsedURL: URL? { URL(string: url) }
@@ -41,6 +44,14 @@ enum SiteCatalog {
 	The repository is the source of truth and the place submissions arrive, so the app reads it rather than keeping its own copy authoritative. What ships in the binary is a snapshot for when there is no network.
 	*/
 	private static let indexURL = URL("https://raw.githubusercontent.com/PathGao/nifro/main/sites/index.json")
+
+	/**
+	The entries that ship with the app, in the order they are installed.
+
+	File name order, which is arbitrary but at least fixed. Worth knowing because the first one is
+	the wallpaper somebody sees before they have chosen anything.
+	*/
+	static var featured: [Entry] { entries.filter(\.isFeatured) }
 
 	static func allTags(in entries: [Entry]) -> [String] {
 		Array(Set(entries.flatMap(\.tags))).sorted()
@@ -88,6 +99,39 @@ extension SiteCatalog.Entry {
 		// The app has no per-site reload interval yet, so the catalogue's value goes to the global setting only when nothing has been chosen. That beats ignoring it, and beats overriding a choice the user made.
 		if let reloadInterval, Defaults[.reloadInterval] == nil {
 			Defaults[.reloadInterval] = reloadInterval
+		}
+	}
+}
+
+extension WebsitesController {
+	/**
+	Put the shipped websites in the list, once, on the first launch.
+
+	A wallpaper app that starts with an empty desktop asks the user to go and find something before
+	it has shown them what it does. These are ordinary websites once installed: editable, reorderable
+	and deletable like anything they add themselves, with no trace of having come from us. That
+	matters more than which ones they are. A built-in you cannot delete is not a starting point, it is
+	furniture.
+
+	Guarded on having been done rather than on the list being empty, so someone who deletes all of
+	them does not get them back on the next launch.
+	*/
+	@MainActor
+	func installFeaturedWebsitesIfNeeded() {
+		guard !Defaults[.hasInstalledFeaturedWebsites] else {
+			return
+		}
+
+		Defaults[.hasInstalledFeaturedWebsites] = true
+
+		for entry in SiteCatalog.featured {
+			entry.add()
+		}
+
+		// Adding makes each one current in turn, so without this the wallpaper would be whichever
+		// happened to be last in the folder. Show the first.
+		if let first = all.first {
+			makeCurrent(first)
 		}
 	}
 }

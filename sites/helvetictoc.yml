@@ -3,6 +3,7 @@ url: http://www.helvetictoc.com/
 description: A Helvetica word clock that spells out the time in prose.
 tags: [clock]
 backend: snapshot
+featured: true
 reloadInterval: 60
 css: |
   body.day, body.night {

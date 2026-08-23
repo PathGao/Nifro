@@ -42,6 +42,7 @@ extension Defaults.Keys {
 	static let dimmedOpacityFactor = Key<Double>("dimmedOpacityFactor", default: 0.5)
 	static let playlistInterval = Key<Double?>("playlistInterval")
 	static let contentRulesURL = Key<String?>("contentRulesURL")
+	static let hasInstalledFeaturedWebsites = Key<Bool>("hasInstalledFeaturedWebsites", default: false)
 }
 
 extension KeyboardShortcuts.Name {

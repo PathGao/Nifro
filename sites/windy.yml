@@ -3,6 +3,7 @@ url: https://www.windy.com/
 description: A live weather map. wind, rain, temperature and pressure layers over the whole globe.
 tags: [weather, map, data]
 backend: snapshot
+featured: true
 backendNote: >-
   Windy animates its wind-particle layer, but the information is the map, not the motion.
   A snapshot every half hour is as informative and costs nothing to keep on screen.

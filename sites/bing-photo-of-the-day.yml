@@ -3,6 +3,7 @@ url: https://bing-photo-of-the-day.netlify.app
 description: Bing's daily featured photograph, aspect-filled to the screen.
 tags: [photo, ambient]
 backend: snapshot
+featured: true
 reloadInterval: 21600
 source: >-
   Upstream Plash readme "Use-cases" section, linking sindresorhus/plash-bing-photo-of-the-day.

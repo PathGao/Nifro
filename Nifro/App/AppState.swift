@@ -130,6 +130,7 @@ final class AppState: ObservableObject {
 
 	private func didLaunch() {
 		_ = statusItemButton
+		WebsitesController.shared.installFeaturedWebsitesIfNeeded()
 		rebuildScenes()
 		setUpEvents()
 		showWelcomeScreenIfNeeded()
