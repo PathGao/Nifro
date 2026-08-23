@@ -9,15 +9,18 @@ extension AppState {
 	var isSelectingCrop: Bool { cropSelectionView != nil }
 
 	func beginCropSelection() {
-		let scene = primaryScene
-
 		guard
 			!isSelectingCrop,
 			let website = WebsitesController.shared.current,
+			// The website being cropped may live on a second display. Framing it on the primary one
+			// would put the overlay on the wrong screen and record a rectangle measured against it.
+			let scene = scenes.first(where: { $0.website?.id == website.id }) ?? scenes.first,
 			let screen = scene.screen
 		else {
 			return
 		}
+
+		croppingSceneDisplay = scene.display
 
 		cropSelectionPreviousCrop = website.crop
 
@@ -50,7 +53,8 @@ extension AppState {
 	}
 
 	private func finishCropSelection(with selection: CGRect?, on screen: NSScreen) {
-		let scene = primaryScene
+		let scene = scenes.first { $0.display == croppingSceneDisplay } ?? primaryScene
+		croppingSceneDisplay = nil
 
 		cropSelectionView?.removeFromSuperview()
 		cropSelectionView = nil

@@ -57,7 +57,7 @@ extension WebsitesController {
 	/**
 	The website that should be showing on `display` right now, taking the schedule into account.
 	*/
-	fileprivate func scheduled(for display: Display?, at date: Date = .now) -> Website? {
+	func scheduled(for display: Display?, at date: Date = .now) -> Website? {
 		let candidates = eligible(for: display, at: date)
 		return candidates.first { $0.isCurrent } ?? candidates.first
 	}

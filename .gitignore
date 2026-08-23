@@ -1,7 +1,15 @@
+# macOS
+.DS_Store
+
+# Xcode
 xcuserdata/
-.typecheck/.build/
-.typecheck/.swiftpm/
 .xcode-build/
-.release/
-.venv/
+
+# SwiftPM, used by the test target
 .build/
+
+# Release staging
+.release/
+
+# Local virtualenv for the site registry scripts
+.venv/

@@ -87,7 +87,20 @@ final class OcclusionMonitor {
 		update()
 	}
 
-	// No `deinit` invalidating the timer. This object lives as long as the app does, and a nonisolated deinit cannot touch a `Timer` under Swift 6 anyway. The timer block holds `self` weakly, so it keeps nothing alive.
+	/**
+	Stop polling.
+
+	Needed because there is one of these per scene, and scenes are torn down whenever a display is
+	plugged in or out. A `deinit` cannot do it: a nonisolated deinit cannot touch a `Timer` under
+	Swift 6. The timer block holds `self` weakly, so nothing is kept alive by it, but the timer keeps
+	firing on the run loop until told otherwise.
+	*/
+	func stop() {
+		timer?.invalidate()
+		timer = nil
+		cancellables.removeAll()
+	}
+
 
 	/**
 	Force a re-check. Costs one window-list snapshot and a grid fill.

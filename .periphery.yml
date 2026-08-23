@@ -32,8 +32,9 @@ retain_files: []
 
 # Known findings we keep, and why. Re-check these when the code around them changes.
 #
-#   OcclusionMonitor.timer          Holding it is the entire point — a repeating
-#                                   Timer nobody retains stops firing. Nothing reads it.
+#   OcclusionMonitor.timer          Holding it is the entire point. A repeating Timer nobody
+#                                   retains stops firing. Nothing reads it, but stop() invalidates
+#                                   it when the scene it belongs to goes away.
 #
 #   ActionTrampoline.action
 #   ActionTrampoline.handleAction   Reached through #selector. Deleting them compiles

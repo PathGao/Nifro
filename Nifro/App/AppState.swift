@@ -94,6 +94,11 @@ final class AppState: ObservableObject {
 	var cropSelectionView: CropSelectionView?
 	var cropSelectionPreviousCrop: CGRect?
 
+	/**
+	Which display the crop being framed belongs to, so finishing acts on the scene that started it.
+	*/
+	var croppingSceneDisplay: Display??
+
 	var webViewError: Error? {
 		didSet {
 			if let webViewError {
@@ -176,7 +181,10 @@ final class AppState: ObservableObject {
 		scenes = kept
 
 		for scene in scenes {
-			scene.website = WebsitesController.shared.current(for: scene.display)
+			// `scheduled` rather than a plain lookup: rebuilding happens on display changes and on any
+			// edit to the list, and a lookup that ignores the hours would put a website back on screen
+			// after its window closed, until the next playlist tick noticed.
+			scene.website = WebsitesController.shared.scheduled(for: scene.display)
 			scene.installContentView()
 			scene.window.isInteractive = isBrowsingMode
 			scene.applyOpacity(animated: false)

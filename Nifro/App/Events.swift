@@ -17,6 +17,16 @@ extension AppState {
 			}
 			.store(in: &cancellables)
 
+		// Read in four places, and until now only the window frame listened. Toggling it left the
+		// colour band and the page layout size showing the answer to the old setting.
+		Defaults.publisher(.extendBelowMenuBar, options: [])
+			.sink { [self] _ in
+				for scene in scenes {
+					scene.reapplyContent()
+				}
+			}
+			.store(in: &cancellables)
+
 		Defaults.publisher(.solidColorUnderMenuBar, options: [])
 			.sink { [self] _ in
 				for scene in scenes {
@@ -121,6 +131,14 @@ extension AppState {
 			.sink { [self] _ in
 				for scene in scenes {
 					scene.applyOpacity()
+				}
+			}
+			.store(in: &cancellables)
+
+		Defaults.publisher(.playlistInterval, options: [])
+			.sink { [self] _ in
+				for scene in scenes {
+					scene.resetPlaylistTimer()
 				}
 			}
 			.store(in: &cancellables)

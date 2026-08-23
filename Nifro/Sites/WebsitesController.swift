@@ -177,14 +177,6 @@ final class WebsitesController {
 	}
 
 	/**
-	The website showing on `display`, if any.
-	*/
-	func current(for display: Display?) -> Website? {
-		let onDisplay = all.filter { $0.effectiveDisplay == display }
-		return onDisplay.first { $0.isCurrent } ?? onDisplay.first
-	}
-
-	/**
 	Record a title observed in the live web view, if we do not already have one.
 
 	`LPMetadataProvider` fetches the raw HTML with subresources turned off and gives up after a few seconds. It comes back empty for anything that sets its title from JavaScript or loads slowly, which covers a lot of the sites people use as wallpapers. The web view has already run the page, so its title is more accurate and costs nothing.
