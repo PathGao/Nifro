@@ -236,6 +236,8 @@ of the answer.
 | **M4** | Only in memory | **No, and there is nothing to be done.** A canvas that keeps its camera in a variable and writes it nowhere cannot be asked where it was |
 | **M5** | Half in the address, half in memory | **Half.** floor796 is this, and it is worth reading its own numbers for: `restorePositionFromUrl: true`, `restorePositionFromLS: false`, and a `_matrixPosition._zoomFactor` that appears in neither. So *where* comes back — the fragment is the only route the site supports, which is exactly what M2 restores — and *how close* does not. The two together are what somebody sees, so getting one back still looks wrong |
 
+| **M6** | Keep the page instead of remembering it | **The only complete answer, and it costs a process.** Everything above is reconstruction: the page is torn down and something is handed back to a fresh copy of it. A page that is never torn down loses nothing — position, magnification, scroll, login, animation state, whatever the site keeps and wherever it keeps it. Switching website builds a new web view and releases the old one; keeping the previous one alive instead is one more WebContent process for as long as it is kept. It would also answer K3, since switching back would be instant rather than a page load. Worth doing as a per-website switch — "keep this page loaded" — so the cost is chosen by whoever wants it, on the page they want it for |
+
 **Why a site entry cannot patch M5.** Custom per-site JavaScript is injected into
 `.world(name: UUID())`, an isolated world, so it cannot see `window.floor796` or any other page
 global. Persisting a site's own zoom from a site entry would mean injecting into the page's world
