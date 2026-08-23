@@ -236,14 +236,25 @@ of the answer.
 | **M4** | Only in memory | **No, and there is nothing to be done.** A canvas that keeps its camera in a variable and writes it nowhere cannot be asked where it was |
 | **M5** | Half in the address, half in memory | **Half.** floor796 is this, and it is worth reading its own numbers for: `restorePositionFromUrl: true`, `restorePositionFromLS: false`, and a `_matrixPosition._zoomFactor` that appears in neither. So *where* comes back — the fragment is the only route the site supports, which is exactly what M2 restores — and *how close* does not. The two together are what somebody sees, so getting one back still looks wrong |
 
-| **M6** | Keep the page instead of remembering it | **The only complete answer, and it costs a process.** Everything above is reconstruction: the page is torn down and something is handed back to a fresh copy of it. A page that is never torn down loses nothing — position, magnification, scroll, login, animation state, whatever the site keeps and wherever it keeps it. Switching website builds a new web view and releases the old one; keeping the previous one alive instead is one more WebContent process for as long as it is kept. It would also answer K3, since switching back would be instant rather than a page load. Worth doing as a per-website switch — "keep this page loaded" — so the cost is chosen by whoever wants it, on the page they want it for |
+| **M6** | Keep the page instead of remembering it | **Complete within one run of the app, and nothing beyond it.** A page that is never torn down loses nothing — position, magnification, scroll, login, animation state, whatever the site keeps and wherever it keeps it. But it is memory, so quitting, a restart, or disabling ends it as surely as a reload does. It answers "switch away and come back", which is the case people hit hourly, and it answers K3 with it, since switching back is not a page load. It does not answer "open the Mac tomorrow". One more WebContent process for as long as a page is kept, which is why it should be a per-website switch rather than a policy |
 
-**Why a site entry cannot patch M5.** Custom per-site JavaScript is injected into
-`.world(name: UUID())`, an isolated world, so it cannot see `window.floor796` or any other page
-global. Persisting a site's own zoom from a site entry would mean injecting into the page's world
-instead — which is a real change of boundary, not a flag: the page could then read and rewrite
-anything a site entry does, and every entry in the catalogue runs on somebody else's machine. Worth
-deciding on purpose if a second site ever needs it; not worth it for one.
+**The one route that survives a restart, and what it costs.** Custom per-site JavaScript is injected
+into `.world(name: UUID())`, an isolated world, so it cannot see `window.floor796` or any other page
+global — which is why a site entry cannot read the zoom, let alone put it back. Injecting into the
+page's world instead would let an entry save the zoom to `localStorage` and restore it on load, and
+`localStorage` is on disk, so that is the only answer here that outlives the app. M6 does not: it is
+memory, and memory ends when the app does.
+
+The cost was overstated when this was first written. The app's own scripts — the audio control —
+live in `.defaultClient` and would stay isolated either way, so what changes is only whether a
+website's own entry can touch that website's globals. The entry is already wrapped in an IIFE, so it
+leaks nothing into the page by accident, and it runs on the page it was written for and nowhere else.
+The honest risk is the reverse direction: a page could redefine what an entry reaches for. For a
+wallpaper that buys an attacker nothing an ordinary page cannot already do to itself.
+
+So the shape to build, if this is wanted, is a per-entry opt-in — `pageWorld: true` in the site
+schema, isolated by default — rather than changing the world for everything. Whoever reviews an entry
+then sees which ones asked for it, and the rest keep the boundary they have.
 
 **M2 is built.** The manual version already existed — "Update Website to Current" in
 the menu points the stored website at the address currently loaded — which is proof both that people
