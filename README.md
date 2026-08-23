@@ -5,8 +5,8 @@
 <h1 align="center">Nifro</h1>
 
 <p align="center">
-  <b>Make any website your Mac desktop wallpaper.</b><br>
-  A clock, your calendar, a dashboard, a live map, a shader, a nature camera.<br>
+  <b>A live window to somewhere else, behind your work.</b><br>
+  Make any website your Mac desktop wallpaper: a nature film, a live camera, a map, a dashboard, or a shader.<br>
   Anything a browser can draw, drawn behind your windows.
 </p>
 
