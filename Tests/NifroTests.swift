@@ -691,3 +691,46 @@ struct ZoomDecodingTests {
 		#expect(asObject?["centerX"] == nil)
 	}
 }
+
+/**
+Version comparison, which goes wrong quietly: compared as text, 0.1.10 is older than 0.1.9, so the project that has shipped ten patches is the one that stops telling anybody about them.
+*/
+@Suite("Update check")
+struct UpdateCheckTests {
+	@Test("A later version is newer")
+	func laterIsNewer() {
+		#expect(UpdateCheck.isNewer("0.1.4", than: "0.1.3"))
+		#expect(UpdateCheck.isNewer("0.2.0", than: "0.1.9"))
+		#expect(UpdateCheck.isNewer("1.0.0", than: "0.9.9"))
+	}
+
+	@Test("Ten is not less than nine")
+	func doubleDigitsAreNotText() {
+		#expect(UpdateCheck.isNewer("0.1.10", than: "0.1.9"))
+		#expect(!UpdateCheck.isNewer("0.1.9", than: "0.1.10"))
+	}
+
+	@Test("The same version is not newer, however it is spelled")
+	func sameIsNotNewer() {
+		#expect(!UpdateCheck.isNewer("0.1.3", than: "0.1.3"))
+		// A missing component is zero, so these are the same version.
+		#expect(!UpdateCheck.isNewer("0.2", than: "0.2.0"))
+		#expect(!UpdateCheck.isNewer("0.2.0", than: "0.2"))
+	}
+
+	@Test("An older version is not newer")
+	func olderIsNotNewer() {
+		#expect(!UpdateCheck.isNewer("0.1.2", than: "0.1.3"))
+		#expect(!UpdateCheck.isNewer("0.9.9", than: "1.0.0"))
+	}
+
+	@Test("Anything unparseable is not newer")
+	func rubbishIsNotNewer() {
+		// This drives a menu item that sends people to a download page. Being wrong in the direction of
+		// silence is the cheap mistake.
+		#expect(!UpdateCheck.isNewer("", than: "0.1.3"))
+		#expect(!UpdateCheck.isNewer("nightly", than: "0.1.3"))
+		#expect(!UpdateCheck.isNewer("0.1.3-beta", than: "0.1.3"))
+		#expect(!UpdateCheck.isNewer("0.1.4", than: "not-a-version"))
+	}
+}

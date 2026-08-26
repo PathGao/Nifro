@@ -69,6 +69,18 @@ private final class AppDelegate: NSObject, NSApplicationDelegate {
 				try? await Task.sleep(for: .seconds(6 * 60 * 60))
 			}
 		}
+
+		// Daily, which is Sparkle's default and what macOS apps have settled on. Written down rather
+		// than acted on: the menu reads it the next time it is opened.
+		Task {
+			while !Task.isCancelled {
+				if let latest = await UpdateCheck.latestReleaseVersion() {
+					Defaults[.latestKnownVersion] = latest
+				}
+
+				try? await Task.sleep(for: .seconds(UpdateCheck.interval))
+			}
+		}
 	}
 
 	// This is only run when the app is started when it's already running.

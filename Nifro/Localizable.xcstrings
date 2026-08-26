@@ -2009,6 +2009,16 @@
         }
       }
     },
+    "Update to %@…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新到 %@…"
+          }
+        }
+      }
+    },
     "Use print styles" : {
       "localizations" : {
         "zh-Hans" : {

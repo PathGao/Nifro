@@ -16,6 +16,30 @@ extension AppState {
 	The dot is the state the switch above it is in — green while the wallpaper is showing, hollow while
 	it is not — so the pair reads as one statement instead of two.
 	*/
+	/**
+	Says a newer version exists, and only then.
+
+	Reads what the last check wrote; it never checks. The menu is torn down and rebuilt on every open,
+	so a check started here would be a network request every time somebody looked at their websites.
+
+	This is the whole of the announcement, on purpose. Sparkle's guidance for background apps is to
+	stay out of the way — no dialog, no stolen focus — and an app with no Dock icon has no badge to
+	put a number on either. So it waits in the menu, which is the only place this app is ever looked
+	at, and says nothing anywhere else.
+	*/
+	private func addUpdateItemIfNeeded() {
+		guard
+			let latest = Defaults[.latestKnownVersion],
+			UpdateCheck.isNewer(latest, than: SSApp.version)
+		else {
+			return
+		}
+
+		menu.addCallbackItem(String(localized: "Update to \(latest)…")) {
+			Constants.latestReleaseURL.open()
+		}
+	}
+
 	private func addInfoMenuItem() {
 		guard
 			let website = currentWebsite,
@@ -234,6 +258,7 @@ extension AppState {
 			.setShortcut(for: Shortcut.toggleEnabled.name)
 		}
 
+		addUpdateItemIfNeeded()
 		addInfoMenuItem()
 
 		menu.addSeparator()
