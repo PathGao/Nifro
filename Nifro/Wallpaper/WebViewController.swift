@@ -274,7 +274,7 @@ extension WebViewController: WKNavigationDelegate {
 		// it. `revealPage` refreshes the band itself, and does nothing if the page is already up.
 		scene?.revealPage()
 		scene?.refreshMenuBarBandColor()
-		scene?.restoreScrollPosition(in: webView)
+		scene?.restorePageState(in: webView)
 
 		internalOnLoaded(nil)
 	}

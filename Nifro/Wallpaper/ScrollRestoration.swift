@@ -156,9 +156,44 @@ extension WallpaperScene {
 	}
 
 	/**
+	Put a freshly loaded page back the way the user left it.
+
+	Both kinds together, and every caller takes this rather than one of the parts, because they had
+	drifted: the scroll position was restored from the two places a page can arrive, and the zoom level
+	from one — the wrong one. `zoomLevelWrapper` was read off `webViewController.webView`, which during
+	a swap is still the *outgoing* page, so switching website wrote the old page's zoom back onto the
+	old page and the new one arrived at 1. The web view to act on is the one being handed the page, so
+	it is a parameter here, exactly as it already was for the scroll.
+
+	This is the same guard the per-page defaults themselves got: a third kind of remembered state has
+	one place to be added, and both arrival paths get it for free.
+	*/
+	func restorePageState(in webView: WKWebView) {
+		restoreScrollPosition(in: webView)
+		restoreZoomLevel(in: webView)
+	}
+
+	/**
+	Put back the zoom level chosen from the page's own context menu.
+	*/
+	private func restoreZoomLevel(in webView: WKWebView) {
+		guard let webView = webView as? SSWebView else {
+			return
+		}
+
+		// Reading the wrapper gives the persisted level, or the live one when nothing was persisted.
+		// Writing it applies `pageZoom`. Skipping 1 keeps an untouched page from being written back.
+		let zoomLevel = webView.zoomLevelWrapper
+
+		if zoomLevel != 1 {
+			webView.zoomLevelWrapper = zoomLevel
+		}
+	}
+
+	/**
 	Scroll a freshly loaded page back to where it was.
 	*/
-	func restoreScrollPosition(in webView: WKWebView) {
+	private func restoreScrollPosition(in webView: WKWebView) {
 		guard
 			Defaults[.restoreScrollPosition],
 			let url = webView.url,

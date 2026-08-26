@@ -23,7 +23,7 @@ extension AppState {
 			return
 		}
 
-		croppingSceneDisplay = scene.display
+		croppingScene = scene
 		croppingWebsiteID = website.id
 
 		// The stored region is left alone for the whole of this. Writing to it, which is what this used
@@ -54,14 +54,16 @@ extension AppState {
 	}
 
 	private func finishCropSelection(with zoom: Zoom?) {
-		let croppedScene = scenes.first { $0.display == croppingSceneDisplay } ?? primaryScene
-		croppingSceneDisplay = nil
+		// Optional and not substituted for: a scene that went away with its display has taken its window
+		// with it, so there is nothing to put back and nothing else that should be put back in its place.
+		let croppedScene = croppingScene
+		croppingScene = nil
 
 		cropSelectionView?.removeFromSuperview()
 		cropSelectionView = nil
 
-		croppedScene.window.level = .desktop
-		croppedScene.window.isInteractive = Defaults[.isBrowsingMode]
+		croppedScene?.window.level = .desktop
+		croppedScene?.window.isInteractive = Defaults[.isBrowsingMode]
 
 		for scene in scenes {
 			scene.applyOpacity(animated: false)
