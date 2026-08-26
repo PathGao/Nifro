@@ -10,12 +10,37 @@ final class AppState: ObservableObject {
 	let holdToInteract = HoldToInteract()
 	let powerSourceWatcher = PowerSourceWatcher()
 
+	let displayPanel = DisplayPanelController()
+
 	private(set) lazy var statusItem = with(NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)) {
 		$0.isVisible = true
 		$0.behavior = [.removalAllowed, .terminationOnRemoval]
-		$0.menu = menu
+
+		// No `menu`, because a status item with one opens it on any click and never tells the app. The
+		// panel is the left click and the menu is the right one, so the button has to see the event.
 		$0.button!.image = .menuBarIcon
 		$0.button!.setAccessibilityTitle(SSApp.name)
+		$0.button!.target = self
+		$0.button!.action = #selector(handleStatusItemClick)
+		$0.button!.sendAction(on: [.leftMouseUp, .rightMouseUp])
+	}
+
+	/**
+	Left opens the panel, right opens the menu that is still the way to everything the panel has not
+	taken over yet.
+	*/
+	@objc
+	private func handleStatusItemClick() {
+		guard NSApp.currentEvent?.type != .rightMouseUp else {
+			// `popUpMenu` is deprecated and the supported route is to hand the item its menu, let it
+			// open, and take it away again — otherwise the next left click opens the menu too.
+			statusItem.menu = menu
+			statusItemButton.performClick(nil)
+			statusItem.menu = nil
+			return
+		}
+
+		displayPanel.toggle(relativeTo: statusItemButton)
 	}
 
 	private(set) lazy var statusItemButton = statusItem.button!

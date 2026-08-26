@@ -1,4 +1,5 @@
 import AppKit
+import WebKit
 import Combine
 
 /**
@@ -368,6 +369,33 @@ final class WallpaperScene {
 			$0.duration = 0.25
 			window.animator().alphaValue = target
 		}
+	}
+
+	/**
+	A picture of what this display is showing right now.
+
+	Taken from our own web view, which needs no permission at all — this is the app photographing its
+	own view, not the screen. Screen Recording would be the other way to get this, and asking a
+	wallpaper app for it to draw a thumbnail is a trade nobody should have to make.
+
+	`nil` when there is nothing up: no website, or a page that has not arrived yet. The panel draws its
+	own empty state rather than a blank rectangle that looks like a broken page.
+	*/
+	func snapshot() async -> NSImage? {
+		guard
+			website != nil,
+			loadedWebsite != nil
+		else {
+			return nil
+		}
+
+		let configuration = WKSnapshotConfiguration()
+
+		// The page is already on screen, so there is nothing to wait for, and waiting on a wallpaper
+		// that animates means waiting forever.
+		configuration.afterScreenUpdates = false
+
+		return try? await webViewController.webView.takeSnapshot(configuration: configuration)
 	}
 
 	/**
