@@ -59,6 +59,18 @@ private final class AppDelegate: NSObject, NSApplicationDelegate {
 		AppState.shared.setUpURLCommands()
 	}
 
+	func applicationDidFinishLaunching(_ notification: Notification) {
+		// On a timer and not only at launch: this app is started at login and then left alone for
+		// weeks, so a check that runs once per launch is a check that mostly does not run.
+		Task {
+			while !Task.isCancelled {
+				await DiskBudget.removeOrphanedStores(keeping: Set(Defaults[.websites].map(\.id)))
+				await DiskBudget.enforce()
+				try? await Task.sleep(for: .seconds(6 * 60 * 60))
+			}
+		}
+	}
+
 	// This is only run when the app is started when it's already running.
 	func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
 		AppState.shared.handleMenuBarIcon()

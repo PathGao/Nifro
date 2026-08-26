@@ -2431,8 +2431,8 @@ extension WKWebsiteDataStore {
 	/**
 	Clear all website data like cookies, local storage, caches, etc.
 
-	On the store rather than on a web view. It touches no web view and clears the shared store, so
-	hanging it off one made callers reach for a web view they had no other use for.
+	On the type rather than on a web view. It touches no web view and reaches every store the app has,
+	so hanging it off one made callers reach for a web view they had no other use for.
 	*/
 	static func clearAllWebsiteData() async {
 		HTTPCookieStorage.shared.removeCookies(since: .distantPast)
@@ -2441,7 +2441,9 @@ extension WKWebsiteDataStore {
 		// origin, and the disk cache is mostly not: measured after a clear, `Caches/WebKit/NetworkCache`
 		// still held 315MB in 1158 files, none of them rewritten since. A button that says it clears
 		// website data has to have cleared it.
-		await `default`().removeData(ofTypes: allWebsiteDataTypes(), modifiedSince: .distantPast)
+		for store in await DiskBudget.allStores() {
+			await store.removeData(ofTypes: allWebsiteDataTypes(), modifiedSince: .distantPast)
+		}
 	}
 }
 extension WKWebView {

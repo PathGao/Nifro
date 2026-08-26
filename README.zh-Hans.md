@@ -80,6 +80,26 @@ brew install --cask nifro
 
 要求 macOS 15 或更新版本。
 
+### 卸载
+
+```sh
+brew uninstall --zap --cask nifro
+```
+
+把 app 拖进废纸篓会留下它的容器目录。这是 macOS 的行为，不是 Nifro 的：容器比拥有它的 app 活得
+久，而 app 在卸载时根本没有机会执行任何代码。`--zap` 就是负责删掉它的那个参数。没加这个参数、或
+者当初是从磁盘映像装的，就手动删这几个目录：
+
+```
+~/Library/Containers/com.pathgao.nifro
+~/Library/Containers/com.pathgao.nifro.ShareExtension
+~/Library/Application Scripts/com.pathgao.nifro
+~/Library/Application Scripts/com.pathgao.nifro.ShareExtension
+```
+
+里面装的大多是 WebKit 的东西而不是你的东西，Nifro 运行期间会把它压在 100 MB 以内，见
+[`DiskBudget`](Nifro/Support/DiskBudget.swift)。**设置 → 高级 → 清除所有网站数据**可以随时清空。
+
 ## 这个项目从哪来
 
 Nifro 是 Sindre Sorhus 的 [Plash](https://github.com/sindresorhus/Plash) 的开源分支，取自它在

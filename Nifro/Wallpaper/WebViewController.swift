@@ -22,6 +22,13 @@ final class WebViewController: NSViewController {
 		let configuration = WKWebViewConfiguration()
 		configuration.allowsAirPlayForMediaPlayback = false
 
+		// Its own store, so deleting the website deletes what the website wrote. Read here for the same
+		// reason everything else below is: this web view belongs to one website for its whole life, and
+		// a new one is built when the website changes.
+		if let id = scene?.website?.id {
+			configuration.websiteDataStore = DiskBudget.store(for: id)
+		}
+
 		// A wallpaper has nobody to click play. The macOS default happens to allow this, but the
 		// header documents no default, and this is now load-bearing for the embedded players.
 		configuration.mediaTypesRequiringUserActionForPlayback = []
