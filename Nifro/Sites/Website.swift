@@ -73,8 +73,20 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	*/
 	@MainActor
 	var effectiveDisplay: Display? {
-		let chosen = display ?? Defaults[.display]
-		return Defaults[.keepWallpaperWhenDisplayUnplugged] ? chosen?.withFallbackToMain : chosen
+		// `Defaults[.display]` is bound before the `??` and not written inline. Measured, on two
+		// displays: written inline it hands back `nil` even with the key set, and every website then
+		// routes to no display at all. Both sides of that `??` are `Display?`, which leaves the
+		// subscript free to be read as a nested optional — `.some(nil)` is not `nil`, so the operator
+		// returns the inner nothing instead of the right-hand side. It happened to work before this
+		// property was split into steps, because the trailing `?.withFallbackToMain` pinned the type
+		// down. Nothing pins it here, so the read is given a name first.
+		let chosenByUser = Defaults[.display]
+
+		guard let chosen = display ?? chosenByUser else {
+			return nil
+		}
+
+		return Defaults[.keepWallpaperWhenDisplayUnplugged] ? chosen.withFallbackToMain : chosen
 	}
 
 	/**

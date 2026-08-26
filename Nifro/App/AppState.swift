@@ -240,6 +240,7 @@ final class AppState: ObservableObject {
 
 		scenes = kept
 
+
 		for scene in scenes {
 			// `scheduled` rather than a plain lookup: rebuilding happens on display changes and on any
 			// edit to the list, and a lookup that ignores the hours would put a website back on screen
