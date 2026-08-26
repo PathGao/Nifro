@@ -19,17 +19,68 @@ struct DisplayPanel: View {
 	}
 
 	var body: some View {
-		HStack(alignment: .top, spacing: 16) {
-			ForEach(model.columns) { column in
-				DisplayColumn(column: column, model: model)
+		VStack(spacing: 0) {
+			HStack(alignment: .top, spacing: 16) {
+				ForEach(model.columns) { column in
+					DisplayColumn(column: column, model: model)
+				}
 			}
+			.padding(16)
+
+			Divider()
+
+			PanelFooter(model: model)
+				.padding(.horizontal, 16)
+				.padding(.vertical, 10)
 		}
-		.padding(16)
 		.task {
 			await model.refresh()
 		}
 	}
 }
+
+/**
+Everything that is not about one display.
+
+Icons, because these five are the app's own verbs rather than a display's, and a row of words here
+would compete with the columns above for the eye. Quit keeps its label: it is the one that cannot be
+undone, and an unlabelled power symbol beside four others is exactly the button somebody presses by
+mistake.
+*/
+private struct PanelFooter: View {
+	@ObservedObject private var model: DisplayPanelModel
+
+	init(model: DisplayPanelModel) {
+		self.model = model
+	}
+
+	var body: some View {
+		HStack(spacing: 10) {
+			PanelButton(symbol: "plus", label: String(localized: "Add Website…")) {
+				model.run { Constants.openWebsitesWindow(); NotificationCenter.default.post(name: .showAddWebsiteDialog, object: nil) }
+			}
+
+			PanelButton(symbol: "list.bullet", label: String(localized: "Manage Websites…")) {
+				model.run { Constants.openWebsitesWindow() }
+			}
+
+			PanelButton(symbol: "square.grid.2x2", label: String(localized: "Site Gallery…")) {
+				model.run { Constants.openSiteGalleryWindow() }
+			}
+
+			PanelButton(symbol: "gearshape", label: String(localized: "Settings…")) {
+				model.run { SSApp.showSettingsWindow() }
+			}
+
+			Spacer()
+
+			PanelWideButton(title: String(localized: "Quit Nifro")) {
+				SSApp.quit()
+			}
+		}
+	}
+}
+
 
 /**
 Everything one display gets to say for itself.

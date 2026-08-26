@@ -6,7 +6,6 @@ final class AppState: ObservableObject {
 
 	var cancellables = Set<AnyCancellable>()
 
-	let menu = SSMenu()
 	let holdToInteract = HoldToInteract()
 	let powerSourceWatcher = PowerSourceWatcher()
 
@@ -16,8 +15,8 @@ final class AppState: ObservableObject {
 		$0.isVisible = true
 		$0.behavior = [.removalAllowed, .terminationOnRemoval]
 
-		// No `menu`, because a status item with one opens it on any click and never tells the app. The
-		// panel is the left click and the menu is the right one, so the button has to see the event.
+		// A status item with a `menu` opens it on any click and never sends its action, so it has none:
+		// the button handles the click itself and shows the panel.
 		$0.button!.image = .menuBarIcon
 		$0.button!.setAccessibilityTitle(SSApp.name)
 		$0.button!.target = self
@@ -26,20 +25,15 @@ final class AppState: ObservableObject {
 	}
 
 	/**
-	Left opens the panel, right opens the menu that is still the way to everything the panel has not
-	taken over yet.
+	Either button opens the panel.
+
+	The menu is gone. It could only ever describe one display, and everything it did the panel now does
+	per display — including the two items that had no per-display answer at all: Quit and Settings,
+	which are in the footer, and "Update Website to Current", which moved into the website's own
+	settings because it is a rare, permanent edit and a menu is the wrong place to keep one.
 	*/
 	@objc
 	private func handleStatusItemClick() {
-		guard NSApp.currentEvent?.type != .rightMouseUp else {
-			// `popUpMenu` is deprecated and the supported route is to hand the item its menu, let it
-			// open, and take it away again — otherwise the next left click opens the menu too.
-			statusItem.menu = menu
-			statusItemButton.performClick(nil)
-			statusItem.menu = nil
-			return
-		}
-
 		displayPanel.toggle(relativeTo: statusItemButton)
 	}
 

@@ -1,4 +1,5 @@
 import AppKit
+import KeyboardShortcuts
 import SwiftUI
 
 /**
@@ -21,7 +22,13 @@ final class DisplayPanelController {
 	private lazy var popover = with(NSPopover()) {
 		$0.behavior = .transient
 		$0.animates = false
+		$0.delegate = closeWatcher
 		$0.contentViewController = NSHostingController(rootView: DisplayPanel(model: model))
+	}
+
+	private lazy var closeWatcher = CloseWatcher {
+		// Put back what showing the panel took away.
+		KeyboardShortcuts.enable(Shortcut.allNames)
 	}
 
 	/**
@@ -32,6 +39,11 @@ final class DisplayPanelController {
 			popover.performClose(nil)
 			return
 		}
+
+		// The panel has its own buttons and its own menus, and a global shortcut firing while somebody
+		// is aiming at one of them acts on the wallpaper behind it. The menu this replaces did the same
+		// thing for the same reason.
+		KeyboardShortcuts.disable(Shortcut.allNames)
 
 		// An accessory app has no active application to hand the popover keyboard focus, so without
 		// this the panel comes up behind whatever the user was working in.
@@ -44,5 +56,24 @@ final class DisplayPanelController {
 		Task {
 			await model.refresh()
 		}
+	}
+}
+
+
+/**
+Tells the controller when the panel goes away.
+
+A popover closes on its own — clicking elsewhere, pressing Escape — so "it is gone" cannot be
+inferred from the thing that opened it.
+*/
+private final class CloseWatcher: NSObject, NSPopoverDelegate {
+	private let onClose: () -> Void
+
+	init(onClose: @escaping () -> Void) {
+		self.onClose = onClose
+	}
+
+	func popoverDidClose(_ notification: Notification) {
+		onClose()
 	}
 }

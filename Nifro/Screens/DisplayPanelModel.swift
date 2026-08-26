@@ -153,6 +153,17 @@ final class DisplayPanelModel: ObservableObject {
 	}
 
 	/**
+	Close the panel, then do the thing.
+
+	In that order, and always: every one of these opens a window, and a popover left up in front of the
+	window it just opened is the panel getting in the way of what it was asked for.
+	*/
+	func run(_ action: @escaping () -> Void) {
+		onClose?()
+		action()
+	}
+
+	/**
 	Put the panel away. Set by whatever is showing it.
 	*/
 	var onClose: (() -> Void)?

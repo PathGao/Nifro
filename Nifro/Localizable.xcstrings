@@ -259,6 +259,16 @@
         }
       }
     },
+    "Browsing Mode let you move this page somewhere else. Saving that address makes it where the wallpaper starts from now on." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "浏览模式让你把这个页面挪到了别处。保存这个地址，壁纸以后就从这里开始。"
+          }
+        }
+      }
+    },
     "Browsing Mode" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1289,6 +1299,16 @@
         }
       }
     },
+    "Now showing" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "当前显示"
+          }
+        }
+      }
+    },
     "Once a day. Nifro mentions a newer version in the menu and nowhere else — it does not interrupt, and it never installs anything." : {
       "localizations" : {
         "zh-Hans" : {
@@ -1475,6 +1495,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "退出 %@"
+          }
+        }
+      }
+    },
+    "Quit Nifro" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "退出 Nifro"
           }
         }
       }
@@ -2215,6 +2245,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "更新到 %@…"
+          }
+        }
+      }
+    },
+    "Use This Address" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "使用这个地址"
           }
         }
       }

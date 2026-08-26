@@ -4,18 +4,6 @@ import KeyboardShortcuts
 
 extension AppState {
 	func setUpEvents() {
-		menu.onUpdate = { [self] in
-			updateMenu()
-		}
-
-		menu.onOpen = {
-			KeyboardShortcuts.disable(Shortcut.allNames)
-		}
-
-		menu.onClose = {
-			KeyboardShortcuts.enable(Shortcut.allNames)
-		}
-
 		powerSourceWatcher?.didChangePublisher
 			.sink { [self] _ in
 				guard Defaults[.deactivateOnBattery] else {
