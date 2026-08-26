@@ -35,17 +35,6 @@ enum DiskBudget {
 	]
 
 	/**
-	Types that must survive a sweep, because only the user can put them back.
-	*/
-	static let keptTypes: Set<String> = [
-		WKWebsiteDataTypeCookies,
-		WKWebsiteDataTypeLocalStorage,
-		WKWebsiteDataTypeSessionStorage,
-		WKWebsiteDataTypeIndexedDBDatabases,
-		WKWebsiteDataTypeServiceWorkerRegistrations
-	]
-
-	/**
 	Where WebKit puts everything the sweep can reach.
 
 	Named rather than measured from the container root, because the budget is about what a sweep could

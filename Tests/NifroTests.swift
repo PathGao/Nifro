@@ -620,10 +620,13 @@ The one thing the cache sweep can get wrong that nobody would notice until a use
 struct DiskBudgetTests {
 	@Test("The sweep only drops types the network can hand back")
 	func dropsNothingTheUserPutThere() {
-		#expect(DiskBudget.refetchableTypes.isDisjoint(with: DiskBudget.keptTypes))
+		// Named one by one rather than checked against a "keep these" set, because such a set has no
+		// caller outside this test and the unused-code scan is right to say so.
 		#expect(!DiskBudget.refetchableTypes.contains(WKWebsiteDataTypeCookies))
 		#expect(!DiskBudget.refetchableTypes.contains(WKWebsiteDataTypeLocalStorage))
+		#expect(!DiskBudget.refetchableTypes.contains(WKWebsiteDataTypeSessionStorage))
 		#expect(!DiskBudget.refetchableTypes.contains(WKWebsiteDataTypeIndexedDBDatabases))
+		#expect(!DiskBudget.refetchableTypes.contains(WKWebsiteDataTypeServiceWorkerRegistrations))
 		#expect(!DiskBudget.refetchableTypes.isEmpty)
 	}
 
