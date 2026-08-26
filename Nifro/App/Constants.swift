@@ -65,6 +65,12 @@ extension Defaults.Keys {
 	// Display key -> group id. A flat map rather than a list of sets, because the question asked of it
 	// is always "what is this display in", and a list would have to be searched to answer it.
 	static let syncGroups = Key<[String: String]>("syncGroups", default: [:])
+
+	// Website id -> where the server sent it instead. Only written when WebKit reports an actual
+	// redirect, never inferred by comparing addresses: a page that rewrites its own address as you
+	// drag a map is not a redirect, and telling the user their website is wrong because they moved a
+	// map would be worse than saying nothing.
+	static let redirectedAddresses = Key<[String: String]>("redirectedAddresses", default: [:])
 	static let contentRulesURL = Key<String?>("contentRulesURL")
 	static let hasInstalledFeaturedWebsites = Key<Bool>("hasInstalledFeaturedWebsites", default: false)
 

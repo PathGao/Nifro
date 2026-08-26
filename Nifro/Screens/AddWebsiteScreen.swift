@@ -246,7 +246,6 @@ struct AddWebsiteScreen: View {
 			}
 		}
 		Section {
-			WebsiteNavigatedAddressSetting(website: website.wrappedValue)
 			WebsiteAudioSetting(audio: website.audio)
 			WebsiteInteractionSetting(allowsInteraction: website.allowsInteraction)
 			WebsiteDisplaySetting(display: website.display)

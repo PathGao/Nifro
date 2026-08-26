@@ -259,16 +259,6 @@
         }
       }
     },
-    "Browsing Mode let you move this page somewhere else. Saving that address makes it where the wallpaper starts from now on." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "浏览模式让你把这个页面挪到了别处。保存这个地址，壁纸以后就从这里开始。"
-          }
-        }
-      }
-    },
     "Browsing Mode" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1299,16 +1289,6 @@
         }
       }
     },
-    "Now showing" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "当前显示"
-          }
-        }
-      }
-    },
     "Once a day. Nifro mentions a newer version in the menu and nowhere else — it does not interrupt, and it never installs anything." : {
       "localizations" : {
         "zh-Hans" : {
@@ -1445,16 +1425,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "请选择一个含有「index.html」文件的目录。"
-          }
-        }
-      }
-    },
-    "Points the stored website at the URL currently loaded" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "把保存的网址改成当前正在显示的地址"
           }
         }
       }
@@ -2089,6 +2059,16 @@
         }
       }
     },
+    "This site sends Nifro somewhere else every time it loads: %@. Click to save that address instead." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这个站点每次加载都会把 Nifro 送到别处：%@。点一下就把那个地址存下来。"
+          }
+        }
+      }
+    },
     "Title" : {
       "localizations" : {
         "zh-Hans" : {
@@ -2229,32 +2209,12 @@
         }
       }
     },
-    "Update Website to Current" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "把网站更新为当前地址"
-          }
-        }
-      }
-    },
     "Update to %@…" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "更新到 %@…"
-          }
-        }
-      }
-    },
-    "Use This Address" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "使用这个地址"
           }
         }
       }
