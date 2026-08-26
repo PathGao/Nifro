@@ -36,6 +36,7 @@
 		A1C0DE01B0074E01A0000021 /* URLCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000022 /* URLCommand.swift */; };
 		A1C0DE01B0074E01A0000015 /* ImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000016 /* ImageCache.swift */; };
 		A1C0DE01B0074E01A0000041 /* DiskBudget.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000042 /* DiskBudget.swift */; };
+		A1C0DE01B0074E01A0000081 /* RotationMode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000082 /* RotationMode.swift */; };
 		A1C0DE01B0074E01A0000051 /* UpdateCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000052 /* UpdateCheck.swift */; };
 		A1C0DE01B0074E01A0000061 /* Language.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000062 /* Language.swift */; };
 		A1C0DE01B0074E01A0000013 /* SecurityScopedBookmarks.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000014 /* SecurityScopedBookmarks.swift */; };
@@ -60,6 +61,7 @@
 		A1C0DE01B0074E01A0000075 /* DisplayPanelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000076 /* DisplayPanelController.swift */; };
 		A1C0DE01B0074E01A0000073 /* DisplayPanelModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000074 /* DisplayPanelModel.swift */; };
 		A1C0DE01B0074E01A0000071 /* DisplayPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000072 /* DisplayPanel.swift */; };
+		A1C0DE01B0074E01A0000091 /* PanelControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000092 /* PanelControls.swift */; };
 		E3369A9A265E344300BAC78B /* URLCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3369A99265E344300BAC78B /* URLCommands.swift */; };
 		E3494C19297D236000983648 /* LaunchAtLogin in Frameworks */ = {isa = PBXBuildFile; productRef = E3494C18297D236000983648 /* LaunchAtLogin */; };
 		E3494C26297D38CC00983648 /* Intents.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3494C1A297D38CC00983648 /* Intents.swift */; };
@@ -135,6 +137,7 @@
 		A1C0DE01B0074E01A0000022 /* URLCommand.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = URLCommand.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A1C0DE01B0074E01A0000016 /* ImageCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ImageCache.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A1C0DE01B0074E01A0000042 /* DiskBudget.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = DiskBudget.swift; sourceTree = "<group>"; usesTabs = 1; };
+		A1C0DE01B0074E01A0000082 /* RotationMode.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = RotationMode.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A1C0DE01B0074E01A0000052 /* UpdateCheck.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = UpdateCheck.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A1C0DE01B0074E01A0000062 /* Language.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Language.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A1C0DE01B0074E01A0000014 /* SecurityScopedBookmarks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = SecurityScopedBookmarks.swift; sourceTree = "<group>"; usesTabs = 1; };
@@ -161,6 +164,7 @@
 		A1C0DE01B0074E01A0000076 /* DisplayPanelController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = DisplayPanelController.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A1C0DE01B0074E01A0000074 /* DisplayPanelModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = DisplayPanelModel.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A1C0DE01B0074E01A0000072 /* DisplayPanel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = DisplayPanel.swift; sourceTree = "<group>"; usesTabs = 1; };
+		A1C0DE01B0074E01A0000092 /* PanelControls.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = PanelControls.swift; sourceTree = "<group>"; usesTabs = 1; };
 		E3369A99265E344300BAC78B /* URLCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLCommands.swift; sourceTree = "<group>"; };
 		E3494C1A297D38CC00983648 /* Intents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Intents.swift; sourceTree = "<group>"; };
 		E34FCBCD264D32150022BDD3 /* App.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = App.swift; sourceTree = "<group>"; };
@@ -342,6 +346,7 @@
 				A1C0DE01B0074E01A0000076 /* DisplayPanelController.swift */,
 				A1C0DE01B0074E01A0000074 /* DisplayPanelModel.swift */,
 				A1C0DE01B0074E01A0000072 /* DisplayPanel.swift */,
+				A1C0DE01B0074E01A0000092 /* PanelControls.swift */,
 				E3EC5A85250D7A0C00ABE1A1 /* WelcomeScreen.swift */,
 			);
 			path = Screens;
@@ -357,6 +362,7 @@
 				A1C0DE01B0074E01A0000012 /* ScrollableTextView.swift */,
 				A1C0DE01B0074E01A0000014 /* SecurityScopedBookmarks.swift */,
 				A1C0DE01B0074E01A0000042 /* DiskBudget.swift */,
+				A1C0DE01B0074E01A0000082 /* RotationMode.swift */,
 				A1C0DE01B0074E01A0000052 /* UpdateCheck.swift */,
 				A1C0DE01B0074E01A0000062 /* Language.swift */,
 				A1C0DE01B0074E01A0000016 /* ImageCache.swift */,
@@ -535,6 +541,7 @@
 				A1C0DE01B0074E01A0000011 /* ScrollableTextView.swift in Sources */,
 				A1C0DE01B0074E01A0000013 /* SecurityScopedBookmarks.swift in Sources */,
 				A1C0DE01B0074E01A0000041 /* DiskBudget.swift in Sources */,
+				A1C0DE01B0074E01A0000081 /* RotationMode.swift in Sources */,
 				A1C0DE01B0074E01A0000051 /* UpdateCheck.swift in Sources */,
 				A1C0DE01B0074E01A0000061 /* Language.swift in Sources */,
 				A1C0DE01B0074E01A0000015 /* ImageCache.swift in Sources */,
@@ -565,6 +572,7 @@
 				A1C0DE01B0074E01A0000075 /* DisplayPanelController.swift in Sources */,
 				A1C0DE01B0074E01A0000073 /* DisplayPanelModel.swift in Sources */,
 				A1C0DE01B0074E01A0000071 /* DisplayPanel.swift in Sources */,
+				A1C0DE01B0074E01A0000091 /* PanelControls.swift in Sources */,
 				E354442F26062D6300CA060F /* WebsitesScreen.swift in Sources */,
 				E354443C2607505100CA060F /* WebsitesController.swift in Sources */,
 				E3EC5A86250D7A0C00ABE1A1 /* WelcomeScreen.swift in Sources */,

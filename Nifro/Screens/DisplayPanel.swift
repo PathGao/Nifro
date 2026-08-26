@@ -21,9 +21,7 @@ struct DisplayPanel: View {
 	var body: some View {
 		HStack(alignment: .top, spacing: 16) {
 			ForEach(model.columns) { column in
-				DisplayColumn(column: column) {
-					model.show($0)
-				}
+				DisplayColumn(column: column, model: model)
 			}
 		}
 		.padding(16)
@@ -41,7 +39,12 @@ assembled is the thing that assembles it.
 */
 private struct DisplayColumn: View {
 	let column: DisplayPanelModel.Column
-	let onSelect: (Website.ID) -> Void
+	@ObservedObject private var model: DisplayPanelModel
+
+	init(column: DisplayPanelModel.Column, model: DisplayPanelModel) {
+		self.column = column
+		self.model = model
+	}
 
 	var body: some View {
 		VStack(spacing: 6) {
@@ -56,9 +59,72 @@ private struct DisplayColumn: View {
 
 			preview
 
+			rotationControls
+
 			picker
+
+			modeButtons
 		}
 		.frame(width: 260)
+	}
+
+	/**
+	Previous, the rotation mode, next.
+
+	The mode is one control that cycles rather than three that are mutually exclusive: it has three
+	values and only one of them is true at a time, which is a switch, and three separate buttons would
+	invite the question of what happens when two are pressed.
+	*/
+	@ViewBuilder
+	private var rotationControls: some View {
+		HStack(spacing: 10) {
+			PanelButton(
+				symbol: "chevron.left",
+				label: String(localized: "Previous website"),
+				isEnabled: column.canRotate
+			) {
+				model.step(.previous, on: column.display)
+			}
+
+			PanelButton(
+				symbol: column.rotationMode.symbol,
+				label: column.rotationMode.label,
+				isOn: column.rotationMode != .loop
+			) {
+				model.cycleRotationMode(on: column.display)
+			}
+
+			PanelButton(
+				symbol: "chevron.right",
+				label: String(localized: "Next website"),
+				isEnabled: column.canRotate
+			) {
+				model.step(.next, on: column.display)
+			}
+		}
+	}
+
+	/**
+	The two verbs no symbol says plainly, and Browsing Mode lights up while it is on.
+	*/
+	@ViewBuilder
+	private var modeButtons: some View {
+		HStack(spacing: 6) {
+			PanelWideButton(
+				title: String(localized: "Crop"),
+				isEnabled: column.websiteID != nil
+			) {
+				model.chooseRegion(on: column.display)
+			}
+
+			PanelWideButton(
+				title: String(localized: "Browsing Mode"),
+				isOn: model.isBrowsingMode,
+				isEnabled: column.websiteID != nil
+			) {
+				model.toggleBrowsingMode()
+			}
+		}
 	}
 
 	@ViewBuilder
@@ -86,6 +152,31 @@ private struct DisplayColumn: View {
 			RoundedRectangle(cornerRadius: 8)
 				.strokeBorder(.separator)
 		}
+		.overlay(alignment: .bottomTrailing) {
+			// On the picture rather than under it: these two say what this display is *doing*, and the
+			// row below says what to show on it. Keeping them apart stops the column reading as five
+			// controls in a stack with no grouping.
+			HStack(spacing: 2) {
+				PanelButton(
+					symbol: column.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill",
+					label: column.isMuted ? String(localized: "Muted") : String(localized: "Playing sound"),
+					isEnabled: column.websiteID != nil
+				) {
+					model.toggleMuted(on: column.display)
+				}
+
+				PanelButton(
+					symbol: column.isShowing ? "power" : "power.circle",
+					label: column.isShowing ? String(localized: "Showing") : String(localized: "Switched off"),
+					isOn: !column.isShowing
+				) {
+					model.toggleShowing(on: column.display)
+				}
+			}
+			.padding(4)
+			.background(.thinMaterial, in: RoundedRectangle(cornerRadius: 7))
+			.padding(6)
+		}
 	}
 
 	/**
@@ -100,7 +191,7 @@ private struct DisplayColumn: View {
 			get: { column.websiteID },
 			set: {
 				if let id = $0 {
-					onSelect(id)
+					model.show(id)
 				}
 			}
 		)) {

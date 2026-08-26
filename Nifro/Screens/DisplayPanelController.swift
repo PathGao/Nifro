@@ -12,6 +12,12 @@ have nowhere to live.
 final class DisplayPanelController {
 	private let model = DisplayPanelModel()
 
+	init() {
+		model.onClose = { [weak self] in
+			self?.popover.performClose(nil)
+		}
+	}
+
 	private lazy var popover = with(NSPopover()) {
 		$0.behavior = .transient
 		$0.animates = false

@@ -499,6 +499,16 @@
         }
       }
     },
+    "Crop" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "裁切"
+          }
+        }
+      }
+    },
     "Current Website" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1389,6 +1399,16 @@
         }
       }
     },
+    "Playing sound" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在发声"
+          }
+        }
+      }
+    },
     "Plays sound" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1689,6 +1709,26 @@
         }
       }
     },
+    "Rotating at random" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "随机轮播"
+          }
+        }
+      }
+    },
+    "Rotating in order" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "按顺序轮播"
+          }
+        }
+      }
+    },
     "Search" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1889,6 +1929,16 @@
         }
       }
     },
+    "Staying on this website" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "固定在这个网站"
+          }
+        }
+      }
+    },
     "Submit a Site…" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1935,6 +1985,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "切换到随机网站"
+          }
+        }
+      }
+    },
+    "Switched off" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已关闭"
           }
         }
       }

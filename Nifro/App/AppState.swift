@@ -134,6 +134,13 @@ final class AppState: ObservableObject {
 			}
 
 			for scene in scenes {
+				// A display switched off on its own stays off when the app comes back on. The app-wide
+				// switch is above this one, not instead of it.
+				guard !scene.isDisabledForDisplay else {
+					scene.suspend()
+					continue
+				}
+
 				scene.resume()
 
 				// Replayed, because `isBrowsingMode.didSet` drops its write while the app is disabled and
@@ -322,6 +329,31 @@ final class AppState: ObservableObject {
 		Defaults[.latestKnownVersion] = latest
 
 		return UpdateCheck.isNewer(latest, than: SSApp.version) ? .newer(latest) : .upToDate
+	}
+
+	/**
+	Switch one display off, or back on, without touching the others.
+	*/
+	func setDisplayEnabled(_ isEnabledForDisplay: Bool, on display: Display?) {
+		guard let scene = scenes.first(where: { $0.display == display }) else {
+			return
+		}
+
+		scene.isDisabledForDisplay = !isEnabledForDisplay
+
+		guard isEnabled else {
+			// The app is off anyway; the setting is recorded and applies when it comes back.
+			return
+		}
+
+		if isEnabledForDisplay {
+			scene.resume()
+			scene.loadWebsite()
+			scene.resetTimer()
+			scene.resetPlaylistTimer()
+		} else {
+			scene.suspend()
+		}
 	}
 
 	func resetTimer() {

@@ -52,6 +52,15 @@ extension Defaults.Keys {
 	static let dimWhenUnfocused = Key<Bool>("dimWhenUnfocused", default: false)
 	static let dimmedOpacityFactor = Key<Double>("dimmedOpacityFactor", default: 0.5)
 	static let playlistInterval = Key<Double?>("playlistInterval")
+
+	// Keyed by display. A dictionary rather than a key per screen, because screens come and go and a
+	// key that named one would outlive it.
+	static let rotationModes = Key<[String: RotationMode]>("rotationModes", default: [:])
+
+	// The displays switched off one at a time, as opposed to `isManuallyDisabled`, which is the whole
+	// app. Stored as the exceptions rather than as a flag per display, so a screen nobody has touched
+	// needs no entry and an unplugged one leaves nothing behind.
+	static let disabledDisplays = Key<Set<String>>("disabledDisplays", default: [])
 	static let contentRulesURL = Key<String?>("contentRulesURL")
 	static let hasInstalledFeaturedWebsites = Key<Bool>("hasInstalledFeaturedWebsites", default: false)
 
