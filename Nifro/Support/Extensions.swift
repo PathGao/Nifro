@@ -2235,7 +2235,7 @@ extension WKUserContentController {
 				return element ? { time: element.currentTime, duration: element.duration } : null;
 			};
 
-			const align = (target, duration) => {
+			const align = (target, duration, jump) => {
 				const element = biggest();
 
 				if (!element || !duration) {
@@ -2256,6 +2256,14 @@ extension WKUserContentController {
 				}
 
 				const distance = Math.abs(drift);
+
+				// Told to jump: this player has never been put in step, so whatever gap it starts with is
+				// not drift and nudging it away would take most of a minute.
+				if (jump && distance >= \(MediaSync.Tolerance.ignore)) {
+					element.playbackRate = 1;
+					element.currentTime = target;
+					return true;
+				}
 
 				if (distance < \(MediaSync.Tolerance.ignore)) {
 					element.playbackRate = 1;
@@ -2280,10 +2288,17 @@ extension WKUserContentController {
 				}
 
 				if (data.\(mediaAlignKey)) {
-					const done = align(data.\(mediaAlignKey).time, data.\(mediaAlignKey).duration);
+					const done = align(data.\(mediaAlignKey).time, data.\(mediaAlignKey).duration, !!data.\(mediaAlignKey).jump);
 
 					if (window === window.top) {
 						window.\(mediaSeekedKey) = done;
+					} else if (done) {
+						// The video is usually one frame down, so the frame that actually moved has to say
+						// so. Reporting only from the top frame made "did it jump" permanently false for
+						// every framed player — which is every YouTube wallpaper.
+						try {
+							window.top.postMessage({ \(mediaSeekedReportKey): true }, '*');
+						} catch (error) {}
 					}
 
 					for (let index = 0; index < window.frames.length; index++) {
@@ -2296,6 +2311,11 @@ extension WKUserContentController {
 				}
 
 				// A frame answering the top frame's question about where it is.
+				if (data.\(mediaSeekedReportKey) === true && window === window.top) {
+					window.\(mediaSeekedKey) = true;
+					return;
+				}
+
 				if (data.\(mediaReportKey) && window === window.top) {
 					window.\(mediaClockKey) = data.\(mediaReportKey);
 				}
@@ -2364,6 +2384,7 @@ private let mediaAlignKey = "__nifroAlignTo"
 private let mediaReportKey = "__nifroClockReport"
 private let mediaClockKey = "__nifroClock"
 private let mediaSeekedKey = "__nifroSeeked"
+private let mediaSeekedReportKey = "__nifroSeekedReport"
 
 private let audioMessageKey = "__nifroAudioMuted"
 
@@ -2423,18 +2444,19 @@ extension WKWebView {
 	Nudge or jump this page's video towards `time`. Returns whether it jumped.
 	*/
 	@discardableResult
-	func alignMedia(to time: Double, duration: Double) async -> Bool {
+	func alignMedia(to time: Double, duration: Double, jumpingRegardless: Bool = false) async -> Bool {
 		let value = try? await callAsyncJavaScript(
 			"""
 			window.\(mediaSeekedKey) = false;
-			window.postMessage({ \(mediaAlignKey): { time: time, duration: duration } }, '*');
+			window.postMessage({ \(mediaAlignKey): { time: time, duration: duration, jump: jump } }, '*');
 
-			// The message is delivered on the next turn, so the answer cannot be read in this one.
-			await new Promise(resolve => setTimeout(resolve, 0));
+			// Delivered on the next turn, and a framed player's answer has to come back up as a second
+			// message, so this waits for two hops rather than one.
+			await new Promise(resolve => setTimeout(resolve, 60));
 
 			return window.\(mediaSeekedKey) === true;
 			""",
-			arguments: ["time": time, "duration": duration],
+			arguments: ["time": time, "duration": duration, "jump": jumpingRegardless],
 			in: nil,
 			contentWorld: .defaultClient
 		)

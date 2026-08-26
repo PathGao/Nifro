@@ -48,6 +48,16 @@ enum MediaSync {
 	private static var quietUntil = [Website.ID: Date]()
 
 	/**
+	Which followers have been put in step at least once.
+
+	The nudge is for drift, and drift is small. What two players start with is not drift: they are
+	loaded separately and each begins wherever it begins, which measured about a second apart — and a
+	second closed at two percent takes the better part of a minute, during which the two screens are
+	visibly out of step. So the first alignment jumps, and every one after it nudges.
+	*/
+	private static var aligned = Set<Website.ID>()
+
+	/**
 	Start comparing, or stop if nothing is synced.
 	*/
 	static func restart() {
@@ -104,7 +114,19 @@ enum MediaSync {
 			// it out would bake in an offset the dead zone then hides.
 			let target = clock.time + Date().timeIntervalSince(sampledAt)
 
-			if await follower.alignMedia(to: target, duration: clock.duration) {
+			let isFirst = !aligned.contains(websiteID)
+			let seeked = await follower.alignMedia(
+				to: target,
+				duration: clock.duration,
+				// One jump to get in step, then never again unless something knocks it out.
+				jumpingRegardless: isFirst
+			)
+
+			// Marked only when a jump actually landed. Marking it on the attempt spent the one free jump
+			// on a page whose video had not loaded yet — measured, and it left the two a second apart
+			// for the next minute.
+			if seeked {
+				aligned.insert(websiteID)
 				quietUntil[websiteID] = Date().addingTimeInterval(Tolerance.settle)
 			}
 		}
@@ -116,5 +138,8 @@ enum MediaSync {
 	*/
 	static func forgetQuietPeriods() {
 		quietUntil.removeAll()
+
+		// A display joining a group has never been put in step, whatever it did in a previous one.
+		aligned.removeAll()
 	}
 }
