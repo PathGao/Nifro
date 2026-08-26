@@ -709,6 +709,16 @@
         }
       }
     },
+    "Follow the system" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "跟随系统"
+          }
+        }
+      }
+    },
     "For a website pinned to a particular display. On, it moves to the main display until that one is plugged back in — which is what Nifro has always done, and what macOS does with an ordinary window. Off, it goes away with its display, the way the desktop picture on that screen does. Either way the website keeps the display you chose for it." : {
       "localizations" : {
         "zh-Hans" : {
@@ -1009,6 +1019,16 @@
         }
       }
     },
+    "Later" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "稍后"
+          }
+        }
+      }
+    },
     "Launch at login" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1109,16 +1129,6 @@
         }
       }
     },
-    "Multi-display support ›" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "多显示器支持 ›"
-          }
-        }
-      }
-    },
     "Muted" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1155,6 +1165,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "下一个网站"
+          }
+        }
+      }
+    },
+    "Nifro follows your Mac's language unless you pick one here. A language that is only half translated falls back to English rather than showing anything raw." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nifro 默认跟随你 Mac 的语言，除非你在这里选一个。翻译不全的语言会退回英文，而不是显示原始标识。"
           }
         }
       }
@@ -1549,6 +1569,26 @@
         }
       }
     },
+    "Reopen Nifro to change the language?" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重新打开 Nifro 以切换语言？"
+          }
+        }
+      }
+    },
+    "Reopen Now" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "立即重新打开"
+          }
+        }
+      }
+    },
     "Report a Problem or Request a Feature…" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1915,6 +1955,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "推荐站点是一份适合当壁纸的网页清单，每条都带着让它好用的那些设置。添加一条只需要一个文件，不用写 Swift，也不用开 Xcode。"
+          }
+        }
+      }
+    },
+    "The wallpaper comes back up on its own." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "壁纸会自己回来。"
           }
         }
       }
