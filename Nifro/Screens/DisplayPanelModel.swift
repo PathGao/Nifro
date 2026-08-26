@@ -68,7 +68,7 @@ final class DisplayPanelModel: ObservableObject {
 					rotationMode: scene.rotationMode,
 					// One website has nothing to rotate to, and a control that does nothing should say so
 					// rather than shrug when pressed.
-					canRotate: WebsitesController.shared.all.count(where: { $0.effectiveDisplay == scene.display }) > 1,
+					canRotate: WebsitesController.shared.all.count { $0.effectiveDisplay == scene.display } > 1,
 					syncTargets: syncTargets(for: scene.display)
 				)
 			)
