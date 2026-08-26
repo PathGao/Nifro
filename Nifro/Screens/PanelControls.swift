@@ -158,7 +158,7 @@ struct MarqueeText: View {
 	let text: String
 	let isActive: Bool
 
-	@State private var overflow: CGFloat = 0
+	@State private var overflow = 0.0
 	@State private var isSlid = false
 
 	var body: some View {

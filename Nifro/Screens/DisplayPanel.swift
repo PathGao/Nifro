@@ -334,5 +334,4 @@ private struct DisplayColumn: View {
 		.background(.quinary, in: RoundedRectangle(cornerRadius: 5))
 		.disabled(column.choices.isEmpty)
 	}
-
 }
