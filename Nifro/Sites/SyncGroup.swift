@@ -39,14 +39,6 @@ enum SyncGroup {
 	}
 
 	/**
-	Whether `display` is synced with anything.
-	*/
-	@MainActor
-	static func isSynced(_ display: Display?) -> Bool {
-		!peers(of: display).isEmpty
-	}
-
-	/**
 	Put `display` in the same group as `other`.
 
 	Both groups merge rather than one joining the other, so syncing A to B when B is already with C

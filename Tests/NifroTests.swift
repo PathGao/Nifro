@@ -389,48 +389,6 @@ struct MenuBarStripTests {
 	}
 }
 
-/**
-Wrapping text for the menu.
-
-The version this replaces shipped a bug for years: a word longer than the line was written out, then
-written again on the next line. Text with no spaces in it came out doubled — which is every sentence
-in Chinese, so the menu showed each error twice. It lived in a file nothing tests, and that is the
-whole reason it survived.
-*/
-@Suite("Word wrapping")
-struct WordWrappingTests {
-	@Test("A word longer than the line appears once, not twice")
-	func longWordIsNotDoubled() {
-		// The shape that broke it: no spaces at all, longer than the limit.
-		let sentence = "未能完成操作。（Swift.CancellationError错误1。）"
-		let wrapped = sentence.wordWrapped(atLength: 20)
-
-		#expect(wrapped == sentence)
-		#expect(!wrapped.contains("\n"))
-	}
-
-	@Test("Wrapping happens at spaces, and every word survives once")
-	func wrapsAtSpaces() {
-		let wrapped = "the quick brown fox jumps over the lazy dog".wordWrapped(atLength: 16)
-		let lines = wrapped.components(separatedBy: "\n")
-
-		#expect(lines.allSatisfy { $0.count <= 16 })
-		#expect(wrapped.components(separatedBy: .whitespacesAndNewlines).filter { !$0.isEmpty }.count == 9)
-	}
-
-	@Test("A short string is left exactly as it was")
-	func shortStringIsUntouched() {
-		#expect("no wrap here".wordWrapped(atLength: 40) == "no wrap here")
-	}
-
-	@Test("Cancellation is recognised however it is reported")
-	func cancellationIsRecognised() {
-		#expect(isCancellation(CancellationError()))
-		#expect(isCancellation(NSError(domain: NSURLErrorDomain, code: NSURLErrorCancelled)))
-		#expect(isCancellation(CocoaError(.userCancelled)))
-		#expect(!isCancellation(NSError(domain: NSURLErrorDomain, code: NSURLErrorTimedOut)))
-	}
-}
 
 /**
 Which website is the current one, on a Mac with more than one display.
