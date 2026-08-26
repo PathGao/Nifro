@@ -36,6 +36,9 @@ private struct GeneralSettings: View {
 				}
 			}
 			Section {
+				LanguageSetting()
+			}
+			Section {
 				UpdateSetting()
 			}
 			Section {
@@ -120,6 +123,54 @@ private struct UpdateSetting: View {
 			case .newer(let version):
 				progress = .available(version: version)
 			}
+		}
+	}
+}
+
+/**
+The language the interface is drawn in, as a plain picker — which is where every app that offers this
+puts it.
+
+macOS has a per-app language of its own, three levels into System Settings. It works, and the
+complaint recorded against it was that nobody finds it; sending people there answers a
+discoverability problem with a longer walk.
+
+It asks before relaunching rather than restarting under the user.
+*/
+private struct LanguageSetting: View {
+	@State private var language = Localization.pending
+	@State private var isConfirmingRelaunch = false
+
+	var body: some View {
+		Picker(selection: $language) {
+			Text("Follow the system").tag(nil as AppLanguage?)
+			Divider()
+			ForEach(AppLanguage.allCases) {
+				Text($0.displayName).tag($0 as AppLanguage?)
+			}
+		} label: {
+			Text("Language")
+				.explained(String(localized: "Nifro follows your Mac's language unless you pick one here. A language that is only half translated falls back to English rather than showing anything raw."))
+		}
+		.onChange(of: language) { previous, new in
+			guard previous != new else {
+				return
+			}
+
+			Localization.request(new)
+			isConfirmingRelaunch = true
+		}
+		.confirmationDialog(
+			String(localized: "Reopen Nifro to change the language?"),
+			isPresented: $isConfirmingRelaunch
+		) {
+			Button(String(localized: "Reopen Now")) {
+				Localization.relaunch()
+			}
+
+			Button(String(localized: "Later"), role: .cancel) {}
+		} message: {
+			Text("The wallpaper comes back up on its own.")
 		}
 	}
 }
@@ -339,7 +390,6 @@ private struct DisplaySetting: View {
 			}
 		} label: {
 			Text("Show on")
-			Link("Multi-display support ›", destination: "https://github.com/PathGao/Nifro/issues/2")
 		}
 		.task(id: chosenDisplay) {
 			guard chosenDisplay == nil else {

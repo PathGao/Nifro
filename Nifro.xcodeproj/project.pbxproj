@@ -37,6 +37,7 @@
 		A1C0DE01B0074E01A0000015 /* ImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000016 /* ImageCache.swift */; };
 		A1C0DE01B0074E01A0000041 /* DiskBudget.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000042 /* DiskBudget.swift */; };
 		A1C0DE01B0074E01A0000051 /* UpdateCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000052 /* UpdateCheck.swift */; };
+		A1C0DE01B0074E01A0000061 /* Language.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000062 /* Language.swift */; };
 		A1C0DE01B0074E01A0000013 /* SecurityScopedBookmarks.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000014 /* SecurityScopedBookmarks.swift */; };
 		A1C0DE01B0074E01A0000011 /* ScrollableTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000012 /* ScrollableTextView.swift */; };
 		A1C0DE01B0074E01A0000001 /* Rotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000002 /* Rotation.swift */; };
@@ -132,6 +133,7 @@
 		A1C0DE01B0074E01A0000016 /* ImageCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ImageCache.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A1C0DE01B0074E01A0000042 /* DiskBudget.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = DiskBudget.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A1C0DE01B0074E01A0000052 /* UpdateCheck.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = UpdateCheck.swift; sourceTree = "<group>"; usesTabs = 1; };
+		A1C0DE01B0074E01A0000062 /* Language.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Language.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A1C0DE01B0074E01A0000014 /* SecurityScopedBookmarks.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = SecurityScopedBookmarks.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A1C0DE01B0074E01A0000012 /* ScrollableTextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ScrollableTextView.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A1C0DE01B0074E01A0000002 /* Rotation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Rotation.swift; sourceTree = "<group>"; usesTabs = 1; };
@@ -347,6 +349,7 @@
 				A1C0DE01B0074E01A0000014 /* SecurityScopedBookmarks.swift */,
 				A1C0DE01B0074E01A0000042 /* DiskBudget.swift */,
 				A1C0DE01B0074E01A0000052 /* UpdateCheck.swift */,
+				A1C0DE01B0074E01A0000062 /* Language.swift */,
 				A1C0DE01B0074E01A0000016 /* ImageCache.swift */,
 				0B4B73021E1104C03600DEFE /* Schedule.swift */,
 				A1C0DE01B0074E01A0000022 /* URLCommand.swift */,
@@ -524,6 +527,7 @@
 				A1C0DE01B0074E01A0000013 /* SecurityScopedBookmarks.swift in Sources */,
 				A1C0DE01B0074E01A0000041 /* DiskBudget.swift in Sources */,
 				A1C0DE01B0074E01A0000051 /* UpdateCheck.swift in Sources */,
+				A1C0DE01B0074E01A0000061 /* Language.swift in Sources */,
 				A1C0DE01B0074E01A0000015 /* ImageCache.swift in Sources */,
 				3188AB74960C1A115F1F09B8 /* Schedule.swift in Sources */,
 				A1C0DE01B0074E01A0000021 /* URLCommand.swift in Sources */,
