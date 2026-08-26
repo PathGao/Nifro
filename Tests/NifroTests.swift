@@ -734,3 +734,14 @@ struct UpdateCheckTests {
 		#expect(!UpdateCheck.isNewer("0.1.4", than: "not-a-version"))
 	}
 }
+
+extension UpdateCheckTests {
+	@Test("A failed check is not the same answer as being up to date")
+	func unreachableIsItsOwnAnswer() {
+		// Told apart by the type, not inferred afterwards. Inferring gets it wrong in one specific
+		// case: a fetch that fails while an older version is already on record looks identical to a
+		// fetch that succeeded and found nothing newer.
+		#expect(UpdateCheck.Result.unreachable != UpdateCheck.Result.upToDate)
+		#expect(UpdateCheck.Result.newer("0.1.4") != UpdateCheck.Result.upToDate)
+	}
+}

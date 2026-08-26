@@ -14,6 +14,19 @@ when the user has already opened the menu to look at something.
 */
 enum UpdateCheck {
 	/**
+	What a check found.
+
+	Three answers rather than an optional version, because "nothing newer" and "could not ask" are
+	different things to tell somebody who pressed a button, and inferring them apart afterwards gets it
+	wrong: a failed fetch with an older version already on record looks exactly like being up to date.
+	*/
+	enum Result: Equatable {
+		case unreachable
+		case upToDate
+		case newer(String)
+	}
+
+	/**
 	One day, which is Sparkle's default and the interval macOS apps have settled on.
 	*/
 	static let interval: TimeInterval = 24 * 60 * 60

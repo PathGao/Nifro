@@ -74,8 +74,10 @@ private final class AppDelegate: NSObject, NSApplicationDelegate {
 		// than acted on: the menu reads it the next time it is opened.
 		Task {
 			while !Task.isCancelled {
-				if let latest = await UpdateCheck.latestReleaseVersion() {
-					Defaults[.latestKnownVersion] = latest
+				// Read each time round rather than captured, so turning it off stops the next check
+				// instead of the one after a relaunch. The loop keeps its own rhythm either way.
+				if Defaults[.checksForUpdatesAutomatically] {
+					await AppState.shared.refreshLatestKnownVersion()
 				}
 
 				try? await Task.sleep(for: .seconds(UpdateCheck.interval))

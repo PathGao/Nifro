@@ -36,6 +36,9 @@ private struct GeneralSettings: View {
 				}
 			}
 			Section {
+				UpdateSetting()
+			}
+			Section {
 				ReloadIntervalSetting()
 				OpacitySetting()
 			}
@@ -43,6 +46,79 @@ private struct GeneralSettings: View {
 				DisplaySetting()
 				KeepWallpaperWhenDisplayUnpluggedSetting()
 				ShowOnAllSpacesSetting()
+			}
+		}
+	}
+}
+
+/**
+Checking for a new version, and being able to stop it.
+
+An app that reaches the network on its own has to be an app that can be told not to, so the automatic
+check is a switch. The button beside it is what the switch leaves missing: somebody who turned the
+daily check off, or who has just heard a release is out, needs a way to ask now.
+
+It says what it found. A check whose only outcome is silence cannot be told apart from one that
+failed — the same reason the clear-data button reports how much it freed.
+*/
+private struct UpdateSetting: View {
+	private enum Progress: Equatable {
+		case ready
+		case checking
+		case upToDate
+		case available(version: String)
+		case failed
+	}
+
+	@State private var progress = Progress.ready
+
+	var body: some View {
+		Defaults.Toggle(key: .checksForUpdatesAutomatically) {
+			Text("Check for updates automatically")
+				.explained(String(localized: "Once a day. Nifro mentions a newer version in the menu and nowhere else — it does not interrupt, and it never installs anything."))
+		}
+
+		LabeledContent {
+			HStack(spacing: 8) {
+				switch progress {
+				case .ready:
+					EmptyView()
+				case .checking:
+					ProgressView()
+						.controlSize(.small)
+				case .upToDate:
+					Text("Up to date")
+						.foregroundStyle(.secondary)
+				case .available(let version):
+					Button(String(localized: "Get \(version)…")) {
+						Constants.latestReleaseURL.open()
+					}
+				case .failed:
+					Text("Could not check")
+						.foregroundStyle(.secondary)
+				}
+
+				Button("Check Now") {
+					check()
+				}
+				.disabled(progress == .checking)
+			}
+		} label: {
+			Text("Version \(SSApp.version)")
+		}
+	}
+
+	private func check() {
+		progress = .checking
+
+		Task {
+			switch await AppState.shared.refreshLatestKnownVersion() {
+			case .unreachable:
+				progress = .failed
+			case .upToDate:
+				progress = .upToDate
+			case .newer(let version):
+				progress = .available(version: version)
 			}
 		}
 	}

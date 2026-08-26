@@ -58,6 +58,10 @@ extension Defaults.Keys {
 	// What the last check found, so the menu can say it without asking the network. The menu is rebuilt
 	// from scratch every time it opens, so anything it triggers, it triggers on every open.
 	static let latestKnownVersion = Key<String?>("latestKnownVersion")
+
+	// On by default, off in one click. An app that checks on its own has to be an app that can be told
+	// not to.
+	static let checksForUpdatesAutomatically = Key<Bool>("checksForUpdatesAutomatically", default: true)
 }
 
 extension Notification.Name {
