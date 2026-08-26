@@ -92,19 +92,25 @@ private struct DisplayColumn: View {
 	let column: DisplayPanelModel.Column
 	@ObservedObject private var model: DisplayPanelModel
 
+	@State private var isHovering = false
+
 	init(column: DisplayPanelModel.Column, model: DisplayPanelModel) {
 		self.column = column
 		self.model = model
+	}
+
+	private func onSelect(_ id: Website.ID) {
+		model.show(id)
 	}
 
 	var body: some View {
 		VStack(spacing: 6) {
 			displayName
 
-			Text(column.websiteName ?? String(localized: "No Website"))
+			MarqueeText(text: column.websiteName ?? String(localized: "No Website"), isActive: isHovering)
 				.font(.subheadline)
 				.foregroundStyle(.secondary)
-				.lineLimit(1)
+				.frame(width: 260, height: 16)
 
 			preview
 
@@ -115,6 +121,23 @@ private struct DisplayColumn: View {
 			modeButtons
 		}
 		.frame(width: 260)
+		.padding(9)
+		.background {
+			RoundedRectangle(cornerRadius: 12, style: .continuous)
+				.fill(isHovering ? Color.white.opacity(0.15) : Color.clear)
+		}
+		.overlay {
+			// The same treatment the Dock preview uses for the card under the pointer: a two-point
+			// accent border and a barely-there fill. Borrowed rather than invented, because a person
+			// who has seen one of these should not have to learn the other.
+			RoundedRectangle(cornerRadius: 12, style: .continuous)
+				.strokeBorder(isHovering ? Color.accentColor : Color.clear, lineWidth: 2)
+		}
+		.contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+		.onHover {
+			isHovering = $0
+		}
+		.animation(.spring(response: 0.2, dampingFraction: 0.82), value: isHovering)
 	}
 
 	/**
@@ -189,6 +212,7 @@ private struct DisplayColumn: View {
 			Text(column.displayName)
 				.font(.headline)
 				.lineLimit(1)
+				.frame(maxWidth: 260)
 		} else {
 			Menu {
 				ForEach(column.syncTargets, id: \.name) { target in
@@ -207,6 +231,7 @@ private struct DisplayColumn: View {
 					Text(column.displayName)
 						.font(.headline)
 						.lineLimit(1)
+						.truncationMode(.middle)
 
 					if column.syncTargets.contains(where: \.isSynced) {
 						Image(systemName: "link")
@@ -276,26 +301,38 @@ private struct DisplayColumn: View {
 	/**
 	The website on this display, from the ones it already owns.
 
+	A `Menu` rather than a `Picker` because the label has to be ours: a picker draws the chosen value
+	itself, truncated, and the name is the one thing in the column that needs room. Fixed width, so
+	two columns do not end up different sizes because one website has a longer title.
+
 	Adding a website is a different act with a different home, so an empty display offers nothing here
 	rather than a form: the panel points displays at things that exist.
 	*/
 	@ViewBuilder
 	private var picker: some View {
-		Picker(selection: Binding(
-			get: { column.websiteID },
-			set: {
-				if let id = $0 {
-					model.show(id)
+		Menu {
+			ForEach(column.choices, id: \.id) { choice in
+				Button(choice.menuTitle) {
+					onSelect(choice.id)
 				}
 			}
-		)) {
-			ForEach(column.choices, id: \.id) {
-				Text($0.menuTitle.truncating(to: 28)).tag($0.id as Website.ID?)
-			}
 		} label: {
-			EmptyView()
+			HStack(spacing: 4) {
+				MarqueeText(text: column.websiteName ?? String(localized: "No Website"), isActive: isHovering)
+					.frame(height: 15)
+
+				Image(systemName: "chevron.up.chevron.down")
+					.font(.system(size: 9, weight: .semibold))
+					.foregroundStyle(.secondary)
+			}
+			.frame(width: 216, alignment: .leading)
 		}
-		.labelsHidden()
+		.menuStyle(.borderlessButton)
+		.menuIndicator(.hidden)
+		.padding(.horizontal, 8)
+		.padding(.vertical, 4)
+		.background(.quinary, in: RoundedRectangle(cornerRadius: 5))
 		.disabled(column.choices.isEmpty)
 	}
+
 }

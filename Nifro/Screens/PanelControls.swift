@@ -142,3 +142,56 @@ extension RotationMode {
 		}
 	}
 }
+
+/**
+Text that slides when it does not fit, and sits still when it does.
+
+A website's name is whatever the site put in its `<title>`, so the column has to hold anything from
+"Windy" to a sentence. Truncating loses the end, which for a video is the part that says which video;
+sliding shows all of it without making the column wider than its neighbours.
+
+It only slides while the column is under the pointer. A panel with two names sliding at once, forever,
+is a panel nobody can read the rest of — and the whole reason to look at a column is that you are
+already pointing at it.
+*/
+struct MarqueeText: View {
+	let text: String
+	let isActive: Bool
+
+	@State private var overflow: CGFloat = 0
+	@State private var isSlid = false
+
+	var body: some View {
+		GeometryReader { outer in
+			Text(text)
+				.fixedSize()
+				.background {
+					GeometryReader { inner in
+						Color.clear.onAppear {
+							overflow = max(0, inner.size.width - outer.size.width)
+						}
+					}
+				}
+				.offset(x: isSlid ? -overflow : 0)
+				.frame(width: outer.size.width, alignment: .leading)
+				.clipped()
+		}
+		.onChange(of: isActive) {
+			guard isActive, overflow > 0 else {
+				// Back to the start rather than wherever it had got to, so the next look begins at the
+				// beginning of the name.
+				withAnimation(.easeOut(duration: 0.2)) {
+					isSlid = false
+				}
+
+				return
+			}
+
+			// Paced by how far it has to go, so a name twice as long takes twice as long rather than
+			// twice the speed. `autoreverses` walks it back instead of snapping.
+			withAnimation(.linear(duration: overflow / 30).delay(0.4).repeatForever(autoreverses: true)) {
+				isSlid = true
+			}
+		}
+	}
+}
