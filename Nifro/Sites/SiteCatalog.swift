@@ -61,13 +61,30 @@ enum SiteCatalog {
 		guard
 			let (data, response) = try? await URLSession.shared.data(for: request),
 			(response as? HTTPURLResponse)?.statusCode == 200,
-			let fetched = try? JSONDecoder().decode([Entry].self, from: data),
+			let fetched = try? JSONDecoder().decode([SkippableEntry].self, from: data).compactMap(\.entry),
 			!fetched.isEmpty
 		else {
 			return (entries, false)
 		}
 
 		return (fetched, true)
+	}
+}
+
+/**
+One entry that is allowed to be undecodable, so that the rest of the list survives it.
+
+The list is fetched from `main` rather than shipped in a build, so an entry can be added without a
+release — which means an entry can also be *wrong* without a release. Decoding the array in one call
+made that all-or-nothing: a single bad entry threw, the `try?` swallowed it, and every installed copy
+silently fell back to the compiled-in snapshot with no sign anything had happened. A catalogue whose
+whole point is arriving between releases must not have a failure mode that costs the whole catalogue.
+*/
+private struct SkippableEntry: Decodable {
+	let entry: SiteCatalog.Entry?
+
+	init(from decoder: any Decoder) throws {
+		entry = try? SiteCatalog.Entry(from: decoder)
 	}
 }
 
