@@ -83,6 +83,11 @@ final class DesktopWindow: NSWindow {
 			.fullScreenNone // This ensures that if Nifro is launched while an app is fullscreen (fullscreen is a separate space), it will not show behind that app and instead show in the primary space.
 		]
 
+		// Read here rather than left to the settings subscription, which only ever reaches the scenes
+		// that exist when it fires. That is every scene at launch and no scene built afterwards, so a
+		// display plugged in later got a wallpaper that stayed on one Space with the setting on.
+		collectionBehavior.toggleExistence(.canJoinAllSpaces, shouldExist: Defaults[.showOnAllSpaces])
+
 		disableSnapshotRestoration()
 		setFrame()
 
