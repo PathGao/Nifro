@@ -123,6 +123,11 @@ private struct UpdateSetting: View {
 			case .newer(let version):
 				progress = .available(version: version)
 			}
+		}
+	}
+}
+
+/**
 The language the interface is drawn in, as a plain picker — which is where every app that offers this
 puts it.
 
