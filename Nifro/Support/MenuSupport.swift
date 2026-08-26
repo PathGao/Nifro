@@ -283,3 +283,40 @@ extension NSMenuItem {
 		return self
 	}
 }
+
+extension NSStatusBarButton {
+	private static let activityAnimationKey = "nifro.activity"
+
+	/**
+	Pulse the menu bar icon while a page is on its way.
+
+	Motion rather than a second static appearance, because the static one is taken: `appearsDisabled`
+	already means the wallpaper is off, and that is the convention menu bar apps follow — a paused
+	state does not move, a working one does. Reusing it would have made "off" and "busy" look alike.
+
+	Subtle and short-lived: it runs only while a page is being fetched, which is seconds, and this is
+	an icon somebody chose to keep in their menu bar rather than a progress bar demanding attention.
+	*/
+	func setShowingActivity(_ isShowingActivity: Bool) {
+		guard isShowingActivity else {
+			layer?.removeAnimation(forKey: Self.activityAnimationKey)
+			return
+		}
+
+		wantsLayer = true
+
+		guard layer?.animation(forKey: Self.activityAnimationKey) == nil else {
+			return
+		}
+
+		let pulse = CABasicAnimation(keyPath: "opacity")
+		pulse.fromValue = 1
+		pulse.toValue = 0.4
+		pulse.duration = 0.7
+		pulse.autoreverses = true
+		pulse.repeatCount = .infinity
+		pulse.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+
+		layer?.add(pulse, forKey: Self.activityAnimationKey)
+	}
+}
