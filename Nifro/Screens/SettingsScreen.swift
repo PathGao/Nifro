@@ -41,6 +41,7 @@ private struct GeneralSettings: View {
 			}
 			Section {
 				DisplaySetting()
+				KeepWallpaperWhenDisplayUnpluggedSetting()
 				ShowOnAllSpacesSetting()
 			}
 		}
@@ -158,6 +159,15 @@ private struct ShowOnAllSpacesSetting: View {
 			Text("Show on every Space")
 				.explained(String(localized: "Spaces are the desktops you switch between in Mission Control, not your displays. Off means the wallpaper stays on whichever Space was in front when Nifro started. Which display a website goes on is set on the website itself, not here."))
   }
+	}
+}
+
+private struct KeepWallpaperWhenDisplayUnpluggedSetting: View {
+	var body: some View {
+		Defaults.Toggle(key: .keepWallpaperWhenDisplayUnplugged) {
+			Text("Keep a wallpaper when its display is unplugged")
+				.explained(String(localized: "For a website pinned to a particular display. On, it moves to the main display until that one is plugged back in — which is what Nifro has always done, and what macOS does with an ordinary window. Off, it goes away with its display, the way the desktop picture on that screen does. Either way the website keeps the display you chose for it."))
+		}
 	}
 }
 
