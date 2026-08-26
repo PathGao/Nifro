@@ -311,46 +311,15 @@ private struct ClearWebsiteDataSetting: View {
 		progress = .clearing
 
 		Task {
-			let before = await Self.storedBytes()
+			let before = await DiskBudget.storedBytes(of: [.homeDirectory])
 
 			WebsitesController.shared.thumbnailCache.removeAllImages()
 			AppState.shared.forgetWherePagesWere()
 			await WKWebsiteDataStore.clearAllWebsiteData()
 
-			let after = await Self.storedBytes()
+			let after = await DiskBudget.storedBytes(of: [.homeDirectory])
 			progress = .cleared(bytes: max(0, before - after))
 		}
-	}
-
-	/**
-	How much the app is keeping on disk.
-
-	The sandbox container is the app's home directory, so this is everything it has written — measured
-	either side of the clear rather than reported by it, because what WebKit actually removed is the
-	question, and only the disk can answer that.
-	*/
-	private static func storedBytes() async -> Int64 {
-		await Task.detached(priority: .utility) {
-			let keys: Set<URLResourceKey> = [.totalFileAllocatedSizeKey]
-
-			guard
-				let files = FileManager.default.enumerator(
-					at: URL.homeDirectory,
-					includingPropertiesForKeys: Array(keys)
-				)
-			else {
-				return 0
-			}
-
-			return files.reduce(into: Int64(0)) { total, item in
-				guard let url = item as? URL else {
-					return
-				}
-
-				total += Int64((try? url.resourceValues(forKeys: keys).totalFileAllocatedSize) ?? 0)
-			}
-		}
-		.value
 	}
 }
 

@@ -82,6 +82,27 @@ at the newest build.
 
 Requires macOS 15 or later.
 
+### Uninstalling
+
+```sh
+brew uninstall --zap --cask nifro
+```
+
+Dragging the app to the Trash leaves its container behind. That is macOS, not Nifro — a container
+outlives the app that owned it, and no app is given a chance to run at uninstall. `--zap` is the flag
+that removes it; without it, or if the app was installed from the disk image, delete these by hand:
+
+```
+~/Library/Containers/com.pathgao.nifro
+~/Library/Containers/com.pathgao.nifro.ShareExtension
+~/Library/Application Scripts/com.pathgao.nifro
+~/Library/Application Scripts/com.pathgao.nifro.ShareExtension
+```
+
+What is in there is mostly WebKit's, not yours, and Nifro keeps it under 100 MB while it runs — see
+[`DiskBudget`](Nifro/Support/DiskBudget.swift). **Settings → Advanced → Clear all website data**
+empties it on demand.
+
 ## Where this came from
 
 Nifro is an open-source fork of [Plash](https://github.com/sindresorhus/Plash) by Sindre Sorhus,

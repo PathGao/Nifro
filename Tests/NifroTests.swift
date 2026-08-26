@@ -1,6 +1,7 @@
 import CoreGraphics
 import Foundation
 import Testing
+import WebKit
 
 @testable import NifroLogic
 
@@ -609,5 +610,41 @@ struct URLCommandTests {
 	@Test("A URL with no command at all is empty rather than something")
 	func noCommand() {
 		#expect(command("nifro:").isEmpty)
+	}
+}
+
+/**
+The one thing the cache sweep can get wrong that nobody would notice until a user complains they were signed out of their own dashboard: dropping a data type the network cannot hand back.
+*/
+@Suite("Disk budget")
+struct DiskBudgetTests {
+	@Test("The sweep only drops types the network can hand back")
+	func dropsNothingTheUserPutThere() {
+		#expect(DiskBudget.refetchableTypes.isDisjoint(with: DiskBudget.keptTypes))
+		#expect(!DiskBudget.refetchableTypes.contains(WKWebsiteDataTypeCookies))
+		#expect(!DiskBudget.refetchableTypes.contains(WKWebsiteDataTypeLocalStorage))
+		#expect(!DiskBudget.refetchableTypes.contains(WKWebsiteDataTypeIndexedDBDatabases))
+		#expect(!DiskBudget.refetchableTypes.isEmpty)
+	}
+
+	@Test("A store whose website is gone is collected")
+	func collectsWhatNoWebsiteOwns() {
+		let kept = UUID()
+		let deleted = UUID()
+
+		#expect(DiskBudget.orphans(among: [kept, deleted], keeping: [kept]) == [deleted])
+	}
+
+	@Test("An empty website list collects nothing, rather than everything")
+	func emptyListIsNotAMandateToDeleteEverything() {
+		// Nothing can put a store back. A reading of "no websites at all" is the one that has to be
+		// distrusted, because acting on it wrongly signs the user out of every page they had.
+		#expect(DiskBudget.orphans(among: [UUID(), UUID()], keeping: []).isEmpty)
+	}
+
+	@Test("The budget is small enough to be worth enforcing")
+	func budgetIsBelowWhatOrdinaryUseReached() {
+		// 151 MB was measured on a container nobody had asked to fill. A limit above that would never fire.
+		#expect(DiskBudget.limit < 151_000_000)
 	}
 }
