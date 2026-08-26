@@ -21,6 +21,33 @@ final class AppState: ObservableObject {
 	private(set) lazy var statusItemButton = statusItem.button!
 
 	/**
+	How many scenes are fetching a replacement page right now.
+
+	Counted rather than flagged, because one display finishing does not mean another has.
+	*/
+	private var loadingScenes = 0 {
+		didSet {
+			statusItemButton.setShowingActivity(loadingScenes > 0)
+		}
+	}
+
+	/**
+	Say that a page is on its way, and that it has arrived.
+
+	Switching website takes a few seconds and said nothing while it did. Swap loading keeps the old
+	page up for all of it — which is the point — so the wallpaper cannot be the thing that reports it,
+	and choosing a website and watching an unchanged desktop reads as the choice not having
+	registered.
+	*/
+	func beginLoadingIndicator() {
+		loadingScenes += 1
+	}
+
+	func endLoadingIndicator() {
+		loadingScenes = max(0, loadingScenes - 1)
+	}
+
+	/**
 	One wallpaper per display in use. Always at least one.
 	*/
 	private(set) var scenes: [WallpaperScene] = []

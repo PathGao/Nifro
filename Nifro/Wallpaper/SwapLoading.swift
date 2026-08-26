@@ -57,6 +57,12 @@ extension WallpaperScene {
 				return
 			}
 
+			AppState.shared.beginLoadingIndicator()
+
+			defer {
+				AppState.shared.endLoadingIndicator()
+			}
+
 			let replacement = webViewController.makeReplacementWebView()
 
 			defer {
