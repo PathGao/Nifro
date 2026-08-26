@@ -1256,10 +1256,6 @@ extension String {
 		trimmingCharacters(in: .whitespacesAndNewlines)
 	}
 
-	var trimmedTrailing: Self {
-		replacing(/\s+$/, with: "")
-	}
-
 	func removingPrefix(_ prefix: Self) -> Self {
 		guard hasPrefix(prefix) else {
 			return self
@@ -1268,23 +1264,6 @@ extension String {
 		return Self(dropFirst(prefix.count))
 	}
 
-	/**
-	```
-	"Unicorn".truncated(to: 4)
-	//=> "Uni…"
-	```
-	*/
-	func truncating(to number: Int, truncationIndicator: Self = "…") -> Self {
-		if number <= 0 {
-			return ""
-		}
-
-		if count > number {
-			return Self(prefix(number - truncationIndicator.count)).trimmedTrailing + truncationIndicator
-		}
-
-		return self
-	}
 }
 extension String {
 	/**
