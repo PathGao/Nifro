@@ -155,10 +155,19 @@ final class WebsitesController {
 
 	Falls back to the display chosen in Settings so there is always exactly one scene to show, even before anything is configured.
 	*/
+	/**
+	The websites that should be on screen right now, before any question of which display.
+
+	Both of the places that route by display start here, so a wallpaper the user has said should go
+	away with its unplugged display goes away once rather than in two places that could disagree.
+	*/
+	@MainActor
+	var showable: [Website] { all.filter(\.isShowable) }
+
 	var displaysInUse: [Display?] {
 		var seen: [Display?] = []
 
-		for website in all {
+		for website in showable {
 			let display = website.effectiveDisplay
 			if !seen.contains(where: { $0 == display }) {
 				seen.append(display)

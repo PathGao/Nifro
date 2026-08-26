@@ -28,7 +28,7 @@ extension WebsitesController {
 	The websites on `display` that are allowed to be showing right now, in list order.
 	*/
 	private func eligible(for display: Display?, at date: Date = .now) -> [Website] {
-		let onDisplay = all.filter { $0.effectiveDisplay == display }
+		let onDisplay = showable.filter { $0.effectiveDisplay == display }
 		let scheduled = onDisplay.filter { $0.isScheduled(at: date) }
 
 		// Never let a schedule empty a display.

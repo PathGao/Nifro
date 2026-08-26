@@ -72,7 +72,35 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	`display` itself is left alone, so plugging the display back in puts the website back on it.
 	*/
 	@MainActor
-	var effectiveDisplay: Display? { (display ?? Defaults[.display])?.withFallbackToMain }
+	var effectiveDisplay: Display? {
+		// `Defaults[.display]` is bound before the `??` and not written inline. Measured, on two
+		// displays: written inline it hands back `nil` even with the key set, and every website then
+		// routes to no display at all. Both sides of that `??` are `Display?`, which leaves the
+		// subscript free to be read as a nested optional — `.some(nil)` is not `nil`, so the operator
+		// returns the inner nothing instead of the right-hand side. It happened to work before this
+		// property was split into steps, because the trailing `?.withFallbackToMain` pinned the type
+		// down. Nothing pins it here, so the read is given a name first.
+		let chosenByUser = Defaults[.display]
+
+		guard let chosen = display ?? chosenByUser else {
+			return nil
+		}
+
+		return Defaults[.keepWallpaperWhenDisplayUnplugged] ? chosen.withFallbackToMain : chosen
+	}
+
+	/**
+	Whether this website should be on screen at all right now.
+
+	False only for a website pinned to a display that is not attached, and only when the user has said
+	such a wallpaper should go away with its display rather than move. Kept apart from
+	`effectiveDisplay` because that answers *where*, and `nil` there already means "wherever Settings
+	says" — there is no value it could return that means nowhere.
+	*/
+	@MainActor
+	var isShowable: Bool {
+		Defaults[.keepWallpaperWhenDisplayUnplugged] || (display ?? Defaults[.display])?.isConnected != false
+	}
 
 	/**
 	How often this website actually reloads.

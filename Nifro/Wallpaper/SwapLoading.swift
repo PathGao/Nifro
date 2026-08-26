@@ -115,7 +115,7 @@ extension WallpaperScene {
 		adoptLoadedWebsite()
 		installContentView()
 
-		restoreScrollPosition(in: replacement)
+		restorePageState(in: replacement)
 		refreshMenuBarBandColor()
 		resetTimer()
 	}

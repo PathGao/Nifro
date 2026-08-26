@@ -83,6 +83,15 @@ final class AppState: ObservableObject {
 
 			for scene in scenes {
 				scene.resume()
+
+				// Replayed, because `isBrowsingMode.didSet` drops its write while the app is disabled and
+				// nothing else puts it back: `resume()` does not read it, and only an unrelated
+				// `rebuildScenes` ever did. Browsing Mode is reachable while disabled from the menu, which
+				// gates on there being a website rather than on `isEnabled`, and from the global shortcut
+				// and the Shortcuts intent, which gate on nothing — so the menu drew a checkmark over
+				// windows still sitting at `.desktop`. `finishCropSelection` already restores it this way.
+				scene.window.isInteractive = isBrowsingMode
+
 				scene.loadWebsite()
 				scene.resetTimer()
 				scene.resetPlaylistTimer()
@@ -104,11 +113,17 @@ final class AppState: ObservableObject {
 	var cropSelectionView: CropSelectionView?
 
 	/**
-	Which display and which website the crop being framed belongs to, so finishing acts on the scene
-	that started it and writes to the website that was being framed rather than to whichever one
-	happens to be current when the drag ends.
+	The scene being framed and the website it is framing, so finishing acts on the one that started it
+	rather than on whichever one happens to be current when the drag ends.
+
+	The scene itself, not its display. Finishing used to look the scene back up by display, with a
+	fallback to the primary one — a second way of naming a thing that was already in hand, and the two
+	disagreed exactly when it mattered: unplug that display mid-drag and the restore landed on the main
+	scene while the framed one kept `.floating` and full opacity, the only way in the app to pin a
+	wallpaper above every window with no way back. Weak, so a scene torn down with its display reads as
+	gone instead of as some other scene.
 	*/
-	var croppingSceneDisplay: Display??
+	weak var croppingScene: WallpaperScene?
 	var croppingWebsiteID: Website.ID?
 
 	private var storedWebViewError: Error?
@@ -224,6 +239,7 @@ final class AppState: ObservableObject {
 		}
 
 		scenes = kept
+
 
 		for scene in scenes {
 			// `scheduled` rather than a plain lookup: rebuilding happens on display changes and on any

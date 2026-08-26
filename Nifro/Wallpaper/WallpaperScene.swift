@@ -107,13 +107,10 @@ final class WallpaperScene {
 
 				switch result {
 				case .success:
-					// Reapplying the persisted zoom has to happen here, once `webView.url` is set.
-					let zoomLevel = webViewController.webView.zoomLevelWrapper
-
-					if zoomLevel != 1 {
-						webViewController.webView.zoomLevelWrapper = zoomLevel
-					}
-
+					// The zoom used to be reapplied here. It read `webViewController.webView`, which
+					// during a swap is the page on its way out, so it restored the old page's zoom onto
+					// the old page and left the arriving one at 1. It belongs with the scroll position,
+					// on the web view actually being handed the page — see `restorePageState`.
 					AppState.shared.statusItemButton.toolTip = website?.tooltip
 				case .failure(let error):
 					AppState.shared.webViewError = error
