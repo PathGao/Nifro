@@ -48,9 +48,7 @@ private struct DisplayColumn: View {
 
 	var body: some View {
 		VStack(spacing: 6) {
-			Text(column.displayName)
-				.font(.headline)
-				.lineLimit(1)
+			displayName
 
 			Text(column.websiteName ?? String(localized: "No Website"))
 				.font(.subheadline)
@@ -124,6 +122,51 @@ private struct DisplayColumn: View {
 			) {
 				model.toggleBrowsingMode()
 			}
+		}
+	}
+
+	/**
+	The display's name, and the way into syncing it with another.
+
+	A menu on the title rather than a control of its own, because syncing is a statement about *this
+	display and that one* and the title is the only thing on the column that names a display. A lit
+	entry means already synced; choosing it again breaks the group.
+	*/
+	@ViewBuilder
+	private var displayName: some View {
+		if column.syncTargets.isEmpty {
+			Text(column.displayName)
+				.font(.headline)
+				.lineLimit(1)
+		} else {
+			Menu {
+				ForEach(column.syncTargets, id: \.name) { target in
+					Button {
+						model.toggleSync(column.display, with: target.display)
+					} label: {
+						if target.isSynced {
+							Label(target.name, systemImage: "checkmark")
+						} else {
+							Text(target.name)
+						}
+					}
+				}
+			} label: {
+				HStack(spacing: 3) {
+					Text(column.displayName)
+						.font(.headline)
+						.lineLimit(1)
+
+					if column.syncTargets.contains(where: \.isSynced) {
+						Image(systemName: "link")
+							.font(.system(size: 10, weight: .semibold))
+							.foregroundStyle(.tint)
+					}
+				}
+			}
+			.menuStyle(.borderlessButton)
+			.menuIndicator(.hidden)
+			.fixedSize()
 		}
 	}
 

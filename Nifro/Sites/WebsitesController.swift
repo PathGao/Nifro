@@ -103,7 +103,16 @@ final class WebsitesController {
 	seven chances to write back a list built from a stale read.
 	*/
 	func update(_ id: Website.ID, _ change: (inout Website) -> Void) {
+		let display = all[id: id]?.effectiveDisplay
+
 		all = all.modifying(elementWithID: id, update: change)
+
+		// Every edit to a website goes through here, so this is where a synced display hands its change
+		// to the rest of its group. Doing it at each call site instead would mean finding all of them,
+		// and finding all of them again whenever one is added.
+		if let display {
+			mirrorAcrossSyncGroup(from: display)
+		}
 	}
 
 	/**

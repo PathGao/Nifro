@@ -60,6 +60,9 @@ private final class AppDelegate: NSObject, NSApplicationDelegate {
 	}
 
 	func applicationDidFinishLaunching(_ notification: Notification) {
+		// Only runs while something is actually synced; it checks and stops otherwise.
+		MediaSync.restart()
+
 		// On a timer and not only at launch: this app is started at login and then left alone for
 		// weeks, so a check that runs once per launch is a check that mostly does not run.
 		Task {

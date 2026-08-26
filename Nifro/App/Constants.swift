@@ -61,6 +61,10 @@ extension Defaults.Keys {
 	// app. Stored as the exceptions rather than as a flag per display, so a screen nobody has touched
 	// needs no entry and an unplugged one leaves nothing behind.
 	static let disabledDisplays = Key<Set<String>>("disabledDisplays", default: [])
+
+	// Display key -> group id. A flat map rather than a list of sets, because the question asked of it
+	// is always "what is this display in", and a list would have to be searched to answer it.
+	static let syncGroups = Key<[String: String]>("syncGroups", default: [:])
 	static let contentRulesURL = Key<String?>("contentRulesURL")
 	static let hasInstalledFeaturedWebsites = Key<Bool>("hasInstalledFeaturedWebsites", default: false)
 

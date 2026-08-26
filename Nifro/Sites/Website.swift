@@ -1,7 +1,10 @@
 import Foundation
 
 struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable {
-	let id: UUID
+	// `var` for one reason: syncing copies a website's contents onto another display's entry, and that
+	// entry has to keep the id it already had — its data store, its thumbnail and its remembered scroll
+	// position are all filed under it. Nothing else assigns this.
+	var id: UUID
 	var isCurrent: Bool
 	var url: URL
 	@DecodableDefault.EmptyString var title: String

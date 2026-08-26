@@ -74,6 +74,7 @@ final class WebViewController: NSViewController {
 
 		userContentController.addJavaScript("document.documentElement.classList.add('is-nifro-app', 'is-plash-app')")
 		userContentController.installAudioControl()
+		userContentController.installMediaClock()
 
 		// This scene's website, not the list-wide current one. Everything below is baked into the web
 		// view when it is created and never revisited, so reading the wrong website here put one

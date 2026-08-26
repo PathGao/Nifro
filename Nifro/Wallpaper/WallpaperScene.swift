@@ -381,6 +381,22 @@ final class WallpaperScene {
 	`nil` when there is nothing up: no website, or a page that has not arrived yet. The panel draws its
 	own empty state rather than a blank rectangle that looks like a broken page.
 	*/
+	/**
+	Where this display's video is, if it has one.
+	*/
+	func mediaClock() async -> (time: Double, duration: Double)? {
+		// Asked of the live web view every time. Swap loading replaces it, and a held reference would
+		// go on talking to the page that left.
+		await webViewController.webView.mediaClock()
+	}
+
+	/**
+	Move this display's video towards `time`. Returns whether it had to jump.
+	*/
+	func alignMedia(to time: Double, duration: Double) async -> Bool {
+		await webViewController.webView.alignMedia(to: time, duration: duration)
+	}
+
 	func snapshot() async -> NSImage? {
 		guard
 			website != nil,

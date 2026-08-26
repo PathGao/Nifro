@@ -33,6 +33,11 @@ final class DisplayPanelModel: ObservableObject {
 		let rotationMode: RotationMode
 		let canRotate: Bool
 
+		/**
+		The displays this one could be synced with, and whether it already is.
+		*/
+		let syncTargets: [(display: Display?, name: String, isSynced: Bool)]
+
 		// `nil` display means "whatever Settings says", and there is only ever one of those, so the
 		// display's own id is the identity when it has one and a fixed stand-in when it does not.
 		var id: String { display?.id.uuidString ?? "default" }
@@ -63,12 +68,54 @@ final class DisplayPanelModel: ObservableObject {
 					rotationMode: scene.rotationMode,
 					// One website has nothing to rotate to, and a control that does nothing should say so
 					// rather than shrug when pressed.
-					canRotate: WebsitesController.shared.all.count(where: { $0.effectiveDisplay == scene.display }) > 1
+					canRotate: WebsitesController.shared.all.count(where: { $0.effectiveDisplay == scene.display }) > 1,
+					syncTargets: syncTargets(for: scene.display)
 				)
 			)
 		}
 
 		columns = built
+	}
+
+	/**
+	Every other display, and whether this one is already synced with it.
+
+	Every other display rather than every other group: a display already in a group appears once per
+	member, all of them ticked, because "sync with the monitor" and "sync with the group the monitor is
+	in" are the same act and only one of them is a phrase anybody would say.
+	*/
+	private func syncTargets(for display: Display?) -> [(display: Display?, name: String, isSynced: Bool)] {
+		let peers = Set(SyncGroup.peers(of: display).map { Display.settingsKey(for: $0) })
+
+		return AppState.shared.scenes
+			.map(\.display)
+			.filter { Display.settingsKey(for: $0) != Display.settingsKey(for: display) }
+			.map {
+				(
+					display: $0,
+					name: $0?.localizedName ?? String(localized: "Main Display"),
+					isSynced: peers.contains(Display.settingsKey(for: $0))
+				)
+			}
+	}
+
+	/**
+	Sync `display` with `other`, or unsync it if they already are.
+	*/
+	func toggleSync(_ display: Display?, with other: Display?) {
+		if SyncGroup.peers(of: display).contains(where: { Display.settingsKey(for: $0) == Display.settingsKey(for: other) }) {
+			SyncGroup.leave(display)
+		} else {
+			SyncGroup.join(display, with: other)
+			WebsitesController.shared.mirrorAcrossSyncGroup(from: other)
+		}
+
+		MediaSync.forgetQuietPeriods()
+		MediaSync.restart()
+
+		Task {
+			await refresh()
+		}
 	}
 
 	/**

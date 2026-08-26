@@ -2230,6 +2230,136 @@ extension WKUserContentController {
 		})();
 		"""
 
+	private static let mediaClockCode =
+		"""
+		(() => {
+			const biggest = () => {
+				let best = null;
+
+				for (const element of document.querySelectorAll('video')) {
+					if (!element.duration || !isFinite(element.duration)) {
+						continue;
+					}
+
+					const area = element.clientWidth * element.clientHeight;
+
+					if (!best || area > best.area) {
+						best = { element, area };
+					}
+				}
+
+				return best && best.element;
+			};
+
+			const read = () => {
+				const element = biggest();
+
+				return element ? { time: element.currentTime, duration: element.duration } : null;
+			};
+
+			const align = (target, duration) => {
+				const element = biggest();
+
+				if (!element || !duration) {
+					return false;
+				}
+
+				// A wallpaper video loops. Without wrapping, the moment the leader returns to zero the
+				// follower is a whole duration behind and gets seeked — and again when it wraps in turn,
+				// so every loop point would visibly jump.
+				let drift = (element.currentTime - target) % duration;
+
+				if (drift > duration / 2) {
+					drift -= duration;
+				}
+
+				if (drift < -duration / 2) {
+					drift += duration;
+				}
+
+				const distance = Math.abs(drift);
+
+				if (distance < \(MediaSync.Tolerance.ignore)) {
+					element.playbackRate = 1;
+					return false;
+				}
+
+				if (distance >= \(MediaSync.Tolerance.seek)) {
+					element.playbackRate = 1;
+					element.currentTime = target;
+					return true;
+				}
+
+				element.playbackRate = drift > 0 ? 1 - \(MediaSync.Tolerance.nudge) : 1 + \(MediaSync.Tolerance.nudge);
+				return false;
+			};
+
+			window.addEventListener('message', event => {
+				const data = event.data;
+
+				if (!data) {
+					return;
+				}
+
+				if (data.\(mediaAlignKey)) {
+					const done = align(data.\(mediaAlignKey).time, data.\(mediaAlignKey).duration);
+
+					if (window === window.top) {
+						window.\(mediaSeekedKey) = done;
+					}
+
+					for (let index = 0; index < window.frames.length; index++) {
+						try {
+							window.frames[index].postMessage(data, '*');
+						} catch (error) {}
+					}
+
+					return;
+				}
+
+				// A frame answering the top frame's question about where it is.
+				if (data.\(mediaReportKey) && window === window.top) {
+					window.\(mediaClockKey) = data.\(mediaReportKey);
+				}
+			});
+
+			// The top frame keeps the answer for the app to read, because `evaluateJavaScript` only ever
+			// reaches the main frame. A frame that has media reports it upward *and* records it locally;
+			// reporting only when the top frame had none was the first version of this and it never
+			// reported at all, since a framed player's top frame has no media of its own to notice.
+			setInterval(() => {
+				const own = read();
+
+				if (!own) {
+					return;
+				}
+
+				if (window === window.top) {
+					window.\(mediaClockKey) = own;
+					return;
+				}
+
+				try {
+					window.top.postMessage({ \(mediaReportKey): own }, '*');
+				} catch (error) {}
+			}, 1000);
+		})();
+		"""
+
+	/**
+	Install the media clock, which reports where a video is and nudges it towards where it should be.
+	*/
+	func installMediaClock() {
+		let userScript = WKUserScript(
+			source: Self.mediaClockCode,
+			injectionTime: .atDocumentStart,
+			forMainFrameOnly: false,
+			in: .defaultClient
+		)
+
+		addUserScript(userScript)
+	}
+
 	// https://github.com/feedback-assistant/reports/issues/79
 	/**
 	Install the audio control. The setting itself is applied afterwards, and again on every load.
@@ -2250,6 +2380,13 @@ extension WKUserContentController {
 The name on the message the audio script answers to. One definition, used by the script and by the
 broadcast that reaches it.
 */
+// The media clock's own names, kept beside the audio ones for the same reason: the script and the
+// Swift that talks to it have to agree, and two spellings of one name is how they stop agreeing.
+private let mediaAlignKey = "__nifroAlignTo"
+private let mediaReportKey = "__nifroClockReport"
+private let mediaClockKey = "__nifroClock"
+private let mediaSeekedKey = "__nifroSeeked"
+
 private let audioMessageKey = "__nifroAudioMuted"
 
 /**
@@ -2275,6 +2412,58 @@ extension WKWebView {
 			in: .defaultClient
 		)
 	}
+	/**
+	Where the video on this page is, if there is one.
+
+	`callAsyncJavaScript` rather than `evaluateJavaScript`. The latter has an overload that returns
+	nothing, and with no contextual type Swift picks it — silently, so every read came back as `()`
+	and the page looked like it had no video. Annotating the result does not settle it either, because
+	`Void` satisfies `Any`. This one has a single async overload and no such choice to get wrong, and
+	it passes numbers as arguments rather than pasting them into source.
+	*/
+	func mediaClock() async -> (time: Double, duration: Double)? {
+		let value = try? await callAsyncJavaScript(
+			"return window.\(mediaClockKey) ?? null;",
+			arguments: [:],
+			in: nil,
+			contentWorld: .defaultClient
+		)
+
+		guard
+			let dictionary = value as? [String: Any],
+			let time = dictionary["time"] as? Double,
+			let duration = dictionary["duration"] as? Double,
+			duration > 0
+		else {
+			return nil
+		}
+
+		return (time, duration)
+	}
+
+	/**
+	Nudge or jump this page's video towards `time`. Returns whether it jumped.
+	*/
+	@discardableResult
+	func alignMedia(to time: Double, duration: Double) async -> Bool {
+		let value = try? await callAsyncJavaScript(
+			"""
+			window.\(mediaSeekedKey) = false;
+			window.postMessage({ \(mediaAlignKey): { time: time, duration: duration } }, '*');
+
+			// The message is delivered on the next turn, so the answer cannot be read in this one.
+			await new Promise(resolve => setTimeout(resolve, 0));
+
+			return window.\(mediaSeekedKey) === true;
+			""",
+			arguments: ["time": time, "duration": duration],
+			in: nil,
+			contentWorld: .defaultClient
+		)
+
+		return (value as? Bool) ?? false
+	}
+
 }
 // MARK: - WKWebView
 extension WKWebView {
