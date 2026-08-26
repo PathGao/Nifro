@@ -124,7 +124,7 @@ final class WallpaperScene {
 
 	// MARK: - Content
 
-	var screen: NSScreen? { window.targetDisplay?.screen ?? .main }
+	var screen: NSScreen? { window.targetDisplay?.screen ?? Display.mainScreen }
 
 	/**
 	The size the page lays out at, zoomed or not.

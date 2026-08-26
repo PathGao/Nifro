@@ -88,9 +88,14 @@ struct Display: Hashable, Codable, Identifiable {
 	)
 
 	/**
-	The main display.
+	The display with the menu bar.
+
+	A `var`, because which display that is changes: rearranging displays in System Settings moves the
+	menu bar, and so does docking. As a `let` it was whatever `CGMainDisplayID()` said the first time
+	anything asked, kept for the life of the process — and `withFallbackToMain` leans on it, so a stale
+	answer sends a wallpaper to a display that may itself be gone.
 	*/
-	static let main = Self(transientID: CGMainDisplayID())
+	static var main: Self? { Self(transientID: CGMainDisplayID()) }
 
 	/**
 	All displays.
@@ -121,6 +126,18 @@ struct Display: Hashable, Codable, Identifiable {
 	Whether the display is connected.
 	*/
 	var isConnected: Bool { screen?.isConnected ?? false }
+
+	/**
+	The screen a wallpaper with no display of its own belongs on.
+
+	Written out rather than left to `?? .main`, which in an `NSScreen?` position means
+	`NSScreen.main` — **the screen holding the window with keyboard focus**, not the display with the
+	menu bar. Measured on two displays: the primary was the built-in one, focus was on the external,
+	and the wallpaper followed the focus. It also moves, so a wallpaper could change screens because
+	the user clicked something.
+	*/
+	@MainActor
+	static var mainScreen: NSScreen? { main?.screen ?? NSScreen.screens.first }
 
 	/**
 	Get the main display if the current display is not connected.
