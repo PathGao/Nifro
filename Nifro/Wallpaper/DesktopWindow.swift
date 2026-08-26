@@ -100,7 +100,7 @@ final class DesktopWindow: NSWindow {
 
 	private func setFrame() {
 		// Ensure the screen still exists.
-		guard let screen = targetDisplay?.screen ?? .main else {
+		guard let screen = targetDisplay?.screen ?? Display.mainScreen else {
 			return
 		}
 
