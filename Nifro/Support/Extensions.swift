@@ -1263,7 +1263,6 @@ extension String {
 
 		return Self(dropFirst(prefix.count))
 	}
-
 }
 extension String {
 	/**
