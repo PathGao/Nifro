@@ -72,7 +72,23 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	`display` itself is left alone, so plugging the display back in puts the website back on it.
 	*/
 	@MainActor
-	var effectiveDisplay: Display? { (display ?? Defaults[.display])?.withFallbackToMain }
+	var effectiveDisplay: Display? {
+		let chosen = display ?? Defaults[.display]
+		return Defaults[.keepWallpaperWhenDisplayUnplugged] ? chosen?.withFallbackToMain : chosen
+	}
+
+	/**
+	Whether this website should be on screen at all right now.
+
+	False only for a website pinned to a display that is not attached, and only when the user has said
+	such a wallpaper should go away with its display rather than move. Kept apart from
+	`effectiveDisplay` because that answers *where*, and `nil` there already means "wherever Settings
+	says" — there is no value it could return that means nowhere.
+	*/
+	@MainActor
+	var isShowable: Bool {
+		Defaults[.keepWallpaperWhenDisplayUnplugged] || (display ?? Defaults[.display])?.isConnected != false
+	}
 
 	/**
 	How often this website actually reloads.

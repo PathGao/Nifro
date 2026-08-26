@@ -679,6 +679,16 @@
         }
       }
     },
+    "For a website pinned to a particular display. On, it moves to the main display until that one is plugged back in — which is what Nifro has always done, and what macOS does with an ordinary window. Off, it goes away with its display, the way the desktop picture on that screen does. Either way the website keeps the display you chose for it." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "针对指定了显示器的网站。打开：它会移到主显示器上，直到那台显示器插回来 —— 这是 Nifro 一直以来的行为，也是 macOS 对待普通窗口的方式。关闭：它跟着那台显示器一起消失，就像那块屏幕上的桌面图片一样。两种情况下，网站自己记着的显示器都不会变。"
+          }
+        }
+      }
+    },
     "For websites that do not set their own. A website with its own schedule — set in its settings — ignores this." : {
       "localizations" : {
         "zh-Hans" : {
@@ -915,6 +925,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "JavaScript"
+          }
+        }
+      }
+    },
+    "Keep a wallpaper when its display is unplugged" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示器拔掉后，保留它上面的壁纸"
           }
         }
       }
