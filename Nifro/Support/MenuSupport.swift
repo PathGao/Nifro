@@ -84,24 +84,6 @@ extension CallbackMenuItem: NSMenuItemValidation {
 
 
 extension NSMenuItem {
-	convenience init(
-		_ title: String,
-		key: String = "",
-		keyModifiers: NSEvent.ModifierFlags? = nil,
-		isEnabled: Bool = true,
-		isChecked: Bool = false,
-		isHidden: Bool = false
-	) {
-		self.init(title: title, action: nil, keyEquivalent: key)
-		self.isEnabled = isEnabled
-		self.isChecked = isChecked
-		self.isHidden = isHidden
-
-		if let keyModifiers {
-			self.keyEquivalentModifierMask = keyModifiers
-		}
-	}
-
 	var isChecked: Bool {
 		get { state == .on }
 		set {

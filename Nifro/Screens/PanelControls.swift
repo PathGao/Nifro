@@ -38,7 +38,12 @@ struct PanelButton: View {
 		.onHover { isHovering = $0 }
 		// `onLongPressGesture` with no delay is the way to read "finger is down" from a SwiftUI button;
 		// the button's own style gives nothing back once it is `.plain`.
-		.onLongPressGesture(minimumDuration: 0, pressing: { isPressed = $0 }) {}
+		.onLongPressGesture(minimumDuration: 0) {
+			// Nothing on completion: the press itself is the whole point, and the button's own action
+			// already fires.
+		} onPressingChanged: {
+			isPressed = $0
+		}
 		.help(label)
 		.accessibilityLabel(label)
 	}
@@ -89,7 +94,12 @@ struct PanelWideButton: View {
 		.scaleEffect(isPressed ? 0.96 : 1)
 		.animation(.easeOut(duration: 0.12), value: isPressed)
 		.onHover { isHovering = $0 }
-		.onLongPressGesture(minimumDuration: 0, pressing: { isPressed = $0 }) {}
+		.onLongPressGesture(minimumDuration: 0) {
+			// Nothing on completion: the press itself is the whole point, and the button's own action
+			// already fires.
+		} onPressingChanged: {
+			isPressed = $0
+		}
 	}
 
 	private var background: some ShapeStyle {

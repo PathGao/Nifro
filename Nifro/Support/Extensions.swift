@@ -2463,7 +2463,6 @@ extension WKWebView {
 
 		return (value as? Bool) ?? false
 	}
-
 }
 // MARK: - WKWebView
 extension WKWebView {
