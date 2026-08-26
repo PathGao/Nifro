@@ -27,9 +27,16 @@ extension AppState {
 			.store(in: &cancellables)
 
 		// Plugging or unplugging a display changes how many wallpapers there should be.
+		//
+		// `applyWebsiteChanges` rather than `rebuildScenes`, because a scene that has just been built
+		// has nothing in it: `rebuildScenes` assigns the website and installs the content view, but the
+		// web view is born hidden and only a load reveals it. Plugging in a display that some website
+		// names therefore gave that display a permanently blank wallpaper. `applyWebsiteChanges` is the
+		// same rebuild followed by a load of exactly the scenes whose page is not already the right
+		// one, so it costs nothing on the screens that did not change.
 		NSScreen.publisher
 			.sink { [self] in
-				rebuildScenes()
+				applyWebsiteChanges()
 			}
 			.store(in: &cancellables)
 

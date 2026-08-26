@@ -61,9 +61,18 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 
 	/**
 	The display this website actually appears on.
+
+	Falls back to the main display when the chosen one is not attached, because otherwise this answers
+	with a display that is not there and every caller believes it. `displaysInUse` kept building a
+	scene for an unplugged display, and both `DesktopWindow.setFrame` and `WallpaperScene.screen` then
+	fall back to `.main` on their own — so an undocked laptop ended up with two full-screen wallpaper
+	windows stacked on the built-in screen, each with its own timers and its own menu-bar band
+	competing for one menu bar.
+
+	`display` itself is left alone, so plugging the display back in puts the website back on it.
 	*/
 	@MainActor
-	var effectiveDisplay: Display? { display ?? Defaults[.display] }
+	var effectiveDisplay: Display? { (display ?? Defaults[.display])?.withFallbackToMain }
 
 	/**
 	How often this website actually reloads.

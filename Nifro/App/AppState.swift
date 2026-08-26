@@ -197,7 +197,9 @@ final class AppState: ObservableObject {
 	/**
 	Create one scene per display that should show a wallpaper, reusing the ones that already match.
 
-	Call this whenever the displays change or a website moves to another display. Scenes for displays that went away get torn down. The rest keep their web views and whatever they had loaded.
+	Call this whenever the displays change or a website moves to another display. Scenes for displays that went away get torn down — which depends entirely on `displaysInUse` no longer naming them, and it used to name them forever. The rest keep their web views and whatever they had loaded.
+
+	This brings a scene up to date with everything app-wide; it does not load anything. Callers that need a page on screen go through `applyWebsiteChanges`.
 	*/
 	func rebuildScenes() {
 		let wanted = WebsitesController.shared.displaysInUse
@@ -231,6 +233,7 @@ final class AppState: ObservableObject {
 			scene.installContentView()
 			scene.window.isInteractive = isBrowsingMode
 			scene.applyOpacity(animated: false)
+			scene.resetTimer()
 			scene.resetPlaylistTimer()
 		}
 	}
