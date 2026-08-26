@@ -53,7 +53,6 @@ final class WebViewController: NSViewController {
 		configuration.preferences = preferences
 
 		let webView = SSWebView(frame: .zero, configuration: configuration)
-		webView.scene = scene
 
 		webView.publisher(for: \.title)
 			.sink { [weak webView] title in

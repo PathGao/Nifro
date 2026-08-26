@@ -3,15 +3,6 @@ import WebKit
 final class SSWebView: WKWebView {
 	override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 
-	/**
-	The scene this web view draws into. Weak because the scene owns it, through its controller.
-
-	Here so the context menu can offer to change the website this page belongs to. Read off the
-	list-wide current website instead, "Update Website to Current" on the second display rewrote the
-	first display's website with the second one's address.
-	*/
-	weak var scene: WallpaperScene?
-
 	private var cancellables = Set<AnyCancellable>()
 
 	private var excludedMenuItems: Set<MenuItemIdentifier> = [
