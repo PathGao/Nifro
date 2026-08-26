@@ -651,3 +651,43 @@ struct DiskBudgetTests {
 		#expect(DiskBudget.limit < 151_000_000)
 	}
 }
+
+/**
+Two spellings of one value, from two places that never agreed. The catalogue's spelling is what `sites/schema.json` requires; the array spelling is what every installed copy already has on disk. Reading only one of them is how a catalogue entry with a `zoom` came to cost the whole live gallery.
+*/
+@Suite("Zoom decoding")
+struct ZoomDecodingTests {
+	private func decode(_ json: String) throws -> Zoom {
+		try JSONDecoder().decode(Zoom.self, from: Data(json.utf8))
+	}
+
+	@Test("The catalogue's spelling decodes")
+	func catalogueSpelling() throws {
+		// The shape `Tools/generate-site-catalog.py` writes and `sites/schema.json` requires.
+		let zoom = try decode(#"{"centerX": 0.25, "centerY": 0.75, "scale": 3}"#)
+
+		#expect(zoom.center == CGPoint(x: 0.25, y: 0.75))
+		#expect(zoom.scale == 3)
+	}
+
+	@Test("What is already saved on disk still decodes")
+	func savedSpelling() throws {
+		// Synthesised `Codable` writes `CGPoint` unkeyed. Taken from a real preferences file.
+		let zoom = try decode(#"{"center": [0.418, 0.526], "scale": 1.2039}"#)
+
+		#expect(zoom.center == CGPoint(x: 0.418, y: 0.526))
+		#expect(zoom.scale == 1.2039)
+	}
+
+	@Test("Encoding still writes the spelling already on disk")
+	func encodingIsUnchanged() throws {
+		// Not a style preference: writing the other spelling would make every saved zoom unreadable
+		// by the version that saved it, and unreadable by this one too if the reader were ever
+		// narrowed to match.
+		let encoded = try JSONEncoder().encode(Zoom(center: CGPoint(x: 0.25, y: 0.75), scale: 3))
+		let asObject = try JSONSerialization.jsonObject(with: encoded) as? [String: Any]
+
+		#expect(asObject?["center"] is [Any])
+		#expect(asObject?["centerX"] == nil)
+	}
+}

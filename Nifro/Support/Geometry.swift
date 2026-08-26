@@ -58,6 +58,56 @@ struct Zoom: Codable, Hashable, Sendable {
 	*/
 	var scale: Double
 
+	init(center: CGPoint, scale: Double) {
+		self.center = center
+		self.scale = scale
+	}
+
+	private enum CodingKeys: String, CodingKey {
+		case center
+		case scale
+		case centerX
+		case centerY
+	}
+
+	/**
+	Reads both spellings of a centre, because two of them are in the wild and neither can be dropped.
+
+	Synthesised `Codable` writes a `CGPoint` as an unkeyed array, so everything the app has ever saved
+	says `"center": [x, y]` — that is what is in every installed copy's preferences and it has to keep
+	round-tripping. The site catalogue says `"centerX"` and `"centerY"`: `sites/schema.json` requires
+	those names, the YAML entries are written with them, and they read far better in a contract meant
+	for contributors than a positional pair does.
+
+	Nothing reconciled the two, so a catalogue entry with a `zoom` could not be decoded at all — and
+	because the whole fetch was one `decode([Entry].self)`, one such entry lost the entire live
+	gallery. Reading both and writing only the first keeps every saved zoom byte-identical while the
+	catalogue's own spelling starts working.
+	*/
+	init(from decoder: any Decoder) throws {
+		let container = try decoder.container(keyedBy: CodingKeys.self)
+
+		scale = try container.decode(Double.self, forKey: .scale)
+
+		if let point = try? container.decode(CGPoint.self, forKey: .center) {
+			center = point
+		} else {
+			center = CGPoint(
+				x: try container.decode(Double.self, forKey: .centerX),
+				y: try container.decode(Double.self, forKey: .centerY)
+			)
+		}
+	}
+
+	/**
+	Writes the array spelling only. Changing this rewrites what is already on every user's disk.
+	*/
+	func encode(to encoder: any Encoder) throws {
+		var container = encoder.container(keyedBy: CodingKeys.self)
+		try container.encode(center, forKey: .center)
+		try container.encode(scale, forKey: .scale)
+	}
+
 	/**
 	The region this zoom picks out of a page of `pageSize`, in page coordinates from the top-left.
 
