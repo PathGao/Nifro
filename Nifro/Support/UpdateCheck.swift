@@ -68,25 +68,28 @@ enum UpdateCheck {
 	page, and being wrong in that direction is worse than saying nothing.
 	*/
 	static func isNewer(_ candidate: String, than current: String) -> Bool {
-		func components(_ version: String) -> [Int]? {
+		// Empty means "not a version I can read", which is why the caller refuses to act on it. There is
+		// no real version with no components, so the sentinel cannot collide with an answer.
+		func components(_ version: String) -> [Int] {
 			let parts = version.split(separator: ".", omittingEmptySubsequences: false)
+			let numbers = parts.compactMap { Int($0) }
 
-			guard !parts.isEmpty else {
-				return nil
+			guard
+				numbers.count == parts.count,
+				numbers.allSatisfy({ $0 >= 0 })
+			else {
+				return []
 			}
 
-			return try? parts.map {
-				guard let number = Int($0), number >= 0 else {
-					throw CocoaError(.formatting)
-				}
-
-				return number
-			}
+			return numbers
 		}
 
+		let candidate = components(candidate)
+		let current = components(current)
+
 		guard
-			let candidate = components(candidate),
-			let current = components(current)
+			!candidate.isEmpty,
+			!current.isEmpty
 		else {
 			return false
 		}
