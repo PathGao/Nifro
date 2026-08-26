@@ -309,6 +309,26 @@
         }
       }
     },
+    "Check Now" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "立即检查"
+          }
+        }
+      }
+    },
+    "Check for updates automatically" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "自动检查更新"
+          }
+        }
+      }
+    },
     "Checking for new entries…" : {
       "localizations" : {
         "zh-Hans" : {
@@ -455,6 +475,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "复制设置"
+          }
+        }
+      }
+    },
+    "Could not check" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "无法检查"
           }
         }
       }
@@ -735,6 +765,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "通用"
+          }
+        }
+      }
+    },
+    "Get %@…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "获取 %@…"
           }
         }
       }
@@ -1185,6 +1225,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "没有匹配的网站"
+          }
+        }
+      }
+    },
+    "Once a day. Nifro mentions a newer version in the menu and nowhere else — it does not interrupt, and it never installs anything." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每天一次。有新版本时 Nifro 只在菜单里提一句，不打断你，也从不自动安装任何东西。"
           }
         }
       }
@@ -1999,12 +2049,32 @@
         }
       }
     },
+    "Up to date" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已是最新"
+          }
+        }
+      }
+    },
     "Update Website to Current" : {
       "localizations" : {
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "把网站更新为当前地址"
+          }
+        }
+      }
+    },
+    "Update to %@…" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "更新到 %@…"
           }
         }
       }

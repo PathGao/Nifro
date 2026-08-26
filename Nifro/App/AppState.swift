@@ -254,6 +254,24 @@ final class AppState: ObservableObject {
 		}
 	}
 
+	/**
+	Ask GitHub what the newest release is and write it down, then say whether it is newer than this one.
+
+	Both the daily check and the button in Settings come through here, so there is one answer to "what
+	is the latest version" and one place it is recorded. The fetch and the comparison stay pure and
+	tested in `UpdateCheck`; storing what they found is the app's business, which is why it is here.
+	*/
+	@discardableResult
+	func refreshLatestKnownVersion() async -> UpdateCheck.Result {
+		guard let latest = await UpdateCheck.latestReleaseVersion() else {
+			return .unreachable
+		}
+
+		Defaults[.latestKnownVersion] = latest
+
+		return UpdateCheck.isNewer(latest, than: SSApp.version) ? .newer(latest) : .upToDate
+	}
+
 	func resetTimer() {
 		for scene in scenes {
 			scene.resetTimer()
