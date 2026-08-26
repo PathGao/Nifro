@@ -3,21 +3,27 @@ import SwiftUI
 /**
 One column per display, side by side.
 
-The menu this replaces could only ever describe one display. Every item in it acted on "the current
-website", and with two screens that meant whichever one last held a flag — so the menu was both
-telling the user about one display and hiding that fact. Showing every display at once removes the
-question rather than answering it.
+The menu this begins to replace could only ever describe one display. Every item in it acted on "the
+current website", and with two screens that meant whichever one last held a flag — so the menu was
+both telling the user about one display and hiding that fact. Showing every display at once removes
+the question rather than answering it.
 
 The picture is the wallpaper itself, taken from the app's own web view. No screen recording is asked
 for, and none is needed.
 */
 struct DisplayPanel: View {
-	@ObservedObject var model: DisplayPanelModel
+	@ObservedObject private var model: DisplayPanelModel
+
+	init(model: DisplayPanelModel) {
+		self.model = model
+	}
 
 	var body: some View {
 		HStack(alignment: .top, spacing: 16) {
 			ForEach(model.columns) { column in
-				DisplayColumn(column: column, model: model)
+				DisplayColumn(column: column) {
+					model.show($0)
+				}
 			}
 		}
 		.padding(16)
@@ -27,9 +33,15 @@ struct DisplayPanel: View {
 	}
 }
 
+/**
+Everything one display gets to say for itself.
+
+Handed a finished column rather than the model, so the only thing that knows how a column is
+assembled is the thing that assembles it.
+*/
 private struct DisplayColumn: View {
 	let column: DisplayPanelModel.Column
-	@ObservedObject var model: DisplayPanelModel
+	let onSelect: (Website.ID) -> Void
 
 	var body: some View {
 		VStack(spacing: 6) {
@@ -44,23 +56,23 @@ private struct DisplayColumn: View {
 
 			preview
 
-			WebsitePicker(column: column, model: model)
+			picker
 		}
 		.frame(width: 260)
 	}
 
 	@ViewBuilder
 	private var preview: some View {
-		// Fixed 16:10 whatever the display is. A column that changed shape with the screen would make a
-		// portrait monitor tall enough to push everything else off the panel.
+		// A fixed shape whatever the display is. A column that took the screen's own aspect would make
+		// a portrait monitor tall enough to push everything else off the panel.
 		ZStack {
 			RoundedRectangle(cornerRadius: 8)
 				.fill(.quaternary)
 
-			if let image = column.snapshot {
-				Image(nsImage: image)
+			if let snapshot = column.snapshot {
+				Image(nsImage: snapshot)
 					.resizable()
-					.aspectRatio(contentMode: .fill)
+					.scaledToFill()
 					.clipShape(RoundedRectangle(cornerRadius: 8))
 			} else {
 				Text("No Website")
@@ -75,30 +87,30 @@ private struct DisplayColumn: View {
 				.strokeBorder(.separator)
 		}
 	}
-}
 
-/**
-The website on this display, chosen from the ones already set up.
+	/**
+	The website on this display, from the ones it already owns.
 
-Adding a website is a different act with a different home, so the empty state sends people to the
-same list rather than to a form: the panel is for pointing displays at things that exist.
-*/
-private struct WebsitePicker: View {
-	let column: DisplayPanelModel.Column
-	@ObservedObject var model: DisplayPanelModel
-
-	var body: some View {
+	Adding a website is a different act with a different home, so an empty display offers nothing here
+	rather than a form: the panel points displays at things that exist.
+	*/
+	@ViewBuilder
+	private var picker: some View {
 		Picker(selection: Binding(
 			get: { column.websiteID },
-			set: { model.show($0, on: column.display) }
+			set: {
+				if let id = $0 {
+					onSelect(id)
+				}
+			}
 		)) {
-			ForEach(model.choices(for: column.display), id: \.id) {
+			ForEach(column.choices, id: \.id) {
 				Text($0.menuTitle.truncating(to: 28)).tag($0.id as Website.ID?)
 			}
 		} label: {
 			EmptyView()
 		}
 		.labelsHidden()
-		.disabled(model.choices(for: column.display).isEmpty)
+		.disabled(column.choices.isEmpty)
 	}
 }

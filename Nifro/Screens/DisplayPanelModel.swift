@@ -17,6 +17,14 @@ final class DisplayPanelModel: ObservableObject {
 		let websiteName: String?
 		let snapshot: NSImage?
 
+		/**
+		The websites this display owns.
+
+		Carried on the column rather than looked up by the view, so a column is a finished description
+		of one display and the view has nothing left to ask.
+		*/
+		let choices: [Website]
+
 		// `nil` display means "whatever Settings says", and there is only ever one of those, so the
 		// display's own id is the identity when it has one and a fixed stand-in when it does not.
 		var id: String { display?.id.uuidString ?? "default" }
@@ -40,7 +48,8 @@ final class DisplayPanelModel: ObservableObject {
 					displayName: scene.display?.localizedName ?? String(localized: "Main Display"),
 					websiteID: scene.website?.id,
 					websiteName: scene.website?.menuTitle.nilIfEmpty,
-					snapshot: await scene.snapshot()
+					snapshot: await scene.snapshot(),
+					choices: WebsitesController.shared.all.filter { $0.effectiveDisplay == scene.display }
 				)
 			)
 		}
@@ -49,24 +58,13 @@ final class DisplayPanelModel: ObservableObject {
 	}
 
 	/**
-	The websites that can go on `display`.
+	Show the website with `websiteID`.
 
-	A website belongs to one display, so this is the list that display already owns — the panel points
-	a display at one of its own, it does not move websites between displays. That is what the website's
-	own settings are for.
+	No display argument: a website belongs to one display already, and `makeCurrent` marks it per
+	display, so passing one in would be a second opinion about something the website settles.
 	*/
-	func choices(for display: Display?) -> [Website] {
-		WebsitesController.shared.all.filter { $0.effectiveDisplay == display }
-	}
-
-	/**
-	Show `websiteID` on `display`.
-	*/
-	func show(_ websiteID: Website.ID?, on display: Display?) {
-		guard
-			let websiteID,
-			let website = WebsitesController.shared.all[id: websiteID]
-		else {
+	func show(_ websiteID: Website.ID) {
+		guard let website = WebsitesController.shared.all[id: websiteID] else {
 			return
 		}
 

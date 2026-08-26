@@ -18,8 +18,6 @@ final class DisplayPanelController {
 		$0.contentViewController = NSHostingController(rootView: DisplayPanel(model: model))
 	}
 
-	var isShown: Bool { popover.isShown }
-
 	/**
 	Show the panel under `button`, or put it away if it is already up.
 	*/
