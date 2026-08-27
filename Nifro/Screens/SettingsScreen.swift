@@ -1,5 +1,4 @@
 import SwiftUI
-import WebKit
 import LaunchAtLogin
 import KeyboardShortcuts
 
@@ -208,11 +207,6 @@ private struct AdvancedSettings: View {
 				OpenExternalLinksInBrowserSetting()
 				HideMenuBarIconSetting()
 			}
-			Section {} // Padding
-			Section {} footer: {
-				ClearWebsiteDataSetting()
-					.controlSize(.small)
-			}
 		}
 	}
 }
@@ -366,64 +360,6 @@ private struct HideMenuBarIconSetting: View {
 				String(localized: "If you need to access the Nifro menu, launch the app again to reveal the menu bar icon for 5 seconds."),
 				isPresented: $isShowingAlert
 			)
-	}
-}
-
-/**
-Clearing takes a moment and used to say nothing about it.
-
-The button disabled itself the instant it was pressed and stayed that way, with no sign of work
-happening, no sign of it finishing, and no way to tell whether anything had gone. It is a button whose
-whole purpose is an effect you cannot see, so it has to report one: it says how much it freed, which
-is the only answer to "did that do anything" that does not require taking the app's word for it.
-*/
-private struct ClearWebsiteDataSetting: View {
-	private enum Progress: Equatable {
-		case ready
-		case clearing
-		case cleared(bytes: Int64)
-	}
-
-	@State private var progress = Progress.ready
-
-	var body: some View {
-		HStack(spacing: 8) {
-			// Not marked as destructive as it should mostly be used when it's together with other buttons.
-			Button("Clear all website data") {
-				clear()
-			}
-			.disabled(progress == .clearing)
-
-			switch progress {
-			case .ready:
-				EmptyView()
-			case .clearing:
-				ProgressView()
-					.controlSize(.small)
-			case .cleared(let bytes):
-				// Zero is a real answer and a common one — pressing it twice frees nothing the second
-				// time — so it says "nothing left to clear" rather than "0 bytes freed", which reads
-				// like a failure.
-				Text(bytes > 0 ? String(localized: "Freed \(bytes.formatted(.byteCount(style: .file)))") : String(localized: "Nothing left to clear"))
-					.foregroundStyle(.secondary)
-			}
-		}
-		.help("Clears cookies, local storage, caches, page thumbnails, and what each page had remembered: where it was scrolled or moved to, and how far it was zoomed in. Your websites and their settings are kept.")
-	}
-
-	private func clear() {
-		progress = .clearing
-
-		Task {
-			let before = await DiskBudget.storedBytes(of: [.homeDirectory])
-
-			WebsitesController.shared.thumbnailCache.removeAllImages()
-			AppState.shared.forgetWherePagesWere()
-			await WKWebsiteDataStore.clearAllWebsiteData()
-
-			let after = await DiskBudget.storedBytes(of: [.homeDirectory])
-			progress = .cleared(bytes: max(0, before - after))
-		}
 	}
 }
 
