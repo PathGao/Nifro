@@ -54,7 +54,6 @@ final class WebViewController: NSViewController {
 		// A wallpaper has nobody to click play. The macOS default happens to allow this, but the
 		// header documents no default, and this is now load-bearing for the embedded players.
 		configuration.mediaTypesRequiringUserActionForPlayback = []
-		configuration.applicationNameForUserAgent = "\(SSApp.name)/\(SSApp.version)"
 
 		// TODO: Enable this again once the first load of a session stops showing a block of grey while
 		// it waits. Suppressing incremental rendering makes that wait longer and more visible, and the
