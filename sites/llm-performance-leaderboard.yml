@@ -4,4 +4,4 @@ description: Artificial Analysis's ranking of language models by speed, price an
 tags: [data, dashboard]
 backend: snapshot
 reloadInterval: 21600
-source: jonbstrong in upstream discussion #136.
+source: The maintainer's own shortlist.

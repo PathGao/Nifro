@@ -46,7 +46,7 @@ struct ZoomSetting: View {
 /**
 Which display a website appears on.
 
-Only offered when there is more than one display. Showing a different page on each screen is the most-asked-for thing upstream (Plash#2), and it needs the display to belong to the website rather than to the app.
+Only offered when there is more than one display. Showing a different page on each screen is the most-asked-for thing there has ever been here, and it needs the display to belong to the website rather than to the app.
 
 The unpinned option is "Main Display" and not "Default display". There is no app-wide display setting
 for a default to come from — unpinned means `Display.main`, whichever screen currently has the menu

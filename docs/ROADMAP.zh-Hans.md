@@ -18,11 +18,8 @@
 
 ## 1. 这是什么
 
-Nifro 是 [sindresorhus/Plash](https://github.com/sindresorhus/Plash) 的开源分支，从
-`mattdanielbrown/Plash` @ `364f3e1`（v2.16.0，2025-06-10）分出来——那是 2025 年 10 月源码闭源之前
-最后一个 MIT 快照。分发走 Homebrew cask 加 GitHub Release，不上 Mac App Store。
-
-上游 issue 分诊在 `UPSTREAM-ISSUES.md`，这里不重复：同一个数字存两份，正是它们后来对不上的原因。
+Nifro 把网页放到桌面壁纸上，一块屏幕一个页面。分发走 Homebrew cask 加 GitHub Release，不上
+Mac App Store。
 
 **v0.1.3 之后的处境。** 菜单栏菜单被按显示器分列的面板取代（#21）。这一步是对的，而且只落地了一半：
 现在选网站是在面板上，而旧菜单能做的十一件事没有任何入口（第 8 节）。这份文档里还开着的东西，
@@ -267,7 +264,7 @@ U1 已发布，然后在面板重构里丢了它的展示面——那是 K25，�
 | **X3** | Tuist / XcodeGen | `project.pbxproj` 远没到冲突会痛的规模，手动加一个文件是四行 |
 | **X4** | 依赖注入框架、插件系统 | 没有第二个实现，抽象没有依据 |
 | **X5** | 只用 CLT 做类型检查门禁 | **试过，失败**：KeyboardShortcuts 用了 `#Preview`，那个宏插件只随 Xcode 分发 |
-| **X7** | 摄像头 / 屏幕采集输入 | entitlement 是按进程给的，等于永久地让一个全天候渲染任意 URL 的进程能碰摄像头。这个 app 的权限列表越短越容易核查。上游 [#125](https://github.com/sindresorhus/Plash/issues/125)。它**技术上做得到**，难度不是理由 |
+| **X7** | 摄像头 / 屏幕采集输入 | entitlement 是按进程给的，等于永久地让一个全天候渲染任意 URL 的进程能碰摄像头。这个 app 的权限列表越短越容易核查。它**技术上做得到**，难度不是理由 |
 | **X8** | 渲染成图片交给 `NSWorkspace.setDesktopImageURL`（原 P6，以及旧第 2 节的 A2） | 是拒绝而不是阻塞：它会终结这个 app。这样设的壁纸是一张图片——不能点、没有 Browsing Mode、无法登录——而刷新它会让整个桌面交叉淡入。**而且它需要那个不可能存在的离屏渲染器：**离屏窗口会让 WebKit 报告 `visibilityState: hidden`，于是 `requestAnimationFrame` 永远不跑，canvas 页面拍出来是空白。在 JS 里覆盖 `document.hidden` 也没用。每一个「用快照当壁纸」的想法都死在这句话上 |
 | **X9** | 把用户自己的 Chrome 窗口放到桌面层 | 拒绝。**没有公开 API 能设置另一个进程的窗口层级**——对着不属于我们的 connection 调 SkyLight 是 yabai 的路子，需要关掉部分 SIP。能做出来的那个变体放弃了图标层，并把壁纸的生命周期交给一个我们控制不了的 app：Cmd-Q 结束它、自动更新重启它，而且 entitlement 要扩到完整辅助功能并关掉沙盒。改用投屏更糟——DRM 视频送过来是黑的、帧是 JPEG，而且需要开着 `--remote-debugging-port`，等于把整个浏览器身份交给 localhost 上的任意进程。它的动机（继承登录态）本来就已有答案：WKWebView 的存储是持久的，通过 Browsing Mode 登录一次就一直有效 |
 | **X10** | 内容铺满屏幕时转为不透明 | 省下的量测不出来，而且需要一个会在透明背景页面上把屏幕变黑的开关 |

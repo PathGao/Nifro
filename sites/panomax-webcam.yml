@@ -6,5 +6,5 @@ backend: snapshot
 backendNote: A single JPEG. There is nothing to render between reloads.
 reloadInterval: 600
 source: >-
-  odolphie in upstream discussion #136, who used camera 879 (Glastonbury Festival site).
-  Other Panomax cameras work by swapping the number in the URL.
+  The maintainer's own shortlist. This is camera 879 (Glastonbury Festival site); other Panomax
+  cameras work by swapping the number in the URL.

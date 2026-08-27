@@ -32,7 +32,6 @@ css: |
     background-color: rgba(0 0 0 / 80%) !important;
   }
 source: >-
-  Listed in the upstream Plash readme "Use-cases"; the CSS above is sindresorhus's transparency
-  example in upstream discussion #136. ha404 posted a shorter variant in the same thread that
-  also pads the grid into the left half of the screen. Google's obfuscated class names change
-  from time to time, so the selectors may need refreshing.
+  The maintainer's own shortlist. The CSS above makes the grid transparent; a shorter variant can
+  also pad it into the left half of the screen. Google's obfuscated class names change from time to
+  time, so the selectors may need refreshing.

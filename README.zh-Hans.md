@@ -102,13 +102,9 @@ brew uninstall --zap --cask nifro
 
 ## 这个项目从哪来
 
-Nifro 是 Sindre Sorhus 的 [Plash](https://github.com/sindresorhus/Plash) 的开源分支，取自它在
-2025 年 10 月闭源之前最后一个 MIT 许可的快照。Plash 本身仍在开发、仍在 App Store 上；想要原版
-请[去那里拿](https://sindresorhus.com/plash)。Nifro 不是它，也不自称是它，没有使用它的任何品牌
-或美术资源。
+灵感来自 Sindre Sorhus 的 [Plash](https://github.com/sindresorhus/Plash)。
 
-做这个分支有两个原因。一是那个项目五年的 issue 列表里堆着很多合理的请求，而它们需要的改动是原
-项目不打算接的。二是把代码读完之后会发现，它建立在两个值得重新考虑的前提上：
+「把网页当壁纸」这个想法，照通常的做法实现出来，会建立在两个值得重新考虑的前提上：
 
 - 为了显示一分钟才变一次的内容，它让浏览器一直在渲染。
 - 它其实不是壁纸，而是压在壁纸上方的一个透明窗口。
@@ -116,10 +112,9 @@ Nifro 是 Sindre Sorhus 的 [Plash](https://github.com/sindresorhus/Plash) 的�
 这个分支要做的就是拆掉这两条，而第一条比看上去难：两套渲染后端、遮挡测量、静止画面自动识别
 都做过，结果每一样都在替「此刻到底在渲染什么」下判断，而浏览模式也在下同一个判断。它们又被拿了
 出来，一共 811 行，之后一次放回一件，每件都要先有测量。这笔账和「什么条件成立了才放回去」写在
-[docs/ROADMAP.zh-Hans.md](docs/ROADMAP.zh-Hans.md) 第 2 节；上游每一条未关闭 issue 的分诊见
-[docs/UPSTREAM-ISSUES.md](docs/UPSTREAM-ISSUES.md)。
+[docs/ROADMAP.zh-Hans.md](docs/ROADMAP.zh-Hans.md) 第 2 节。
 
-## 它比 Plash 多做了什么
+## 它做了什么
 
 **用移动的方式框出网页的一部分。** 拖动或双指滚动壁纸，捏合缩放，最后留在屏幕上的就是那一块。
 你瞄的是结果而不是被框的东西，而且它从这个网站已有的区域开始，所以既能新建也能调整。页面仍然按
@@ -174,5 +169,4 @@ swift test
 
 ## 许可
 
-MIT，见 [license](license)。衍生自 [sindresorhus/Plash](https://github.com/sindresorhus/Plash)
-v2.16.0，版权归 Sindre Sorhus，以同一许可使用。应用图标及其他美术资源不衍生自 Plash。
+MIT，见 [license](license)。应用图标及其他美术资源均为本项目原创。

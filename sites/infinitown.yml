@@ -8,4 +8,4 @@ css: |
   #about-button {
     display: none;
   }
-source: patrickpistor in upstream discussion #136, including the CSS that hides the about button.
+source: The maintainer's own shortlist. The CSS above hides the about button.

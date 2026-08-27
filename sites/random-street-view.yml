@@ -7,4 +7,4 @@ backendNote: >-
   The site's own slideshow advances on a timer, but reloading achieves the same thing and lets
   the renderer sleep in between. Interval controls how often the location changes.
 reloadInterval: 600
-source: Upstream Plash readme "Use-cases" section.
+source: The maintainer's own shortlist.

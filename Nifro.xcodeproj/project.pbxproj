@@ -744,7 +744,7 @@
 				INFOPLIST_FILE = Nifro/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License. Derived from Plash © Sindre Sorhus.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License. See the license file in the source repository.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -771,7 +771,7 @@
 				INFOPLIST_FILE = Nifro/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License. Derived from Plash © Sindre Sorhus.";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License. See the license file in the source repository.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",

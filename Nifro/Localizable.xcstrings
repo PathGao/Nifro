@@ -2089,12 +2089,12 @@
         }
       }
     },
-    "The page is laid out at the size of the wallpaper — your screen without the menu bar strip — so `100vw`, `100vh` and `@media (min-aspect-ratio: 16/9)` all mean that area. A rule written for a 16:10 laptop and a rule written for a 16:9 monitor can live in the same stylesheet; branch on the aspect ratio rather than guessing.\n\nNifro adds two classes to `<html>` you can target: `is-nifro-app`, always, and `nifro-is-browsing-mode` while Browsing Mode is on — useful for showing controls only when the page can be clicked. Both also exist under their Plash names, so stylesheets written for Plash keep working.\n\nZooming into a region is not done with CSS and cannot be seen from CSS. It is the web view's own magnification, and the page is deliberately never told: if the layout changed when you zoomed, the part you framed would stop being the part you get.": {
+    "The page is laid out at the size of the wallpaper — your screen without the menu bar strip — so `100vw`, `100vh` and `@media (min-aspect-ratio: 16/9)` all mean that area. A rule written for a 16:10 laptop and a rule written for a 16:9 monitor can live in the same stylesheet; branch on the aspect ratio rather than guessing.\n\nNifro adds two classes to `<html>` you can target: `is-nifro-app`, always, and `nifro-is-browsing-mode` while Browsing Mode is on — useful for showing controls only when the page can be clicked.\n\nZooming into a region is not done with CSS and cannot be seen from CSS. It is the web view's own magnification, and the page is deliberately never told: if the layout changed when you zoomed, the part you framed would stop being the part you get.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "页面是按壁纸的大小排版的——你的屏幕去掉菜单栏那一条——所以 `100vw`、`100vh` 和 `@media (min-aspect-ratio: 16/9)` 指的都是那块区域。为 16:10 笔记本写的规则和为 16:9 显示器写的规则可以放在同一份样式表里，按宽高比分支，不要靠猜。\n\nNifro 会往 `<html>` 上加两个类供你选中：`is-nifro-app` 一直都在，`nifro-is-browsing-mode` 只在浏览模式开着时出现——适合让某些控件只在页面可点时才显示。两个类都同时保留了 Plash 时代的名字，为 Plash 写的样式表照样能用。\n\n放大到某个区域不是用 CSS 做的，CSS 也看不见它。那是 web view 自己的缩放，而且是故意不告诉页面的：如果缩放时布局跟着变，你框出来的那一部分就不再是你拿到的那一部分了。"
+            "value": "页面是按壁纸的大小排版的——你的屏幕去掉菜单栏那一条——所以 `100vw`、`100vh` 和 `@media (min-aspect-ratio: 16/9)` 指的都是那块区域。为 16:10 笔记本写的规则和为 16:9 显示器写的规则可以放在同一份样式表里，按宽高比分支，不要靠猜。\n\nNifro 会往 `<html>` 上加两个类供你选中：`is-nifro-app` 一直都在，`nifro-is-browsing-mode` 只在浏览模式开着时出现——适合让某些控件只在页面可点时才显示。\n\n放大到某个区域不是用 CSS 做的，CSS 也看不见它。那是 web view 自己的缩放，而且是故意不告诉页面的：如果缩放时布局跟着变，你框出来的那一部分就不再是你拿到的那一部分了。"
           }
         }
       }

@@ -12,7 +12,7 @@ relaunch does not drop the user back at the middle of the map.
 The third place, `localStorage`, needs nothing: the web view uses the persistent data store, so a
 site that saves its own position gets it back on its own.
 
-A wallpaper often shows one region of a long page, a particular day in a calendar or a section of a dashboard, and every automatic reload used to drop the user back at the top. Upstream tracked this for six years without landing it (Plash#39).
+A wallpaper often shows one region of a long page, a particular day in a calendar or a section of a dashboard, and every automatic reload used to drop the user back at the top.
 
 The position is captured just before a reload rather than polled, so nothing runs in the background to support it. That covers the reload case, which is the one people hit. A hard quit loses at most the last scroll.
 

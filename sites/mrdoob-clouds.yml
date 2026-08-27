@@ -6,4 +6,4 @@ backend: live
 backendNote: >-
   Slow but continuous drift, and the camera follows the pointer. Snapshotting would freeze the
   one thing that makes it feel alive.
-source: sindresorhus in upstream discussion #136.
+source: The maintainer's own shortlist.

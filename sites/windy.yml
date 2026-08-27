@@ -8,4 +8,4 @@ backendNote: >-
   Windy animates its wind-particle layer, but the information is the map, not the motion.
   A snapshot every half hour is as informative and costs nothing to keep on screen.
 reloadInterval: 1800
-source: sindresorhus in upstream discussion #136.
+source: The maintainer's own shortlist.

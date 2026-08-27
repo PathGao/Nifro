@@ -224,7 +224,7 @@ final class AppState: ObservableObject {
 			scene.resetPlaylistTimer()
 		}
 
-		// Making the window key is not enough when the app is an accessory. The window comes forward, but keystrokes still go to whatever was active before, so nobody can type into the page. Plash#114.
+		// Making the window key is not enough when the app is an accessory. The window comes forward, but keystrokes still go to whatever was active before, so nobody can type into the page.
 		if isBrowsingMode {
 			SSApp.forceActivate()
 		}

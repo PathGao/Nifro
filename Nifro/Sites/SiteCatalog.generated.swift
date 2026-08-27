@@ -138,7 +138,7 @@ extension SiteCatalog {
 		),
 		.init(
 			name: "Gitstalk",
-			url: "https://gitstalk.netlify.app/sindresorhus",
+			url: "https://gitstalk.netlify.app/PathGao",
 			description: "A GitHub user's recent public activity as a card feed. Replace the username in the URL with your own.",
 			tags: ["dashboard", "personal", "data"],
 			reloadInterval: 1800,

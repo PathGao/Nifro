@@ -23,7 +23,7 @@ enum SecurityScopedBookmarkManager {
 		}
 
 		subscript(url: URL) -> Data? {
-			// Resolving symlinks is important for normalization. For example, sometimes a reference to the Desktop directory is pointed at a symlink in the sandbox container: `file:///Users/sindresorhus/Library/Containers/com.sindresorhus.Plash/Data/Desktop/`.
+			// Resolving symlinks is important for normalization. For example, sometimes a reference to the Desktop directory is pointed at a symlink in the sandbox container: `file:///Users/me/Library/Containers/com.pathgao.nifro/Data/Desktop/`.
 			get { bookmarkStore[url.resolvingSymlinksInPath().absoluteString] }
 			set {
 				var bookmarks = bookmarkStore

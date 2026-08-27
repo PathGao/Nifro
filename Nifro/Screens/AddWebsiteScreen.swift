@@ -447,8 +447,7 @@ private struct CustomCodeScreen: View {
 
 		Nifro adds two classes to `<html>` you can target: `is-nifro-app`, always, and \
 		`nifro-is-browsing-mode` while Browsing Mode is on — useful for showing controls only when the \
-		page can be clicked. Both also exist under their Plash names, so stylesheets written for Plash \
-		keep working.
+		page can be clicked.
 
 		Zooming into a region is not done with CSS and cannot be seen from CSS. It is the web view's \
 		own magnification, and the page is deliberately never told: if the layout changed when you \
