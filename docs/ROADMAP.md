@@ -195,7 +195,7 @@ no entry point. Baseline for every row: `git show 54cac6a~1:Nifro/App/Menus.swif
 | **W6** | Edit this website, from its name | The panel's name row is not a button. **The half-dead route is gone rather than left lying there:** `.showEditWebsiteDialog` and its observer were deleted, because the observer opened `AppState.currentWebsite` — the main display's website whatever screen the request came from — so re-pointing it at the panel would have opened the laptop's website in front of somebody looking at the monitor. Wiring this up is a per-display route, not a notification to re-declare |
 | **W7** | Move a website to another display | Only inside the website editor sheet. With K17, there is no path from the panel to put a website on a display |
 | **W8** | Keyboard shortcuts, discoverable | `setShortcut(for:)` is gone; panel buttons carry `.help()` text only. `Shortcuts.swift:8,15-16` still argues defaults were shipped so the menu could display them |
-| **W9** | The scaffolding the menu left behind | `SSMenu` is never instantiated; `CallbackMenuItem.validateCallback` is never assigned so `validateMenuItem` is a constant `true`; there is an empty `extension NSMenuItem {}`; `WebsitesScreen` has an `.onChange` whose body is an empty `withAnimation` and an empty `.onAppear` |
+| **W9** | The scaffolding the menu left behind | `SSMenu` is deleted. `CallbackMenuItem.validateCallback` is never assigned so `validateMenuItem` is a constant `true`; there is an empty `extension NSMenuItem {}`; `WebsitesScreen` has an `.onChange` whose body is an empty `withAnimation` and an empty `.onAppear` |
 
 W1 and W3 are the two that make the app feel unfinished from the panel; W5 is the one that lost a
 feature rather than an entry point.
