@@ -105,7 +105,6 @@ final class DisplayPanelModel: ObservableObject {
 		}
 
 		columns = built
-
 	}
 
 
@@ -152,16 +151,6 @@ final class DisplayPanelModel: ObservableObject {
 			await refresh()
 		}
 	}
-
-	/**
-	Whether Browsing Mode is on.
-
-	App-wide, unlike everything else here: it moves the wallpaper window above the desktop icons and
-	takes keyboard focus, and doing that to one screen while the others stay behind is not a state the
-	window levels can express. The button appears per column because that is where the user is looking,
-	not because the answer differs per display.
-	*/
-	var isBrowsingMode: Bool { AppState.shared.isBrowsingMode }
 
 	func toggleBrowsingMode() {
 		Action.toggleBrowsingMode.run()
