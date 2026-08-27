@@ -156,48 +156,56 @@ struct AddWebsiteScreen: View {
 
 	private var topView: some View {
 		Section {
-			TextField("URL", text: $urlString)
-				.textContentType(.URL)
-				.lineLimit(1)
-				// This change listener is used to respond to URL changes from the outside, like the "Revert" button or the Shortcuts actions.
-				.onChange(of: website.wrappedValue.url) { _, url in
-					guard
-						url.absoluteString != "-",
-						url.absoluteString != urlString
-					else {
-						return
-					}
-
-					urlString = url.absoluteString
-				}
-				.onChange(of: urlString) {
-					guard let url = URL(humanString: urlString) else {
-						// Makes the “Revert” button work if the user clears the URL field.
-						if urlString.trimmed.isEmpty {
-							website.wrappedValue.url = "-"
-						} else if
-							let url = URL(string: urlString, encodingInvalidCharacters: false),
-							url.isValid
-						{
-							website.wrappedValue.url = url
+			// `LabeledContent` rather than the field's own label, so the help button has somewhere to
+			// sit — the same arrangement the content-blocking field uses in Settings.
+			LabeledContent {
+				TextField("URL", text: $urlString)
+					.labelsHidden()
+					.textContentType(.URL)
+					.lineLimit(1)
+					// This change listener is used to respond to URL changes from the outside, like the "Revert" button or the Shortcuts actions.
+					.onChange(of: website.wrappedValue.url) { _, url in
+						guard
+							url.absoluteString != "-",
+							url.absoluteString != urlString
+						else {
+							return
 						}
 
-						return
+						urlString = url.absoluteString
 					}
+					.onChange(of: urlString) {
+						guard let url = URL(humanString: urlString) else {
+							// Makes the “Revert” button work if the user clears the URL field.
+							if urlString.trimmed.isEmpty {
+								website.wrappedValue.url = "-"
+							} else if
+								let url = URL(string: urlString, encodingInvalidCharacters: false),
+								url.isValid
+							{
+								website.wrappedValue.url = url
+							}
 
-					guard url.isValid else {
-						return
+							return
+						}
+
+						guard url.isValid else {
+							return
+						}
+
+						website.wrappedValue.url = url
+							.normalized(
+								removeDefaultPort: false, // We need to allow typing `http://172.16.0.100:8080`.
+								removeWWW: false // Some low-quality sites don't work without this.
+							)
 					}
-
-					website.wrappedValue.url = url
-						.normalized(
-							removeDefaultPort: false, // We need to allow typing `http://172.16.0.100:8080`.
-							removeWWW: false // Some low-quality sites don't work without this.
-						)
-				}
-				.debouncingTask(id: website.wrappedValue.url, interval: .seconds(0.5)) {
-					await fetchTitle()
-				}
+					.debouncingTask(id: website.wrappedValue.url, interval: .seconds(0.5)) {
+						await fetchTitle()
+					}
+			} label: {
+				Text("URL")
+					.explained(String(localized: "A page that needs a resolution can take “[[screenWidth]]” and “[[screenHeight]]” in the address, which Nifro replaces with the wallpaper's size on that display."))
+			}
 
 			// Offered rather than applied. Rewriting what somebody just typed is rude, and the point
 			// of showing the rewritten URL in the field is that they can see it and undo it.
