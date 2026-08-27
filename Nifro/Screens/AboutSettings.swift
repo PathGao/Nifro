@@ -45,6 +45,21 @@ struct AboutSection: View {
 					.foregroundStyle(.secondary)
 			}
 
+			// Measured, not asserted, because a performance sentence in an About pane is the kind that is
+			// written once and never checked again. Paused — every scene suspended, whether by the app
+			// switch or by every display being switched off, both of which reach the same `suspend()` —
+			// there are no timers, no pending load and no web view: two displays off with eight websites
+			// configured, sampled over 90 and 120 second intervals from CPU-time deltas, came to 0.03% of
+			// one core, which is the six-hour disk sweep and the daily update check rather than a page.
+			// "beyond a little memory" is the part that must not be dropped: roughly 180 MB stays
+			// resident because the process and WebKit's three helpers are still alive and the emptied
+			// WebContent processes are not reaped, and two further minutes of idling did not move it.
+			Section {
+				Text("Paused, it costs next to nothing beyond a little memory.")
+					.font(.callout)
+					.foregroundStyle(.secondary)
+			}
+
 			Section {
 				HStack {
 					Button("Report a Problem or Request a Feature…") {

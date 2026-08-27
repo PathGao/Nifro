@@ -1439,6 +1439,16 @@
         }
       }
     },
+    "Paused, it costs next to nothing beyond a little memory.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "暂停时，除少量内存外几乎没有开销。"
+          }
+        }
+      }
+    },
     "Permission": {
       "localizations": {
         "zh-Hans": {
