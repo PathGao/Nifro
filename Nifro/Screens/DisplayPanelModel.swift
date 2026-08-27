@@ -64,7 +64,7 @@ final class DisplayPanelModel: ObservableObject {
 					snapshot: await scene.snapshot(),
 					choices: WebsitesController.shared.all.filter { $0.effectiveDisplay == scene.display },
 					isShowing: !scene.isDisabledForDisplay,
-					isMuted: scene.website?.audio != .unmuted,
+					isMuted: !scene.shouldPlaySound,
 					rotationMode: scene.rotationMode,
 					// One website has nothing to rotate to, and a control that does nothing should say so
 					// rather than shrug when pressed.
@@ -114,6 +114,9 @@ final class DisplayPanelModel: ObservableObject {
 		MediaSync.forgetQuietPeriods()
 		MediaSync.restart()
 
+		// Who is audible is a property of the group, so it changes when the group does.
+		AppState.shared.applyAudioSetting()
+
 		Task {
 			await refresh()
 		}
@@ -150,7 +153,7 @@ final class DisplayPanelModel: ObservableObject {
 
 		onClose?()
 		WebsitesController.shared.makeCurrent(website)
-		AppState.shared.beginCropSelection()
+		AppState.shared.beginCropSelection(on: scene)
 	}
 
 	/**

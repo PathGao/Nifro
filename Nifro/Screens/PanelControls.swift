@@ -11,6 +11,27 @@ registered somewhere, and it stays lit while the thing it turns on is on.
 SF Symbols throughout: they carry the meanings already, they follow the user's own text size, and they
 are the vocabulary the rest of the system uses for exactly these verbs.
 */
+enum PanelMetrics {
+	/**
+	The chrome the wide controls share: the website chooser, Crop, Browsing Mode and Quit.
+
+	One definition, because "make Quit match the chooser" is a request that comes back every time one
+	of them is adjusted on its own.
+	*/
+	static let font = Font.system(size: 13)
+	static let height = 28.0
+	static let horizontalPadding = 15.0
+	static let cornerRadius = 6.0
+	static let symbolFont = Font.system(size: 11, weight: .semibold)
+
+	/**
+	The width of the website chooser, and of Quit, which is asked to match it.
+
+	Three quarters of the picture above it.
+	*/
+	static let chooserWidth = 195.0
+}
+
 struct PanelButton: View {
 	let symbol: String
 	let label: String
@@ -70,6 +91,12 @@ A button whose label is a word rather than a symbol, for the two verbs no symbol
 */
 struct PanelWideButton: View {
 	let title: String
+
+	/**
+	An optional symbol before the words, for the one button that cannot be undone.
+	*/
+	var symbol: String?
+
 	var isOn = false
 	var isEnabled = true
 	let action: () -> Void
@@ -79,14 +106,22 @@ struct PanelWideButton: View {
 
 	var body: some View {
 		Button(action: action) {
-			Text(title)
-				.font(.system(size: 11))
-				.lineLimit(1)
-				.padding(.horizontal, 10)
-				.frame(height: 22)
+			HStack(spacing: 6) {
+				if let symbol {
+					Image(systemName: symbol)
+						.font(PanelMetrics.symbolFont)
+				}
+
+				Text(title)
+					.font(PanelMetrics.font)
+					.lineLimit(1)
+					.frame(maxWidth: .infinity)
+			}
+				.padding(.horizontal, PanelMetrics.horizontalPadding)
+				.frame(height: PanelMetrics.height)
 				.foregroundStyle(isOn ? AnyShapeStyle(.white) : AnyShapeStyle(.primary))
-				.background(background, in: RoundedRectangle(cornerRadius: 5))
-				.contentShape(RoundedRectangle(cornerRadius: 5))
+				.background(background, in: RoundedRectangle(cornerRadius: PanelMetrics.cornerRadius))
+				.contentShape(RoundedRectangle(cornerRadius: PanelMetrics.cornerRadius))
 		}
 		.buttonStyle(.plain)
 		.disabled(!isEnabled)
@@ -173,7 +208,9 @@ struct MarqueeText: View {
 					}
 				}
 				.offset(x: isSlid ? -overflow : 0)
-				.frame(width: outer.size.width, alignment: .leading)
+				// Centred while it fits, and left-aligned once it does not — a name that has to slide has
+				// to start at its beginning, and centring one that overflows would cut both ends at once.
+				.frame(width: outer.size.width, alignment: overflow > 0 ? .leading : .center)
 				.clipped()
 		}
 		.onChange(of: isActive) {

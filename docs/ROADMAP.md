@@ -365,6 +365,25 @@ to the app.
 
 ---
 
+## 5.8 Media controls for the panel (the V series)
+
+The panel already knows where a video is — it reads `currentTime` and `duration` out of the page, and
+writes them back, to keep synced displays in step. Everything a transport needs is therefore already
+in hand; what is missing is only the controls and the decision about which pages get them.
+
+| | The item | What is known |
+|---|---|---|
+| **V1** | Pause, play, and step back or forward on the column | The clock already reports `duration`, so a page either has a video or it does not, and the controls can simply not appear when it does not. `MediaSync` already writes `currentTime`, so stepping is the same call it makes to correct drift |
+| **V2** | A progress bar under the picture | The same reading drives it. It has to update while the panel is open and stop when it closes — the panel is transient and a timer that outlives it is a timer nobody switched off |
+| **V3** | What a control means in a sync group | Pausing one display of a synced pair is a contradiction: the follower is corrected towards the leader every five seconds and would be dragged back into playing. A control pressed on any member has to act on the group, which makes the group the unit a transport acts on rather than the display |
+| **V4** | Live streams have no transport | `currentTime` on a live stream is relative to a sliding window, seeking is often refused, and "back thirty seconds" may not exist. The controls have to be absent rather than present and broken, and the test for it is not the same as "has a video" |
+
+The one thing this needs that does not exist yet: the clock reports the leader's position on a five
+second tick, which is right for correcting drift and far too slow for a progress bar. A transport
+wants its own faster read while the panel is open, and only while it is open.
+
+---
+
 ## 6. Known and not yet fixed (the K series)
 
 Reported while using the app, reproduced, and left alone for now. Each is written down rather than

@@ -74,6 +74,36 @@ final class AppState: ObservableObject {
 	/**
 	The scene the menu and the settings act on when nothing says otherwise.
 	*/
+	/**
+	The scene a keyboard shortcut acts on: the one the pointer is over.
+
+	A shortcut is pressed by somebody looking at a screen, and until now every one of them went to the
+	display named in Settings instead — so on two displays, pressing Next in front of the monitor
+	changed the laptop.
+
+	Falls back to `primaryScene` when the pointer is not over a wallpaper: it is over a window, over a
+	screen with nothing on it, or the displays are mid-reconfiguration. Silently, because a shortcut
+	that does nothing and says nothing is worse than one that acts somewhere reasonable.
+
+	It returns a *scene*, and callers pass `scene.display` on. Passing `Display.underMouse` straight
+	into the playlist would be a different value from the one the scenes are keyed by — and
+	`randomIterators` is keyed by exactly that, so a display would get two shuffle sequences and the
+	"no repeats until the list is done" promise would quietly stop holding.
+	*/
+	var actingScene: WallpaperScene {
+		guard let pointer = Display.underMouse else {
+			return primaryScene
+		}
+
+		let match = scenes.first {
+			// A scene's `nil` means the main display, so the two have to be compared after that is
+			// spelled out rather than as written.
+			Display.settingsKey(for: $0.display ?? .main) == Display.settingsKey(for: pointer)
+		}
+
+		return match ?? primaryScene
+	}
+
 	var primaryScene: WallpaperScene {
 		if let match = scenes.first(where: { $0.display == Defaults[.display] }) {
 			return match
@@ -448,7 +478,7 @@ final class AppState: ObservableObject {
 	*/
 	func applyAudioSetting() {
 		for scene in scenes {
-			scene.webViewController.webView.setAudioMuted(scene.website?.audio != .unmuted)
+			scene.webViewController.webView.setAudioMuted(!scene.shouldPlaySound)
 		}
 	}
 

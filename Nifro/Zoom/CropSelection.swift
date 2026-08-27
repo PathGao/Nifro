@@ -11,13 +11,18 @@ rectangle inside an already-framed region would have been framing a region of a 
 extension AppState {
 	var isSelectingCrop: Bool { cropSelectionView != nil }
 
-	func beginCropSelection() {
+	/**
+	Frame a region on `scene`, or on the one the pointer is over when none is named.
+
+	The scene is passed rather than looked up. It used to find one by matching the list-wide current
+	website, which on two displays meant framing whichever screen last held the mark — the overlay
+	would appear on a page the user was not looking at.
+	*/
+	func beginCropSelection(on scene: WallpaperScene? = nil) {
 		guard
 			!isSelectingCrop,
-			let website = currentWebsite,
-			// The website being adjusted may live on a second display. Putting the overlay on the primary
-			// one would move a region on a page the user is not looking at.
-			let scene = scenes.first(where: { $0.website?.id == website.id }) ?? scenes.first,
+			let scene = scene ?? Optional(actingScene),
+			let website = scene.website,
 			scene.screen != nil
 		else {
 			return

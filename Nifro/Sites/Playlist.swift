@@ -113,6 +113,28 @@ extension WallpaperScene {
 	Start, restart or stop this scene's rotation to match the current settings.
 	*/
 	/**
+	Whether this display should be the one making the noise.
+
+	The website's own setting, and then one rule on top of it: in a sync group only the leader is
+	audible. The others are showing the same video a fraction of a second apart, and two copies of the
+	same soundtrack that close together is not stereo — it is an echo, and it is worse than either one
+	alone. Supermarket walls of televisions do the same thing: many pictures, one sound.
+
+	The stored setting is not touched, so a display leaving a group gets its own sound back.
+	*/
+	var shouldPlaySound: Bool {
+		guard website?.audio == .unmuted else {
+			return false
+		}
+
+		guard let leader = MediaSync.leader(of: display) else {
+			return true
+		}
+
+		return Display.settingsKey(for: leader) == Display.settingsKey(for: display)
+	}
+
+	/**
 	Whether this display is switched off on its own.
 
 	Separate from the app-wide Disable, and beneath it: turning the app off turns every display off,

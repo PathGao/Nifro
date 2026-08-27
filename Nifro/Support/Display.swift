@@ -123,6 +123,26 @@ struct Display: Hashable, Codable, Identifiable {
 	var localizedName: String { screen?.localizedName ?? "<Unknown name>" }
 
 	/**
+	The display the pointer is on, or `nil` when it cannot be placed on one.
+
+	`frame` rather than `visibleFrame` or `pageFrame`: those cut away the menu bar, and the pointer
+	being *on* the menu bar is the moment this matters most — it is where the app's own icon is.
+	`CGRect.contains` is half-open, so the seam between two screens belongs to exactly one of them.
+
+	Optional because there are moments when the answer is nothing: the tens of milliseconds while
+	displays are being reconfigured, every screen asleep, and the dead corners of a non-rectangular
+	arrangement. Every caller falls back rather than forcing it.
+	*/
+	@MainActor
+	static var underMouse: Self? {
+		let point = NSEvent.mouseLocation
+
+		return NSScreen.screens
+			.first { $0.frame.contains(point) }
+			.flatMap(Self.init(screen:))
+	}
+
+	/**
 	Whether the display is connected.
 	*/
 	var isConnected: Bool { screen?.isConnected ?? false }

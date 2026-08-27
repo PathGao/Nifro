@@ -74,9 +74,12 @@ private struct PanelFooter: View {
 
 			Spacer()
 
-			PanelWideButton(title: String(localized: "Quit Nifro")) {
+			PanelWideButton(title: String(localized: "Quit Nifro"), symbol: "power") {
 				SSApp.quit()
 			}
+			// The same width as a column's chooser. Left to hug its words it would be the smallest
+			// control in the panel, and it is the only one that cannot be undone.
+			.frame(width: PanelMetrics.chooserWidth)
 		}
 	}
 }
@@ -104,7 +107,7 @@ private struct DisplayColumn: View {
 	}
 
 	var body: some View {
-		VStack(spacing: 6) {
+		VStack(spacing: 9) {
 			displayName
 
 			MarqueeText(text: column.websiteName ?? String(localized: "No Website"), isActive: isHovering)
@@ -181,7 +184,7 @@ private struct DisplayColumn: View {
 	*/
 	@ViewBuilder
 	private var modeButtons: some View {
-		HStack(spacing: 6) {
+		HStack(spacing: 9) {
 			PanelWideButton(
 				title: String(localized: "Crop"),
 				isEnabled: column.websiteID != nil
@@ -318,20 +321,23 @@ private struct DisplayColumn: View {
 			}
 		} label: {
 			HStack(spacing: 4) {
-				MarqueeText(text: column.websiteName ?? String(localized: "No Website"), isActive: isHovering)
-					.frame(height: 15)
-
 				Image(systemName: "chevron.up.chevron.down")
-					.font(.system(size: 9, weight: .semibold))
+					.font(PanelMetrics.symbolFont)
 					.foregroundStyle(.secondary)
+
+				MarqueeText(text: column.websiteName ?? String(localized: "No Website"), isActive: isHovering)
+					.font(PanelMetrics.font)
+					.frame(maxWidth: .infinity)
 			}
-			.frame(width: 216, alignment: .leading)
+			// Three quarters of the picture above it, fixed. The chooser is not the widest thing in the
+			// column and should not look like it: the picture is what the column is about.
+			.frame(width: PanelMetrics.chooserWidth - PanelMetrics.horizontalPadding * 2)
+			.frame(height: PanelMetrics.height)
 		}
 		.menuStyle(.borderlessButton)
 		.menuIndicator(.hidden)
-		.padding(.horizontal, 8)
-		.padding(.vertical, 4)
-		.background(.quinary, in: RoundedRectangle(cornerRadius: 5))
+		.padding(.horizontal, PanelMetrics.horizontalPadding)
+		.background(.quinary, in: RoundedRectangle(cornerRadius: PanelMetrics.cornerRadius))
 		.disabled(column.choices.isEmpty)
 	}
 }

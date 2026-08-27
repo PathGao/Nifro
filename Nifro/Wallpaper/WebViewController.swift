@@ -292,7 +292,7 @@ extension WebViewController: WKNavigationDelegate {
 		webView.centerAndAspectFillImage(mimeType: response?.mimeType)
 
 		// The script starts every page muted and waits to be told. This is the telling.
-		webView.setAudioMuted(scene?.website?.audio != .unmuted)
+		webView.setAudioMuted(!(scene?.shouldPlaySound ?? false))
 
 		recordTitleIfNeeded(from: webView)
 

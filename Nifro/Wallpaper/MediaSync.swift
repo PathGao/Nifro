@@ -75,6 +75,22 @@ enum MediaSync {
 		}
 	}
 
+	/**
+	The display a group takes its time — and its sound — from.
+
+	The first scene in a group, and never corrected. A fixed leader rather than whoever reported first:
+	two followers correcting towards each other chase a moving target and never settle.
+	*/
+	static func leader(of display: Display?) -> Display? {
+		guard let group = Defaults[.syncGroups][Display.settingsKey(for: display)] else {
+			return nil
+		}
+
+		return AppState.shared.scenes
+			.first { Defaults[.syncGroups][Display.settingsKey(for: $0.display)] == group }?
+			.display
+	}
+
 	private static func tick() async {
 		let groups = Dictionary(grouping: AppState.shared.scenes) {
 			Defaults[.syncGroups][Display.settingsKey(for: $0.display)]
