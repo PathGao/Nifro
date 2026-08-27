@@ -729,16 +729,6 @@
         }
       }
     },
-    "For a website pinned to a particular display. On, it moves to the main display and takes over from whatever was showing there, until its own display is plugged back in — one desktop shows one page, so the arriving one wins. Off, it goes away with its display, the way the desktop picture on that screen does. Either way the website keeps the display you chose for it, and the page it displaced comes back when that display returns.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "针对固定在某个显示器上的网站。开启后，它会移到主显示器并顶替原本在那里显示的网页，直到它自己的显示器重新接上——一个桌面只显示一个网页，所以后到的那个胜出。关闭后，它随显示器一起消失，就像那块屏幕上的桌面图片一样。两种情况下网站都保留你为它选的显示器，被顶替的网页会在那台显示器回来时回来。"
-          }
-        }
-      }
-    },
     "For a website pinned to a particular display. On, it moves to the main display until that one is plugged back in — which is what Nifro has always done, and what macOS does with an ordinary window. Off, it goes away with its display, the way the desktop picture on that screen does. Either way the website keeps the display you chose for it.": {
       "localizations": {
         "zh-Hans": {
@@ -1049,16 +1039,6 @@
         }
       }
     },
-    "Keep a wallpaper when its display is unplugged": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "显示器拔掉后，保留它上面的壁纸"
-          }
-        }
-      }
-    },
     "Keep changes?": {
       "localizations": {
         "zh-Hans": {
@@ -1209,6 +1189,16 @@
         }
       }
     },
+    "Move to the main display when unplugged": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拔掉后移到主显示器"
+          }
+        }
+      }
+    },
     "Muted": {
       "localizations": {
         "zh-Hans": {
@@ -1335,6 +1325,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "没有匹配的网站"
+          }
+        }
+      }
+    },
+    "Off, it goes away with its display and returns when you plug it back in; on, it moves to the main display and takes over there until its own returns.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭时它随显示器一起消失，插回去就回来；开启时它移到主显示器顶替那里的网页，直到自己的显示器接回来。"
           }
         }
       }

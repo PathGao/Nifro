@@ -333,8 +333,8 @@ private struct DimWhenUnfocusedSetting: View {
 private struct KeepWallpaperWhenDisplayUnpluggedSetting: View {
 	var body: some View {
 		Defaults.Toggle(key: .keepWallpaperWhenDisplayUnplugged) {
-			Text("Keep a wallpaper when its display is unplugged")
-				.explained(String(localized: "For a website pinned to a particular display. On, it moves to the main display and takes over from whatever was showing there, until its own display is plugged back in — one desktop shows one page, so the arriving one wins. Off, it goes away with its display, the way the desktop picture on that screen does. Either way the website keeps the display you chose for it, and the page it displaced comes back when that display returns."))
+			Text("Move to the main display when unplugged")
+				.explained(String(localized: "Off, it goes away with its display and returns when you plug it back in; on, it moves to the main display and takes over there until its own returns."))
 		}
 	}
 }
