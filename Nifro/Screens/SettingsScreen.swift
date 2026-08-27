@@ -79,10 +79,10 @@ private struct BehaviorSettings: View {
 			Section {
 				ReloadIntervalSetting()
 				Defaults.Toggle(key: .restoreScrollPosition) {
-					Text("Put the page back where it was")
+					Text("Restore the page position after a reload")
 						.explained(String(localized: "A page that reloads on a timer starts over: a long page goes back to the top, and a map or a drawing goes back to wherever it opens. This puts it back — the scroll position after a reload, and the part of the page a site names after the “#” in its address, which also survives quitting. A site that saves its own position needs none of this and keeps working either way."))
 				}
-				Defaults.Toggle(String(localized: "Reload when the Mac wakes"), key: .reloadOnWake)
+				Defaults.Toggle(String(localized: "Reload the page when the Mac wakes"), key: .reloadOnWake)
 			}
 			Section {
 				OpenExternalLinksInBrowserSetting()
@@ -272,7 +272,7 @@ keep in step, and the one the user actually reads is the one in the dialog.
 */
 private struct RestoreDefaultsSetting: View {
 	var body: some View {
-		Button("Restore Everything…", role: .destructive) {
+		Button("Restore All Settings…", role: .destructive) {
 			RestoreDefaults.confirmAndRun()
 		}
 	}
@@ -338,7 +338,7 @@ private struct BringBrowsingModeToFrontSetting: View {
 	var body: some View {
 		// TODO: Find a better title for this.
 		Defaults.Toggle(key: .bringBrowsingModeToFront) {
-			Text("Bring browsing mode to the front")
+			Text("Force browsing mode to the front")
 				.explained(String(localized: "Keep the website above all other windows while browsing mode is active."))
   }
 	}
@@ -362,7 +362,7 @@ private struct OpacitySetting: View {
 			in: 0.1...1,
 			step: 0.1
 		) {
-			Text("Opacity")
+			Text("Page opacity")
 				.explained(String(localized: "How see-through the wallpaper page is against the desktop behind it. Browsing Mode ignores this and always draws the page fully opaque, because a page you are about to click should not be half transparent."))
 		}
 	}
@@ -380,12 +380,12 @@ private struct ReloadIntervalSetting: View {
 				IntervalField(seconds: $reloadInterval.withDefaultValue(Self.defaultReloadInterval))
 			}
 
-			Toggle("Reload every", isOn: $reloadInterval.isNotNil(trueSetValue: Self.defaultReloadInterval))
+			Toggle("Page reload interval", isOn: $reloadInterval.isNotNil(trueSetValue: Self.defaultReloadInterval))
 				.labelsHidden()
 				.controlSize(.mini)
 				.toggleStyle(.switch)
 		} label: {
-			Text("Reload every")
+			Text("Page reload interval")
 				.explained(String(localized: "For websites that do not set their own. A website with its own schedule — set in its settings — ignores this."))
 		}
 		.accessibilityLabel("Reload interval")
