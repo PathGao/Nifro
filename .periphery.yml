@@ -17,14 +17,35 @@ schemes:
 targets:
   - Nifro
 
-# Selector targets and anything else Objective-C can reach by name at runtime.
-retain_objc_accessible: true
+# Both flags below are off, and both were on. A flag that retains a whole category is the one kind of
+# entry this file cannot make argue for itself: it has no name attached, so nothing about it expires.
+#
+# `retain_objc_accessible` was here for selector targets, and it hid far more than it protected. An
+# `NSMenu` subclass is Objective-C accessible by inheritance, so the dead `SSMenu` — thirty-two lines
+# nothing had constructed since the menu was deleted — was invisible to a scan that reported nothing
+# and therefore read as though it had been checked. The selector targets turn out not to need the
+# flag: `#selector(ActionTrampoline.handleAction)` and the others are references the index already
+# follows, and with the flag off the scan is still clean. An `@objc` member reached only from a nib or
+# `Info.plist` would now be reported — that is a finding to argue here, not a reason to switch this
+# back on.
+retain_objc_accessible: false
 
-retain_public: true
+# `retain_public` was on with nothing to retain. This is an app target and has no public API: the four
+# `public` declarations in `Nifro/` are all witnesses to public protocol requirements
+# (`Identifiable.id`, `ExpressibleByStringLiteral.init`) and are retained by the conformance, not by
+# this. It hid a category of finding against a case that does not arise.
+retain_public: false
 
 report_exclude:
-  # App Intents. The system finds and runs these; no Swift code names them.
-  # Deleting one silently removes a Shortcuts action.
+  # App Intents. The system finds and runs these from bundle metadata; no Swift code names them, so
+  # deleting one silently removes a Shortcuts action.
+  #
+  # Still earning it: with this line removed the scan reports fourteen findings, all fourteen in this
+  # file and all fourteen framework surface — eleven `AppIntent` structs, the two `@Property` fields
+  # of `WebsiteAppEntity` that only Shortcuts reads, and `findIntentDescription`, which
+  # `EnumerableEntityQuery` requires. A whole file rather than fourteen names because the file is
+  # nothing but that surface. The cost is real and worth writing down: an ordinary helper added to
+  # this file would be excluded too.
   - "**/Intents.swift"
 
 # Named retentions, each with the reason it is not really dead.
@@ -38,6 +59,11 @@ retain_files: []
 # every entry argue for itself.
 #
 # Everything is reported by nothing, and the scan runs with `--strict`, so anything new fails CI.
+#
+# What this scan cannot see, so a green run is not read as more than it is. An extension with an empty
+# body has no declaration to call unused; `empty_extension` in `.swiftlint.yml` is the check for those.
+# A `Defaults` key that is written and never read is a use as far as any symbol graph is concerned.
+# `Localizable.xcstrings` is not Swift and is outside this tool's world entirely.
 #
 # The three findings that used to be listed here were parameters that `#selector` signatures require
 # and nothing reads. They are written `_` now, which is what they always were — the scan was right,

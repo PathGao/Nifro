@@ -373,11 +373,6 @@ final class AppState: ObservableObject {
 		rebuildScenes()
 		setUpEvents()
 		showWelcomeScreenIfNeeded()
-
-		#if DEBUG
-//		SSApp.showSettingsWindow()
-//		Constants.openWebsitesWindow()
-		#endif
 	}
 
 	func handleMenuBarIcon() {

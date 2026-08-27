@@ -134,8 +134,8 @@ Against `WORKSPACE_GUIDE.md` § "缺陷的三个形状".
   `AppState.swift:30` says "The menu is gone." `Menus.swift` was deleted in #21 and
   `sendAction(on: [.leftMouseUp, .rightMouseUp])` (`AppState.swift:24`) sends both buttons to the
   same handler. The first comment describes an app that no longer exists, and it is the one a reader
-  reaches first when asking which surface owns what. (The dead `SSMenu` scaffolding behind it is
-  already ROADMAP W9; this is the comment, not the code.)
+  reaches first when asking which surface owns what. (The scaffolding behind it is ROADMAP W9,
+  which is now down to `CallbackMenuItem.validateCallback`; this entry is the comment, not the code.)
 
 ---
 

@@ -248,6 +248,18 @@ custom_rules:
     regex: '\b\(alignment: .center\b'
     message: 'This alignment is the default.'
 
+  # What a deleted member leaves behind. Nothing else reports it: `periphery` needs a declaration to
+  # call unused and an extension with an empty body has none, so nine of these had accumulated in
+  # `Extensions.swift`, `AppInfo.swift` and `MenuSupport.swift`, three still wearing the `// MARK:`
+  # header of the type whose last member was removed — which is the jump bar the file header says the
+  # MARKs are there for.
+  #
+  # Only the multi-line form. A conformance-only `extension NSToolbarItem: ControlActionClosureProtocol {}`
+  # declares the conformance and is content; it is written on one line and is not matched.
+  empty_extension:
+    regex: 'extension [^{\n]*\{\n[ \t]*\}'
+    message: 'An extension with nothing in it. Delete it, and any `// MARK:` header that only pointed at it.'
+
   # The three below guard the app's own drawn chrome. Each matches a SwiftUI or AppKit parameter
   # label — nothing this repo named — so renaming `PanelMetrics`, `PanelButton` or anything else here
   # cannot turn one red. `included:` is the three folders that draw; `Wallpaper`, `Support` and `App`

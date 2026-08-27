@@ -172,9 +172,6 @@ extension SSApp {
 }
 
 
-extension SSApp {
-}
-
 extension Bundle {
 	/**
 	The first URL scheme this bundle registers.

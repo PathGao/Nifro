@@ -9,12 +9,17 @@ The one action in Nifro that cannot be undone, which is why it asks first, why t
 out all four of what resets, what comes back, what goes, and what stays, and why it lives on its own
 at the bottom of Advanced rather than next to a control that adds something.
 
-**It wipes the domain rather than a list of keys.** There are twenty-three `Defaults.Keys` today.
-Written out here, that is a second place answering "what are the app's preferences", with nothing
-making the two agree — and the way it fails is silent. Somebody adds a preference, never finds this
-list, and their key survives a restore for as long as it takes another person to sit down and count.
-That is the same defect this codebase keeps finding: a mechanism whose members have to volunteer.
-`Defaults.removeAll()` has no members. A preference added tomorrow is covered by existing.
+**It wipes the domain rather than a list of keys.** Written out here, the keys would be a second
+place answering "what are the app's preferences", with nothing making the two agree — and the way it
+fails is silent. Somebody adds a preference, never finds this list, and their key survives a restore
+for as long as it takes another person to sit down and count. That is the same defect this codebase
+keeps finding: a mechanism whose members have to volunteer. `Defaults.removeAll()` has no members. A
+preference added tomorrow is covered by existing.
+
+**And no count of them either**, which this paragraph used to open with: "there are twenty-three
+`Defaults.Keys` today", when there were twenty-two. A count is the shortest possible version of the
+list and goes stale in exactly the way the sentence after it warns about, so correcting the number
+would only have set the same trap one key further out.
 
 The price of that is reach: it also clears things that are not `Defaults.Keys` — where each page was
 scrolled to, the one-off tips, the flag that first launch checks. All of that is the app's own state
