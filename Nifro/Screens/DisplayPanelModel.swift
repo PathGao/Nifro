@@ -117,7 +117,8 @@ final class DisplayPanelModel: ObservableObject {
 		// the end, after its awaits.
 		openings += 1
 
-		columns = AppState.shared.scenes.map { column(for: $0, snapshot: nil) }
+		let websites = WebsitesController.shared.all
+		columns = AppState.shared.scenes.map { column(for: $0, snapshot: nil, websites: websites) }
 	}
 
 	/**
@@ -130,8 +131,15 @@ final class DisplayPanelModel: ObservableObject {
 		let opening = openings
 		var built: [Column] = []
 
+		// Read once for the whole pass rather than once per column. `all` is `Defaults[.websites]`,
+		// which decodes the entire list on every read, and every column then resolves
+		// `effectiveDisplay` for every website in it — so this ran at the panel's refresh rate,
+		// multiplied by the number of displays. The columns are published together as one array
+		// anyway, so one read is also the only way they can agree with each other.
+		let websites = WebsitesController.shared.all
+
 		for scene in AppState.shared.scenes {
-			built.append(column(for: scene, snapshot: await scene.snapshot()))
+			built.append(column(for: scene, snapshot: await scene.snapshot(), websites: websites))
 		}
 
 		// The panel was closed and opened again while these were being taken, so they are pictures of
@@ -147,24 +155,29 @@ final class DisplayPanelModel: ObservableObject {
 	/**
 	One display, described.
 
-	The snapshot is passed in rather than taken here because it is the only part of a column that costs
-	anything: the panel is opened with `nil` and the refreshes fill it in.
+	The two things a column costs are both passed in. The snapshot because it has to be photographed:
+	the panel is opened with `nil` and the refreshes fill it in. The website list because reading it
+	decodes every website, and one pass builds a column per display off the same list.
 	*/
-	private func column(for scene: WallpaperScene, snapshot: NSImage?) -> Column {
-		Column(
+	private func column(for scene: WallpaperScene, snapshot: NSImage?, websites: [Website]) -> Column {
+		// `effectiveDisplay` asks CoreGraphics for a display's identity and walks `NSScreen.screens`,
+		// so the answer costs something and every website in the list is asked. Once per column.
+		let onDisplay = websites.filter { $0.effectiveDisplay == scene.display }
+
+		return Column(
 			display: scene.display,
 			displayName: scene.display?.localizedName ?? String(localized: "Main Display"),
 			websiteID: scene.website?.id,
 			websiteName: scene.website?.menuTitle.nilIfEmpty,
 			snapshot: snapshot,
-			choices: WebsitesController.shared.all.filter { $0.effectiveDisplay == scene.display },
+			choices: onDisplay,
 			isShowing: !scene.isDisabledForDisplay,
 			isMuted: !scene.shouldPlaySound,
 			rotationMode: scene.rotationMode,
 			rotationIntervalMinutes: scene.rotationIntervalMinutes,
 			// One website has nothing to rotate to, and a control that does nothing should say so
 			// rather than shrug when pressed.
-			canRotate: WebsitesController.shared.all.count { $0.effectiveDisplay == scene.display } > 1,
+			canRotate: onDisplay.count > 1,
 			isLoading: scene.isLoading
 		)
 	}
