@@ -129,7 +129,10 @@ enum Device {
 		sysctlbyname("hw.model", nil, &size, nil, 0)
 		var model = [CChar](repeating: 0, count: size)
 		sysctlbyname("hw.model", &model, &size, nil, 0)
-		return String(cString: model)
+		// `prefix` rather than the whole buffer: `sysctlbyname` reports a size that counts the
+		// terminating NUL, and unlike the C-string initialisers this one has no idea the array is
+		// NUL-terminated, so handing it the lot puts a U+0000 on the end of the model name.
+		return String(validating: model.prefix { $0 != 0 }, as: UTF8.self) ?? ""
 	}()
 }
 
