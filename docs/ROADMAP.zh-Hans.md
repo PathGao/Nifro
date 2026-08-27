@@ -29,7 +29,7 @@ Nifro 是 [sindresorhus/Plash](https://github.com/sindresorhus/Plash) 的开源�
 大部分要么是这些接线，要么是被面板照出来的问题。
 
 ```
-未完成    W1-W9 接线   K1 K6 K8 K12 K16-K18 K20-K37 缺陷   L1-L4  V1-V5  S1 S2 S4  D4 D6  E21 E22  U2 U3
+未完成    W1-W9 接线   K1 K6 K8 K12 K16-K18 K20-K37 缺陷   L1-L4  V1-V5  S1 S2 S4  D4 D6  E21-E23  U2 U3
 搁置      K7 HDR（你的决定）、P 系列（要先有测量）
 阻塞      无
 ```
@@ -220,6 +220,7 @@ W1 和 W3 是让 app 从面板上看起来最不完整的两个；W5 丢的是�
 |---|---|---|
 | **E21** | `nifro://` 被注册到了 app 的陈旧副本上 | **测试 URL 命令一律用 `open -a <path> "nifro:reload"`，绝不用裸的 `open "nifro:reload"`。** LaunchServices 把这个 scheme 记在这台机器上构建过的每一份副本上，包括 `~/.Trash` 和 derived data。仓库里没有任何东西导致它，也没有任何东西能修它。裸写法曾经让我们对着一个三周前的构建折腾了一下午 |
 | **E22** | 把本地化迁到 Vorssaint 那套机制 | **新增，而且是重做而非缺陷。** Nifro 现状：`Localizable.xcstrings`，244 个键，2 种语言（英文是未翻译的源），写 `AppleLanguages` 并**强制重启**，外加一个 CI 脚本守完整性。Vorssaint：字符串就是 Swift——一个 892 个字段的 `struct Strings`，13 种语言各一个 `static let`，少一个字段就编译不过，因此不需要 CI 门禁；`L10n: ObservableObject` 发布选择，视图**无需重启**即刻重绘。迁过去是五步，第三步就是全部成本：(1) 用 `struct Strings` 加每语言一个值替掉 catalogue；(2) 加 `L10n`，带 `systemDefault` 映射和字面量 `displayName`；(3) **把约 30 个文件里的 244 处字面量改写成 `l10n.s.field`**，并让 AppKit 那几个界面——`DisplayPanel`、`PanelControls`、`Actions`——在切换时重建，而不是依赖 `AppleLanguages`；(4) 删掉重启对话框；(5) 删掉 CI 门禁，编译器接管。**会失去什么：**`AppleLanguages` 免费顺带本地化了第三方包的字符串（`LaunchAtLogin.Toggle`），Swift struct 方案够不着它们。为这些保留一个小门禁 |
+| **E23** | 升级时用户配置的迁移 | **新增。** 没有这套机制。现有的是三样各管一个 case 的东西：`rotationInterval(stored:legacySeconds:)` 在新键缺失时读旧键，`@DecodableDefault` 给 `Website` 新增的字段补默认值，`SS_hasLaunched` 是欢迎界面的一次性标志。没有任何地方记录上次运行的是哪一版，也没有一个可以挂一次性升级步骤的位置。至今没出事，是因为还没有人从任何版本升上来——这同时也意味着它的形态还可以自由选。改动已发布的默认值是最能暴露这个缺口的 case。它不属于第 12 节：该做，而且该在首个正式版把每个选择变成永久之前做。|
 
 **这是一个坑，不是一个条目：**第四种按页面的记录必须是 `PerPageDefaults` 的一个 case——key 由它构造，
 而清扫走的是 `allCases`。
