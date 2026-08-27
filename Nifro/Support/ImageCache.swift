@@ -187,6 +187,12 @@ final class SimpleImageCache<Key: SimpleImageCacheKeyable> {
 			return nil
 		}
 
+		// This directory holds both formats and always will. The files are named by the SHA-256 of the
+		// key with no extension, and everything written before this app started writing PNG is
+		// uncompressed TIFF — nothing rewrites an entry that is already on disk, because a hit never
+		// reaches the fetch that would. `NSImage(contentsOf:)` sniffs the content rather than the name,
+		// verified on extension-less files of both kinds, so the old ones stay readable and there is
+		// nothing to migrate.
 		return NSImage(contentsOf: cacheFile)
 	}
 
@@ -203,8 +209,20 @@ final class SimpleImageCache<Key: SimpleImageCacheKeyable> {
 				return
 			}
 
-			guard let tiffData = image.tiffRepresentation else {
-				assertionFailure("Could not get TIFF representation from image.")
+			// PNG rather than the TIFF this used to write. `tiffRepresentation` is uncompressed, so the
+			// file was exactly the pixel count times the channel count — 2,768,326 bytes for the
+			// 1280x720 cover art these entries mostly are, from a 65,324 byte JPEG. As PNG the same
+			// image is 561,602. TIFF still appears here because it is how AppKit hands an `NSImage` to
+			// `NSBitmapImageRep`; it is never written.
+			//
+			// Lossless, because it is the only kind of re-encoding that can be done to somebody's
+			// picture without deciding on their behalf what it is for. These are drawn at 44 points
+			// square today and the file is the only copy.
+			guard
+				let tiffData = image.tiffRepresentation,
+				let pngData = NSBitmapImageRep(data: tiffData)?.representation(using: .png, properties: [:])
+			else {
+				assertionFailure("Could not get PNG representation from image.")
 				return
 			}
 
@@ -217,7 +235,7 @@ final class SimpleImageCache<Key: SimpleImageCacheKeyable> {
 				// were the real one, and read back the same way on every launch after. There is no
 				// path that notices and refetches, so one interrupted write is a permanently blank
 				// square in the websites list.
-				try tiffData.write(to: cacheFile, options: .atomic)
+				try pngData.write(to: cacheFile, options: .atomic)
 			} catch {
 				assertionFailure("Failed to write image to disk: \(error.localizedDescription)")
 			}
