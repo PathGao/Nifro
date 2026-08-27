@@ -115,7 +115,7 @@ private struct UpdateSetting: View {
 	var body: some View {
 		Defaults.Toggle(key: .checksForUpdatesAutomatically) {
 			Text("Check for updates automatically")
-				.explained(String(localized: "Checks once a day, in the background; nothing is ever downloaded or installed for you."))
+				.explained(String(localized: "Checks once a day in the background and puts a download button in the panel when there is something newer; nothing is ever downloaded or installed for you."))
 		}
 
 		LabeledContent {

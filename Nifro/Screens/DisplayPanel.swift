@@ -54,16 +54,38 @@ struct DisplayPanel: View {
 /**
 Everything that is not about one display.
 
-Icons, because these five are the app's own verbs rather than a display's, and a row of words here
-would compete with the columns above for the eye. Quit keeps its label: it is the one that cannot be
-undone, and an unlabelled power symbol beside four others is exactly the button somebody presses by
-mistake.
+Icons, because the app's own verbs are not a display's, and a row of words here would compete with the
+columns above for the eye. Quit keeps its label: it is the one that cannot be undone, and an
+unlabelled power symbol beside four others is exactly the button somebody presses by mistake.
+
+The download icon is the one that comes and goes, and it is where the daily update check finally says
+what it found. The check has written `latestKnownVersion` down since #18 and the surface that read it
+was in the menu #21 deleted, so for six releases the app asked GitHub once a day and told nobody. It
+is read from the store rather than fetched here, so opening the panel costs no network, and it is
+compared against the running version on every draw rather than stored as a flag — a flag would go on
+saying an update exists after the update was installed.
 */
 private struct PanelFooter: View {
 	@ObservedObject private var model: DisplayPanelModel
 
+	@Default(.latestKnownVersion) private var latestKnownVersion
+
 	init(model: DisplayPanelModel) {
 		self.model = model
+	}
+
+	/**
+	The version to offer, or `nil` when there is nothing newer than this one.
+	*/
+	private var newerVersion: String? {
+		guard
+			let latestKnownVersion,
+			UpdateCheck.isNewer(latestKnownVersion, than: SSApp.version)
+		else {
+			return nil
+		}
+
+		return latestKnownVersion
 	}
 
 	var body: some View {
@@ -82,6 +104,15 @@ private struct PanelFooter: View {
 
 			PanelButton(symbol: "gearshape", label: String(localized: "Settings…")) {
 				model.run { SSApp.showSettingsWindow() }
+			}
+
+			// This side of the spacer rather than beside Quit. It appears without warning, and a button
+			// that turns up under the pointer next to the one that ends the app is the reach the
+			// workspace rule about neighbours is written for.
+			if let newerVersion {
+				PanelButton(symbol: "arrow.down.circle", label: String(localized: "Get \(newerVersion)…")) {
+					model.run { Constants.latestReleaseURL.open() }
+				}
 			}
 
 			Spacer()

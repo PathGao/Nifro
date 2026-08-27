@@ -77,7 +77,7 @@ private final class AppDelegate: NSObject, NSApplicationDelegate {
 		}
 
 		// Daily, which is Sparkle's default and what macOS apps have settled on. Written down rather
-		// than acted on: the menu reads it the next time it is opened.
+		// than acted on: the panel's footer reads it the next time it is opened.
 		Task {
 			while !Task.isCancelled {
 				// Read each time round rather than captured, so turning it off stops the next check
