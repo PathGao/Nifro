@@ -608,7 +608,11 @@ bug survived is that nothing said which spelling was the real one.
 @Suite("URL commands")
 struct URLCommandTests {
 	private func command(_ string: String) -> String {
-		urlCommand(from: URLComponents(string: string)!)
+		// Through `URL` and back out, because that is the trip the real one makes: the system hands
+		// the app delegate a `URL`, not the string it was typed as. The two routes do not agree on
+		// everything — `nifro:///reload` has no host built from the string and an empty one built
+		// from the `URL` — so testing the shorter route would be testing a path nothing takes.
+		urlCommand(from: URLComponents(url: URL(string: string)!, resolvingAgainstBaseURL: false)!)
 	}
 
 	@Test("The documented spelling puts the command in the path")

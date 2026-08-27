@@ -1,16 +1,17 @@
 import Cocoa
 
 extension AppState {
-	func setUpURLCommands() {
-		SSEvents.appOpenURL
-			.sink { [self] in
-				handleURLCommands($0)
-			}
-			.store(in: &cancellables)
-	}
+	/**
+	Run whatever a `nifro:` URL is asking for.
 
-	private func handleURLCommands(_ urlComponents: URLComponents) {
-		guard urlComponents.scheme == Bundle.main.urlScheme else {
+	Read through `URLComponents` rather than off the `URL`, because the query has to be split and
+	because the three spellings of a command land in different places — see `urlCommand(from:)`.
+	*/
+	func handleURLCommand(_ url: URL) {
+		guard
+			url.scheme == Bundle.main.urlScheme,
+			let urlComponents = URLComponents(url: url, resolvingAgainstBaseURL: false)
+		else {
 			return
 		}
 
