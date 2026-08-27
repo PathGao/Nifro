@@ -175,7 +175,7 @@ private struct ClearWebsiteDataButton: View {
 					.foregroundStyle(.secondary)
 			}
 		}
-		.help("Clears cookies, local storage, caches, page thumbnails, and what each page had remembered: where it was scrolled or moved to, and how far it was zoomed in. Your websites and their settings are kept.")
+		.help("Clears cookies, local storage, caches, thumbnails and each page's remembered position and zoom; your websites and their settings are kept.")
 		// The cookies are why. Everything else this throws away comes back on the next load, but a
 		// cookie is a login, and signing out of every website at once is not something to discover
 		// afterwards from a number of megabytes. It asks here rather than relying on the distance from
@@ -194,7 +194,7 @@ private struct ClearWebsiteDataButton: View {
 
 			Button(String(localized: "Cancel"), role: .cancel) {}
 		} message: {
-			Text("Every website you are signed in to will be signed out. Your websites and their settings are kept.")
+			Text("Every website you are signed in to will be signed out, and your websites and their settings are kept.")
 		}
 	}
 
@@ -250,7 +250,7 @@ private struct RedirectNotice: View {
 					.imageScale(.large)
 			}
 			.buttonStyle(.plain)
-			.help(String(localized: "This site sends Nifro somewhere else every time it loads: \(destination.absoluteString). Click to save that address instead."))
+			.help(String(localized: "This site sends Nifro to \(destination.absoluteString) every time it loads. Click to save that address instead."))
 		}
 	}
 }
@@ -337,7 +337,7 @@ private struct RowView: View {
 
 			Button(String(localized: "Cancel"), role: .cancel) {}
 		} message: {
-			Text("Its custom CSS, JavaScript, region and schedule go with it, and you will be signed out of the site. There is no undo.")
+			Text("Its custom CSS, JavaScript, region and schedule go with it, you will be signed out of the site, and there is no undo.")
 		}
 		.accessibilityElement(children: .combine)
 		.accessibilityAddTraits(.isButton)
