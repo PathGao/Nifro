@@ -283,16 +283,62 @@ private struct RestoreDefaultsSetting: View {
 	}
 }
 
+/**
+An address that is fetched, compiled and applied where nobody can watch it happen, so it says what
+became of it.
+
+The one setting in the app whose effect is a thing that does *not* appear — an ad that is gone leaves
+nothing behind to say the rules are working, and a page that still shows one is the same picture
+whether the list is blocking and does not cover that ad, or never loaded at all. Everything went into
+`ContentRules.compiled`, which no screen read, so all three ways of failing looked exactly like
+success.
+
+Same shape as `UpdateSetting` two panes over, and for the reason written there: a check whose only
+outcome is silence cannot be told apart from one that failed. Secondary text beside the control, no
+new setting, and nothing at all until there is something to report.
+
+It says which failure, because the answers differ. "Could not download" is the address or the network;
+"not a rule list" is the file, and is almost always the same mistake — the address of the page a list
+is *displayed* on rather than of the raw file. It does not say whether last session's list is still
+attached behind a failure. That is real — a failed fetch deliberately leaves the previous list in
+place — but it would double the failure vocabulary to change nothing anybody would do about it, which
+in both cases is to look at the address again.
+*/
 private struct ContentRulesSetting: View {
 	@Default(.contentRulesURL) private var url
+	@State private var status = ContentRules.Status.unset
 
 	var body: some View {
 		LabeledContent {
-			TextField("", text: $url.withDefaultValue(""), prompt: Text("URL to a rule list"))
-				.labelsHidden()
+			VStack(alignment: .leading, spacing: 4) {
+				TextField("", text: $url.withDefaultValue(""), prompt: Text("URL to a rule list"))
+					.labelsHidden()
+
+				Group {
+					switch status {
+					case .unset:
+						EmptyView()
+					case .loading:
+						ProgressView()
+							.controlSize(.small)
+					case .blocking:
+						Text("Blocking")
+					case .unreachable:
+						Text("Could not download")
+					case .rejected:
+						Text("Not a rule list")
+					}
+				}
+				.foregroundStyle(.secondary)
+			}
 		} label: {
 			Text("Content blocking rules")
 				.explained(String(localized: "Paste the address of a raw WebKit content-blocking `.json` file — the content-blocker projects publish them — and Nifro applies it to every website; empty means no rules."))
+		}
+		// Sends its current value on subscribe, so opening Settings shows what the refresh at launch
+		// made of the address rather than waiting for the next one.
+		.onReceive(ContentRules.status) {
+			status = $0
 		}
 	}
 }

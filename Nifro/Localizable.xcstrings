@@ -239,6 +239,16 @@
         }
       }
     },
+    "Blocking": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在拦截"
+          }
+        }
+      }
+    },
     "Browsing Mode": {
       "localizations": {
         "zh-Hans": {
@@ -475,6 +485,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "无法检查"
+          }
+        }
+      }
+    },
+    "Could not download": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法下载"
           }
         }
       }
@@ -1245,6 +1265,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "没有网络连接"
+          }
+        }
+      }
+    },
+    "Not a rule list": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不是规则列表"
           }
         }
       }
