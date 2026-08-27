@@ -52,8 +52,9 @@ final class DisplayPanelModel: ObservableObject {
 		*/
 		let isLoading: Bool
 
-		// `nil` display means "whatever Settings says", and there is only ever one of those, so the
-		// display's own id is the identity when it has one and a fixed stand-in when it does not.
+		// `nil` display means the main display — the one with the menu bar, not a display named in any
+		// setting — and there is only ever one of those, so the display's own id is the identity when it
+		// has one and a fixed stand-in when it does not.
 		var id: String { display?.id.uuidString ?? "default" }
 	}
 

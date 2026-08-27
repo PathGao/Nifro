@@ -54,9 +54,10 @@ extension Display {
 	/**
 	The key this display's per-display settings are stored under.
 
-	`nil` means "whatever Settings points at", and there is only ever one of those, so it gets a name
-	of its own rather than being folded into whichever display that currently is — otherwise every
-	setting made against it would move the day the user changed that preference.
+	`nil` means the main display, the one with the menu bar. There is only ever one of those, so it
+	gets a name of its own rather than being folded into whichever display that currently is —
+	otherwise every setting made against it would move the day the user rearranged their displays or
+	docked the laptop.
 	*/
 	static func settingsKey(for display: Self?) -> String {
 		display?.id.uuidString ?? "default"

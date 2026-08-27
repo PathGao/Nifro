@@ -57,9 +57,10 @@ than for the one and two cases, because "the first website" alone left every dis
 with an empty wallpaper and nothing saying so.
 
 `display` is an index into the attached displays, and `nil` for the first one — a website with no
-display of its own already means "the display in Settings", which is the main display, and the main
-display is the first one. Pinning it explicitly would say the same thing while making the website
-carry a display badge and stop following the setting.
+display of its own already means the main display, the one with the menu bar, and that is the first
+of the attached displays. Pinning it explicitly would say the same thing today while freezing it: the
+main display moves when the user rearranges their screens or docks, and an unpinned website follows
+it where a pinned one would not.
 
 More displays than websites gets the websites; more websites than displays leaves the rest in the
 list, unshown, which is where a list of eight is meant to be. No displays at all still places the

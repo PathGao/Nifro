@@ -92,6 +92,10 @@ extension Defaults.Keys {
 }
 
 extension Notification.Name {
+	// One name, not a pair. `showEditWebsiteDialog` went with the menu that posted it: its observer
+	// opened `AppState.currentWebsite`, which is the main display's website whatever screen the
+	// request came from, so re-wiring it to the panel would have opened the laptop's website while
+	// somebody was looking at the monitor. The panel's name row wants a per-display route instead —
+	// roadmap W6.
 	static let showAddWebsiteDialog = Self("showAddWebsiteDialog")
-	static let showEditWebsiteDialog = Self("showEditWebsiteDialog")
 }

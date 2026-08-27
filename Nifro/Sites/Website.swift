@@ -23,7 +23,11 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	var zoom: Zoom?
 
 	/**
-	Which display to show this website on. `nil` follows the display chosen in Settings.
+	Which display to show this website on. `nil` means the main display — the one with the menu bar.
+
+	`nil` is not "the display Settings names": there is no such setting, and there never has been. It
+	resolves through `Display.main` on every read, so it follows the menu bar when displays are
+	rearranged or the laptop is docked, rather than naming a screen once.
 
 	The most-asked-for thing upstream was a different page on each screen, a calendar on one and a dashboard on the other (Plash#2, 47 reactions). That needs the display to be a property of the website rather than one app-wide setting.
 	*/

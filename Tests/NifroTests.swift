@@ -421,10 +421,10 @@ struct CurrentWebsiteTests {
 		#expect(flags == [false, false, true])
 	}
 
-	@Test("Websites following the default display are one display, not none")
+	@Test("Websites following the main display are one display, not none")
 	func nilDisplaysGroupTogether() {
-		// `effectiveDisplay` is optional and `nil` means "whatever Settings says", so two of those are
-		// on the same screen and have to fight over one mark like any other pair.
+		// `effectiveDisplay` is optional and `nil` means the main display, so two of those are on the
+		// same screen and have to fight over one mark like any other pair.
 		let displays: [String?] = [nil, nil, "B"]
 
 		let flags = currentFlags(displays: displays, wasCurrent: [true, false, true], makingCurrent: 1)
@@ -1003,8 +1003,9 @@ struct ShippedWebsitesTests {
 
 		#expect(placements.map(\.website) == [0, 1])
 
-		// The first is left following the display in Settings rather than pinned to a display of its
-		// own; the second has to be pinned, or nothing names that screen and it gets no wallpaper.
+		// The first is left following the main display rather than pinned to a display of its own, so
+		// it moves with the menu bar; the second has to be pinned, or nothing names that screen and it
+		// gets no wallpaper.
 		#expect(placements.map(\.display) == [nil, 1])
 	}
 

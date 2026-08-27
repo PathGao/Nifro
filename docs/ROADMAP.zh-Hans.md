@@ -5,6 +5,11 @@
 > 范围的唯一事实来源。README 是面向社区的说明，这一份是我们自己的工作文档。
 > 2026-08-27 对着 `54cac6a`（v0.1.3）重写。下面每一条都拿代码核过。已经做完的条目是删掉而不是划掉——
 > 只有那种「删了就会被重新问一遍」的一行残留留在第 14 节。
+>
+> 第 8 到 11 节于 2026-08-27 对着 `53f110b` 这棵树重新核过——它是 `54cac6a` 加上 #24 到 #30，
+> 再加 `fix/docs` 上的两个提交。关掉三条、新开四条，另有若干就地更正。关掉的每一条都是照着
+> 现在的代码读出来的；没有一条是照提交信息关的，而 K12 和 K28 都从「读起来像是已经修好」的
+> 提交里活了下来。
 
 **这份文档反复犯的那个错。** 在写下「没人看过」之前，先读调用方。这里每一条最后被证伪的断言都是这么错的，
 而读代码的成本，比它一直在等的那台硬件低得多。
@@ -24,7 +29,7 @@ Nifro 是 [sindresorhus/Plash](https://github.com/sindresorhus/Plash) 的开源�
 大部分要么是这些接线，要么是被面板照出来的问题。
 
 ```
-未完成    W1-W9 接线   K1 K3 K6 K8 K12 K16-K18 K20-K33 缺陷   L1-L4  V1-V5  S1 S2 S4  D4 D6  E19 E21 E22  U2 U3
+未完成    W1-W9 接线   K1 K6 K8 K12 K16-K18 K20-K37 缺陷   L1-L4  V1-V5  S1 S2 S4  D4 D6  E21 E22  U2 U3
 搁置      K7 HDR（你的决定）、P 系列（要先有测量）
 阻塞      无
 ```
@@ -167,7 +172,7 @@ D7 原本在这一节，但它不属于这里：它是有明确修法的缺陷�
 | **W3** | Reload | 只有快捷键和 `nifro://reload` |
 | **W4** | Random——立刻随机跳一个 | 面板的 `.random` 轮换模式只影响定时器的 tick |
 | **W5** | "Update Website to Current" | **整个仓库里都不存在了。** `AppState.swift:32-33` 声称它「搬进了网站自己的设置」；并没有。那条注释是假的，而这是 M2 的手动那一半 |
-| **W6** | 从名字进入「编辑这个网站」 | `.showEditWebsiteDialog` 在 `WebsitesScreen` 里有观察者，**而仓库里已经没有任何地方发出它**。面板上的名字那一行不是按钮 |
+| **W6** | 从名字进入「编辑这个网站」 | 面板上的名字那一行不是按钮。**那条半死的路径是删掉了，不是继续摆着：**`.showEditWebsiteDialog` 和它的观察者都已删除——观察者打开的是 `AppState.currentWebsite`，也就是无论请求从哪块屏幕来都取主显示器的网站，于是把它重新接到面板上，只会在用户盯着外接显示器时打开笔记本上的那个网站。要接上这条线，需要的是一条按显示器的路径，而不是把这个通知重新声明一遍 |
 | **W7** | 把网站挪到另一台显示器 | 只在网站编辑弹窗里。加上 K17，从面板出发没有任何路径能把网站放到某台显示器上 |
 | **W8** | 快捷键的可发现性 | `setShortcut(for:)` 没了；面板按钮只有 `.help()` 文案。`Shortcuts.swift:8,15-16` 还在论证「之所以配了默认快捷键，是为了让菜单能显示它们」 |
 | **W9** | 菜单留下的脚手架 | `SSMenu` 从未被实例化；`CallbackMenuItem.validateCallback` 从未被赋值，所以 `validateMenuItem` 恒为 `true`；有一个空的 `extension NSMenuItem {}`；`WebsitesScreen` 里有一个 body 是空 `withAnimation` 的 `.onChange` 和一个空的 `.onAppear` |
@@ -181,29 +186,31 @@ W1 和 W3 是让 app 从面板上看起来最不完整的两个；W5 丢的是�
 | | 现象 | 已知情况 |
 |---|---|---|
 | **K1** | YouTube 视频没法缩回 YouTube 页面 | 地址被改写成纯播放器页（它的播放器在自己是文档而不是 frame 时会报 error 153），所以没有页面可导航，Browsing Mode 也无处可点。**但登录是做得到的**：把地址改成 `youtube.com/watch`，登录，再改回来——cookie 存储按 `website.id` 走，不跟着地址变。没人告诉用户这件事。修法是一句帮助文案，不是新 UI。这里做任何改动都必须继续避开 153 |
-| **K3** | 选了网站，看不出画面正在路上 | 已收窄。已发布的菜单栏脉冲**只覆盖 swap 路径**，而且它就画在锚定它的那个 popover **背后**。非 swap 路径——本次会话的首次加载、挂起/恢复之后、某台显示器被重新打开之后——完全不报告，而面板没有任何加载状态，尽管现在选网站就是在面板上。列上的**名字**是立刻变的，所以「选择」看起来生效了，画面却没跟上 |
 | **K6** | 帮助文案有的地方到位，有的地方单薄 | 这次数清楚了：**30 处**——23 处 `.explained(…)` 加 7 处 `.help(…)`，分布在三个界面共 2838 行里。之前那个「七处」错了四倍。值得整体过一遍，但这是 30 条文案的活，不是小活 |
 | **K7** | 全 app 没有任何地方处理 HDR | **搁置，你的决定。** 已扫描确认：没有 API、entitlement 或 plist 键涉及它；唯一的匹配是菜单栏取色器里的一个色彩空间选项，以及某个站点名字里的 "HDR" 三个字母。要先有真实 HDR 源和一次「究竟什么送到了显示器」的测量，才谈得上设计 |
 | **K8** | Bilibili 条目只有通用图标，YouTube 条目有视频封面 | YouTube 的封面能从视频 id 推出来；Bilibili 的在 `api.bilibili.com` 后面（`data.pic`）。只影响 Websites 列表的行图标——`previewImageURL` 只有一个调用方。这会是 app 第一次调用站点 API 而不只是加载页面 |
-| **K12** | 裁剪进行中重建 scene 的 content view，会把那个窗口永久钉在最上层 | **已重新定位：不需要第二台显示器，而且从来就不需要。** 覆盖层是 `window.contentView` 的子视图，而没有任何地方保护 `applyContent` 不在裁剪进行中执行——于是任何一次重建都会把覆盖层摘下来，而它是唯一能调用 `onFinish` 的东西。窗口保持 `.floating`、完全不透明、可交互，`beginCropSelection` 从此永远拒绝。`DisplayPanelModel.chooseRegion` 在 `beginCropSelection` **之前**紧挨着调用 `makeCurrent`，而那次写入是在**下一个** runloop 回合才到达——也就是覆盖层装好之后。对于已经有区域的网站，也就是这个功能存在的理由，摘下来是必然的 |
+| **K12** | 裁剪进行中重建 scene 的 content view，会把那个窗口永久钉在最上层 | **已重新定位：不需要第二台显示器，而且从来就不需要。** 覆盖层是 `window.contentView` 的子视图，而没有任何地方保护 `applyContent` 不在裁剪进行中执行——于是任何一次重建都会把覆盖层摘下来，而它是唯一能调用 `onFinish` 的东西。窗口保持 `.floating` 和完全不透明，`beginCropSelection` 从此永远拒绝。**在 `a332dae` 和 `53f110b` 的取景改动之后重新核过，它们没够到这里：**`installContentView` 现在在 `isFramingRegion` 时传 `nil`，`applyOpacity` 现在也不动正在取景的那个窗口，但 `content` 的 `didSet` 是按赋值触发而不是按变化触发——于是那次重新赋值照样走到 `applyContent`，照样写 `window.contentView`，照样把覆盖层一起带走。「可交互」这一项已经从症状里去掉：`rebuildScenes` 路过时会按 Browsing Mode 重新赋 `isInteractive`。`DisplayPanelModel.chooseRegion` 在 `beginCropSelection` **之前**紧挨着调用 `makeCurrent`，而那次写入是在**下一个** runloop 回合才到达——也就是覆盖层装好之后。对于已经有区域的网站，也就是这个功能存在的理由，摘下来是必然的 |
 | **K16** | 同步一台显示器会吃掉它原来的网站，并留下一份副本 | `mirrorAcrossSyncGroup` 就地覆盖 follower 的条目，所以那台显示器原本显示的页面是被删掉而不是被搁置，没有任何办法找回。在维护者自己的列表上量过：八个条目里六个是副本，两个原始条目不可恢复。追加的副本上限是「每台起初为空的 follower 显示器一个」，而且永远不会被删除。两半是同一个决定：镜像条目是 leader 的一个**视图**，不是独立的网站，它根本不该出现在列表里 |
 | **K17** | 某台显示器上的网站选择器只列出那台显示器自己的网站，通常只有一个 | 过滤条件是 `effectiveDisplay == scene.display`，而网站获得显示器的方式就是在那儿被选中——于是菜单只有一项，看起来像坏了。被删掉的菜单遍历的是整个列表，它的注释说这是**刻意的**，所以这是回归而不是设计变更。这个控件的用途是选中任意网站**并把它挪过来** |
 | **K18** | 同步纠正会让画面卡顿 | 在 WebKit 上每次改 `playbackRate` 都有一次可见的顿挫（bug 208142）。任何调参之前，先在真实流上数出每分钟发生多少次速率变化；如果次数高，答案是放宽 `engage`，不是缩小 `nudge` |
-| **K19** | 首次运行会装上所有 featured，并显示排序最靠前的那个 —— **正在别处修，不要接手** | 已重写：播种存在，策展不存在。它该以 **floor796**、**Svalbard**、**Calculating Empires** 开场，静音，单显示器时 floor796 在上，有第二台时补上 Svalbard。三个都已在目录里且都带 `audio: muted`，所以这是一个读目录的首启步骤，不是新条目 |
-| **K20** | 面板每秒截图十二次，而且没人看得见时还在继续 | **你提的这条。** 关掉面板确实会停——所有关闭路径都会到达 `popoverDidClose`。但仍有两处不对。循环 sleep **80 毫秒**，也就是每秒 12.5 轮、每轮每台显示器一张快照，而旁边的注释写的是 "a few a second"，快照那边自己的注释写的是 "roughly once a second"。而且停止条件是**已关闭**，不是**可见**：transient popover 只在外部交互时自关，所以它能挺过锁屏、显示器休眠、切换 Space 和 Mission Control，全程以 12.5 Hz 转 SwiftUI 树。`DisplayPanelModel.swift:65` 声称没人看的时候这里什么都不跑。修法是降低频率加一个遮挡或锁屏判断，顺手在各 scene 之间加一个 `Task.isCancelled`，免得中途关闭还多推一帧 |
+| **K20** | 面板每秒截图十二次，而且没人看得见时还在继续 | **你提的这条。** 关掉面板确实会停——所有关闭路径都会到达 `popoverDidClose`。但仍有两处不对。循环 sleep **80 毫秒**，也就是每秒 12.5 轮、每轮每台显示器一张快照，而旁边的注释写的是 "a few a second"，快照那边自己的注释写的是 "roughly once a second"。而且停止条件是**已关闭**，不是**可见**：transient popover 只在外部交互时自关，所以它能挺过锁屏、显示器休眠、切换 Space 和 Mission Control，全程以 12.5 Hz 转 SwiftUI 树。`startLiveRefresh` 上的注释仍然声称没人看的时候这里什么都不跑。修法是降低频率加一个遮挡或锁屏判断，顺手在各 scene 之间加一个 `Task.isCancelled`，免得中途关闭还多推一帧 |
 | **K21** | 面板预览显示的是整个放大后的页面，不是取景区域 | `snapshot()` 没有传 `rect`，于是抓的是 web view 的完整 bounds——而在区域模式下 `PageView` 把那个 frame 设成放大后的整页再裁切。结果是列上显示整页缩到 260 点，显示器上显示的却是其中一片。`refreshMenuBarBandColor` 已经演示了正确写法：把 `configuration.rect` 设成区域与 `webView.bounds` 的交集 |
 | **K22** | app 被禁用时，面板的电源按钮显示「开着」，按下去反而关掉显示器 | 那一列读的是 `!scene.isDisabledForDisplay`，从不参考 `AppState.isEnabled`。开着「用电池时停用」拔掉电源：所有壁纸消失，每一列仍画成 Showing，按下电源按钮传入 `false`，把那台显示器**关掉**。而 W1 缺失，于是从面板里没有任何办法把 app 重新打开 |
 | **K23** | 网站选择器不会唤醒已关闭的显示器，上面两行的箭头却会 | `step()` 会先重新启用，还带着解释为什么的注释。`show()` 只是裸的 `makeCurrent`，没有这个保护，于是在已关闭的显示器上选网站只会改标题、屏幕依然空白。同一列里的两个相邻控件对「选一个网站」是什么意思给出了不同答案 |
 | **K24** | 轮换箭头可能亮着却按不动 | `canRotate` 按显示器数网站；轮换走的是 `eligible(for:)`，也就是那个集合与排期的交集。一台显示器上有两个网站、其中一个排 08:00–18:00，到 22:00 两个箭头都是亮的，按下去什么也不发生。`RotationMode` 自己的文档承诺固定期间箭头依然可用 |
-| **K25** | 每日更新检查写进了一个没人读的键 | U1 随 #18 落地，它的被动提示面做在 `Menus.swift` 里；#21 删掉了那个文件，没给这个条目重新安家。`latestKnownVersion` 现在只写不读——每 24 小时一次网络请求，结果从不展示——而 `SettingsScreen.swift:79` 还在承诺「Nifro 会在菜单里提到新版本，别处不提」。要么在面板底栏加一个提示，要么删掉每日任务；两样都不做是三个选项里最差的 |
+| **K25** | 每日更新检查写进了一个没人读的键 | U1 随 #18 落地，它的被动提示面做在 `Menus.swift` 里；#21 删掉了那个文件，没给这个条目重新安家。`latestKnownVersion` 现在只写不读——每 24 小时一次网络请求，结果从不展示——而 `SettingsScreen.swift:78` 还在承诺「Nifro 会在菜单里提到新版本，别处不提」。要么在面板底栏加一个提示，要么删掉每日任务；两样都不做是三个选项里最差的 |
 | **K26** | 页面加载失败，报告在没人会看的地方 | 错误设置了状态栏图标的 tooltip，除非 Browsing Mode 开着，否则到此为止。面板从不读它，所以一个开始返回 500 的壁纸 URL 只会显示成 "No Website"，不给任何原因。被删掉的菜单是把错误放在最顶上的 |
 | **K27** | Browsing Mode 会把已关闭显示器的窗口重新调到前台 | `applyBrowsingMode` 遍历**所有** scene，包括已挂起的，而 `isInteractive.didSet` 每次赋值都会调 `makeKeyAndOrderFront`，哪怕值没变。窗口是透明的所以症状不重——除了对 `allowsInteraction` 的网站，它会不再让点击穿透；而通过全局快捷键触发时，它会以 `.floating` 出现在用户已经关掉的那台显示器上 |
 | **K28** | 任何一次挂起之后 M2 就不再记录 | `releaseWebView` 会新建一个 web view，而两边都没有重新订阅 `addressObserver`，于是它仍绑在已经消失的那个 web view 上。禁用/启用、锁屏、电池切换、按显示器开关之后，那个 scene 再也不会记录它的页面把自己挪到了哪里。`reload()` 是直接捕获的，这掩盖了带 reload 定时器的页面的问题。改一行 |
 | **K29** | 四条 `WKUIDelegate` 路径仍在用全局 Browsing Mode | `createWebViewWith` 以及 confirm、prompt、open 面板读的是 `isBrowsingMode`，含义是「任意一台显示器」；同一文件里的两条导航路径已经改成按显示器的形式，这四条被落下了。笔记本上开着 Browsing Mode 时，显示器壁纸上的 `window.open()` 会被接受，替掉一个没人在交互的页面 |
 | **K30** | 缩略图缓存不清扫、不受预算约束、且未压缩存储 | `DiskBudget` 每六小时按 100 MB 预算清扫两个 WebKit 根目录。`websiteThumbnailCache` 不在其中任何一个：在 `~/Library/Caches/Nifro/` 下每个 key 一个文件，以 `tiffRepresentation` 写入，于是一张 15 KB 的 JPEG 封面落盘成约 690 KB。没有数量上限、没有大小上限、没有按时间清扫；唯一的删除路径是「清除所有网站数据」按钮。key 是 URL，所以改地址或删网站会永久留下孤儿文件。上限是「列表里出现过的不同 URL 数」，所以不会失控——但它对现有的那个预算是不可见的。两行：把这个目录加进 `sweptRoots`，或者拿孤儿清扫那套对着缩略图 key 再用一次。改成 PNG 编码是第二个一行的收益 |
 | **K31** | 同一个 URL 的两个条目在两台显示器上会互相覆盖页面位置 | 原 D7。按页面的记录（`scrollPosition_`、`lastAddress_`、`zoomLevel_`）按 URL 存，而数据存储按 `website.id` 存。**同步组让这成为常态而不是边角情况**：每个组都会为每台 follower 显示器新建一个带着 leader URL 的条目，于是 ≥2 个 id 不同、URL 相同的条目共用同一套记录。修法是改按 `website.id` 存，代价是已保存的位置丢一次 |
-| **K32** | UI 还在让人去用一个不存在的菜单 | 至少七处文案：欢迎页的「点它的图标并选择 Add Website…」和「在同一个菜单里」、区域设置的「Nifro 菜单里的 Choose Region…」（面板上它叫 Crop）、声音设置的「和 Nifro 菜单里的 Sound 是同一个设置」、更新设置的「在菜单里」、「如果你需要访问 Nifro 菜单…」，以及目录里的那处。区域帮助文案还在描述「在壁纸上拖一个矩形」，那是 L0 已经替换掉的模型 |
+| **K32** | UI 还在让人去用一个不存在的菜单 | **六处，是数出来的不是估的：**欢迎页的「点它的图标并选择 Add Website…」和「在同一个菜单里」、区域设置的「Nifro 菜单里的 Choose Region…」（面板上它叫 Crop）、声音设置的「和 Nifro 菜单里的 Sound 是同一个设置」、更新设置的「在菜单里」，以及隐藏图标设置的「如果你需要访问 Nifro 菜单…」。这一行原先说的第七处、目录里的那一处，并不存在。**矩形也已经没了：**区域帮助文案描述的是移动和缩放壁纸，那就是 L0 的模型，也是对的那个 |
 | **K33** | 菜单栏色带采样的位置，和页面实际布局的位置差最多一个缩放因子 | 窗口被刻意设成 `pageFrame.height + 1`，而 `pageLayoutSize` 就是 `pageFrame.height`。`PageView` 从实时 `bounds` 推导，`topStripOfWallpaper` 从 `pageLayoutSize` 推导。和 K2 是同一类差一个点的不一致，而且发生在唯一没有测试的那个界面上 |
+| **K34** | 按住交互键时移动指针，会把起手那台显示器晾在那儿 | `HoldToInteract.begin` 给 `actingScene.display` 打开 Browsing Mode，`end` 给 `actingScene.display` 关掉，两次都是运行的那一刻现问的。松手时人在另一块屏幕上，于是被关掉的是第二台——它本来就没开过——而第一台继续可交互，没有任何东西按着它，只能靠切换快捷键收回来。显示器必须在 `begin` 时记下来，不能到 `end` 再问一遍。**有一条自己的分支在处理它；在这棵树上它仍然能复现，所以照实写在这里，而不是假定它已经没了** |
+| **K35** | 显示器正在重新配置的那一小段时间里，两张全屏壁纸可能叠在同一块屏幕上 | `Display.main` 是套在 `CGDisplayCreateUUIDFromDisplayID` 上的可失败初始化，它会在几十毫秒里返回 `nil`——正是 `Display.underMouse` 已经写下来的那个窗口。在那段时间里，没指定显示器的网站 `effectiveDisplay == nil`，而 `isShowable` 仍然说「该显示」——整条链都是 `nil` 时 `(display ?? .main)?.isConnected != false` 为真——于是 `displaysInUse` 里可以同时装着 `nil` 和一台真实显示器。`rebuildScenes` 给两者各建一个 scene，而两者解析屏幕都走 `Display.mainScreen`，于是同一块屏幕上有两个壁纸窗口、两条菜单栏色带、两套定时器。下一次 `NSScreen.publisher` 事件会让它自愈。**是推出来的，从未复现过：**那个窗口短到手工撞不上，这也是它出错代价低的原因 |
+| **K36** | 一台显示器的加载失败，会被另一台显示器的例行重载抹掉 | `AppState.webViewError` 是一个全 app 唯一的槽位，却是按显示器写的。`load()` 会为正在加载的那个 scene 把它置 `nil`，于是外接显示器上的一次重载定时器，就把「笔记本上的页面开始返回 500」这条记录扔了。状态栏图标的 tooltip 是同一个槽位的另一头：`report` 把错误写上去，而下一个加载完成的 scene 会把它自己网站的 tooltip 盖上去。两者都不说这是哪台显示器。K26 说的是根本没人看得见这个错误；这一条说的是这个错误只有一份 |
+| **K37** | 已经彻底不会再回来的显示器，它的按显示器设置永远不会被忘掉 | `rotationModes`、`rotationIntervals` 和 `disabledDisplays` 都按 `Display.settingsKey`（一台显示器一个 UUID）存，而没有任何地方删条目。对于「拔掉又插回来」的显示器这是对的，那正是当初选字典的理由；但对于一台已经卖掉的显示器，没有任何办法忘掉它。每台接过的显示器一个小条目，任何地方都看不见，所以这是整洁性问题而不是缺陷——值得留一行，免得以后被当成泄漏重新发现一遍。`browsingDisplays` 是例外：`Events.swift` 会把它整个清空 |
 
 ---
 
@@ -211,7 +218,6 @@ W1 和 W3 是让 app 从面板上看起来最不完整的两个；W5 丢的是�
 
 | | 条目 | 状态 |
 |---|---|---|
-| **E19** | 本次会话的第一个页面是由内容规则订阅加载的 | `didLaunch` 里没有任何地方加载页面：`Defaults.publisher(.contentRulesURL)` 在订阅时会发出当前值，是那个 handler 把第一张壁纸放上去的。这个顺序是刻意的——页面起来时拦截规则已经编译好——而改动那个订阅就会让启动时壁纸消失。订阅上有一条注释说明此事；那条注释是唯一的护栏 |
 | **E21** | `nifro://` 被注册到了 app 的陈旧副本上 | **测试 URL 命令一律用 `open -a <path> "nifro:reload"`，绝不用裸的 `open "nifro:reload"`。** LaunchServices 把这个 scheme 记在这台机器上构建过的每一份副本上，包括 `~/.Trash` 和 derived data。仓库里没有任何东西导致它，也没有任何东西能修它。裸写法曾经让我们对着一个三周前的构建折腾了一下午 |
 | **E22** | 把本地化迁到 Vorssaint 那套机制 | **新增，而且是重做而非缺陷。** Nifro 现状：`Localizable.xcstrings`，244 个键，2 种语言（英文是未翻译的源），写 `AppleLanguages` 并**强制重启**，外加一个 CI 脚本守完整性。Vorssaint：字符串就是 Swift——一个 892 个字段的 `struct Strings`，13 种语言各一个 `static let`，少一个字段就编译不过，因此不需要 CI 门禁；`L10n: ObservableObject` 发布选择，视图**无需重启**即刻重绘。迁过去是五步，第三步就是全部成本：(1) 用 `struct Strings` 加每语言一个值替掉 catalogue；(2) 加 `L10n`，带 `systemDefault` 映射和字面量 `displayName`；(3) **把约 30 个文件里的 244 处字面量改写成 `l10n.s.field`**，并让 AppKit 那几个界面——`DisplayPanel`、`PanelControls`、`Actions`——在切换时重建，而不是依赖 `AppleLanguages`；(4) 删掉重启对话框；(5) 删掉 CI 门禁，编译器接管。**会失去什么：**`AppleLanguages` 免费顺带本地化了第三方包的字符串（`LaunchAtLogin.Toggle`），Swift struct 方案够不着它们。为这些保留一个小门禁 |
 
@@ -290,17 +296,20 @@ U1 已发布，然后在面板重构里丢了它的展示面——那是 K25，�
 
 - **L0** 区域选择已是直接操作。见第 3 节那两个坑。
 - **K2** 区域漂移——随 L0 消失；已经没有转换，也就没有差一个点的地方。
+- **K3** 正在路上的页面在两个界面上都会说话：面板的选择器会脉冲、那一列变灰，菜单栏图标则对任意显示器脉冲。它是从 `WallpaperScene.isLoading` 读出来的而不是数出来的，所以本次会话的首次加载、挂起之后那次、以及某台显示器被重新打开之后那次，报告方式和其它每一次一样——而旧条目说只有 swap 路径才报告。
 - **K5** 语言选择器已发布：写 `AppleLanguages` 加重启提示。被 E22 取代，E22 改的是机制而不是功能。
 - **K9** 带 `zoom` 的目录条目不再拖垮整个 gallery：两种拼写都能解码，拉取时跳过坏条目而不是丢掉整个列表。跳过那一半没有测试——它是 `private` 的。
 - **K10** Browsing Mode 由 `isEnabled.didSet` 重放。**K11** 页面缩放在两条到达路径上都恢复到真正接手页面的那个 web view 上。
 - **K13 / K14 / D5** 显示器消失时它的壁纸也消失；插上的显示器能拿到页面，因为 `NSScreen.publisher` 现在调的是 `applyWebsiteChanges()` 而不是 `rebuildScenes()`。
 - **K15** `.canJoinAllSpaces` 在 `DesktopWindow.init` 里设置。**尚未在真机核过：**开着 app 切换 Mission Control 桌面。
+- **K19** 首次运行的策展写在条目自己的 YAML 里：`featured` 从标志变成了名次，floor796 是 1、Svalbard 是 2，第 N 台显示器拿第 N 个站点。它仍然会装上全部八个 featured 条目；那一半从来不是抱怨所在，而且那份列表正是新用户要去编辑的东西。
 - **D3** `croppingSceneDisplay` 和它的 `?? primaryScene` 兜底都没了；裁剪持有的是 weak scene。
 - **D9 / D10** 轮换按显示器走，scene 在 `init` 时就拿到自己的网站。两者都由 `swift test` 覆盖，这正是它们不再需要两台显示器的原因。
 - **D11** `layOutContent` 从 `bounds` 推导。当初那个断言是只读一个文件推出来的，读了调用方就站不住。
 - **E16** Universal binary：不做。每个架构一个精简构建，workflow 里写着理由。
 - **E17** 按页面的 defaults 不会无界增长；是量出来的，不是推出来的。
 - **E18** 清扫已经不可能被遗忘——见第 10 节那个坑。
+- **E19** 本次会话的第一个页面由 `setUpEvents` 里一句显式的 `reloadEverything()` 加载，排在内容规则订阅**前面**而不是后面。原先站在这里的那条断言说旧顺序是刻意的、订阅上那条注释是唯一的护栏——两句都是假的：设了规则列表时，启动加载要等一次 `URLSession` 拉取加一次规则编译，而 `isEnabled.didSet` 里的一次重复加载正好把这件事遮住了。
 - **E20** `nifro://reload`、`nifro:reload` 和 `nifro:///reload` 三种写法都接受；解析是纯函数，三种拼写都钉住了。
 - **U1** 检查本身已发布，每日一次且可关闭。它的展示面没有——K25。
 - **R5** `Extensions.swift` 已拆分，四个不是 extension 的类型搬了出去。里面没有任何死代码，`periphery` 推翻了那个只靠读代码得出的相反结论。

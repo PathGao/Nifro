@@ -47,6 +47,12 @@ struct ZoomSetting: View {
 Which display a website appears on.
 
 Only offered when there is more than one display. Showing a different page on each screen is the most-asked-for thing upstream (Plash#2), and it needs the display to belong to the website rather than to the app.
+
+The unpinned option is "Main Display" and not "Default display". There is no app-wide display setting
+for a default to come from — unpinned means `Display.main`, whichever screen currently has the menu
+bar — and "default" sends the reader looking for the place it was set. "Main Display" is the same
+string the panel puts at the top of a column for a website with no display of its own, so the two
+surfaces name one thing once.
 */
 struct WebsiteDisplaySetting: View {
 	@Binding var display: Display?
@@ -56,13 +62,13 @@ struct WebsiteDisplaySetting: View {
 	var body: some View {
 		if displays.wrappedValue.all.count > 1 {
 			Picker(selection: $display) {
-				Text("Default display").tag(nil as Display?)
+				Text("Main Display").tag(nil as Display?)
 				ForEach(displays.wrappedValue.all) { candidate in
 					Text(candidate.localizedName).tag(candidate as Display?)
 				}
 			} label: {
 				Text("Show on")
-					.explained(String(localized: "Each website can live on its own screen. “Default display” follows the choice in Settings."))
+					.explained(String(localized: "Each website can live on its own screen. “Main Display” is not one particular screen: it is whichever one has the menu bar, so it moves when you rearrange your displays in System Settings or dock your laptop."))
 			}
 		}
 	}

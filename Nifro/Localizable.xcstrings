@@ -559,16 +559,6 @@
         }
       }
     },
-    "Default display": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "默认显示器"
-          }
-        }
-      }
-    },
     "Delete": {
       "localizations": {
         "zh-Hans": {
@@ -649,12 +639,12 @@
         }
       }
     },
-    "Each website can live on its own screen. “Default display” follows the choice in Settings.": {
+    "Each website can live on its own screen. “Main Display” is not one particular screen: it is whichever one has the menu bar, so it moves when you rearrange your displays in System Settings or dock your laptop.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "每个网站可以待在自己的屏幕上。「默认显示器」跟随设置里的选择。"
+            "value": "每个网站可以待在自己的屏幕上。「主显示器」不是某一块固定的屏幕：它指当前显示菜单栏的那一块，所以你在「系统设置」里重新排列显示器、或者给笔记本接上扩展坞时，它会跟着换。"
           }
         }
       }
