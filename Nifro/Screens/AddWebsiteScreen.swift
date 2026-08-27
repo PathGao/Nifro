@@ -457,6 +457,10 @@ private struct CustomCodeScreen: View {
 					}
 					ScrollableTextView(
 						text: $css,
+						// A code editor's font, not the app's. It answers to what fits eighty columns
+						// of CSS, and pointing it at the panel's type would couple an editor to a
+						// popover that has nothing to do with it.
+						// swiftlint:disable:next hardcoded_font_size
 						font: .monospacedSystemFont(ofSize: 11, weight: .regular),
 						isAutomaticQuoteSubstitutionEnabled: false,
 						isAutomaticDashSubstitutionEnabled: false,
@@ -478,6 +482,9 @@ private struct CustomCodeScreen: View {
 					}
 					ScrollableTextView(
 						text: $javaScript,
+						// The CSS editor's font, for the same reason, and matching it deliberately:
+						// the two boxes sit one above the other and hold the same kind of text.
+						// swiftlint:disable:next hardcoded_font_size
 						font: .monospacedSystemFont(ofSize: 11, weight: .regular),
 						isAutomaticQuoteSubstitutionEnabled: false,
 						isAutomaticDashSubstitutionEnabled: false,

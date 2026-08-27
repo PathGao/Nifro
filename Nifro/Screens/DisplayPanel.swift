@@ -119,7 +119,7 @@ private struct DisplayColumn: View {
 				MarqueeText(text: column.websiteName ?? String(localized: "No Website"), isActive: isHovering)
 					.font(.subheadline)
 					.foregroundStyle(.secondary)
-					.frame(width: 260, height: 16)
+					.frame(width: PanelMetrics.columnWidth, height: 16)
 
 				preview
 
@@ -136,20 +136,25 @@ private struct DisplayColumn: View {
 			.disabled(column.isFollowing)
 			.opacity(column.isFollowing ? 0.45 : 1)
 		}
-		.frame(width: 260)
+		.frame(width: PanelMetrics.columnWidth)
 		.padding(9)
 		.background {
-			RoundedRectangle(cornerRadius: 12, style: .continuous)
-				.fill(isHovering ? Color.white.opacity(0.15) : Color.clear)
+			RoundedRectangle(cornerRadius: PanelMetrics.cardRadius, style: .continuous)
+				.fill(isHovering ? PanelMetrics.hoverFill : AnyShapeStyle(.clear))
 		}
 		.overlay {
 			// The same treatment the Dock preview uses for the card under the pointer: a two-point
 			// accent border and a barely-there fill. Borrowed rather than invented, because a person
 			// who has seen one of these should not have to learn the other.
-			RoundedRectangle(cornerRadius: 12, style: .continuous)
+			//
+			// The fill is the same `hoverFill` the buttons inside the card use. It was a fixed white
+			// wash before, which is what the Dock's fill looks like in the dark appearance only — over
+			// a light popover it was all but invisible, so hovering a column showed a border and no
+			// card at all for anyone not in dark mode.
+			RoundedRectangle(cornerRadius: PanelMetrics.cardRadius, style: .continuous)
 				.strokeBorder(isHovering ? Color.accentColor : Color.clear, lineWidth: 2)
 		}
-		.contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+		.contentShape(RoundedRectangle(cornerRadius: PanelMetrics.cardRadius, style: .continuous))
 		.onHover {
 			isHovering = $0
 		}
@@ -277,12 +282,12 @@ private struct DisplayColumn: View {
 					}
 				} label: {
 					Image(systemName: "link")
-						.font(.system(size: 11, weight: .semibold))
+						.font(PanelMetrics.symbolFont)
 						.frame(width: 22, height: 20)
-						.foregroundStyle(isSynced ? AnyShapeStyle(.white) : AnyShapeStyle(.secondary))
+						.foregroundStyle(isSynced ? PanelMetrics.onForeground : AnyShapeStyle(.secondary))
 						.background(
 							isSynced ? AnyShapeStyle(PanelMetrics.onTint) : AnyShapeStyle(.quinary),
-							in: RoundedRectangle(cornerRadius: 5)
+							in: RoundedRectangle(cornerRadius: PanelMetrics.smallCornerRadius)
 						)
 				}
 				.menuStyle(.borderlessButton)
@@ -291,7 +296,7 @@ private struct DisplayColumn: View {
 				.help(String(localized: "Show the same wallpaper as another display"))
 			}
 		}
-		.frame(maxWidth: 260)
+		.frame(maxWidth: PanelMetrics.columnWidth)
 	}
 
 	/**
@@ -306,24 +311,24 @@ private struct DisplayColumn: View {
 		// A fixed shape whatever the display is. A column that took the screen's own aspect would make
 		// a portrait monitor tall enough to push everything else off the panel.
 		ZStack {
-			RoundedRectangle(cornerRadius: 8)
+			RoundedRectangle(cornerRadius: PanelMetrics.pictureRadius)
 				.fill(.quaternary)
 
 			if let snapshot = column.snapshot {
 				Image(nsImage: snapshot)
 					.resizable()
 					.scaledToFill()
-					.clipShape(RoundedRectangle(cornerRadius: 8))
+					.clipShape(RoundedRectangle(cornerRadius: PanelMetrics.pictureRadius))
 			} else {
 				Text("No Website")
 					.font(.callout)
 					.foregroundStyle(.secondary)
 			}
 		}
-		.frame(width: 260, height: 162)
-		.clipShape(RoundedRectangle(cornerRadius: 8))
+		.frame(width: PanelMetrics.columnWidth, height: 162)
+		.clipShape(RoundedRectangle(cornerRadius: PanelMetrics.pictureRadius))
 		.overlay {
-			RoundedRectangle(cornerRadius: 8)
+			RoundedRectangle(cornerRadius: PanelMetrics.pictureRadius)
 				.strokeBorder(.separator)
 		}
 		.overlay(alignment: .bottomTrailing) {
@@ -342,12 +347,23 @@ private struct DisplayColumn: View {
 				PanelButton(
 					symbol: column.isShowing ? "power" : "power.circle",
 					label: column.isShowing ? String(localized: "Showing") : String(localized: "Switched off"),
+					// Lit while the display is switched *off*, which is the one caller that reads
+					// `onTint` as "this button is engaged" rather than as "the thing it turns on is
+					// on". The other four read it the second way, and only the second way is written
+					// down. Left as it ships until somebody picks which reading the app has; both are
+					// defensible and the defect is that the choice is unrecorded, not that this line
+					// is wrong.
 					isOn: !column.isShowing
 				) {
 					model.toggleShowing(on: column.display)
 				}
 			}
 			.padding(4)
+			// Not `pictureRadius`, and not derived from it: the pill floats six points inside the
+			// picture, so a concentric radius would be 2, and 7 is what the two 22-point buttons
+			// inside it want. It is the only rounded thing in the app with that argument, so it has
+			// no name — a token with one user is a number with a longer spelling.
+			// swiftlint:disable:next hardcoded_corner_radius
 			.background(.thinMaterial, in: RoundedRectangle(cornerRadius: 7))
 			.padding(6)
 		}
