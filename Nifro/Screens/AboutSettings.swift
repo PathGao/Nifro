@@ -28,21 +28,39 @@ struct AboutSettings: View {
 					}
 
 					Spacer()
+
+					// The gallery answers "what do I even put up there", which is the question somebody
+					// has the minute the app is installed. Third in a stack of three plain rows it read
+					// as documentation. Beside the icon and filled, it is the one thing on the page that
+					// looks like it wants pressing — and nothing competes with it, because the two rows
+					// below are both places you only go when something is wrong.
+					Button("Site Gallery…") {
+						Constants.openSiteGalleryWindow()
+					}
+					.buttonStyle(.borderedProminent)
+					.controlSize(.large)
 				}
 				.padding(.vertical, 4)
-			}
-
-			Section {
-				Button("Report a Problem or Request a Feature…") {
-					SSApp.openSendFeedbackPage()
-				}
-				Button("Site Gallery…") {
-					Constants.openSiteGalleryWindow()
-				}
-				Link("GitHub Repository", destination: Constants.repositoryURL)
 			} footer: {
 				Text("The site gallery is a list of pages that work well as wallpapers, each with the settings that make it work. Adding one takes a single file, no Swift and no Xcode.")
 					.foregroundStyle(.secondary)
+			}
+
+			Section {
+				HStack {
+					Button("Report a Problem or Request a Feature…") {
+						SSApp.openSendFeedbackPage()
+					}
+
+					Spacer()
+
+					// "GitHub", not "GitHub Repository". The settings window is a fixed 400pt, which
+					// leaves 340pt across a row; the English button wants 270 of that, and the longer
+					// label overruns what is left and truncates the button rather than itself. The
+					// Chinese label has room for either, so the shorter source string is the one that
+					// works in both.
+					Link("GitHub", destination: Constants.repositoryURL)
+				}
 			}
 
 			Section {
