@@ -159,7 +159,12 @@ final class SimpleImageCache<Key: SimpleImageCacheKeyable> {
 			createCacheDirectoryIfNeeded()
 
 			do {
-				try tiffData.write(to: cacheFile)
+				// Atomic because the read is `NSImage(contentsOf:)` on another queue with nothing
+				// between them: a torn file is decoded as a broken image, cached in memory as if it
+				// were the real one, and read back the same way on every launch after. There is no
+				// path that notices and refetches, so one interrupted write is a permanently blank
+				// square in the websites list.
+				try tiffData.write(to: cacheFile, options: .atomic)
 			} catch {
 				assertionFailure("Failed to write image to disk: \(error.localizedDescription)")
 			}
