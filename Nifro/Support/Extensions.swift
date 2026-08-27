@@ -740,6 +740,10 @@ extension KeyedDecodingContainer {
 	it happened to have no members, and adding `externalLinks` to `Website` in #53 was the first field
 	added since. `WebsiteMigrationTests` pins the behaviour rather than the presence of this code.
 	*/
+	// periphery:ignore - The only caller is a synthesised `init(from:)`, which no index attributes to
+	// this overload. That invisibility is not a footnote here: it is why the extension holding this was
+	// deleted once as an empty shell, and deleting it empties every user's website list on the next
+	// field added to `Website`. Reported by the scan, argued here, and not to be quieted any other way.
 	func decode<T>(_ type: DecodableDefault.Wrapper<T>.Type, forKey key: Key) throws -> DecodableDefault.Wrapper<T> {
 		try decodeIfPresent(type, forKey: key) ?? .init()
 	}
