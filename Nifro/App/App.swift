@@ -60,9 +60,13 @@ private final class AppDelegate: NSObject, NSApplicationDelegate {
 	// Without this, Nifro quits when the screen is locked. (macOS 13.2)
 	func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
 
-	func applicationWillFinishLaunching(_ notification: Notification) {
-		// It's important that this is here so it's registered in time.
-		AppState.shared.setUpURLCommands()
+	// Every `nifro:` URL arrives here, including the one that started the app: AppKit holds the launch
+	// event until the delegate is in place, and `@NSApplicationDelegateAdaptor` puts it there before
+	// the app finishes launching. Nothing has to be subscribed early any more.
+	func application(_ application: NSApplication, open urls: [URL]) {
+		for url in urls {
+			AppState.shared.handleURLCommand(url)
+		}
 	}
 
 	func applicationDidFinishLaunching(_ notification: Notification) {
