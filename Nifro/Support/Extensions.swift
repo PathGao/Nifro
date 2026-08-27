@@ -2036,8 +2036,10 @@ extension WKUserContentController {
 			const selector = 'audio, video';
 			let muted = true;
 			let rescanQueued = false;
+			let sawMedia = false;
 
 			const adopt = element => {
+				sawMedia = true;
 				element.muted = muted;
 
 				// A player that was only allowed to start because it was muted stays paused when the
@@ -2059,11 +2061,16 @@ extension WKUserContentController {
 				apply();
 			};
 
-			// A full rescan is needed as well as muting on insertion: players reuse and reparent their
-			// media elements, so a node that was muted on insertion can come back unmuted. But a live
-			// stream's chat fires mutations continuously, and rescanning the document on every batch
-			// made the cost scale with the chat rather than with the video. One rescan per frame is
-			// enough, and it collapses a burst into a single pass.
+			// A full rescan is needed as well as muting on insertion: a player can reuse an element and
+			// set `muted` back on it in place, which produces no mutation of its own, so the rescan is
+			// what re-asserts the setting. But this script is in every page and every frame, a live
+			// stream's chat fires mutations continuously, and the rescan reads the whole document — so a
+			// page with no media on it at all was scanning up to sixty times a second for as long as it
+			// stayed on screen, which is the entire life of a wallpaper. Hence both brakes. One rescan
+			// per frame collapses a burst into a single pass, and `sawMedia` means a page that has never
+			// held a media element never scans. The first element on a page is not what the rescan is
+			// for: insertion and reparenting both arrive as added nodes, and the walk below reaches the
+			// same elements `document.querySelectorAll` would.
 			const observer = new MutationObserver(mutations => {
 				for (const mutation of mutations) {
 					for (const node of mutation.addedNodes) {
@@ -2077,7 +2084,7 @@ extension WKUserContentController {
 					}
 				}
 
-				if (!rescanQueued) {
+				if (sawMedia && !rescanQueued) {
 					rescanQueued = true;
 					requestAnimationFrame(rescan);
 				}
