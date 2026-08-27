@@ -17,19 +17,40 @@ enum PanelMetrics {
 
 	One definition, because "make Quit match the chooser" is a request that comes back every time one
 	of them is adjusted on its own.
+
+	`controlRadius` is the exception that reaches wider than this group: every control the panel draws
+	uses it, 22-point squares and 28-point pills alike. It was two numbers — 5 written four times and
+	6 written once — which is what stopped the question being asked at all. There is no system answer
+	to borrow here: AppKit and SwiftUI expose no standard control radius, and `ConcentricRectangle`
+	answers a different question (what an inner radius should be inside a known outer one) and needs
+	macOS 26, above this app's floor.
 	*/
+	// swiftlint:disable:next hardcoded_font_size - This is the definition the rule redirects to.
 	static let font = Font.system(size: 13)
 	static let height = 28.0
 	static let horizontalPadding = 15.0
-	static let cornerRadius = 6.0
+	static let controlRadius = 5.0
+	// swiftlint:disable:next hardcoded_font_size - This is the definition the rule redirects to.
 	static let symbolFont = Font.system(size: 11, weight: .semibold)
+
+	/**
+	The column: its width, the card behind it, and the picture inside it.
+
+	Three radii rather than one. The card is the hover target and wants to read as a card; the picture
+	is a screenshot and takes the radius a screenshot takes; they are nested, not siblings, so making
+	them agree would make the inner one look wrong against the outer.
+	*/
+	static let columnWidth = 260.0
+	static let cardRadius = 12.0
+	static let pictureRadius = 8.0
 
 	/**
 	The width of the website chooser, and of Quit, which is asked to match it.
 
-	Three quarters of the picture above it.
+	Three quarters of the picture above it — derived rather than written as 195, because it was prose
+	before and prose does not change when the column does.
 	*/
-	static let chooserWidth = 195.0
+	static let chooserWidth = columnWidth * 0.75
 
 	/**
 	The colour a control wears while what it turns on is on.
@@ -38,7 +59,27 @@ enum PanelMetrics {
 	the user picked for their Mac, and a wallpaper app lighting one of its buttons in it says "this is
 	selected" rather than "this is running". The icon's orange says the second.
 	*/
+	// swiftlint:disable:next hardcoded_ui_colour - This is the definition the rule redirects to.
 	static let onTint = Color(red: 234 / 255, green: 115 / 255, blue: 63 / 255)
+
+	/**
+	What goes on top of `onTint`.
+
+	Named because the tint was and this was not, so three call sites each decided separately that lit
+	means white — which is a property of the tint, not of the control.
+	*/
+	// swiftlint:disable:next hardcoded_ui_colour - This is the definition the rule redirects to.
+	static let onForeground = AnyShapeStyle(.white)
+
+	/**
+	What the pointer being over something looks like.
+
+	One answer, because there were three: the buttons used `.quaternary`, the column used a fixed
+	pale wash at fifteen percent that was invisible over a light popover, and the column's border used
+	the accent. The resting fills are deliberately not named alongside it — `.quinary` and `.clear`
+	never disagreed with each other, and a name that prevents nothing is a name to maintain.
+	*/
+	static let hoverFill = AnyShapeStyle(.quaternary)
 }
 
 struct PanelButton: View {
@@ -54,11 +95,11 @@ struct PanelButton: View {
 	var body: some View {
 		Button(action: action) {
 			Image(systemName: symbol)
-				.font(.system(size: 13, weight: .medium))
+				.font(PanelMetrics.font.weight(.medium))
 				.frame(width: 26, height: 22)
 				.foregroundStyle(foreground)
-				.background(background, in: RoundedRectangle(cornerRadius: 5))
-				.contentShape(RoundedRectangle(cornerRadius: 5))
+				.background(background, in: RoundedRectangle(cornerRadius: PanelMetrics.controlRadius))
+				.contentShape(RoundedRectangle(cornerRadius: PanelMetrics.controlRadius))
 		}
 		.buttonStyle(.plain)
 		.disabled(!isEnabled)
@@ -79,14 +120,14 @@ struct PanelButton: View {
 	}
 
 	private var foreground: some ShapeStyle {
-		isOn ? AnyShapeStyle(.white) : AnyShapeStyle(.primary)
+		isOn ? PanelMetrics.onForeground : AnyShapeStyle(.primary)
 	}
 
 	private var background: some ShapeStyle {
 		if isOn {
 			AnyShapeStyle(PanelMetrics.onTint)
 		} else if isHovering {
-			AnyShapeStyle(.quaternary)
+			PanelMetrics.hoverFill
 		} else {
 			AnyShapeStyle(.clear)
 		}
@@ -122,7 +163,7 @@ struct PanelIntervalField: View {
 				.multilineTextAlignment(.center)
 				.font(PanelMetrics.font)
 				.frame(width: 34, height: 22)
-				.background(.quinary, in: RoundedRectangle(cornerRadius: 5))
+				.background(.quinary, in: RoundedRectangle(cornerRadius: PanelMetrics.controlRadius))
 				.help(String(localized: "Minutes between websites"))
 				.accessibilityLabel(String(localized: "Minutes between websites"))
 
@@ -169,9 +210,9 @@ struct PanelWideButton: View {
 			}
 				.padding(.horizontal, PanelMetrics.horizontalPadding)
 				.frame(height: PanelMetrics.height)
-				.foregroundStyle(isOn ? AnyShapeStyle(.white) : AnyShapeStyle(.primary))
-				.background(background, in: RoundedRectangle(cornerRadius: PanelMetrics.cornerRadius))
-				.contentShape(RoundedRectangle(cornerRadius: PanelMetrics.cornerRadius))
+				.foregroundStyle(isOn ? PanelMetrics.onForeground : AnyShapeStyle(.primary))
+				.background(background, in: RoundedRectangle(cornerRadius: PanelMetrics.controlRadius))
+				.contentShape(RoundedRectangle(cornerRadius: PanelMetrics.controlRadius))
 		}
 		.buttonStyle(.plain)
 		.disabled(!isEnabled)
@@ -191,7 +232,7 @@ struct PanelWideButton: View {
 		if isOn {
 			AnyShapeStyle(PanelMetrics.onTint)
 		} else if isHovering {
-			AnyShapeStyle(.quaternary)
+			PanelMetrics.hoverFill
 		} else {
 			AnyShapeStyle(.quinary)
 		}

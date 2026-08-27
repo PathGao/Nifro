@@ -5,9 +5,7 @@ import SwiftUI
 /**
 Opens the panel under the menu bar icon.
 
-The old menu is still there on a right-click, and stays until the panel carries everything it does.
-Replacing it in one move would mean a build where the panel is the only way in and half the actions
-have nowhere to live.
+Either mouse button, and nothing else: the old right-click menu is gone, and `AppState` says why.
 */
 @MainActor
 final class DisplayPanelController {

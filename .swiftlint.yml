@@ -247,3 +247,37 @@ custom_rules:
   no_alignment_center:
     regex: '\b\(alignment: .center\b'
     message: 'This alignment is the default.'
+
+  # The three below guard the app's own drawn chrome. Each matches a SwiftUI or AppKit parameter
+  # label — nothing this repo named — so renaming `PanelMetrics`, `PanelButton` or anything else here
+  # cannot turn one red. `included:` is the three folders that draw; `Wallpaper`, `Support` and `App`
+  # are left out because none of them paints chrome.
+  #
+  # `Nifro/Zoom/CropSelectionView.swift` is exempt as a whole surface rather than line by line. It
+  # draws over an arbitrary web page: its black scrim, white outline and 22-point readout are
+  # contrast decisions against unknown content, which is the one place in the app where a colour that
+  # follows the theme is the wrong answer. Nine identical per-line reasons would say less than this
+  # one. The cost is that a genuinely shared value hardcoded in that file goes unnoticed.
+  #
+  # Everything else takes `// swiftlint:disable:next <rule>` with its reason above it.
+  # `superfluous_disable_command`, enabled above, turns each of those red once the line under it
+  # stops violating, so the allowlist expires on its own.
+  hardcoded_corner_radius:
+    included: 'Nifro/(Screens|Zoom|Visibility)/.*\.swift'
+    excluded: 'Nifro/Zoom/CropSelectionView\.swift'
+    regex: '(cornerRadius|xRadius|yRadius): *[0-9]'
+    message: 'Corner radii belong in PanelMetrics. Name it there, or disable this line with the reason it is not shared.'
+
+  hardcoded_font_size:
+    included: 'Nifro/(Screens|Zoom|Visibility)/.*\.swift'
+    excluded: 'Nifro/Zoom/CropSelectionView\.swift'
+    # `[1-9]`, not `[0-9]`: `NSFont.controlContentFont(ofSize: 0)` is AppKit's idiom for "the system
+    # default size", which is the opposite of a hardcoded size.
+    regex: '\.(system|systemFont|monospacedSystemFont|monospacedDigitSystemFont)\((of)?[Ss]ize: *[1-9]'
+    message: 'Point sizes belong in PanelMetrics.'
+
+  hardcoded_ui_colour:
+    included: 'Nifro/(Screens|Zoom|Visibility)/.*\.swift'
+    excluded: 'Nifro/Zoom/CropSelectionView\.swift'
+    regex: 'Color\(red:|(NS)?Color\.(white|black)\b|AnyShapeStyle\(\.white\)'
+    message: 'A literal colour follows neither the theme nor the user accent. Use PanelMetrics, or a semantic style.'
