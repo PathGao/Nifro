@@ -107,8 +107,6 @@ final class SSWebView: WKWebView {
 	}
 
 	func toggleBrowsingModeClass() {
-		// `plash-is-browsing-mode` stays alongside ours so the custom CSS people wrote for Plash keeps working.
-		//
 		// This page's own display, not any display: a page that styles itself for Browsing Mode should
 		// do it when *it* is the one being interacted with, not when the other screen is.
 		let method = AppState.shared.isBrowsingMode(on: scene?.display) ? "add" : "remove"
@@ -116,9 +114,7 @@ final class SSWebView: WKWebView {
 		// The async variant hands back `Any`, which cannot cross an actor boundary under Swift 6. Nothing here needs the result.
 		evaluateJavaScript(
 			"""
-			const list = document.documentElement.classList;
-			list.\(method)("nifro-is-browsing-mode");
-			list.\(method)("plash-is-browsing-mode");
+			document.documentElement.classList.\(method)("nifro-is-browsing-mode");
 			""",
 			in: nil,
 			in: .page,

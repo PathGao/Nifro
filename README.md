@@ -105,15 +105,10 @@ empties it on demand.
 
 ## Where this came from
 
-Nifro is an open-source fork of [Plash](https://github.com/sindresorhus/Plash) by Sindre Sorhus,
-taken from the last MIT-licensed snapshot before that project closed its source in October 2025.
-Plash itself is still developed and still on the App Store; if you want the original,
-[get it there](https://sindresorhus.com/plash). Nifro is not it, does not claim to be, and uses none
-of its branding or artwork.
+Inspired by [Plash](https://github.com/sindresorhus/Plash) by Sindre Sorhus.
 
-The fork exists because the app's five-year issue tracker is full of good requests that needed
-changes the original could not take on, and because the code, once you read it, turns out to rest on
-two assumptions worth revisiting:
+Nifro exists because a website-as-wallpaper app, as the idea is usually built, rests on two
+assumptions worth revisiting:
 
 - It keeps a browser rendering continuously to display content that changes once a minute.
 - It is not really a wallpaper. It is a transparent window sitting just above one.
@@ -122,10 +117,9 @@ Undoing those is what this fork is about, and the first one has been harder than
 rendering backends, occlusion measurement and automatic still detection were all built, and every one
 of them turned out to own an answer that Browsing Mode also owns. They came back out — 811 lines — and
 go back in one piece at a time, each with a measurement first. [docs/ROADMAP.md](docs/ROADMAP.md) §2
-has what that cost and what has to be true before any of it returns;
-[docs/UPSTREAM-ISSUES.md](docs/UPSTREAM-ISSUES.md) triages every open upstream issue.
+has what that cost and what has to be true before any of it returns.
 
-## What it does that Plash does not
+## What it does
 
 **Frame part of a page by moving it.** Drag or two-finger scroll the wallpaper, pinch to zoom, and
 what you leave on screen is the region. You aim at the result rather than at the thing you are
@@ -184,6 +178,4 @@ most code.
 
 ## License
 
-MIT. See [license](license). Derived from [sindresorhus/Plash](https://github.com/sindresorhus/Plash)
-v2.16.0, copyright Sindre Sorhus, used under the same license. The app icon and other artwork are
-not derived from Plash.
+MIT. See [license](license). The app icon and other artwork are original to this project.

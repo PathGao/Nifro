@@ -4,11 +4,11 @@ import WebKit
 /**
 Loads the next page out of sight and only shows it once it has arrived.
 
-Loading in place has three failure modes that upstream tracked as five separate issues, all of them the same mechanism:
+Loading in place has three failure modes, all of them the same mechanism:
 
-- the wallpaper goes white while the new page is on its way (Plash#21)
-- a load that fails leaves the desktop showing nothing, most visibly when the Mac wakes before the network does (Plash#41, Plash#11)
-- switching between images cuts rather than fades (Plash#47, Plash#9)
+- the wallpaper goes white while the new page is on its way
+- a load that fails leaves the desktop showing nothing, most visibly when the Mac wakes before the network does
+- switching between images cuts rather than fades
 
 Loading into a second web view fixes all three at once. The current page stays up, untouched, until the replacement has finished. A failure then changes nothing on screen. The old page stays, and the error goes to the menu bar tooltip instead of the desktop.
 

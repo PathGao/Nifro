@@ -3,7 +3,7 @@ import WebKit
 /**
 Loads a content-blocking rule list so pages stop showing cookie banners and ads on the desktop.
 
-Asked for upstream (Plash#37). This maintains no rules of its own. Blocklists go stale within weeks and keeping one working is a full-time job. It takes a URL to a list somebody else keeps and hands it to WebKit, which has done the actual blocking since macOS 10.13.
+This maintains no rules of its own. Blocklists go stale within weeks and keeping one working is a full-time job. It takes a URL to a list somebody else keeps and hands it to WebKit, which has done the actual blocking since macOS 10.13.
 
 The compiled list is cached by WebKit under a name derived from the source, so it is compiled once and reused across launches. A fetch that fails leaves the previous compiled list in place rather than dropping protection.
 */

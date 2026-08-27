@@ -4,8 +4,8 @@ description: A plain monospace clock on a transparent background, so the wallpap
 tags: [clock]
 backend: snapshot
 backendNote: >-
-  Minute resolution only. The URL sindresorhus shared included the `seconds` flag; it is dropped
-  here because a ticking seconds hand forces a live renderer for one glyph of information.
+  Minute resolution only. The site also takes a `seconds` flag; it is left off here because a
+  ticking seconds hand forces a live renderer for one glyph of information.
 source: >-
-  pablopunk in upstream discussion #136, with the colour/font query string as posted by
-  sindresorhus in the same thread. `seconds` removed deliberately (see backendNote).
+  The maintainer's own shortlist. The colour and font are set through the query string, and
+  `seconds` is left off deliberately (see backendNote).

@@ -44,7 +44,7 @@ extension Defaults.Keys {
 	// Defaults to what the app already did, so nobody's wallpaper changes on upgrade. There is no
 	// convention to follow here: macOS's own wallpaper stays with its display and goes away with it,
 	// AppKit moves a window off a departed screen rather than losing it, and this wallpaper is a
-	// window. Upstream has no answer either — Plash has no per-display websites at all.
+	// window.
 	static let keepWallpaperWhenDisplayUnplugged = Key<Bool>("keepWallpaperWhenDisplayUnplugged", default: true)
 	static let bringBrowsingModeToFront = Key<Bool>("bringBrowsingModeToFront", default: false)
 	static let openExternalLinksInBrowser = Key<Bool>("openExternalLinksInBrowser", default: false)

@@ -98,7 +98,7 @@
     "source": {
       "type": "string",
       "minLength": 1,
-      "description": "Where this entry came from. Credit the person and link the upstream discussion or issue if you adapted their CSS/JS."
+      "description": "Where this entry came from, and anything a reader needs in order to adapt it — which part of the URL to swap, why a flag is there, what goes stale."
     },
     "audio": {
       "type": "string",

@@ -7,5 +7,5 @@ audio: muted
 css: |
   header, footer, nav, .subscribe-banner { display: none !important; }
 source: >-
-  Picked for the ambient category rather than from the upstream threads. Pick a single camera from
+  Picked for the ambient category. Pick a single camera from
   the wall and use its own URL if you want one view instead of the grid.

@@ -1,14 +1,21 @@
 {
-	"ApplicationDescription": "Plash lets you set a website as your desktop wallpaper.",
-	"DeveloperName": "Sindre Sorhus",
-	"Website": "https://sindresorhus.com/plash",
+	"ApplicationDescription": "Nifro lets you set a website as your desktop wallpaper.",
+	"DeveloperName": "PathGao",
+	"Website": "https://github.com/PathGao/Nifro",
 	"Connections" : [
 		{
-			"Host" : "*.sentry.io",
+			"Host" : "api.github.com",
 			"NetworkProtocol" : "TCP",
 			"Port" : "443",
-			"Purpose" : "Plash sends crash reports to this server.",
-			"DenyConsequences" : "If you deny this connection, crash reports will not be sent and bugs might stay unfixed."
+			"Purpose" : "Nifro asks GitHub whether a newer release exists.",
+			"DenyConsequences" : "If you deny this connection, Nifro will not tell you when an update is available. Everything else keeps working."
+		},
+		{
+			"Host" : "raw.githubusercontent.com",
+			"NetworkProtocol" : "TCP",
+			"Port" : "443",
+			"Purpose" : "Nifro downloads the catalogue of ready-made websites shown in the Site Gallery.",
+			"DenyConsequences" : "If you deny this connection, the Site Gallery falls back to the list built into the app and will not pick up entries added since the release. Websites you add yourself are unaffected."
 		}
 	]
 }

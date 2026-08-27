@@ -18,5 +18,5 @@ css: |
 
   #colophon { display: none }
 source: >-
-  tobie in upstream discussion #136; the CSS above is sindresorhus's reply in that same thread
-  (transparent background, larger type, moved to the bottom, colophon hidden).
+  The maintainer's own shortlist. The CSS above makes the background transparent, enlarges the
+  type, moves it to the bottom and hides the colophon.

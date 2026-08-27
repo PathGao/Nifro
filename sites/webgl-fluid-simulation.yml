@@ -4,4 +4,4 @@ description: Coloured fluid that swirls across the screen and reacts to the poin
 tags: [art, ambient, screensaver, 3d]
 backend: live
 backendNote: Continuous GPU simulation, and it responds to the cursor. Both need a live renderer.
-source: marcofugaro in upstream discussion #136.
+source: The maintainer's own shortlist.

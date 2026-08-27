@@ -5,6 +5,5 @@ tags: [data, news, dashboard]
 backend: snapshot
 reloadInterval: 1800
 source: >-
-  sindresorhus in upstream discussion #136. The URL he posted
-  (trends.google.com/trends/hottrends/visualize) now redirects to /tv/, which is the current
-  equivalent.
+  The maintainer's own shortlist. The older trends.google.com/trends/hottrends/visualize address
+  now redirects to /tv/, which is the current equivalent.

@@ -3,7 +3,7 @@ import AppKit
 /**
 Rotating between the websites on a display, and letting a website say when it is allowed to be up.
 
-Two requests that turned out to be one mechanism (Plash#4). Rotation is the obvious half. The other, asked for in the same thread, is a schedule. A news page in the morning, something calmer at night. Both answer "which of this display's websites should be showing right now", so they share one answer instead of fighting over the same state.
+Two requests that turned out to be one mechanism. Rotation is the obvious half. The other is a schedule. A news page in the morning, something calmer at night. Both answer "which of this display's websites should be showing right now", so they share one answer instead of fighting over the same state.
 
 A website with no hours set is always eligible. If a schedule leaves a display with nothing eligible, that display ignores the schedule rather than going blank. An empty desktop is worse than the wrong page.
 */

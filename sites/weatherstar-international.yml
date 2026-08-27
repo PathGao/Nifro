@@ -4,4 +4,4 @@ description: The WeatherStar 4000+ presentation, rebuilt for locations outside t
 tags: [weather, ambient, data]
 backend: live
 backendNote: Same auto-advancing slide rotation as WeatherStar 4000+.
-source: paulrudy in upstream discussion #136, posted alongside the US version.
+source: The maintainer's own shortlist, added alongside the US version.

@@ -82,7 +82,7 @@ extension AppState {
 
 		SSEvents.deviceDidWake
 			.sink { [self] in
-				// Some pages hold state that a reload throws away, such as a signed-in dashboard mid-view, or a page that took a while to settle. Plash#127.
+				// Some pages hold state that a reload throws away, such as a signed-in dashboard mid-view, or a page that took a while to settle.
 				guard Defaults[.reloadOnWake] else {
 					return
 				}

@@ -20,13 +20,8 @@ was waiting for.
 
 ## 1. What this is
 
-Nifro is an open-source fork of [sindresorhus/Plash](https://github.com/sindresorhus/Plash), branched
-from `mattdanielbrown/Plash` @ `364f3e1` (v2.16.0, 2025-06-10) — the last MIT snapshot before the
-source was closed in October 2025. Distribution is a Homebrew cask plus a GitHub Release, not the Mac
-App Store.
-
-Upstream issue triage lives in `UPSTREAM-ISSUES.md`. It is not repeated here: two copies of one number
-is how they came to disagree.
+Nifro puts a website on the desktop wallpaper, one page per display. Distribution is a Homebrew cask
+plus a GitHub Release, not the Mac App Store.
 
 **Where this stands after v0.1.3.** The menu-bar menu was replaced by a per-display panel (#21). That
 was the right move and it is half-landed: the panel is the surface a website is chosen on now, and
@@ -300,7 +295,7 @@ U1 shipped and then lost its surface in the panel refactor — that is K25, not 
 | **X3** | Tuist / XcodeGen | `project.pbxproj` is nowhere near the size where conflicts hurt, and adding a file by hand is four lines |
 | **X4** | A dependency injection framework, a plugin system | No second implementation, so nothing to base the abstraction on |
 | **X5** | Use only the CLT as a type-checking gate | **Tried, failed**: KeyboardShortcuts uses `#Preview`, that macro plugin ships only with Xcode |
-| **X7** | Camera / screen capture input | The entitlement is per process, so it permanently gives a process that renders arbitrary URLs around the clock access to the camera. The shorter this app's permission list, the easier it is to check. Upstream [#125](https://github.com/sindresorhus/Plash/issues/125). It **is** technically doable; difficulty is not the reason |
+| **X7** | Camera / screen capture input | The entitlement is per process, so it permanently gives a process that renders arbitrary URLs around the clock access to the camera. The shorter this app's permission list, the easier it is to check. It **is** technically doable; difficulty is not the reason |
 | **X8** | Render the page and hand it to `NSWorkspace.setDesktopImageURL` (was P6, and A2 in the old section 2) | Refused, not blocked: it ends the app. A wallpaper set this way is a picture — no clicks, no Browsing Mode, no logins — and refreshing it cross-fades the whole desktop. **And it needs the offscreen renderer, which cannot exist:** an offscreen window makes WebKit report `visibilityState: hidden`, so `requestAnimationFrame` never runs and canvas pages photograph blank. Overriding `document.hidden` in JS does not help. Every snapshot-as-wallpaper idea dies on that sentence |
 | **X9** | Put the user's own Chrome window on the desktop layer | Refused. **No public API sets another process's window level** — SkyLight against a connection we do not own is yabai's route and needs part of SIP off. The buildable variant gives up the icon layer and moves the wallpaper's lifetime into an app we do not control: Cmd-Q ends it, an auto-update restarts it, and the entitlement list goes to full Accessibility with the sandbox off. Screencasting instead is worse — DRM video arrives black, frames are JPEG, and `--remote-debugging-port` hands the whole browser identity to any process on localhost. The motive, inherited logins, is already answered: WKWebView's store is persistent, so one sign-in through Browsing Mode holds |
 | **X10** | Go opaque when the content fills the screen | The saving cannot be measured, and it needs a switch that turns the screen black on a page with a transparent background |

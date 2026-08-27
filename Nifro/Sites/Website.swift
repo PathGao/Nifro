@@ -29,7 +29,7 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	resolves through `Display.main` on every read, so it follows the menu bar when displays are
 	rearranged or the laptop is docked, rather than naming a screen once.
 
-	The most-asked-for thing upstream was a different page on each screen, a calendar on one and a dashboard on the other (Plash#2, 47 reactions). That needs the display to be a property of the website rather than one app-wide setting.
+	The most-asked-for thing has always been a different page on each screen, a calendar on one and a dashboard on the other. That needs the display to be a property of the website rather than one app-wide setting.
 	*/
 	var display: Display?
 
@@ -52,7 +52,7 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	/**
 	Whether this website can be clicked without turning on Browsing Mode.
 
-	Asked for repeatedly upstream (Plash#50 over ten comments, Plash#16). Off by default and per website, because it costs something. A window that accepts clicks puts your desktop icons behind it, and it keeps the page awake. A page tracking the pointer cannot be frozen or drawn from stills.
+	Asked for repeatedly. Off by default and per website, because it costs something. A window that accepts clicks puts your desktop icons behind it, and it keeps the page awake. A page tracking the pointer cannot be frozen or drawn from stills.
 	*/
 	@DecodableDefault.False var allowsInteraction
 

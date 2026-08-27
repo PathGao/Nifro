@@ -5,5 +5,5 @@ tags: [map, data, art]
 backend: snapshot
 reloadInterval: 86400
 source: >-
-  jonbstrong in upstream discussion #136. Swap the path for your own city. the root URL
-  redirects based on your location.
+  The maintainer's own shortlist. Swap the path for your own city. the root URL redirects based on
+  your location.

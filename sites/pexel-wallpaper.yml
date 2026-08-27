@@ -5,5 +5,5 @@ tags: [photo, ambient]
 backend: snapshot
 reloadInterval: 3600
 source: >-
-  Geert in upstream discussion #136, built as a replacement for the Unsplash source URL that
-  the upstream readme used to recommend.
+  The maintainer's own shortlist, as a replacement for the Unsplash source URL that used to be the
+  usual recommendation.

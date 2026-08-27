@@ -92,9 +92,6 @@ Nifro/
 └── Support/      geometry, scheduling, rotation, URL commands and shared extensions
 ```
 
-`Support/` is mostly inherited from Plash and shared across the author's apps. Changing it makes
-future comparison with upstream harder, so prefer adding beside it over editing inside it.
-
 Adding a file means adding it to the Xcode project as well. The project uses old-style file
 references, so a file has to appear in four places in `project.pbxproj`. Xcode does this for you;
 adding the file on disk alone compiles nothing and reports no error.

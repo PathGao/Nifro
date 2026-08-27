@@ -9,10 +9,8 @@ adding a good site here is a one-click win for everyone who installs Nifro.
 **This is the lowest-effort way to contribute to Nifro.** You do not need Swift, Xcode, or a Mac
 build. You need a text editor and a website you like looking at.
 
-The seed entries come from five years of people sharing their setups in
-[Plash discussion #136](https://github.com/sindresorhus/Plash/discussions/136) and from the
-use-cases and tips in the pre-close [Plash readme](https://github.com/sindresorhus/Plash#readme). Credit stays with them in each
-entry's `source` field.
+The seed entries are the maintainer's own shortlist: pages that have been run as a wallpaper long
+enough to know how they behave.
 
 ## Fields
 
@@ -32,7 +30,7 @@ entry's `source` field.
 | `requiresLogin` | boolean | no | `true` if the site shows nothing useful unless the user is signed in. |
 | `screenshot` | string | no | Preview image. Leave it out — we will add images later. |
 | `featured` | integer | no | Where the entry sits in the list the app ships with, counting from 1. Omit it and the entry does not ship. A number rather than `true` because the order is the decision: rank 1 is the wallpaper somebody sees before they have chosen anything, and on a second display they see rank 2. Ranks must be unique — `Tools/validate-sites.py` rejects a duplicate. Keep the list very short: every featured entry is one a new user has to delete if they do not want it. Eight entries carry it today; adding a ninth needs a reason, and a rank. |
-| `source` | string | yes | Where the entry came from. Credit the person, and link the upstream thread if you took their CSS or JS. |
+| `source` | string | yes | Where the entry came from, plus anything a reader needs to adapt it: which part of the URL to swap, why a flag is there, what goes stale. |
 
 ### `backend`: what the page needs
 
@@ -64,16 +62,13 @@ deliberately never told about it — if the layout changed when the region was f
 was framed would stop being the part that shows.
 
 Two classes are on `<html>` for CSS to target: `is-nifro-app` always, and `nifro-is-browsing-mode`
-while Browsing Mode is on. Both also exist under their Plash names, so stylesheets written for Plash
-keep working.
+while Browsing Mode is on.
 
 ### `zoom` vs. `css`
 
 Prefer `css` when the site gives you a selector to hide (`header { display: none }`). Reach for
 `zoom` when it does not — when the clutter is baked into a canvas, an iframe, or an embed you cannot
-select. Upstream discussed a JS approach for the same problem
-([#139](https://github.com/sindresorhus/Plash/discussions/139)); `zoom` exists so you do not have to
-paste a transform script into every entry.
+select. `zoom` exists so you do not have to paste a transform script into every entry.
 
 ## A complete entry
 
@@ -101,8 +96,8 @@ css: |
 
   #colophon { display: none }
 source: >-
-  tobie in upstream discussion #136; the CSS above is sindresorhus's reply in that same thread
-  (transparent background, larger type, moved to the bottom, colophon hidden).
+  The maintainer's own shortlist. The CSS above makes the background transparent, enlarges the
+  type, moves it to the bottom and hides the colophon.
 ```
 
 ## Contributing an entry

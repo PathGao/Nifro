@@ -34,7 +34,9 @@ final class WebViewController: NSViewController {
 		configuration.mediaTypesRequiringUserActionForPlayback = []
 		configuration.applicationNameForUserAgent = "\(SSApp.name)/\(SSApp.version)"
 
-		// TODO: Enable this again when https://github.com/sindresorhus/Plash/issues/9 is fixed.
+		// TODO: Enable this again once the first load of a session stops showing a block of grey while
+		// it waits. Suppressing incremental rendering makes that wait longer and more visible, and the
+		// first load is the one path with nothing already on screen to protect it.
 //		configuration.suppressesIncrementalRendering = true
 
 		let userContentController = WKUserContentController()
@@ -72,7 +74,7 @@ final class WebViewController: NSViewController {
 		webView.customUserAgent = SSWebView.safariUserAgent
 		webView.drawsBackground = false
 
-		userContentController.addJavaScript("document.documentElement.classList.add('is-nifro-app', 'is-plash-app')")
+		userContentController.addJavaScript("document.documentElement.classList.add('is-nifro-app')")
 		userContentController.installAudioControl()
 
 		// This scene's website, not the list-wide current one. Everything below is baked into the web
@@ -191,7 +193,7 @@ extension WebViewController: WKNavigationDelegate {
 			return .cancel
 		}
 
-		// Holding Command or Option sends a link to the default browser whatever the settings say. That matches other Mac apps with an embedded web view, and it is the only way to open a same-site link externally without changing a setting first. Plash#140.
+		// Holding Command or Option sends a link to the default browser whatever the settings say. That matches other Mac apps with an embedded web view, and it is the only way to open a same-site link externally without changing a setting first.
 		if
 			navigationAction.navigationType == .linkActivated,
 			!NSEvent.modifiers.isDisjoint(with: [.command, .option]),

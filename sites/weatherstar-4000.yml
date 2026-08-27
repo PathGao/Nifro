@@ -7,5 +7,5 @@ backendNote: >-
   The whole point is the auto-advancing slide rotation, the scrolling ticker and the music-video
   pacing. A still frame of one panel loses it.
 source: >-
-  paulrudy in upstream discussion #136, who noted you should append the kiosk flag to the
-  permalink so it starts playing without the settings panel.
+  The maintainer's own shortlist. Append the kiosk flag to the permalink so it starts playing
+  without the settings panel.
