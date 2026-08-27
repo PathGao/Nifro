@@ -115,7 +115,9 @@ struct PanelWideButton: View {
 				Text(title)
 					.font(PanelMetrics.font)
 					.lineLimit(1)
+					// Centred when the button is given a width, and hugging when it is not.
 					.frame(maxWidth: .infinity)
+					.fixedSize(horizontal: false, vertical: true)
 			}
 				.padding(.horizontal, PanelMetrics.horizontalPadding)
 				.frame(height: PanelMetrics.height)

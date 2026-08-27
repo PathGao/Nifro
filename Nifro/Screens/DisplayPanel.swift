@@ -77,9 +77,7 @@ private struct PanelFooter: View {
 			PanelWideButton(title: String(localized: "Quit Nifro"), symbol: "power") {
 				SSApp.quit()
 			}
-			// The same width as a column's chooser. Left to hug its words it would be the smallest
-			// control in the panel, and it is the only one that cannot be undone.
-			.frame(width: PanelMetrics.chooserWidth)
+			.fixedSize()
 		}
 	}
 }
@@ -329,13 +327,15 @@ private struct DisplayColumn: View {
 					.font(PanelMetrics.font)
 					.frame(maxWidth: .infinity)
 			}
-			// Three quarters of the picture above it, fixed. The chooser is not the widest thing in the
-			// column and should not look like it: the picture is what the column is about.
-			.frame(width: PanelMetrics.chooserWidth - PanelMetrics.horizontalPadding * 2)
+			.frame(maxWidth: .infinity)
 			.frame(height: PanelMetrics.height)
 		}
 		.menuStyle(.borderlessButton)
 		.menuIndicator(.hidden)
+		// Width, then padding, then background, in that order. `borderlessButton` sizes a menu to its
+		// label, so the width has to be forced from outside the label — and the background has to come
+		// after it, or it paints the pill at the label's size and the frame merely centres that.
+		.frame(width: PanelMetrics.chooserWidth - PanelMetrics.horizontalPadding * 2)
 		.padding(.horizontal, PanelMetrics.horizontalPadding)
 		.background(.quinary, in: RoundedRectangle(cornerRadius: PanelMetrics.cornerRadius))
 		.disabled(column.choices.isEmpty)
