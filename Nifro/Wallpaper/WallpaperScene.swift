@@ -480,6 +480,14 @@ final class WallpaperScene {
 				self?.reload()
 			}
 		}
+
+		// A tenth of the interval, the same argument `resetPlaylistTimer` makes beside its own timer:
+		// zero tolerance means macOS may not coalesce this with anything, and this one also runs for
+		// the life of the app on every display. Proportional rather than a fixed number of seconds
+		// because this interval is the user's, from one second to whatever they typed, and a tenth is
+		// the floor Apple's guidance suggests. Nobody can see a wallpaper reload arrive late by a tenth
+		// of the gap between reloads.
+		reloadTimer?.tolerance = reloadInterval / 10
 	}
 
 	// MARK: - Appearance

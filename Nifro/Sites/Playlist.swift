@@ -259,6 +259,17 @@ extension WallpaperScene {
 				self.advancePlaylist(rotating: rotates)
 			}
 		}
+
+		// Fifteen seconds of slack, so macOS is allowed to fire this alongside a wakeup it was making
+		// anyway. Left at the default of zero, a repeating timer is a wakeup of its own every time, and
+		// this one repeats for the life of the app on every display — which is the case Apple's energy
+		// guidance names for `tolerance` in the first place.
+		//
+		// It promises nothing this tick was making. The tick is a minute standing in for a schedule
+		// measured in hours, per the argument above. And a repeating timer works its next fire date out
+		// from the original one rather than from when it actually fired, so slack cannot accumulate: a
+		// display told to rotate every thirty minutes still rotates on the thirtieth tick.
+		playlistTimer?.tolerance = 15
 	}
 
 	/**
