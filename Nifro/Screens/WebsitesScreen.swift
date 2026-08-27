@@ -151,6 +151,7 @@ private struct ClearWebsiteDataButton: View {
 	}
 
 	@State private var progress = Progress.ready
+	@State private var isConfirming = false
 
 	var body: some View {
 		HStack(spacing: 8) {
@@ -159,7 +160,7 @@ private struct ClearWebsiteDataButton: View {
 			// colour. Full size too: it was small because it used to sit in a section footer, among
 			// footnote text, and there is no footnote text here.
 			Button("Clear all website data") {
-				clear()
+				isConfirming = true
 			}
 			.disabled(progress == .clearing)
 
@@ -178,6 +179,26 @@ private struct ClearWebsiteDataButton: View {
 			}
 		}
 		.help("Clears cookies, local storage, caches, page thumbnails, and what each page had remembered: where it was scrolled or moved to, and how far it was zoomed in. Your websites and their settings are kept.")
+		// The cookies are why. Everything else this throws away comes back on the next load, but a
+		// cookie is a login, and signing out of every website at once is not something to discover
+		// afterwards from a number of megabytes. It asks here rather than relying on the distance from
+		// "Add Website": that distance stops a slip, and this is for the press that was aimed.
+		//
+		// Named in the button rather than "OK", and `role: .destructive` here where the button itself
+		// declines it — a dialog is where a colour means something, since there is nothing else in it
+		// to be the odd coloured control.
+		.confirmationDialog(
+			String(localized: "Clear all website data?"),
+			isPresented: $isConfirming
+		) {
+			Button(String(localized: "Clear Data"), role: .destructive) {
+				clear()
+			}
+
+			Button(String(localized: "Cancel"), role: .cancel) {}
+		} message: {
+			Text("Every website you are signed in to will be signed out. Your websites and their settings are kept.")
+		}
 	}
 
 	private func clear() {

@@ -389,12 +389,32 @@
         }
       }
     },
+    "Clear Data": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除数据"
+          }
+        }
+      }
+    },
     "Clear all website data": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "清除所有网站数据"
+          }
+        }
+      }
+    },
+    "Clear all website data?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "要清除所有网站数据吗？"
           }
         }
       }
@@ -685,6 +705,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "出错：%@"
+          }
+        }
+      }
+    },
+    "Every website you are signed in to will be signed out. Your websites and their settings are kept.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "所有已登录的网站都会被登出。你的网站和它们的设置会保留。"
           }
         }
       }
