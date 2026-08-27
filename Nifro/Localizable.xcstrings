@@ -49,6 +49,16 @@
         }
       }
     },
+    "A page that needs a resolution can take “[[screenWidth]]” and “[[screenHeight]]” in the address, which Nifro replaces with the wallpaper's size on that display.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要分辨率的页面可以在地址里写「[[screenWidth]]」和「[[screenHeight]]」，Nifro 会把它们替换成壁纸在那块屏幕上的尺寸。"
+          }
+        }
+      }
+    },
     "A page that reloads on a timer starts over; this puts back where it was scrolled or moved to.": {
       "localizations": {
         "zh-Hans": {
