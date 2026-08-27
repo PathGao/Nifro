@@ -1923,19 +1923,6 @@ extension View {
 	}
 }
 
-// MARK: - WKPreferences
-extension WKPreferences {
-	// https://github.com/feedback-assistant/reports/issues/80
-	var isDeveloperExtrasEnabled: Bool {
-		get {
-			value(forKey: "developerExtrasEnabled") as? Bool ?? false
-		}
-		set {
-			setValue(newValue, forKey: "developerExtrasEnabled")
-		}
-	}
-}
-
 // MARK: - WKUserContentController
 extension WKUserContentController {
 	/**

@@ -63,7 +63,6 @@ final class WebViewController: NSViewController {
 
 		let preferences = WKPreferences()
 		preferences.javaScriptCanOpenWindowsAutomatically = false
-		preferences.isDeveloperExtrasEnabled = true
 		// A wallpaper is already the size of the screen, so a page's fullscreen button has nothing to
 		// offer, and taking it breaks the wallpaper: WebKit moves the web view into a window of its
 		// own, while the visibility policy carries on reinstalling the content view every couple of
@@ -91,6 +90,9 @@ final class WebViewController: NSViewController {
 		webView.allowsMagnification = true
 		webView.customUserAgent = SSWebView.safariUserAgent
 		webView.drawsBackground = false
+		// A wallpaper has no window to open the inspector from, so attaching Safari's Develop menu to it
+		// is the only way to see what a page is doing.
+		webView.isInspectable = true
 
 		userContentController.addJavaScript("document.documentElement.classList.add('is-nifro-app')")
 		userContentController.installAudioControl()
