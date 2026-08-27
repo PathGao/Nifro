@@ -1,5 +1,5 @@
 import AppKit
-import CoreImage
+import CoreImage.CIFilterBuiltins
 import WebKit
 
 /**
@@ -173,6 +173,13 @@ extension WallpaperScene {
 		let webView = webViewController.webView
 		let configuration = WKSnapshotConfiguration()
 
+		// No `snapshotWidth`, unlike `WallpaperScene.snapshot()` next door, and that is measured rather
+		// than an oversight. WebKit keeps the rectangle's aspect ratio, and this rectangle is a strip:
+		// 1470 by 33 points is 44:1, so a width small enough to be worth asking for rounds the height
+		// to nothing. Asking for 8 produced an image 0 pixels high, and the average came out of the
+		// full-size pixels anyway — the cheap-looking snapshot was a snapshot that had not been scaled
+		// at all. The panel's thumbnail is 260 points of a whole screen and has no such shape.
+		//
 		// Clipped rather than trusted. The rectangle is worked out from the size the page was laid out
 		// at, and a display change moves that before the view holding the page has been rebuilt for it.
 		configuration.rect = topStripOfWallpaper(height: screen.statusBarThickness).intersection(webView.bounds)
@@ -235,17 +242,31 @@ extension NSImage {
 
 	/**
 	The average colour of the whole image, or `nil` if it cannot be read.
+
+	The pixels are asked for, not re-encoded. This used to go out through `tiffRepresentation` and
+	back in through `CIImage(data:)`, which is a full TIFF written and parsed to hand Core Image
+	something it can already be handed directly. Measured on the strip this samples — 1470 points
+	wide on a 2× display, so 2940×66 pixels: the round trip allocated 779,614 bytes and cost 0.44ms,
+	`cgImage(forProposedRect:context:hints:)` costs 0.004ms and allocates nothing, and both produce
+	the same colour to the bit. End to end the sample went from 0.83ms to 0.52ms.
+
+	`CIFilter.areaAverage()` rather than the filter's name in a string, so a typo in the name or in a
+	parameter key is a build failure instead of a band that silently never changes colour: the string
+	form returns an optional filter and takes `Any` values, and neither is checked until it runs.
 	*/
 	fileprivate var averageColor: NSColor? {
-		guard
-			let tiff = tiffRepresentation,
-			let input = CIImage(data: tiff),
-			let filter = CIFilter(name: "CIAreaAverage", parameters: [
-				kCIInputImageKey: input,
-				kCIInputExtentKey: CIVector(cgRect: input.extent)
-			]),
-			let output = filter.outputImage
-		else {
+		var proposed = CGRect(origin: .zero, size: size)
+
+		guard let cgImage = cgImage(forProposedRect: &proposed, context: nil, hints: nil) else {
+			return nil
+		}
+
+		let input = CIImage(cgImage: cgImage)
+		let filter = CIFilter.areaAverage()
+		filter.inputImage = input
+		filter.extent = input.extent
+
+		guard let output = filter.outputImage else {
 			return nil
 		}
 
