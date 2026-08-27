@@ -199,11 +199,6 @@ final class WebsitesController {
 	}
 
 	/**
-	Every display that has at least one website assigned to it.
-
-	Falls back to the display chosen in Settings so there is always exactly one scene to show, even before anything is configured.
-	*/
-	/**
 	The websites that should be on screen right now, before any question of which display.
 
 	Both of the places that route by display start here, so a wallpaper the user has said should go
@@ -212,6 +207,12 @@ final class WebsitesController {
 	@MainActor
 	var showable: [Website] { all.filter(\.isShowable) }
 
+	/**
+	Every display that has at least one website assigned to it.
+
+	Falls back to the main display — the one with the menu bar — so there is always exactly one scene
+	to show, even before anything is configured.
+	*/
 	var displaysInUse: [Display?] {
 		var seen: [Display?] = []
 

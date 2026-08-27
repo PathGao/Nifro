@@ -71,13 +71,10 @@ final class AppState: ObservableObject {
 	}
 
 	/**
-	The scene the menu and the settings act on when nothing says otherwise.
-	*/
-	/**
 	The scene a keyboard shortcut acts on: the one the pointer is over.
 
 	A shortcut is pressed by somebody looking at a screen, and until now every one of them went to the
-	display named in Settings instead — so on two displays, pressing Next in front of the monitor
+	main display instead — the one with the menu bar, whichever screen that currently is — so on two displays, pressing Next in front of the monitor
 	changed the laptop.
 
 	Falls back to `primaryScene` when the pointer is not over a wallpaper: it is over a window, over a
@@ -103,6 +100,13 @@ final class AppState: ObservableObject {
 		return match ?? primaryScene
 	}
 
+	/**
+	The scene an action acts on when nothing says which display it means.
+
+	The main display's — the one with the menu bar. Not a display named in Settings: there is no such
+	setting. Automations reach this through `Action.Source.automation`; a keyboard shortcut goes to
+	`actingScene` instead, because a shortcut has a pointer behind it.
+	*/
 	var primaryScene: WallpaperScene {
 		if let match = scenes.first(where: { $0.display == .main }) {
 			return match
@@ -116,12 +120,14 @@ final class AppState: ObservableObject {
 	}
 
 	/**
-	The website the menu, the keyboard shortcuts, the URL commands and the Shortcuts actions act on.
+	The website a Shortcuts query means by "the current website".
 
-	The primary scene's, because a menu item has to mean one website and that is the screen Settings
-	points at. Every other display is reached through its own scene. There is deliberately no
-	list-wide answer to this any more: one existed, every one of those entry points used it, and on
-	two displays it meant they all silently acted on whichever screen happened to hold the mark.
+	The primary scene's — the main display's, the one with the menu bar. Not "the screen Settings
+	points at": there is no display setting, and `Display.main` moves when the user rearranges their
+	displays or docks. `Intents.swift` is the only reader; every other entry point goes through a
+	scene of its own, and a keyboard shortcut goes to `actingScene`. There is deliberately no
+	list-wide answer to this any more: one existed, every entry point used it, and on two displays it
+	meant they all silently acted on whichever screen happened to hold the mark.
 	*/
 	var currentWebsite: Website? { primaryScene.website }
 

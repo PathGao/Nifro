@@ -65,7 +65,7 @@ enum Action: String, CaseIterable {
 	A shortcut is pressed by somebody looking at a screen. A Shortcuts automation or a `nifro://` URL
 	may fire from a cron job, a Focus change or a script with nobody at the machine at all, and
 	"whichever display the mouse happens to be over" is then a coin toss. Those keep acting on the
-	display named in Settings.
+	main display, the one with the menu bar.
 	*/
 	enum Source {
 		case pointer

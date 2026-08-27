@@ -110,25 +110,17 @@ extension WebsitesController {
 
 extension WallpaperScene {
 	/**
-	Start, restart or stop this scene's rotation to match the current settings.
-	*/
-	/**
 	Whether this display should be the one making the noise.
 
-	The website's own setting, and then one rule on top of it: in a sync group only the leader is
-	audible. The others are showing the same video a fraction of a second apart, and two copies of the
-	same soundtrack that close together is not stereo — it is an echo, and it is worse than either one
-	alone. Supermarket walls of televisions do the same thing: many pictures, one sound.
+	The website's own setting and nothing else. Sound is per display because a website is per display:
+	a display with no website on it has nothing to play, and every other display answers for itself.
 
-	The stored setting is not touched, so a display leaving a group gets its own sound back.
+	There used to be a second rule on top — in a sync group only the leader was audible, because two
+	copies of one soundtrack a fraction of a second apart is an echo rather than stereo. That rule
+	went with sync groups; `docs/shelved/MULTI-DISPLAY-SYNC.md` keeps it, because a rebuild needs it.
 	*/
 	var shouldPlaySound: Bool {
-		guard website?.audio == .unmuted else {
-			return false
-		}
-
-		// A follower is silent; a leader, and a display in no group at all, is not.
-		return SyncGroup.leader(of: display) == nil
+		website?.audio == .unmuted
 	}
 
 	/**

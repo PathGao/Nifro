@@ -115,7 +115,8 @@ arrival to prefer — two marks that both predate the change, which is a stored 
 wrong rather than a move — the first in list order wins, because that is the one `scheduled(for:)` was
 already showing, so repairing an old mess does not change anybody's wallpaper.
 
-`Screen` is `Display?` in the app, where `nil` means the display named in Settings. That is a display
+`Screen` is `Display?` in the app, where `nil` means the main display — the one with the menu bar,
+and not a display named in any setting. That is a display
 like any other here, which is why this keys on the value rather than skipping the ones without one.
 */
 func repairedCurrentFlags<Screen: Hashable>(
