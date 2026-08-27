@@ -67,8 +67,10 @@ Upstream issue triage   35 issues, compressing into 8 mechanisms
                         The counts live in UPSTREAM-ISSUES.md, not here, because two copies
                         of one number is how they came to disagree
 Blocked                 nothing
-Open bugs               K1, K3, K5-K15. K9-K15 were found by reading this document against
-                        the code rather than by using the app; none had been noticed in use
+Open bugs               K1, K3, K5-K14, K16-K19. K9-K14 were found by reading this document
+                        against the code rather than by using the app; none had been noticed in
+                        use. K16-K19 came the other way round — from the panel being used on two
+                        displays for an afternoon
 ```
 
 **A note on how the last seven were found, because it changes what this document is for.** Every
@@ -365,6 +367,35 @@ to the app.
 
 ---
 
+## 5.8 Media controls for the panel (the V series)
+
+The panel already knows where a video is — it reads `currentTime` and `duration` out of the page, and
+writes them back, to keep synced displays in step. Everything a transport needs is therefore already
+in hand; what is missing is only the controls and the decision about which pages get them.
+
+| | The item | What is known |
+|---|---|---|
+| **V1** | Pause, play, and step back or forward on the column | The clock already reports `duration`, so a page either has a video or it does not, and the controls can simply not appear when it does not. `MediaSync` already writes `currentTime`, so stepping is the same call it makes to correct drift |
+| **V2** | A progress bar under the picture | The same reading drives it. It has to update while the panel is open and stop when it closes — the panel is transient and a timer that outlives it is a timer nobody switched off |
+| **V3** | What a control means in a sync group | Pausing one display of a synced pair is a contradiction: the follower is corrected towards the leader every five seconds and would be dragged back into playing. A control pressed on any member has to act on the group, which makes the group the unit a transport acts on rather than the display |
+| **V4** | Live streams have no transport | `currentTime` on a live stream is relative to a sliding window, seeking is often refused, and "back thirty seconds" may not exist. The controls have to be absent rather than present and broken, and the test for it is not the same as "has a video" |
+
+| **V5** | Save the picture a column is showing | A button on the column writes the current frame to the Desktop, and a press held past a second writes a short GIF instead. **At the display's own resolution, not the panel's.** The panel takes its snapshots at 260 points because that is all it draws — a saved frame taken the same way would be a thumbnail, so this needs a second snapshot at full size, taken only when asked. The two paths must not be confused: the cheap one runs several times a second while the panel is open, the expensive one runs once and cost about 600ms a frame when it was the default |
+
+Two things these need that do not exist yet.
+
+The clock reports the leader's position on a five second tick, which is right for correcting drift and
+far too slow for a progress bar. A transport wants its own faster read while the panel is open, and
+only while it is open.
+
+And a GIF needs frames held rather than shown. The panel's snapshots are deliberately transient — each
+refresh replaces the last and the previous images are released, which is why forty-five seconds of
+continuous refreshing moves the app's memory by less than it fluctuates on its own. Recording has to
+keep them, at full resolution, for as long as the press lasts: a second of a 4K display is tens of
+megabytes, so it wants a frame budget and a hard stop rather than "until the user lets go".
+
+---
+
 ## 6. Known and not yet fixed (the K series)
 
 Reported while using the app, reproduced, and left alone for now. Each is written down rather than
@@ -386,7 +417,11 @@ fixed so that the first release is a thing that exists.
 | **K12** | Unplugging a display mid-crop pins a wallpaper window above everything, permanently | See D3. `finishCropSelection` resolves the scene through `croppingSceneDisplay` with a `?? primaryScene` fallback, so the restore lands on the wrong scene and the framed one keeps `.floating` and `alphaValue = 1`. The only path in the app that can do this |
 | **K13** | An unplugged display's wallpaper does not go away, it stacks onto the built-in one | See D5. Two full-screen windows on one screen, two sets of timers, two menu-bar bands competing for one menu bar |
 | **K14** | A display plugged in while running gets a scene that never loads a page | See D5. `rebuildScenes` assigns the website, installs the content view and resets the playlist timer, but calls neither `loadWebsite()` nor `reload()`; the web view is born hidden and only a load reveals it. It also skips `resetTimer()`, so the new scene has no reload timer. Only fires when some website names that display explicitly |
-| **K15** | "Show on every Space" never reaches a scene built after launch | See D5/D8. `.canJoinAllSpaces` is added only by the settings subscription, over the scenes alive when it fires |
+| ~~K15~~ | ~~"Show on every Space" never reaches a scene built after launch~~ | **Gone with the setting.** It was off by default, which made it a wallpaper that disappeared when you switched Mission Control desktop — not a preference. `.canJoinAllSpaces` is now set in `DesktopWindow.init`, so a scene built later gets it like every other one. **Not yet checked on a real machine:** switching desktop with the app running is the one-line verification nobody has done |
+| **K16** | Syncing a display eats the website that was on it, and leaves a duplicate behind every time | `mirrorAcrossSyncGroup` overwrites the follower's existing entry in place — `update(existing.id) { $0 = copy }` — so the page that display was showing is gone, not set aside, and there is no way back to it. When the follower has no entry it appends a new one instead, and nothing ever removes those, so a list picks up a copy of the leader's website per display per group. Measured on the maintainer's own list: eight entries, six of them copies of two websites, and two originals (Calculating Empires, WindowSwap) overwritten and unrecoverable. Both halves are one decision — a mirrored entry is a *view* of the leader's, not a website in its own right, and it should not be in the list at all |
+| **K17** | The website chooser on a display lists only that display's own websites, which is usually one | `DisplayPanelModel.refresh` builds `choices` as `all.filter { $0.effectiveDisplay == scene.display }`, so a website reaches the menu only once it already belongs to that display — and the way a website gets a display is by being chosen there. A display with one website has a one-item menu, which reads as "the chooser does not work". What the control is for is picking any website *and* moving it here, so the list wants to be every website, with the ones already here marked |
+| **K18** | The correction can make the picture stutter | Every change of `playbackRate` costs a visible hitch on WebKit (bug 208142; dash.js refuses rate changes under 0.25 on Safari for this reason). The hysteresis around `engage`/`release` is there to make one correction cost two changes rather than one per pass, but nothing has measured how often a correction episode actually starts on a real stream over an hour — a page that stalls every few seconds would be changing rate every few seconds. Needs a count of rate changes per minute before any tuning, and if it is high the answer is a wider `engage`, not a smaller `nudge` |
+| **K19** | A new install opens with nothing on screen | There is no initial configuration, so the first thing a new user sees is a wallpaper that is not there. It should ship with websites already in the list, muted, in this order: **floor796**, **Svalbard**, **Calculating Empires** — with floor796 up on a single display, and Svalbard added on the second when there are two. Muted because a wallpaper that makes a sound the moment it is installed is a wallpaper that gets uninstalled. All three are already in `sites/index.json` and all three already carry `audio: muted`, so this is a first-run step that reads the catalogue, not new entries |
 
 ---
 

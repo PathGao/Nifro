@@ -46,9 +46,7 @@ private struct GeneralSettings: View {
 				OpacitySetting()
 			}
 			Section {
-				DisplaySetting()
 				KeepWallpaperWhenDisplayUnpluggedSetting()
-				ShowOnAllSpacesSetting()
 			}
 		}
 	}
@@ -178,8 +176,16 @@ private struct LanguageSetting: View {
 private struct ShortcutsSettings: View {
 	var body: some View {
 		Form {
-			ForEach(Shortcut.allCases, id: \.self) {
-				KeyboardShortcuts.Recorder($0.title, name: $0.name)
+			Section {
+				ForEach(Shortcut.allCases, id: \.self) {
+					KeyboardShortcuts.Recorder($0.title, name: $0.name)
+				}
+			} footer: {
+				// Worth saying once, here, because it is invisible on one display and surprising on two:
+				// a shortcut is pressed by somebody looking at a screen, and this is how it knows which.
+				Text("These act on the display your pointer is on. Automations and nifro:// commands act on the main display, since they can run with nobody at the Mac.")
+					.font(.callout)
+					.foregroundStyle(.secondary)
 			}
 		}
 	}
@@ -280,15 +286,6 @@ private struct DimWhenUnfocusedSetting: View {
 	}
 }
 
-private struct ShowOnAllSpacesSetting: View {
-	var body: some View {
-		Defaults.Toggle(key: .showOnAllSpaces) {
-			Text("Show on every Space")
-				.explained(String(localized: "Spaces are the desktops you switch between in Mission Control, not your displays. Off means the wallpaper stays on whichever Space was in front when Nifro started. Which display a website goes on is set on the website itself, not here."))
-  }
-	}
-}
-
 private struct KeepWallpaperWhenDisplayUnpluggedSetting: View {
 	var body: some View {
 		Defaults.Toggle(key: .keepWallpaperWhenDisplayUnplugged) {
@@ -369,35 +366,6 @@ private struct HideMenuBarIconSetting: View {
 				String(localized: "If you need to access the Nifro menu, launch the app again to reveal the menu bar icon for 5 seconds."),
 				isPresented: $isShowingAlert
 			)
-	}
-}
-
-private struct DisplaySetting: View {
-	@ObservedObject private var displayWrapper = Display.observable
-	@Default(.display) private var chosenDisplay
-
-	var body: some View {
-		Picker(
-			selection: $chosenDisplay.getMap(\.?.withFallbackToMain)
-		) {
-			ForEach(displayWrapper.wrappedValue.all) { display in
-				Text(display.localizedName)
-					.tag(display)
-					// A view cannot have multiple tags, otherwise, this would have been the best solution.
-//					.if(display == .main) {
-//						$0.tag(nil as Display?)
-//					}
-			}
-		} label: {
-			Text("Show on")
-		}
-		.task(id: chosenDisplay) {
-			guard chosenDisplay == nil else {
-				return
-			}
-
-			chosenDisplay = .main
-		}
 	}
 }
 

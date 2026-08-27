@@ -84,43 +84,6 @@ extension CallbackMenuItem: NSMenuItemValidation {
 
 
 extension NSMenuItem {
-	convenience init(
-		_ title: String,
-		key: String = "",
-		keyModifiers: NSEvent.ModifierFlags? = nil,
-		isEnabled: Bool = true,
-		isChecked: Bool = false,
-		isHidden: Bool = false
-	) {
-		self.init(title: title, action: nil, keyEquivalent: key)
-		self.isEnabled = isEnabled
-		self.isChecked = isChecked
-		self.isHidden = isHidden
-
-		if let keyModifiers {
-			self.keyEquivalentModifierMask = keyModifiers
-		}
-	}
-
-	convenience init(
-		_ attributedTitle: NSAttributedString,
-		key: String = "",
-		keyModifiers: NSEvent.ModifierFlags? = nil,
-		isEnabled: Bool = true,
-		isChecked: Bool = false,
-		isHidden: Bool = false
-	) {
-		self.init(
-			"",
-			key: key,
-			keyModifiers: keyModifiers,
-			isEnabled: isEnabled,
-			isChecked: isChecked,
-			isHidden: isHidden
-		)
-		self.attributedTitle = attributedTitle
-	}
-
 	var isChecked: Bool {
 		get { state == .on }
 		set {
@@ -133,44 +96,6 @@ extension NSMenuItem {
 extension NSMenu {
 	func addSeparator() {
 		addItem(.separator())
-	}
-
-
-	@discardableResult
-	func addDisabled(_ title: String) -> NSMenuItem {
-		let menuItem = NSMenuItem(title)
-		menuItem.isEnabled = false
-		addItem(menuItem)
-		return menuItem
-	}
-
-	@discardableResult
-	func addDisabled(_ attributedTitle: NSAttributedString) -> NSMenuItem {
-		let menuItem = NSMenuItem(attributedTitle)
-		menuItem.isEnabled = false
-		addItem(menuItem)
-		return menuItem
-	}
-
-	@discardableResult
-	func addItem(
-		_ title: String,
-		key: String = "",
-		keyModifiers: NSEvent.ModifierFlags? = nil,
-		isEnabled: Bool = true,
-		isChecked: Bool = false,
-		isHidden: Bool = false
-	) -> NSMenuItem {
-		let menuItem = NSMenuItem(
-			title,
-			key: key,
-			keyModifiers: keyModifiers,
-			isEnabled: isEnabled,
-			isChecked: isChecked,
-			isHidden: isHidden
-		)
-		addItem(menuItem)
-		return menuItem
 	}
 
 
@@ -195,29 +120,6 @@ extension NSMenu {
 		)
 		addItem(menuItem)
 		return menuItem
-	}
-
-
-	@MainActor
-	@discardableResult
-	func addSettingsItem() -> NSMenuItem {
-		addCallbackItem(String(localized: "Settings…"), key: ",") {
-			SSApp.showSettingsWindow()
-		}
-	}
-
-
-
-
-
-	@MainActor
-	@discardableResult
-	func addQuitItem() -> NSMenuItem {
-		addSeparator()
-
-		return addCallbackItem(String(localized: "Quit \(SSApp.name)"), key: "q") {
-			SSApp.quit()
-		}
 	}
 }
 
@@ -269,19 +171,6 @@ extension NSMenuItem: ControlActionClosureProtocol {}
 
 
 extension NSMenuItem {
-	/**
-	The menu is only created when it's enabled.
-
-	```
-	menu.addItem("Foo")
-		.withSubmenu(createCalendarEventMenu(with: event))
-	```
-	*/
-	@discardableResult
-	func withSubmenu(_ menu: @autoclosure () -> NSMenu) -> Self {
-		submenu = isEnabled ? menu() : NSMenu()
-		return self
-	}
 }
 
 extension NSStatusBarButton {

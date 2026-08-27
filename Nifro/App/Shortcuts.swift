@@ -123,7 +123,8 @@ enum Shortcut: String, CaseIterable {
 			}
 
 			KeyboardShortcuts.onKeyUp(for: shortcut.name) {
-				action.run()
+				// The one entry point with a pointer behind it.
+				action.run(from: .pointer)
 			}
 		}
 	}

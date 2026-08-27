@@ -112,6 +112,51 @@ extension WallpaperScene {
 	/**
 	Start, restart or stop this scene's rotation to match the current settings.
 	*/
+	/**
+	Whether this display should be the one making the noise.
+
+	The website's own setting, and then one rule on top of it: in a sync group only the leader is
+	audible. The others are showing the same video a fraction of a second apart, and two copies of the
+	same soundtrack that close together is not stereo — it is an echo, and it is worse than either one
+	alone. Supermarket walls of televisions do the same thing: many pictures, one sound.
+
+	The stored setting is not touched, so a display leaving a group gets its own sound back.
+	*/
+	var shouldPlaySound: Bool {
+		guard website?.audio == .unmuted else {
+			return false
+		}
+
+		// A follower is silent; a leader, and a display in no group at all, is not.
+		return SyncGroup.leader(of: display) == nil
+	}
+
+	/**
+	Whether this display is switched off on its own.
+
+	Separate from the app-wide Disable, and beneath it: turning the app off turns every display off,
+	turning it back on returns each display to whatever it was set to. Two switches that both mean
+	"off" would otherwise disagree about what "on" restores.
+	*/
+	var isDisabledForDisplay: Bool {
+		get { Defaults[.disabledDisplays].contains(Display.settingsKey(for: display)) }
+		set {
+			if newValue {
+				Defaults[.disabledDisplays].insert(Display.settingsKey(for: display))
+			} else {
+				Defaults[.disabledDisplays].remove(Display.settingsKey(for: display))
+			}
+		}
+	}
+
+	/**
+	How this display rotates.
+	*/
+	var rotationMode: RotationMode {
+		get { Defaults[.rotationModes][Display.settingsKey(for: display)] ?? .pinned }
+		set { Defaults[.rotationModes][Display.settingsKey(for: display)] = newValue }
+	}
+
 	func resetPlaylistTimer() {
 		playlistTimer?.invalidate()
 		playlistTimer = nil
@@ -128,7 +173,16 @@ extension WallpaperScene {
 
 		playlistTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
 			Task { @MainActor in
-				self?.advancePlaylist(rotating: Defaults[.playlistInterval] != nil)
+				guard let self else {
+					return
+				}
+
+				// Rotation used to be inferred from "is an interval set", which made it one answer for the
+				// whole machine. It is this display's own mode now; the interval is still shared, because
+				// how often is a much weaker preference than whether.
+				let rotates = Defaults[.playlistInterval] != nil && self.rotationMode != .pinned
+
+				self.advancePlaylist(rotating: rotates)
 			}
 		}
 	}
@@ -142,7 +196,11 @@ extension WallpaperScene {
 		let controller = WebsitesController.shared
 
 		if rotating {
-			controller.advance(on: display)
+			if self.rotationMode == .random {
+				controller.makeRandomCurrent(on: display)
+			} else {
+				controller.advance(on: display)
+			}
 		}
 
 		guard let next = controller.scheduled(for: display) else {

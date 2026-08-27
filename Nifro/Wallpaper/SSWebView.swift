@@ -6,9 +6,9 @@ final class SSWebView: WKWebView {
 	/**
 	The scene this web view draws into. Weak because the scene owns it, through its controller.
 
-	Here so the context menu can offer to change the website this page belongs to. Read off the
-	list-wide current website instead, "Update Website to Current" on the second display rewrote the
-	first display's website with the second one's address.
+	Here so the page can be told whether *its* display is in Browsing Mode. It was removed once, when
+	the only thing that read it was a context-menu item that has since gone — and came straight back
+	when Browsing Mode stopped being one flag for the whole app.
 	*/
 	weak var scene: WallpaperScene?
 
@@ -27,7 +27,7 @@ final class SSWebView: WKWebView {
 	override init(frame: CGRect, configuration: WKWebViewConfiguration) {
 		super.init(frame: frame, configuration: configuration)
 
-		Defaults.publisher(.isBrowsingMode)
+		Defaults.publisher(.browsingDisplays)
 			.receive(on: DispatchQueue.main)
 			.sink { [weak self] _ in
 				self?.toggleBrowsingModeClass()
@@ -89,19 +89,6 @@ final class SSWebView: WKWebView {
 
 		menu.addSeparator()
 
-		if
-			let website = scene?.website,
-			let url = navigatedURL(for: website)
-		{
-			let menuItem = menu.addCallbackItem(String(localized: "Update Website to Current")) {
-				WebsitesController.shared.update(website.id) {
-					$0.url = url
-				}
-			}
-
-			menuItem.toolTip = String(localized: "Points the stored website at the URL currently loaded")
-		}
-
 		menu.addSeparator()
 
 		// Move the “Inspect Element” menu item to the end.
@@ -121,7 +108,10 @@ final class SSWebView: WKWebView {
 
 	func toggleBrowsingModeClass() {
 		// `plash-is-browsing-mode` stays alongside ours so the custom CSS people wrote for Plash keeps working.
-		let method = Defaults[.isBrowsingMode] ? "add" : "remove"
+		//
+		// This page's own display, not any display: a page that styles itself for Browsing Mode should
+		// do it when *it* is the one being interacted with, not when the other screen is.
+		let method = AppState.shared.isBrowsingMode(on: scene?.display) ? "add" : "remove"
 
 		// The async variant hands back `Any`, which cannot cross an actor boundary under Swift 6. Nothing here needs the result.
 		evaluateJavaScript(
@@ -173,15 +163,17 @@ extension SSWebView {
 
 extension WKWebView {
 	/**
-	Where the page has ended up, when that is somewhere the user navigated to and not where the
-	website says it should be. `nil` when there is nothing worth offering to save.
+	Where the page has ended up, when that is not where the website says it should be. `nil` when there
+	is nothing worth remembering.
 
-	Offered as "Update Website to Current", so the question it answers is "is this a page the user
-	found, that they might want to keep?".
+	Used to record where a page was so it can be put back after a reload — a map that was dragged, a
+	dashboard on a particular tab. It used to also drive a menu item that wrote this into the stored
+	website permanently; that is gone, because a website plus its snapshot already describes what is
+	on screen, and a page that moves itself is the snapshot's business rather than an edit the user
+	should be asked to make.
 
-	A framed player is not. It is shown inside a page this app builds, and that page's address is
-	this app's, not anywhere anybody went — so the offer appeared for every video website, always,
-	and taking it replaced the website with our own scaffolding.
+	A framed player is excluded. It is shown inside a page this app builds, and that page's address is
+	this app's, not anywhere anybody went.
 	*/
 	func navigatedURL(for website: Website) -> URL? {
 		guard

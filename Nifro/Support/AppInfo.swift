@@ -142,7 +142,6 @@ extension SSApp {
 	if SSApp.runOnceShouldRun(identifier: "foo") {
 		// True only the first time and only once.
 	} else {
-
 	}
 	```
 	*/

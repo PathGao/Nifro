@@ -29,15 +29,17 @@ enum Constants {
 
 extension Defaults.Keys {
 	static let websites = Key<[Website]>("websites", default: [])
-	static let isBrowsingMode = Key<Bool>("isBrowsingMode", default: false)
+	// Which displays are interactive, not whether any is. Browsing Mode was one flag for the whole app,
+	// so entering it on the monitor also raised the laptop's wallpaper over its desktop icons — and its
+	// button lit in every column at once. `DesktopWindow.isInteractive` was always per window; only this
+	// was not.
+	static let browsingDisplays = Key<Set<String>>("browsingDisplays", default: [])
 
 	// Settings
 	static let hideMenuBarIcon = Key<Bool>("hideMenuBarIcon", default: false)
 	static let opacity = Key<Double>("opacity", default: 1)
 	static let reloadInterval = Key<Double?>("reloadInterval")
-	static let display = Key<Display?>("display")
 	static let deactivateOnBattery = Key<Bool>("deactivateOnBattery", default: false)
-	static let showOnAllSpaces = Key<Bool>("showOnAllSpaces", default: false)
 
 	// Defaults to what the app already did, so nobody's wallpaper changes on upgrade. There is no
 	// convention to follow here: macOS's own wallpaper stays with its display and goes away with it,
@@ -52,6 +54,30 @@ extension Defaults.Keys {
 	static let dimWhenUnfocused = Key<Bool>("dimWhenUnfocused", default: false)
 	static let dimmedOpacityFactor = Key<Double>("dimmedOpacityFactor", default: 0.5)
 	static let playlistInterval = Key<Double?>("playlistInterval")
+
+	// Keyed by display. A dictionary rather than a key per screen, because screens come and go and a
+	// key that named one would outlive it.
+	static let rotationModes = Key<[String: RotationMode]>("rotationModes", default: [:])
+
+	// The displays switched off one at a time, as opposed to `isManuallyDisabled`, which is the whole
+	// app. Stored as the exceptions rather than as a flag per display, so a screen nobody has touched
+	// needs no entry and an unplugged one leaves nothing behind.
+	static let disabledDisplays = Key<Set<String>>("disabledDisplays", default: [])
+
+	// Display key -> group id. A flat map rather than a list of sets, because the question asked of it
+	// is always "what is this display in", and a list would have to be searched to answer it.
+	static let syncGroups = Key<[String: String]>("syncGroups", default: [:])
+
+	// When each sync group's video was at zero, in seconds since 1970, keyed by the display that
+	// leads it. Every page in the group works out where it should be from this and its own clock, so
+	// this one number is the whole of what the app has to say about synchronised playback.
+	static let syncEpochs = Key<[String: Double]>("syncEpochs", default: [:])
+
+	// Website id -> where the server sent it instead. Only written when WebKit reports an actual
+	// redirect, never inferred by comparing addresses: a page that rewrites its own address as you
+	// drag a map is not a redirect, and telling the user their website is wrong because they moved a
+	// map would be worse than saying nothing.
+	static let redirectedAddresses = Key<[String: String]>("redirectedAddresses", default: [:])
 	static let contentRulesURL = Key<String?>("contentRulesURL")
 	static let hasInstalledFeaturedWebsites = Key<Bool>("hasInstalledFeaturedWebsites", default: false)
 

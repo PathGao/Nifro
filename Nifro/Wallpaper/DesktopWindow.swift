@@ -80,13 +80,14 @@ final class DesktopWindow: NSWindow {
 		self.collectionBehavior = [
 			.stationary,
 			.ignoresCycle,
-			.fullScreenNone // This ensures that if Nifro is launched while an app is fullscreen (fullscreen is a separate space), it will not show behind that app and instead show in the primary space.
+			// A wallpaper that is only on the Mission Control desktop that happened to be in front when
+			// Nifro started is a wallpaper that disappears when you switch desktop, which nobody wants
+			// from a wallpaper. This used to be a setting, off by default.
+			.canJoinAllSpaces,
+			// So that launching Nifro while an app is fullscreen — a Space of its own — does not put the
+			// wallpaper behind that app. It lands on the ordinary desktop instead.
+			.fullScreenNone
 		]
-
-		// Read here rather than left to the settings subscription, which only ever reaches the scenes
-		// that exist when it fires. That is every scene at launch and no scene built afterwards, so a
-		// display plugged in later got a wallpaper that stayed on one Space with the setting on.
-		collectionBehavior.toggleExistence(.canJoinAllSpaces, shouldExist: Defaults[.showOnAllSpaces])
 
 		disableSnapshotRestoration()
 		setFrame()

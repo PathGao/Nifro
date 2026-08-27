@@ -1,4 +1,5 @@
 import AppKit
+import WebKit
 import Combine
 
 /**
@@ -368,6 +369,67 @@ final class WallpaperScene {
 			$0.duration = 0.25
 			window.animator().alphaValue = target
 		}
+	}
+
+	/**
+	A picture of what this display is showing right now.
+
+	Taken from our own web view, which needs no permission at all — this is the app photographing its
+	own view, not the screen. Screen Recording would be the other way to get this, and asking a
+	wallpaper app for it to draw a thumbnail is a trade nobody should have to make.
+
+	`nil` when there is nothing up: no website, or a page that has not arrived yet. The panel draws its
+	own empty state rather than a blank rectangle that looks like a broken page.
+	*/
+	/**
+	Where this display's video is, if it has one.
+	*/
+	func mediaClock() async -> (time: Double, duration: Double)? {
+		// Asked of the live web view every time. Swap loading replaces it, and a held reference would
+		// go on talking to the page that left.
+		await webViewController.webView.mediaClock()
+	}
+
+	/**
+	Tell this display's page which wall-clock moment its video was at zero, or `nil` when it is in no
+	group.
+	*/
+	func setMediaEpoch(_ epoch: Double?) {
+		webViewController.webView.setMediaEpoch(epoch)
+	}
+
+	/**
+	Where somebody dragged this display's video to since this was last asked, if they did.
+	*/
+	func scrubbedPosition() async -> Double? {
+		await webViewController.webView.scrubbedPosition()
+	}
+
+	/**
+	How wide the panel draws a preview. Snapshots are taken at this size rather than the display's.
+	*/
+	static let previewWidth = 260
+
+	func snapshot() async -> NSImage? {
+		guard
+			website != nil,
+			loadedWebsite != nil
+		else {
+			return nil
+		}
+
+		let configuration = WKSnapshotConfiguration()
+
+		// The page is already on screen, so there is nothing to wait for, and waiting on a wallpaper
+		// that animates means waiting forever.
+		configuration.afterScreenUpdates = false
+
+		// At the size it will be looked at, not at the size of the display. Full resolution cost about
+		// 600ms a frame on a 4K screen — a panel meant to look live updating roughly once a second —
+		// and every one of those pixels was thrown away by a 260-point thumbnail anyway.
+		configuration.snapshotWidth = NSNumber(value: Self.previewWidth)
+
+		return try? await webViewController.webView.takeSnapshot(configuration: configuration)
 	}
 
 	/**

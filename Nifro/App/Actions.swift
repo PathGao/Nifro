@@ -54,13 +54,30 @@ enum Action: String, CaseIterable {
 		}
 	}
 
+	/**
+	Where the request came from, because only one of them has a pointer behind it.
+
+	A shortcut is pressed by somebody looking at a screen. A Shortcuts automation or a `nifro://` URL
+	may fire from a cron job, a Focus change or a script with nobody at the machine at all, and
+	"whichever display the mouse happens to be over" is then a coin toss. Those keep acting on the
+	display named in Settings.
+	*/
+	enum Source {
+		case pointer
+		case automation
+	}
+
 	@MainActor
-	func run() {
+	func run(from source: Source = .automation) {
+		let scene = source == .pointer ? AppState.shared.actingScene : AppState.shared.primaryScene
 		switch self {
 		case .toggleEnabled:
 			AppState.shared.isManuallyDisabled.toggle()
 		case .toggleBrowsingMode:
-			Defaults[.isBrowsingMode].toggle()
+			AppState.shared.setBrowsingMode(
+				!AppState.shared.isBrowsingMode(on: scene.display),
+				on: scene.display
+			)
 
 			SSApp.runOnce(identifier: "activatedBrowsingMode") {
 				DispatchQueue.main.async {
@@ -71,7 +88,7 @@ enum Action: String, CaseIterable {
 				}
 			}
 		case .toggleSound:
-			guard let website = AppState.shared.currentWebsite else {
+			guard let website = scene.website else {
 				return
 			}
 
@@ -83,11 +100,11 @@ enum Action: String, CaseIterable {
 		case .reload:
 			AppState.shared.reloadWebsite()
 		case .nextWebsite:
-			WebsitesController.shared.makeNextCurrent(on: AppState.shared.primaryScene.display)
+			WebsitesController.shared.makeNextCurrent(on: scene.display)
 		case .previousWebsite:
-			WebsitesController.shared.makePreviousCurrent(on: AppState.shared.primaryScene.display)
+			WebsitesController.shared.makePreviousCurrent(on: scene.display)
 		case .randomWebsite:
-			WebsitesController.shared.makeRandomCurrent(on: AppState.shared.primaryScene.display)
+			WebsitesController.shared.makeRandomCurrent(on: scene.display)
 		}
 	}
 

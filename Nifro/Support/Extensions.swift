@@ -172,27 +172,6 @@ extension Binding {
 			}
 		)
 	}
-
-
-	/**
-	Transform the value on `get`.
-
-	- Important: If you want to simply map using a property, you can just do `$foo.someProperty` instead, thanks to dynamic member support in `Binding`.
-
-	```
-	$foo.getMap { $0.uppercased() }
-	```
-	*/
-	func getMap(
-		_ get: @escaping (Value) -> Value
-	) -> Self {
-		.init(
-			get: { get(wrappedValue) },
-			set: { newValue in
-				wrappedValue = newValue
-			}
-		)
-	}
 }
 // MARK: - BindingCollection
 extension BindingCollection where Base.Element: Identifiable {
@@ -1228,23 +1207,6 @@ extension Sequence where Element: Equatable {
 		filter { $0 != element }
 	}
 }
-extension Sequence where Element: Equatable {
-}
-
-// MARK: - SetAlgebra
-extension SetAlgebra {
-	/**
-	Insert the `value` if `shouldExist` is true, otherwise remove it.
-	*/
-	mutating func toggleExistence(_ value: Element, shouldExist: Bool) {
-		if shouldExist {
-			insert(value)
-		} else {
-			remove(value)
-		}
-	}
-}
-
 // MARK: - SimpleImageCacheKeyable
 
 // MARK: - String
@@ -1256,34 +1218,12 @@ extension String {
 		trimmingCharacters(in: .whitespacesAndNewlines)
 	}
 
-	var trimmedTrailing: Self {
-		replacing(/\s+$/, with: "")
-	}
-
 	func removingPrefix(_ prefix: Self) -> Self {
 		guard hasPrefix(prefix) else {
 			return self
 		}
 
 		return Self(dropFirst(prefix.count))
-	}
-
-	/**
-	```
-	"Unicorn".truncated(to: 4)
-	//=> "Uni…"
-	```
-	*/
-	func truncating(to number: Int, truncationIndicator: Self = "…") -> Self {
-		if number <= 0 {
-			return ""
-		}
-
-		if count > number {
-			return Self(prefix(number - truncationIndicator.count)).trimmedTrailing + truncationIndicator
-		}
-
-		return self
 	}
 }
 extension String {
@@ -2230,6 +2170,218 @@ extension WKUserContentController {
 		})();
 		"""
 
+	private static let mediaClockCode =
+		"""
+		(() => {
+			const biggest = () => {
+				let best = null;
+
+				for (const element of document.querySelectorAll('video')) {
+					if (!element.duration || !isFinite(element.duration)) {
+						continue;
+					}
+
+					const area = element.clientWidth * element.clientHeight;
+
+					if (!best || area > best.area) {
+						best = { element, area };
+					}
+				}
+
+				return best && best.element;
+			};
+
+			// Of two readings, the one showing more picture — unless the one being held has gone stale,
+			// which is how a player that has been replaced stops holding the answer forever. Every frame
+			// that has a video reports upward, and a page with an advertisement beside the player has
+			// several: keeping whichever arrived last made the reading hop between two different videos.
+			const better = (held, fresh) => {
+				if (!held || Date.now() - held.at > 3000) {
+					return fresh;
+				}
+
+				return fresh.area >= held.area ? fresh : held;
+			};
+
+			const read = () => {
+				const element = biggest();
+
+				if (!element) {
+					return null;
+				}
+
+				return {
+					time: element.currentTime,
+					duration: element.duration,
+					area: element.clientWidth * element.clientHeight,
+					at: Date.now()
+				};
+			};
+
+			// The wall-clock moment this group's video was at zero, or null when this page is in no
+			// group. Everything below is a function of it.
+			let epoch = null;
+
+			// Where the video should be, now. Not a starting position — a curve that holds for all
+			// time, evaluated afresh on every pass. A page that stalls, reloads or is switched off
+			// comes back onto the same curve rather than back into a race with another page.
+			//
+			// Two web views on one Mac read the same system clock, so two pages given the same epoch
+			// agree without exchanging anything at all. That is the whole point of doing it this way:
+			// there is no leader to poll, so there is no round trip to lag behind, and one page
+			// falling behind does not drag the other with it.
+			const targetFor = duration => {
+				const position = (Date.now() / 1000 - epoch) % duration;
+
+				return position < 0 ? position + duration : position;
+			};
+
+			const correct = () => {
+				if (epoch === null) {
+					return;
+				}
+
+				const element = biggest();
+
+				// Nothing is spent on a player that cannot keep playing: measured, a jump onto a video
+				// that was still buffering landed, and the video then resumed a second and a half behind.
+				if (!element || element.seeking || element.readyState < 3) {
+					return;
+				}
+
+				const duration = element.duration;
+				const target = targetFor(duration);
+
+				// A wallpaper video loops. Without wrapping, the moment the video returns to zero it is a
+				// whole duration away from the target and gets seeked, and again on the way round.
+				let drift = (element.currentTime - target) % duration;
+
+				if (drift > duration / 2) {
+					drift -= duration;
+				}
+
+				if (drift < -duration / 2) {
+					drift += duration;
+				}
+
+				const distance = Math.abs(drift);
+
+				if (distance >= \(MediaSync.Tolerance.seek)) {
+					element.playbackRate = 1;
+					ours = element.currentTime = target;
+					return;
+				}
+
+				// Already correcting, so hold on until the gap is properly closed rather than until it is
+				// merely acceptable. One rate change in and one out: on WebKit every change of
+				// `playbackRate` costs a visible hitch, which is why dash.js refuses small ones there.
+				// The player's own rate is the only state this needs.
+				const correcting = element.playbackRate !== 1;
+				const threshold = correcting ? \(MediaSync.Tolerance.release) : \(MediaSync.Tolerance.engage);
+
+				if (distance < threshold) {
+					element.playbackRate = 1;
+					return;
+				}
+
+				element.playbackRate = drift > 0 ? 1 - \(MediaSync.Tolerance.nudge) : 1 + \(MediaSync.Tolerance.nudge);
+			};
+
+			// The last position this script seeked to, so a seek somebody else made can be told apart
+			// from one of ours. Dragging the progress bar has to move the whole group rather than be
+			// undone a quarter of a second later, and the only way to know a drag happened is that the
+			// video arrived somewhere this script did not send it.
+			let ours = null;
+
+			document.addEventListener('seeked', event => {
+				const element = event.target;
+
+				if (!element || element.tagName !== 'VIDEO' || epoch === null) {
+					return;
+				}
+
+				if (ours !== null && Math.abs(element.currentTime - ours) < 0.5) {
+					return;
+				}
+
+				try {
+					window.top.postMessage({ \(mediaScrubKey): element.currentTime }, '*');
+				} catch (error) {}
+			}, true);
+
+			window.addEventListener('message', event => {
+				const data = event.data;
+
+				if (!data) {
+					return;
+				}
+
+				if (\(mediaEpochKey.debugDescription) in data) {
+					epoch = data.\(mediaEpochKey);
+					ours = null;
+					correct();
+
+					// Every frame needs it: the media element is usually one frame down, inside a
+					// cross-origin player that can only be reached by passing the message along.
+					for (let index = 0; index < window.frames.length; index++) {
+						try {
+							window.frames[index].postMessage(data, '*');
+						} catch (error) {}
+					}
+
+					return;
+				}
+
+				// A frame telling the top frame somebody dragged its progress bar.
+				if (typeof data.\(mediaScrubKey) === 'number' && window === window.top) {
+					window.\(mediaScrubbedKey) = data.\(mediaScrubKey);
+					return;
+				}
+
+				if (data.\(mediaReportKey) && window === window.top) {
+					window.\(mediaClockKey) = better(window.\(mediaClockKey), data.\(mediaReportKey));
+				}
+			});
+
+			setInterval(correct, 250);
+
+			// The top frame keeps the reading for the app, because `evaluateJavaScript` only ever reaches
+			// the main frame. A frame that has media reports it upward *and* records it locally;
+			// reporting only when the top frame had none was the first version of this and it never
+			// reported at all, since a framed player's top frame has no media of its own to notice.
+			setInterval(() => {
+				const own = read();
+
+				if (!own) {
+					return;
+				}
+
+				if (window === window.top) {
+					window.\(mediaClockKey) = better(window.\(mediaClockKey), own);
+					return;
+				}
+
+				try {
+					window.top.postMessage({ \(mediaReportKey): own }, '*');
+				} catch (error) {}
+			}, 1000);
+		})();
+		"""
+
+	/**
+	Install the media clock, which holds this page's video to the group's shared clock.
+	*/
+	func installMediaClock() {
+		let userScript = WKUserScript(
+			source: Self.mediaClockCode,
+			injectionTime: .atDocumentStart,
+			forMainFrameOnly: false,
+			in: .defaultClient
+		)
+
+		addUserScript(userScript)
+	}
+
 	// https://github.com/feedback-assistant/reports/issues/79
 	/**
 	Install the audio control. The setting itself is applied afterwards, and again on every load.
@@ -2250,6 +2402,14 @@ extension WKUserContentController {
 The name on the message the audio script answers to. One definition, used by the script and by the
 broadcast that reaches it.
 */
+// The media clock's own names, kept beside the audio ones for the same reason: the script and the
+// Swift that talks to it have to agree, and two spellings of one name is how they stop agreeing.
+private let mediaReportKey = "__nifroClockReport"
+private let mediaClockKey = "__nifroClock"
+private let mediaEpochKey = "__nifroEpoch"
+private let mediaScrubKey = "__nifroScrub"
+private let mediaScrubbedKey = "__nifroScrubbed"
+
 private let audioMessageKey = "__nifroAudioMuted"
 
 /**
@@ -2274,6 +2434,71 @@ extension WKWebView {
 			in: nil,
 			in: .defaultClient
 		)
+	}
+	/**
+	Where the video on this page is, if there is one.
+
+	`callAsyncJavaScript` rather than `evaluateJavaScript`. The latter has an overload that returns
+	nothing, and with no contextual type Swift picks it — silently, so every read came back as `()`
+	and the page looked like it had no video. Annotating the result does not settle it either, because
+	`Void` satisfies `Any`. This one has a single async overload and no such choice to get wrong, and
+	it passes numbers as arguments rather than pasting them into source.
+	*/
+	func mediaClock() async -> (time: Double, duration: Double)? {
+		let value = try? await callAsyncJavaScript(
+			"return window.\(mediaClockKey) ?? null;",
+			arguments: [:],
+			in: nil,
+			contentWorld: .defaultClient
+		)
+
+		guard
+			let dictionary = value as? [String: Any],
+			let time = dictionary["time"] as? Double,
+			let duration = dictionary["duration"] as? Double,
+			duration > 0
+		else {
+			return nil
+		}
+
+		return (time, duration)
+	}
+
+	/**
+	Tell this page which wall-clock moment its video was at zero, or `nil` when it is in no group.
+
+	One number, stated rather than asked for, and the page does the rest for itself. Nothing here waits
+	on a reply, so it costs the same whether the page has a video or not.
+	*/
+	func setMediaEpoch(_ epoch: Double?) {
+		let value = epoch.map { "\($0)" } ?? "null"
+
+		evaluateJavaScript(
+			"window.postMessage({ \(mediaEpochKey): \(value) }, '*');",
+			in: nil,
+			in: .defaultClient
+		)
+	}
+
+	/**
+	Where somebody dragged this page's video to since the last time this was asked, if they did.
+
+	A drag has to move the whole group rather than be undone a quarter of a second later, so it is read
+	back and turned into a new epoch — the group's clock follows the person, not the other way round.
+	*/
+	func scrubbedPosition() async -> Double? {
+		let value = try? await callAsyncJavaScript(
+			"""
+			const position = window.\(mediaScrubbedKey);
+			window.\(mediaScrubbedKey) = undefined;
+			return position ?? null;
+			""",
+			arguments: [:],
+			in: nil,
+			contentWorld: .defaultClient
+		)
+
+		return value as? Double
 	}
 }
 // MARK: - WKWebView

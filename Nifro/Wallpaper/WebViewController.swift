@@ -74,6 +74,7 @@ final class WebViewController: NSViewController {
 
 		userContentController.addJavaScript("document.documentElement.classList.add('is-nifro-app', 'is-plash-app')")
 		userContentController.installAudioControl()
+		userContentController.installMediaClock()
 
 		// This scene's website, not the list-wide current one. Everything below is baked into the web
 		// view when it is created and never revisited, so reading the wrong website here put one
@@ -197,8 +198,10 @@ extension WebViewController: WKNavigationDelegate {
 			!NSEvent.modifiers.isDisjoint(with: [.command, .option]),
 			let newURL = navigationAction.request.url
 		{
-			if Defaults[.isBrowsingMode], Defaults[.bringBrowsingModeToFront] {
-				Defaults[.isBrowsingMode] = false
+			// This display's own Browsing Mode: opening a link in the browser should put back the screen
+			// the link was on, not every screen.
+			if AppState.shared.isBrowsingMode(on: scene?.display), Defaults[.bringBrowsingModeToFront] {
+				AppState.shared.setBrowsingMode(false, on: scene?.display)
 			}
 
 			newURL.open()
@@ -221,8 +224,10 @@ extension WebViewController: WKNavigationDelegate {
 			siteHost != newURL.host
 		{
 			// Hide Nifro if it's in front of everything.
-			if Defaults[.isBrowsingMode], Defaults[.bringBrowsingModeToFront] {
-				Defaults[.isBrowsingMode] = false
+			// This display's own Browsing Mode: opening a link in the browser should put back the screen
+			// the link was on, not every screen.
+			if AppState.shared.isBrowsingMode(on: scene?.display), Defaults[.bringBrowsingModeToFront] {
+				AppState.shared.setBrowsingMode(false, on: scene?.display)
 			}
 
 			newURL.open()
@@ -262,11 +267,37 @@ extension WebViewController: WKNavigationDelegate {
 		return navigationResponse.canShowMIMEType ? .allow : .download
 	}
 
+	/**
+	The server sent us somewhere else.
+
+	This is the one thing a URL comparison cannot tell apart from everything else that changes an
+	address. A page that writes its own fragment as it is dragged, a dashboard that adds a tab to the
+	query, a link followed in Browsing Mode — all of those end with `webView.url` different from the
+	stored one, and none of them means the stored one is wrong. A redirect does: it will happen again
+	on every launch, and the day the site stops redirecting the entry breaks.
+
+	Recorded rather than acted on. Rewriting the address behind the user's back is how "Update Website
+	to Current" once turned a website into a GitHub 404.
+	*/
+	func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
+		guard
+			let website = scene?.website,
+			let destination = webView.url?.normalized(),
+			website.url.normalized() != destination,
+			// A framed player's host page is ours, and its address is not anywhere anybody went.
+			VideoEmbed.hostPage(for: website.url) == nil
+		else {
+			return
+		}
+
+		Defaults[.redirectedAddresses][website.id.uuidString] = destination.absoluteString
+	}
+
 	func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
 		webView.centerAndAspectFillImage(mimeType: response?.mimeType)
 
 		// The script starts every page muted and waits to be told. This is the telling.
-		webView.setAudioMuted(scene?.website?.audio != .unmuted)
+		webView.setAudioMuted(!(scene?.shouldPlaySound ?? false))
 
 		recordTitleIfNeeded(from: webView)
 

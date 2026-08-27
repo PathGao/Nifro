@@ -107,6 +107,47 @@ struct WebsitesScreen: View {
 	WebsitesScreen()
 }
 
+/**
+Says when a website's address is not where the site actually serves it from.
+
+Only for a redirect WebKit reported, never for an address that merely differs. A page that rewrites
+its own address as a map is dragged, or a dashboard that adds a tab to the query, ends up with a
+different address too — and neither means the stored one is wrong. Those are the snapshot's business:
+the website plus what was remembered about it is what ends up on screen.
+
+A redirect is different because it is durable. It happens again on every launch, costs a round trip
+every time, and the day the site stops redirecting the entry stops working. So it is worth mentioning
+once, here, where the addresses are — and worth leaving to the user, because rewriting it unasked is
+how the old menu item turned a website into a GitHub 404.
+*/
+private struct RedirectNotice: View {
+	let website: Website
+
+	@Default(.redirectedAddresses) private var redirects
+
+	private var destination: URL? {
+		redirects[website.id.uuidString].flatMap { URL(string: $0) }
+	}
+
+	var body: some View {
+		if let destination {
+			Button {
+				WebsitesController.shared.update(website.id) {
+					$0.url = destination
+				}
+
+				redirects[website.id.uuidString] = nil
+			} label: {
+				Image(systemName: "exclamationmark.triangle.fill")
+					.renderingMode(.original)
+					.imageScale(.large)
+			}
+			.buttonStyle(.plain)
+			.help(String(localized: "This site sends Nifro somewhere else every time it loads: \(destination.absoluteString). Click to save that address instead."))
+		}
+	}
+}
+
 private struct RowView: View {
 	@Binding var website: Website
 	@Binding var selection: Website.ID?
@@ -134,6 +175,7 @@ private struct RowView: View {
 			}
 			.lineLimit(1)
 			Spacer()
+			RedirectNotice(website: website)
 			if website.isCurrent {
 				Image(systemName: "checkmark.circle.fill")
 					.renderingMode(.original)

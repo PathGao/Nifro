@@ -1,2324 +1,2434 @@
 {
-  "sourceLanguage" : "en",
-  "strings" : {
-    "" : {},
-    "${shouldToggle} Nifro" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "${shouldToggle} Nifro"
+  "sourceLanguage": "en",
+  "strings": {
+    "": {},
+    "${shouldToggle} Nifro": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "${shouldToggle} Nifro"
           }
         }
       }
     },
-    "${shouldToggle} Nifro ${isEnabled}" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "${shouldToggle} Nifro ${isEnabled}"
+    "${shouldToggle} Nifro ${isEnabled}": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "${shouldToggle} Nifro ${isEnabled}"
           }
         }
       }
     },
-    "%@" : {},
-    "%@× at %lld%%, %lld%%" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$@× at %2$lld%%, %3$lld%%"
+    "%@": {},
+    "%@× at %lld%%, %lld%%": {
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "%1$@× at %2$lld%%, %3$lld%%"
           }
         },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@× 位于 %lld%%, %lld%%"
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@× 位于 %lld%%, %lld%%"
           }
         }
       }
     },
-    "%lld minutes" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld 分钟"
+    "%lld minutes": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 分钟"
           }
         }
       }
     },
-    "A WebKit content-blocking rule list, for hiding cookie banners and ads. Paste the address of a `.json` file and Nifro compiles it once and applies it to every website.\n\nNifro keeps no rules of its own: a blocklist goes stale within weeks, and keeping one working is a full-time job somebody else is already doing. Lists in WebKit's format are published by the content-blocker projects — the one your Safari extension uses can usually be exported, and several are on GitHub as a single raw `.json` file. The address has to be the raw file, not the page it is displayed on.\n\nLeave it empty for no rules at all." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "WebKit 的内容拦截规则列表，用来挡掉 Cookie 横幅和广告。粘贴一个 `.json` 文件的地址，Nifro 编译一次，然后应用到所有网站。\n\nNifro 自己不维护规则：拦截列表几周就会过期，让它一直有效是一份全职工作，而已经有人在做了。WebKit 格式的列表由那些内容拦截项目发布——你在 Safari 里用的那个扩展通常可以导出，GitHub 上也有若干现成的单个 raw `.json` 文件。地址必须是原始文件本身，不是显示它的那个网页。\n\n留空表示不使用任何规则。"
+    "A WebKit content-blocking rule list, for hiding cookie banners and ads. Paste the address of a `.json` file and Nifro compiles it once and applies it to every website.\n\nNifro keeps no rules of its own: a blocklist goes stale within weeks, and keeping one working is a full-time job somebody else is already doing. Lists in WebKit's format are published by the content-blocker projects — the one your Safari extension uses can usually be exported, and several are on GitHub as a single raw `.json` file. The address has to be the raw file, not the page it is displayed on.\n\nLeave it empty for no rules at all.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "WebKit 的内容拦截规则列表，用来挡掉 Cookie 横幅和广告。粘贴一个 `.json` 文件的地址，Nifro 编译一次，然后应用到所有网站。\n\nNifro 自己不维护规则：拦截列表几周就会过期，让它一直有效是一份全职工作，而已经有人在做了。WebKit 格式的列表由那些内容拦截项目发布——你在 Safari 里用的那个扩展通常可以导出，GitHub 上也有若干现成的单个 raw `.json` 文件。地址必须是原始文件本身，不是显示它的那个网页。\n\n留空表示不使用任何规则。"
           }
         }
       }
     },
-    "A page that reloads on a timer starts over: a long page goes back to the top, and a map or a drawing goes back to wherever it opens. This puts it back — the scroll position after a reload, and the part of the page a site names after the “#” in its address, which also survives quitting. A site that saves its own position needs none of this and keeps working either way." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "定时刷新会让页面从头开始：长页面回到顶部，地图或大图回到它默认打开的地方。这个开关把它放回去 —— 刷新后的滚动位置，以及网站写在地址「#」后面的那部分位置（这一项退出应用也留得住）。本身就会保存位置的网站不需要它，开不开都照常工作。"
+    "A page that reloads on a timer starts over: a long page goes back to the top, and a map or a drawing goes back to wherever it opens. This puts it back — the scroll position after a reload, and the part of the page a site names after the “#” in its address, which also survives quitting. A site that saves its own position needs none of this and keeps working either way.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "定时刷新会让页面从头开始：长页面回到顶部，地图或大图回到它默认打开的地方。这个开关把它放回去 —— 刷新后的滚动位置，以及网站写在地址「#」后面的那部分位置（这一项退出应用也留得住）。本身就会保存位置的网站不需要它，开不开都照常工作。"
           }
         }
       }
     },
-    "A video page is mostly navigation, recommendations and comments. This is the address of the player on its own, so the video fills the wallpaper without cropping or hiding anything." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "视频页面大部分是导航、推荐和评论。这是播放器单独的地址，视频会直接铺满壁纸，不用裁剪也不用隐藏任何东西。"
+    "A video page is mostly navigation, recommendations and comments. This is the address of the player on its own, so the video fills the wallpaper without cropping or hiding anything.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "视频页面大部分是导航、推荐和评论。这是播放器单独的地址，视频会直接铺满壁纸，不用裁剪也不用隐藏任何东西。"
           }
         }
       }
     },
-    "About" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "关于"
+    "About": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关于"
           }
         }
       }
     },
-    "Action" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "操作"
+    "Action": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "操作"
           }
         }
       }
     },
-    "Actual Size" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "实际大小"
+    "Actual Size": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "实际大小"
           }
         }
       }
     },
-    "Add" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "添加"
+    "Add": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加"
           }
         }
       }
     },
-    "Add ${url} to Nifro" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "把 ${url} 添加到 Nifro"
+    "Add ${url} to Nifro": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "把 ${url} 添加到 Nifro"
           }
         }
       }
     },
-    "Add Website" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "添加网站"
+    "Add Website": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加网站"
           }
         }
       }
     },
-    "Add Website…" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "添加网站…"
+    "Add Website…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加网站…"
           }
         }
       }
     },
-    "Add website" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "添加网站"
+    "Add website": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加网站"
           }
         }
       }
     },
-    "Added" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已添加"
+    "Added": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已添加"
           }
         }
       }
     },
-    "Added Website" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已添加的网站"
+    "Added Website": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已添加的网站"
           }
         }
       }
     },
-    "Adds a website to Nifro.\n\nReturns the added website." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "向 Nifro 添加一个网站。\n\n返回添加的网站。"
+    "Adds a website to Nifro.\n\nReturns the added website.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "向 Nifro 添加一个网站。\n\n返回添加的网站。"
           }
         }
       }
     },
-    "Advanced" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "高级"
+    "Advanced": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高级"
           }
         }
       }
     },
-    "All" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "全部"
+    "All": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部"
           }
         }
       }
     },
-    "Allow" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "允许"
+    "Allow": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允许"
           }
         }
       }
     },
-    "Allow self-signed certificate" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "允许自签名证书"
+    "Allow self-signed certificate": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允许自签名证书"
           }
         }
       }
     },
-    "Always" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "总是"
+    "Always": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "总是"
           }
         }
       }
     },
-    "Audio" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "声音"
+    "Audio": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "声音"
           }
         }
       }
     },
-    "Bring browsing mode to the front" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "浏览模式时置于最前"
+    "Bring browsing mode to the front": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浏览模式时置于最前"
           }
         }
       }
     },
-    "Browsing Mode" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "浏览模式"
+    "Browsing Mode": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浏览模式"
           }
         }
       }
     },
-    "Browsing Mode lets you temporarily interact with the website. For example, to log into an account or scroll to a specific position on the website." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "浏览模式让你临时操作网站，比如登录账号，或者把网页滚到某个位置。"
+    "Browsing Mode lets you temporarily interact with the website. For example, to log into an account or scroll to a specific position on the website.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浏览模式让你临时操作网站，比如登录账号，或者把网页滚到某个位置。"
           }
         }
       }
     },
-    "CSS" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CSS"
+    "CSS": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CSS"
           }
         }
       }
     },
-    "CSS and JavaScript…" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "CSS 与 JavaScript…"
+    "CSS and JavaScript…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "CSS 与 JavaScript…"
           }
         }
       }
     },
-    "Cancel" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "取消"
+    "Cancel": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消"
           }
         }
       }
     },
-    "Check Now" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "立即检查"
+    "Check Now": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "立即检查"
           }
         }
       }
     },
-    "Check for updates automatically" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "自动检查更新"
+    "Check for updates automatically": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动检查更新"
           }
         }
       }
     },
-    "Checking for new entries…" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "正在检查新条目…"
+    "Checking for new entries…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在检查新条目…"
           }
         }
       }
     },
-    "Choose" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "选择"
+    "Choose": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择"
           }
         }
       }
     },
-    "Choose Local Website" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "选择本地网页"
+    "Choose Local Website": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择本地网页"
           }
         }
       }
     },
-    "Choose Region…" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "选择区域…"
+    "Choose Region…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择区域…"
           }
         }
       }
     },
-    "Choose a directory with a “index.html” file." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "选择一个含有「index.html」文件的目录。"
+    "Choose a directory with a “index.html” file.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择一个含有「index.html」文件的目录。"
           }
         }
       }
     },
-    "Choose a region with “Choose Region…” in the Nifro menu: the wallpaper becomes something you can move and zoom, and where you leave it is the region. It is remembered as a place and a magnification rather than as a rectangle, so the same website works on a second display of a different shape." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "用 Nifro 菜单里的「选择区域…」来选：壁纸会变成一张可以拖动和缩放的画面，你把它停在哪里，哪里就是区域。它记住的是位置和倍率而不是一个矩形，所以同一个网站换到形状不同的第二块屏幕上一样成立。"
+    "Choose a region with “Choose Region…” in the Nifro menu: the wallpaper becomes something you can move and zoom, and where you leave it is the region. It is remembered as a place and a magnification rather than as a rectangle, so the same website works on a second display of a different shape.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用 Nifro 菜单里的「选择区域…」来选：壁纸会变成一张可以拖动和缩放的画面，你把它停在哪里，哪里就是区域。它记住的是位置和倍率而不是一个矩形，所以同一个网站换到形状不同的第二块屏幕上一样成立。"
           }
         }
       }
     },
-    "Choose region" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "选择区域"
+    "Choose region": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "选择区域"
           }
         }
       }
     },
-    "Clear all website data" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "清除所有网站数据"
+    "Clear all website data": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除所有网站数据"
           }
         }
       }
     },
-    "Clears cookies, local storage, caches, page thumbnails, and what each page had remembered: where it was scrolled or moved to, and how far it was zoomed in. Your websites and their settings are kept." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "清除 Cookie、本地存储、缓存、页面缩略图，以及每个页面记住的东西：它滚动到或移动到过的位置，以及它被放大到多少。你的网站和它们的设置会保留。"
+    "Clears cookies, local storage, caches, page thumbnails, and what each page had remembered: where it was scrolled or moved to, and how far it was zoomed in. Your websites and their settings are kept.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除 Cookie、本地存储、缓存、页面缩略图，以及每个页面记住的东西：它滚动到或移动到过的位置，以及它被放大到多少。你的网站和它们的设置会保留。"
           }
         }
       }
     },
-    "Click to edit this website." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "点这里编辑这个网站。"
+    "Click to edit this website.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "点这里编辑这个网站。"
           }
         }
       }
     },
-    "Clickable on the desktop" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在桌面上可点击"
+    "Clickable on the desktop": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在桌面上可点击"
           }
         }
       }
     },
-    "Content blocking rules" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "内容拦截规则"
+    "Content blocking rules": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内容拦截规则"
           }
         }
       }
     },
-    "Continue" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "继续"
+    "Continue": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "继续"
           }
         }
       }
     },
-    "Copies this website's settings as text, ready to paste into an issue. Nearly every question about a wallpaper is decided by these, and it saves being asked for them one at a time. The address is included; the CSS and JavaScript are reported by size rather than by content, since a stylesheet can carry something private and this gets pasted in public." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "把这个网站的设置复制成文本，可以直接粘进 issue。关于壁纸的问题几乎都由这些设置决定，贴上它们就不用被一项项追问。地址会包含在内；CSS 和 JavaScript 只报行数不报内容——样式表里可能有私人信息，而这段文本是要贴到公开地方的。"
+    "Copies this website's settings as text, ready to paste into an issue. Nearly every question about a wallpaper is decided by these, and it saves being asked for them one at a time. The address is included; the CSS and JavaScript are reported by size rather than by content, since a stylesheet can carry something private and this gets pasted in public.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "把这个网站的设置复制成文本，可以直接粘进 issue。关于壁纸的问题几乎都由这些设置决定，贴上它们就不用被一项项追问。地址会包含在内；CSS 和 JavaScript 只报行数不报内容——样式表里可能有私人信息，而这段文本是要贴到公开地方的。"
           }
         }
       }
     },
-    "Copy Settings" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "复制设置"
+    "Copy Settings": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制设置"
           }
         }
       }
     },
-    "Could not check" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "无法检查"
+    "Could not check": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无法检查"
           }
         }
       }
     },
-    "Creates a fake dark mode for websites without a native dark mode by inverting all the colors on the website." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "对没有原生深色模式的网站反转全部颜色，做出一个假的深色模式。"
+    "Creates a fake dark mode for websites without a native dark mode by inverting all the colors on the website.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "对没有原生深色模式的网站反转全部颜色，做出一个假的深色模式。"
           }
         }
       }
     },
-    "Current Website" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "当前网站"
+    "Crop": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "裁切"
           }
         }
       }
     },
-    "Custom code" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "自定义代码"
+    "Current Website": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "当前网站"
           }
         }
       }
     },
-    "Deactivate while on battery" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "使用电池时停用"
+    "Custom code": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自定义代码"
           }
         }
       }
     },
-    "Deactivated While on Battery" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "使用电池时已停用"
+    "Deactivate while on battery": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用电池时停用"
           }
         }
       }
     },
-    "Default display" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "默认显示器"
+    "Deactivated While on Battery": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用电池时已停用"
           }
         }
       }
     },
-    "Delete" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "删除"
+    "Default display": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "默认显示器"
           }
         }
       }
     },
-    "Derived from [Plash](https://github.com/sindresorhus/Plash) by Sindre Sorhus, from its last MIT-licensed release. Plash is still developed and still on the App Store; Nifro is a separate project and uses none of its branding or artwork." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "衍生自 Sindre Sorhus 的 [Plash](https://github.com/sindresorhus/Plash)，取自它最后一个 MIT 许可的版本。Plash 仍在开发、仍在 App Store 上；Nifro 是一个独立项目，没有使用它的任何品牌或美术资源。"
+    "Delete": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除"
           }
         }
       }
     },
-    "Dim while another app is in front" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "其他应用在前时变暗"
+    "Derived from [Plash](https://github.com/sindresorhus/Plash) by Sindre Sorhus, from its last MIT-licensed release. Plash is still developed and still on the App Store; Nifro is a separate project and uses none of its branding or artwork.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "衍生自 Sindre Sorhus 的 [Plash](https://github.com/sindresorhus/Plash)，取自它最后一个 MIT 许可的版本。Plash 仍在开发、仍在 App Store 上；Nifro 是一个独立项目，没有使用它的任何品牌或美术资源。"
           }
         }
       }
     },
-    "Dimmed to" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "变暗到"
+    "Dim while another app is in front": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "其他应用在前时变暗"
           }
         }
       }
     },
-    "Disable" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "停用"
+    "Dimmed to": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "变暗到"
           }
         }
       }
     },
-    "Don't Keep" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "不保留"
+    "Disable": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "停用"
           }
         }
       }
     },
-    "Done" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "完成"
+    "Don't Keep": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不保留"
           }
         }
       }
     },
-    "Drag or scroll to move the frame · pinch to resize · Return to keep · Esc to cancel" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "拖动或滚动移动取景框 · 捏合改大小 · 回车保留 · Esc 取消"
+    "Done": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "完成"
           }
         }
       }
     },
-    "Each website can live on its own screen. “Default display” follows the choice in Settings." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "每个网站可以待在自己的屏幕上。「默认显示器」跟随设置里的选择。"
+    "Drag or scroll to move the frame · pinch to resize · Return to keep · Esc to cancel": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拖动或滚动移动取景框 · 捏合改大小 · 回车保留 · Esc 取消"
           }
         }
       }
     },
-    "Edit" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "编辑"
+    "Each website can live on its own screen. “Default display” follows the choice in Settings.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每个网站可以待在自己的屏幕上。「默认显示器」跟随设置里的选择。"
           }
         }
       }
     },
-    "Edit…" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "编辑…"
+    "Edit": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编辑"
           }
         }
       }
     },
-    "Enable" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "启用"
+    "Edit…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "编辑…"
           }
         }
       }
     },
-    "Enabled State" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "启用状态"
+    "Enable": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启用"
           }
         }
       }
     },
-    "Error: %@" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "出错：%@"
+    "Enabled State": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "启用状态"
           }
         }
       }
     },
-    "Fades the wallpaper back while you work elsewhere, and brings it up again when you click the desktop. A page bright enough to enjoy when you look at it is often too loud behind a document you are reading." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "你在别处工作时让壁纸淡下去，点桌面时再亮回来。一个看着舒服的网页，垫在你正在读的文档后面往往就太吵了。"
+    "Error: %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "出错：%@"
           }
         }
       }
     },
-    "Feedback Welcome" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "欢迎反馈"
+    "Fades the wallpaper back while you work elsewhere, and brings it up again when you click the desktop. A page bright enough to enjoy when you look at it is often too loud behind a document you are reading.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "你在别处工作时让壁纸淡下去，点桌面时再亮回来。一个看着舒服的网页，垫在你正在读的文档后面往往就太吵了。"
           }
         }
       }
     },
-    "Follow the system" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "跟随系统"
+    "Feedback Welcome": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "欢迎反馈"
           }
         }
       }
     },
-    "For a website pinned to a particular display. On, it moves to the main display until that one is plugged back in — which is what Nifro has always done, and what macOS does with an ordinary window. Off, it goes away with its display, the way the desktop picture on that screen does. Either way the website keeps the display you chose for it." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "针对指定了显示器的网站。打开：它会移到主显示器上，直到那台显示器插回来 —— 这是 Nifro 一直以来的行为，也是 macOS 对待普通窗口的方式。关闭：它跟着那台显示器一起消失，就像那块屏幕上的桌面图片一样。两种情况下，网站自己记着的显示器都不会变。"
+    "Follow the system": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "跟随系统"
           }
         }
       }
     },
-    "For websites that do not set their own. A website with its own schedule — set in its settings — ignores this." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "供没有自己设定的网站使用。设了自己节奏的网站（在该网站的设置里）不受这里影响。"
+    "For a website pinned to a particular display. On, it moves to the main display until that one is plugged back in — which is what Nifro has always done, and what macOS does with an ordinary window. Off, it goes away with its display, the way the desktop picture on that screen does. Either way the website keeps the display you chose for it.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "针对指定了显示器的网站。打开：它会移到主显示器上，直到那台显示器插回来 —— 这是 Nifro 一直以来的行为，也是 macOS 对待普通窗口的方式。关闭：它跟着那台显示器一起消失，就像那块屏幕上的桌面图片一样。两种情况下，网站自己记着的显示器都不会变。"
           }
         }
       }
     },
-    "Forces the website to use its print styles (“@media print”) if any. Some websites have a simpler presentation for printing, for example, Google Calendar." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "强制网站使用它的打印样式（「@media print」），如果有的话。有些网站的打印版式更简洁，比如 Google 日历。"
+    "For websites that do not set their own. A website with its own schedule — set in its settings — ignores this.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "供没有自己设定的网站使用。设了自己节奏的网站（在该网站的设置里）不受这里影响。"
           }
         }
       }
     },
-    "Freed %@" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已释放 %@"
+    "Forces the website to use its print styles (“@media print”) if any. Some websites have a simpler presentation for printing, for example, Google Calendar.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "强制网站使用它的打印样式（「@media print」），如果有的话。有些网站的打印版式更简洁，比如 Google 日历。"
           }
         }
       }
     },
-    "From" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "从"
+    "Freed %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已释放 %@"
           }
         }
       }
     },
-    "General" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "通用"
+    "From": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从"
           }
         }
       }
     },
-    "Get %@…" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "获取 %@…"
+    "General": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "通用"
           }
         }
       }
     },
-    "Get Current Website" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "获取当前网站"
+    "Get %@…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "获取 %@…"
           }
         }
       }
     },
-    "Get Enabled State" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "获取启用状态"
+    "Get Current Website": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "获取当前网站"
           }
         }
       }
     },
-    "Get Started with Nifro" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "开始使用 Nifro"
+    "Get Enabled State": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "获取启用状态"
           }
         }
       }
     },
-    "Get the current enabled state of Nifro" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "获取 Nifro 当前的启用状态"
+    "Get Started with Nifro": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "开始使用 Nifro"
           }
         }
       }
     },
-    "GitHub Repository" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub 仓库"
+    "Get the current enabled state of Nifro": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "获取 Nifro 当前的启用状态"
           }
         }
       }
     },
-    "Hide menu bar icon" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "隐藏菜单栏图标"
+    "GitHub Repository": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GitHub 仓库"
           }
         }
       }
     },
-    "Hold to use the page" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "按住以操作网页"
+    "Hide menu bar icon": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隐藏菜单栏图标"
           }
         }
       }
     },
-    "How far back the wallpaper sits. Browsing Mode always uses full opacity, whatever this says, because a page you are about to click should not be half transparent." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "壁纸退到多后面。浏览模式下始终是完全不透明的，不管这里设成多少——一个你正要去点的页面不该是半透明的。"
+    "Hold to use the page": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按住以操作网页"
           }
         }
       }
     },
-    "How often a page goes stale is a property of the page: a calendar is wrong after fifteen minutes, a poster never is. Off follows the interval in Settings." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "一个页面多久过时，是页面自己的性质：日历过十五分钟就不对了，海报永远不会。关闭则跟随「设置」里的间隔。"
+    "How far back the wallpaper sits. Browsing Mode always uses full opacity, whatever this says, because a page you are about to click should not be half transparent.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "壁纸退到多后面。浏览模式下始终是完全不透明的，不管这里设成多少——一个你正要去点的页面不该是半透明的。"
           }
         }
       }
     },
-    "If a website requires login, you should disable this setting while logging in as the website might require you to navigate to a different page, and you don't want that to open in a browser instead of Nifro." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "如果网站需要登录，登录期间应该关掉这个设置：网站可能要求你跳转到别的页面，而你不希望那个页面开在浏览器里而不是 Nifro 里。"
+    "How often a page goes stale is a property of the page: a calendar is wrong after fifteen minutes, a poster never is. Off follows the interval in Settings.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "一个页面多久过时，是页面自己的性质：日历过十五分钟就不对了，海报永远不会。关闭则跟随「设置」里的间隔。"
           }
         }
       }
     },
-    "If you don't currently see the website, you might need to hide some windows to reveal the desktop." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "如果现在看不到网站，可能需要收起一些窗口把桌面露出来。"
+    "If a website requires login, you should disable this setting while logging in as the website might require you to navigate to a different page, and you don't want that to open in a browser instead of Nifro.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "如果网站需要登录，登录期间应该关掉这个设置：网站可能要求你跳转到别的页面，而你不希望那个页面开在浏览器里而不是 Nifro 里。"
           }
         }
       }
     },
-    "If you need to access the Nifro menu, launch the app again to reveal the menu bar icon for 5 seconds." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "需要用到 Nifro 菜单时，再次启动这个 app，菜单栏图标会出现 5 秒。"
+    "If you don't currently see the website, you might need to hide some windows to reveal the desktop.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "如果现在看不到网站，可能需要收起一些窗口把桌面露出来。"
           }
         }
       }
     },
-    "Incorrect directory." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "目录不对。"
+    "If you need to access the Nifro menu, launch the app again to reveal the menu bar icon for 5 seconds.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要用到 Nifro 菜单时，再次启动这个 app，菜单栏图标会出现 5 秒。"
           }
         }
       }
     },
-    "Inject your own CSS or JavaScript into this website. Most websites need neither." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "给这个网站注入你自己的 CSS 或 JavaScript。绝大多数网站两个都不需要。"
+    "Incorrect directory.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "目录不对。"
           }
         }
       }
     },
-    "Invalid URL for the “add” command." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "「add」命令的网址无效。"
+    "Inject your own CSS or JavaScript into this website. Most websites need neither.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "给这个网站注入你自己的 CSS 或 JavaScript。绝大多数网站两个都不需要。"
           }
         }
       }
     },
-    "Invert colors" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "反转颜色"
+    "Invalid URL for the “add” command.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "「add」命令的网址无效。"
           }
         }
       }
     },
-    "Is Current" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "是当前网站"
+    "Invert colors": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "反转颜色"
           }
         }
       }
     },
-    "Is Enabled" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已启用"
+    "Is Current": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "是当前网站"
           }
         }
       }
     },
-    "JavaScript" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "JavaScript"
+    "Is Enabled": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已启用"
           }
         }
       }
     },
-    "Keep a wallpaper when its display is unplugged" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "显示器拔掉后，保留它上面的壁纸"
+    "JavaScript": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "JavaScript"
           }
         }
       }
     },
-    "Keep" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "保留"
+    "Keep": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保留"
           }
         }
       }
     },
-    "Keep changes?" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "保留更改吗？"
+    "Keep a wallpaper when its display is unplugged": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示器拔掉后，保留它上面的壁纸"
           }
         }
       }
     },
-    "Keep the website above all other windows while browsing mode is active." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "浏览模式期间让网站保持在所有窗口之上。"
+    "Keep changes?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保留更改吗？"
           }
         }
       }
     },
-    "Language" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "语言"
+    "Keep the website above all other windows while browsing mode is active.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浏览模式期间让网站保持在所有窗口之上。"
           }
         }
       }
     },
-    "Later" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "稍后"
+    "Language": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "语言"
           }
         }
       }
     },
-    "Launch at login" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "登录时启动"
+    "Later": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "稍后"
           }
         }
       }
     },
-    "Lets you use the page without switching to Browsing Mode. The window then stops letting clicks through, so your desktop icons sit behind it, and the page has to keep rendering." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "不用切到浏览模式就能操作网页。代价是窗口不再让点击穿过去，桌面图标会被挡在后面，而且网页必须一直渲染。"
+    "Launch at login": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录时启动"
           }
         }
       }
     },
-    "Loads the page even though its certificate is not one macOS trusts. For a device on your own network — a router, a NAS, a dashboard on a Raspberry Pi — that is normal and this is the switch for it. On a page from the public internet an untrusted certificate means somebody may be reading or altering what you load, so leave it off there." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "即使证书不被 macOS 信任也照样加载。对你自己网络里的设备——路由器、NAS、树莓派上的仪表盘——这很正常，这个开关就是为它准备的。而对来自公网的页面，证书不受信任意味着可能有人在读或改你加载的内容，那里请保持关闭。"
+    "Lets you use the page without switching to Browsing Mode. The window then stops letting clicks through, so your desktop icons sit behind it, and the page has to keep rendering.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不用切到浏览模式就能操作网页。代价是窗口不再让点击穿过去，桌面图标会被挡在后面，而且网页必须一直渲染。"
           }
         }
       }
     },
-    "Local Website…" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "本地网页…"
+    "Loads the page even though its certificate is not one macOS trusts. For a device on your own network — a router, a NAS, a dashboard on a Raspberry Pi — that is normal and this is the switch for it. On a page from the public internet an untrusted certificate means somebody may be reading or altering what you load, so leave it off there.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "即使证书不被 macOS 信任也照样加载。对你自己网络里的设备——路由器、NAS、树莓派上的仪表盘——这很正常，这个开关就是为它准备的。而对来自公网的页面，证书不受信任意味着可能有人在读或改你加载的内容，那里请保持关闭。"
           }
         }
       }
     },
-    "Log In" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "登录"
+    "Local Website…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "本地网页…"
           }
         }
       }
     },
-    "Manage Websites…" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "管理网站…"
+    "Log In": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录"
           }
         }
       }
     },
-    "More ideas" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "更多灵感"
+    "Main Display": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "主显示器"
           }
         }
       }
     },
-    "More information" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "更多说明"
+    "Manage Websites…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "管理网站…"
           }
         }
       }
     },
-    "Move the wallpaper until it shows what you want. Drag or scroll to move it, pinch to zoom." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在壁纸上摆一个取景框：拖动或滚动移动它，捏合改大小。框住的部分会填满整个屏幕。"
+    "More ideas": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更多灵感"
           }
         }
       }
     },
-    "Moves to the next website on each display in turn. Websites with hours set are skipped outside them." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在每块屏幕上依次切到下一个网站。设了时段的网站在时段外会被跳过。"
+    "More information": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更多说明"
           }
         }
       }
     },
-    "Muted" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "静音"
+    "Move the wallpaper until it shows what you want. Drag or scroll to move it, pinch to zoom.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在壁纸上摆一个取景框：拖动或滚动移动它，捏合改大小。框住的部分会填满整个屏幕。"
           }
         }
       }
     },
-    "Never" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "从不"
+    "Moves to the next website on each display in turn. Websites with hours set are skipped outside them.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在每块屏幕上依次切到下一个网站。设了时段的网站在时段外会被跳过。"
           }
         }
       }
     },
-    "Next" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下一个"
+    "Muted": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "静音"
           }
         }
       }
     },
-    "Next website" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "下一个网站"
+    "Never": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从不"
           }
         }
       }
     },
-    "Nifro follows your Mac's language unless you pick one here. A language that is only half translated falls back to English rather than showing anything raw." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nifro 默认跟随你 Mac 的语言，除非你在这里选一个。翻译不全的语言会退回英文，而不是显示原始标识。"
+    "Next": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下一个"
           }
         }
       }
     },
-    "Nifro is open source under the MIT licence." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nifro 以 MIT 许可开源。"
+    "Next website": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "下一个网站"
           }
         }
       }
     },
-    "No Websites" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "还没有网站"
+    "Nifro follows your Mac's language unless you pick one here. A language that is only half translated falls back to English rather than showing anything raw.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nifro 默认跟随你 Mac 的语言，除非你在这里选一个。翻译不全的语言会退回英文，而不是显示原始标识。"
           }
         }
       }
     },
-    "No internet connection" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "没有网络连接"
+    "Nifro is open source under the MIT licence.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nifro 以 MIT 许可开源。"
           }
         }
       }
     },
-    "Not showing" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "未显示"
+    "No Website": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无网站"
           }
         }
       }
     },
-    "Not yet implemented." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "尚未实现。"
+    "No Websites": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还没有网站"
           }
         }
       }
     },
-    "Nothing left to clear" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已经没有可清的了"
+    "No internet connection": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有网络连接"
           }
         }
       }
     },
-    "Nothing matches" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "没有匹配的网站"
+    "Not showing": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "未显示"
           }
         }
       }
     },
-    "Once a day. Nifro mentions a newer version in the menu and nowhere else — it does not interrupt, and it never installs anything." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "每天一次。有新版本时 Nifro 只在菜单里提一句，不打断你，也从不自动安装任何东西。"
+    "Not yet implemented.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "尚未实现。"
           }
         }
       }
     },
-    "Only show at certain hours" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "只在特定时段显示"
+    "Nothing left to clear": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已经没有可清的了"
           }
         }
       }
     },
-    "Opacity" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "不透明度"
+    "Nothing matches": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有匹配的网站"
           }
         }
       }
     },
-    "Open Frame" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "打开框架"
+    "Once a day. Nifro mentions a newer version in the menu and nowhere else — it does not interrupt, and it never installs anything.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每天一次。有新版本时 Nifro 只在菜单里提一句，不打断你，也从不自动安装任何东西。"
           }
         }
       }
     },
-    "Open Image" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "打开图片"
+    "Only show at certain hours": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "只在特定时段显示"
           }
         }
       }
     },
-    "Open Link" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "打开链接"
+    "Opacity": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不透明度"
           }
         }
       }
     },
-    "Open Video" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "打开视频"
+    "Open Frame": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开框架"
           }
         }
       }
     },
-    "Open external links in default browser" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在默认浏览器中打开外部链接"
+    "Open Image": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开图片"
           }
         }
       }
     },
-    "Pages that work well as wallpapers. Adding one brings its recommended settings with it." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "适合当壁纸的网页。添加时会一并带上它推荐的设置。"
+    "Open Link": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开链接"
           }
         }
       }
     },
-    "Password" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "密码"
+    "Open Video": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开视频"
           }
         }
       }
     },
-    "Permission" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "授权"
+    "Open external links in default browser": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在默认浏览器中打开外部链接"
           }
         }
       }
     },
-    "Plays sound" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "有声音"
+    "Pages that work well as wallpapers. Adding one brings its recommended settings with it.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "适合当壁纸的网页。添加时会一并带上它推荐的设置。"
           }
         }
       }
     },
-    "Please choose a directory that contains a “index.html” file." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "请选择一个含有「index.html」文件的目录。"
+    "Password": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "密码"
           }
         }
       }
     },
-    "Points the stored website at the URL currently loaded" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "把保存的网址改成当前正在显示的地址"
+    "Permission": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "授权"
           }
         }
       }
     },
-    "Previous" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "上一个"
+    "Playing sound": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在发声"
           }
         }
       }
     },
-    "Previous website" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "上一个网站"
+    "Plays sound": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "有声音"
           }
         }
       }
     },
-    "Put the page back where it was" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "把页面放回原来的位置"
+    "Please choose a directory that contains a “index.html” file.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请选择一个含有「index.html」文件的目录。"
           }
         }
       }
     },
-    "Quit %@" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "退出 %@"
+    "Previous": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上一个"
           }
         }
       }
     },
-    "Random" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "随机"
+    "Previous website": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "上一个网站"
           }
         }
       }
     },
-    "Random website" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "随机网站"
+    "Put the page back where it was": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "把页面放回原来的位置"
           }
         }
       }
     },
-    "Region" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "区域"
+    "Quit %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "退出 %@"
           }
         }
       }
     },
-    "Reload" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "重新加载"
+    "Quit Nifro": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "退出 Nifro"
           }
         }
       }
     },
-    "Reload Website" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "重新加载网站"
+    "Random": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "随机"
           }
         }
       }
     },
-    "Reload every" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "刷新间隔"
+    "Random website": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "随机网站"
           }
         }
       }
     },
-    "Reload interval" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "刷新间隔"
+    "Region": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "区域"
           }
         }
       }
     },
-    "Reload on its own schedule" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "按自己的节奏刷新"
+    "Release every display following this one": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "解除所有跟随这块显示器的同步"
           }
         }
       }
     },
-    "Reload website" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "重新加载网站"
+    "Reload": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新加载"
           }
         }
       }
     },
-    "Reload when the Mac wakes" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mac 唤醒时重新加载"
+    "Reload Website": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新加载网站"
           }
         }
       }
     },
-    "Reloads the current website in Nifro." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "重新加载 Nifro 当前的网站。"
+    "Reload every": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刷新间隔"
           }
         }
       }
     },
-    "Remove Websites" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "移除网站"
+    "Reload interval": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "刷新间隔"
           }
         }
       }
     },
-    "Remove websites ${websites}" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "移除网站 ${websites}"
+    "Reload on its own schedule": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按自己的节奏刷新"
           }
         }
       }
     },
-    "Removes the given websites from Nifro." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "从 Nifro 中移除指定的网站。"
+    "Reload website": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新加载网站"
           }
         }
       }
     },
-    "Reopen Nifro to change the language?" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "重新打开 Nifro 以切换语言？"
+    "Reload when the Mac wakes": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac 唤醒时重新加载"
           }
         }
       }
     },
-    "Reopen Now" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "立即重新打开"
+    "Reloads the current website in Nifro.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新加载 Nifro 当前的网站。"
           }
         }
       }
     },
-    "Report a Problem or Request a Feature…" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "报告问题或提出需求…"
+    "Remove Websites": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除网站"
           }
         }
       }
     },
-    "Report a problem" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "报告问题"
+    "Remove websites ${websites}": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "移除网站 ${websites}"
           }
         }
       }
     },
-    "Returns the current website in Nifro." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "返回 Nifro 当前的网站。"
+    "Removes the given websites from Nifro.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从 Nifro 中移除指定的网站。"
           }
         }
       }
     },
-    "Returns the websites in Nifro." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "返回 Nifro 里的网站列表。"
+    "Reopen Nifro to change the language?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重新打开 Nifro 以切换语言？"
           }
         }
       }
     },
-    "Returns whether Nifro is currently enabled." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "返回 Nifro 当前是否启用。"
+    "Reopen Now": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "立即重新打开"
           }
         }
       }
     },
-    "Revert" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "还原"
+    "Report a Problem or Request a Feature…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "报告问题或提出需求…"
           }
         }
       }
     },
-    "Rotate between websites every" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "轮换间隔"
+    "Report a problem": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "报告问题"
           }
         }
       }
     },
-    "Search" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "搜索"
+    "Returns the current website in Nifro.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "返回 Nifro 当前的网站。"
           }
         }
       }
     },
-    "Search by name or address" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "按名称或地址搜索"
+    "Returns the websites in Nifro.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "返回 Nifro 里的网站列表。"
           }
         }
       }
     },
-    "Set Current Website" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "设置当前网站"
+    "Returns whether Nifro is currently enabled.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "返回 Nifro 当前是否启用。"
           }
         }
       }
     },
-    "Set Enabled State" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "设置启用状态"
+    "Revert": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "还原"
           }
         }
       }
     },
-    "Set as Current" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "设为当前"
+    "Rotate between websites every": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "轮换间隔"
           }
         }
       }
     },
-    "Set current website to ${website}" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "把当前网站设为 ${website}"
+    "Rotating at random": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "随机轮播"
           }
         }
       }
     },
-    "Sets the current website in Nifro to the given website." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "把 Nifro 的当前网站设为指定的网站。"
+    "Rotating in order": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按顺序轮播"
           }
         }
       }
     },
-    "Sets the enabled state of Nifro." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "设置 Nifro 的启用状态。"
+    "Search": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "搜索"
           }
         }
       }
     },
-    "Settings…" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "设置…"
+    "Search by name or address": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "按名称或地址搜索"
           }
         }
       }
     },
-    "Shortcuts" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "快捷键"
+    "Set Current Website": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置当前网站"
           }
         }
       }
     },
-    "Show Menu Bar Icon" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "显示菜单栏图标"
+    "Set Enabled State": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置启用状态"
           }
         }
       }
     },
-    "Show Whole Page" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "显示整页"
+    "Set as Current": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设为当前"
           }
         }
       }
     },
-    "Show on" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "显示在"
+    "Set current website to ${website}": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "把当前网站设为 ${website}"
           }
         }
       }
     },
-    "Show on every Space" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "在每个「桌面」上显示"
+    "Sets the current website in Nifro to the given website.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "把 Nifro 的当前网站设为指定的网站。"
           }
         }
       }
     },
-    "Showing" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "正在显示"
+    "Sets the enabled state of Nifro.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置 Nifro 的启用状态。"
           }
         }
       }
     },
-    "Site Gallery" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "推荐站点"
+    "Settings…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "设置…"
           }
         }
       }
     },
-    "Site Gallery…" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "推荐站点…"
+    "Shortcuts": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "快捷键"
           }
         }
       }
     },
-    "Sound" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "声音"
+    "Show Menu Bar Icon": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示菜单栏图标"
           }
         }
       }
     },
-    "Spaces are the desktops you switch between in Mission Control, not your displays. Off means the wallpaper stays on whichever Space was in front when Nifro started. Which display a website goes on is set on the website itself, not here." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "「桌面」指的是调度中心里来回切换的那些虚拟桌面，不是显示器。关掉时，壁纸只留在 Nifro 启动时最前面的那个桌面上。网站放在哪块显示器上，是在网站自己的设置里定的，不在这里。"
+    "Show Whole Page": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示整页"
           }
         }
       }
     },
-    "Starts Nifro when you log in, so the wallpaper is already up when you reach the desktop." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "登录时自动启动 Nifro，你到桌面时壁纸已经在了。"
+    "Show on": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示在"
           }
         }
       }
     },
-    "Submit a Site…" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "提交站点…"
+    "Show the same wallpaper as another display": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "与另一块显示器显示同一个壁纸"
           }
         }
       }
     },
-    "Switch" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "切换网站"
+    "Show what %@ shows": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示 %@ 正在显示的内容"
           }
         }
       }
     },
-    "Switch to Next Website" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "切换到下一个网站"
+    "Showing": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "正在显示"
           }
         }
       }
     },
-    "Switch to Previous Website" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "切换到上一个网站"
+    "Site Gallery": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "推荐站点"
           }
         }
       }
     },
-    "Switch to Random Website" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "切换到随机网站"
+    "Site Gallery…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "推荐站点…"
           }
         }
       }
     },
-    "Switches Nifro to a random website in the list." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "切换到列表里的随机一个网站。"
+    "Sound": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "声音"
           }
         }
       }
     },
-    "Switches Nifro to the next website in the list." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "切换到列表里的下一个网站。"
+    "Starts Nifro when you log in, so the wallpaper is already up when you reach the desktop.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录时自动启动 Nifro，你到桌面时壁纸已经在了。"
           }
         }
       }
     },
-    "Switches Nifro to the previous website in the list." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "切换到列表里的上一个网站。"
+    "Staying on this website": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "固定在这个网站"
           }
         }
       }
     },
-    "The page is laid out at the size of the wallpaper — your screen without the menu bar strip — so `100vw`, `100vh` and `@media (min-aspect-ratio: 16/9)` all mean that area. A rule written for a 16:10 laptop and a rule written for a 16:9 monitor can live in the same stylesheet; branch on the aspect ratio rather than guessing.\n\nNifro adds two classes to `<html>` you can target: `is-nifro-app`, always, and `nifro-is-browsing-mode` while Browsing Mode is on — useful for showing controls only when the page can be clicked. Both also exist under their Plash names, so stylesheets written for Plash keep working.\n\nZooming into a region is not done with CSS and cannot be seen from CSS. It is the web view's own magnification, and the page is deliberately never told: if the layout changed when you zoomed, the part you framed would stop being the part you get." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "页面是按壁纸的大小排版的——你的屏幕去掉菜单栏那一条——所以 `100vw`、`100vh` 和 `@media (min-aspect-ratio: 16/9)` 指的都是那块区域。为 16:10 笔记本写的规则和为 16:9 显示器写的规则可以放在同一份样式表里，按宽高比分支，不要靠猜。\n\nNifro 会往 `<html>` 上加两个类供你选中：`is-nifro-app` 一直都在，`nifro-is-browsing-mode` 只在浏览模式开着时出现——适合让某些控件只在页面可点时才显示。两个类都同时保留了 Plash 时代的名字，为 Plash 写的样式表照样能用。\n\n放大到某个区域不是用 CSS 做的，CSS 也看不见它。那是 web view 自己的缩放，而且是故意不告诉页面的：如果缩放时布局跟着变，你框出来的那一部分就不再是你拿到的那一部分了。"
+    "Stop following %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不再跟随 %@"
           }
         }
       }
     },
-    "The site gallery is a list of pages that work well as wallpapers, each with the settings that make it work. Adding one takes a single file, no Swift and no Xcode." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "推荐站点是一份适合当壁纸的网页清单，每条都带着让它好用的那些设置。添加一条只需要一个文件，不用写 Swift，也不用开 Xcode。"
+    "Submit a Site…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "提交站点…"
           }
         }
       }
     },
-    "The wallpaper comes back up on its own." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "壁纸会自己回来。"
+    "Switch": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换网站"
           }
         }
       }
     },
-    "Title" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "标题"
+    "Switch to Next Website": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换到下一个网站"
           }
         }
       }
     },
-    "Toggle" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "切换"
+    "Switch to Previous Website": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换到上一个网站"
           }
         }
       }
     },
-    "Toggle Browsing Mode" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "切换浏览模式"
+    "Switch to Random Website": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换到随机网站"
           }
         }
       }
     },
-    "Toggle browsing mode" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "切换浏览模式"
+    "Switched off": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已关闭"
           }
         }
       }
     },
-    "Toggle enabled state" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "切换启用状态"
+    "Switches Nifro to a random website in the list.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换到列表里的随机一个网站。"
           }
         }
       }
     },
-    "Toggle sound" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "切换声音"
+    "Switches Nifro to the next website in the list.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换到列表里的下一个网站。"
           }
         }
       }
     },
-    "Toggles “Browsing Mode” for Nifro." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "切换 Nifro 的「浏览模式」。"
+    "Switches Nifro to the previous website in the list.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换到列表里的上一个网站。"
           }
         }
       }
     },
-    "Turn" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "切换"
+    "The page is laid out at the size of the wallpaper — your screen without the menu bar strip — so `100vw`, `100vh` and `@media (min-aspect-ratio: 16/9)` all mean that area. A rule written for a 16:10 laptop and a rule written for a 16:9 monitor can live in the same stylesheet; branch on the aspect ratio rather than guessing.\n\nNifro adds two classes to `<html>` you can target: `is-nifro-app`, always, and `nifro-is-browsing-mode` while Browsing Mode is on — useful for showing controls only when the page can be clicked. Both also exist under their Plash names, so stylesheets written for Plash keep working.\n\nZooming into a region is not done with CSS and cannot be seen from CSS. It is the web view's own magnification, and the page is deliberately never told: if the layout changed when you zoomed, the part you framed would stop being the part you get.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "页面是按壁纸的大小排版的——你的屏幕去掉菜单栏那一条——所以 `100vw`、`100vh` 和 `@media (min-aspect-ratio: 16/9)` 指的都是那块区域。为 16:10 笔记本写的规则和为 16:9 显示器写的规则可以放在同一份样式表里，按宽高比分支，不要靠猜。\n\nNifro 会往 `<html>` 上加两个类供你选中：`is-nifro-app` 一直都在，`nifro-is-browsing-mode` 只在浏览模式开着时出现——适合让某些控件只在页面可点时才显示。两个类都同时保留了 Plash 时代的名字，为 Plash 写的样式表照样能用。\n\n放大到某个区域不是用 CSS 做的，CSS 也看不见它。那是 web view 自己的缩放，而且是故意不告诉页面的：如果缩放时布局跟着变，你框出来的那一部分就不再是你拿到的那一部分了。"
           }
         }
       }
     },
-    "URL" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "网址"
+    "The site gallery is a list of pages that work well as wallpapers, each with the settings that make it work. Adding one takes a single file, no Swift and no Xcode.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "推荐站点是一份适合当壁纸的网页清单，每条都带着让它好用的那些设置。添加一条只需要一个文件，不用写 Swift，也不用开 Xcode。"
           }
         }
       }
     },
-    "URL Host" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "网址主机"
+    "The wallpaper comes back up on its own.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "壁纸会自己回来。"
           }
         }
       }
     },
-    "URL to a rule list" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "规则列表的网址"
+    "These act on the display your pointer is on. Automations and nifro:// commands act on the main display, since they can run with nobody at the Mac.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这些作用于鼠标所在的那块显示器。自动化和 nifro:// 命令作用于主显示器，因为它们可能在没人用电脑的时候运行。"
           }
         }
       }
     },
-    "Undo the region and go back to the whole page." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "取消区域，回到整页。"
+    "This site sends Nifro somewhere else every time it loads: %@. Click to save that address instead.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这个站点每次加载都会把 Nifro 送到别处：%@。点一下就把那个地址存下来。"
           }
         }
       }
     },
-    "Until" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "到"
+    "Title": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "标题"
           }
         }
       }
     },
-    "Up to date" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已是最新"
+    "Toggle": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换"
           }
         }
       }
     },
-    "Update Website to Current" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "把网站更新为当前地址"
+    "Toggle Browsing Mode": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换浏览模式"
           }
         }
       }
     },
-    "Update to %@…" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "更新到 %@…"
+    "Toggle browsing mode": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换浏览模式"
           }
         }
       }
     },
-    "Use print styles" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "使用打印样式"
+    "Toggle enabled state": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换启用状态"
           }
         }
       }
     },
-    "Use the player-only page" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "改用纯播放器页面"
+    "Toggle sound": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换声音"
           }
         }
       }
     },
-    "Useful with rotation. A news page in the morning, something calmer at night. A window that runs past midnight, 22 to 6, works." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "配合轮换很好用。早上放新闻，晚上放安静点的。跨过午夜的时段（22 到 6）也可以。"
+    "Toggles “Browsing Mode” for Nifro.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换 Nifro 的「浏览模式」。"
           }
         }
       }
     },
-    "Username" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "用户名"
+    "Turn": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "切换"
           }
         }
       }
     },
-    "Version %@" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "版本 %@"
+    "URL": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网址"
           }
         }
       }
     },
-    "Website" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "网站"
+    "URL Host": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网址主机"
           }
         }
       }
     },
-    "Websites" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "网站"
+    "URL to a rule list": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "规则列表的网址"
           }
         }
       }
     },
-    "Welcome to Nifro!" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "欢迎使用 Nifro！"
+    "Undo the region and go back to the whole page.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "取消区域，回到整页。"
           }
         }
       }
     },
-    "When in dark mode" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "深色模式下"
+    "Until": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "到"
           }
         }
       }
     },
-    "Whether this website is allowed to make noise. Remembered per website, so a clock stays silent and a live stream does not." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "这个网站能不能出声。按网站分别记住，所以时钟保持安静而直播不会。"
+    "Up to date": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已是最新"
           }
         }
       }
     },
-    "Whether this website may make noise. Remembered for this website, so a clock stays silent and a live stream does not, and it is the same setting as Sound in the Nifro menu — change it in either place. Muting works by holding every audio and video element on the page muted, so it covers media and not sound a page generates with the Web Audio API." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "这个网站能不能出声。按网站分别记住，所以时钟保持安静而直播不会；它和 Nifro 菜单里的「声音」是同一个设置，在哪边改都行。静音的做法是把页面上每个音频和视频元素保持静音，所以覆盖媒体元素，不覆盖网页用 Web Audio API 生成的声音。"
+    "Update to %@…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "更新到 %@…"
           }
         }
       }
     },
-    "Whole page" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "整页"
+    "Use print styles": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用打印样式"
           }
         }
       }
     },
-    "You could, for example," : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "比如，你可以让它"
+    "Use the player-only page": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "改用纯播放器页面"
           }
         }
       }
     },
-    "Zoom In" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "放大"
+    "Useful with rotation. A news page in the morning, something calmer at night. A window that runs past midnight, 22 to 6, works.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "配合轮换很好用。早上放新闻，晚上放安静点的。跨过午夜的时段（22 到 6）也可以。"
           }
         }
       }
     },
-    "Zoom Out" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "缩小"
+    "Username": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用户名"
           }
         }
       }
     },
-    "^[%lld site](inflect: true) · bundled copy, could not reach GitHub" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld 个站点 · 内置副本，连不上 GitHub"
+    "Version %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "版本 %@"
           }
         }
       }
     },
-    "^[%lld site](inflect: true) · up to date with GitHub" : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld 个站点 · 已与 GitHub 同步"
+    "Website": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网站"
           }
         }
       }
     },
-    "show the time." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "显示时间。"
+    "Websites": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网站"
+          }
+        }
+      }
+    },
+    "Welcome to Nifro!": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "欢迎使用 Nifro！"
+          }
+        }
+      }
+    },
+    "When in dark mode": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "深色模式下"
+          }
+        }
+      }
+    },
+    "Whether this website is allowed to make noise. Remembered per website, so a clock stays silent and a live stream does not.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这个网站能不能出声。按网站分别记住，所以时钟保持安静而直播不会。"
+          }
+        }
+      }
+    },
+    "Whether this website may make noise. Remembered for this website, so a clock stays silent and a live stream does not, and it is the same setting as Sound in the Nifro menu — change it in either place. Muting works by holding every audio and video element on the page muted, so it covers media and not sound a page generates with the Web Audio API.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "这个网站能不能出声。按网站分别记住，所以时钟保持安静而直播不会；它和 Nifro 菜单里的「声音」是同一个设置，在哪边改都行。静音的做法是把页面上每个音频和视频元素保持静音，所以覆盖媒体元素，不覆盖网页用 Web Audio API 生成的声音。"
+          }
+        }
+      }
+    },
+    "Whole page": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "整页"
+          }
+        }
+      }
+    },
+    "You could, for example,": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "比如，你可以让它"
+          }
+        }
+      }
+    },
+    "Zoom In": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "放大"
+          }
+        }
+      }
+    },
+    "Zoom Out": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "缩小"
+          }
+        }
+      }
+    },
+    "^[%lld site](inflect: true) · bundled copy, could not reach GitHub": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 个站点 · 内置副本，连不上 GitHub"
+          }
+        }
+      }
+    },
+    "^[%lld site](inflect: true) · up to date with GitHub": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 个站点 · 已与 GitHub 同步"
+          }
+        }
+      }
+    },
+    "show the time.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示时间。"
           }
         }
       }
     }
   },
-  "version" : "1.0"
+  "version": "1.0"
 }

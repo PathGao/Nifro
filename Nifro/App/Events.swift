@@ -4,18 +4,6 @@ import KeyboardShortcuts
 
 extension AppState {
 	func setUpEvents() {
-		menu.onUpdate = { [self] in
-			updateMenu()
-		}
-
-		menu.onOpen = {
-			KeyboardShortcuts.disable(Shortcut.allNames)
-		}
-
-		menu.onClose = {
-			KeyboardShortcuts.enable(Shortcut.allNames)
-		}
-
 		powerSourceWatcher?.didChangePublisher
 			.sink { [self] _ in
 				guard Defaults[.deactivateOnBattery] else {
@@ -87,15 +75,9 @@ extension AppState {
 
 				// We never destroy the webview, so we have to make sure it's not in browsing mode when there are no websites.
 				if $0.newValue.isEmpty {
-					Defaults[.isBrowsingMode] = false
+					Defaults[.browsingDisplays] = []
+					applyBrowsingMode()
 				}
-			}
-			.store(in: &cancellables)
-
-		Defaults.publisher(.isBrowsingMode)
-			.receive(on: DispatchQueue.main)
-			.sink { [self] change in
-				isBrowsingMode = change.newValue
 			}
 			.store(in: &cancellables)
 
@@ -134,23 +116,9 @@ extension AppState {
 			}
 			.store(in: &cancellables)
 
-		Defaults.publisher(.display, options: [])
-			.sink { [self] _ in
-				rebuildScenes()
-			}
-			.store(in: &cancellables)
-
 		Defaults.publisher(.deactivateOnBattery)
 			.sink { [self] _ in
 				setEnabledStatus()
-			}
-			.store(in: &cancellables)
-
-		Defaults.publisher(.showOnAllSpaces)
-			.sink { [self] change in
-				for scene in scenes {
-					scene.window.collectionBehavior.toggleExistence(.canJoinAllSpaces, shouldExist: change.newValue)
-				}
 			}
 			.store(in: &cancellables)
 

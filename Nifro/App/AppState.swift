@@ -6,16 +6,35 @@ final class AppState: ObservableObject {
 
 	var cancellables = Set<AnyCancellable>()
 
-	let menu = SSMenu()
 	let holdToInteract = HoldToInteract()
 	let powerSourceWatcher = PowerSourceWatcher()
+
+	let displayPanel = DisplayPanelController()
 
 	private(set) lazy var statusItem = with(NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)) {
 		$0.isVisible = true
 		$0.behavior = [.removalAllowed, .terminationOnRemoval]
-		$0.menu = menu
+
+		// A status item with a `menu` opens it on any click and never sends its action, so it has none:
+		// the button handles the click itself and shows the panel.
 		$0.button!.image = .menuBarIcon
 		$0.button!.setAccessibilityTitle(SSApp.name)
+		$0.button!.target = self
+		$0.button!.action = #selector(handleStatusItemClick)
+		$0.button!.sendAction(on: [.leftMouseUp, .rightMouseUp])
+	}
+
+	/**
+	Either button opens the panel.
+
+	The menu is gone. It could only ever describe one display, and everything it did the panel now does
+	per display — including the two items that had no per-display answer at all: Quit and Settings,
+	which are in the footer, and "Update Website to Current", which moved into the website's own
+	settings because it is a rare, permanent edit and a menu is the wrong place to keep one.
+	*/
+	@objc
+	private func handleStatusItemClick() {
+		displayPanel.toggle(relativeTo: statusItemButton)
 	}
 
 	private(set) lazy var statusItemButton = statusItem.button!
@@ -55,8 +74,38 @@ final class AppState: ObservableObject {
 	/**
 	The scene the menu and the settings act on when nothing says otherwise.
 	*/
+	/**
+	The scene a keyboard shortcut acts on: the one the pointer is over.
+
+	A shortcut is pressed by somebody looking at a screen, and until now every one of them went to the
+	display named in Settings instead — so on two displays, pressing Next in front of the monitor
+	changed the laptop.
+
+	Falls back to `primaryScene` when the pointer is not over a wallpaper: it is over a window, over a
+	screen with nothing on it, or the displays are mid-reconfiguration. Silently, because a shortcut
+	that does nothing and says nothing is worse than one that acts somewhere reasonable.
+
+	It returns a *scene*, and callers pass `scene.display` on. Passing `Display.underMouse` straight
+	into the playlist would be a different value from the one the scenes are keyed by — and
+	`randomIterators` is keyed by exactly that, so a display would get two shuffle sequences and the
+	"no repeats until the list is done" promise would quietly stop holding.
+	*/
+	var actingScene: WallpaperScene {
+		guard let pointer = Display.underMouse else {
+			return primaryScene
+		}
+
+		let match = scenes.first {
+			// A scene's `nil` means the main display, so the two have to be compared after that is
+			// spelled out rather than as written.
+			Display.settingsKey(for: $0.display ?? .main) == Display.settingsKey(for: pointer)
+		}
+
+		return match ?? primaryScene
+	}
+
 	var primaryScene: WallpaperScene {
-		if let match = scenes.first(where: { $0.display == Defaults[.display] }) {
+		if let match = scenes.first(where: { $0.display == .main }) {
 			return match
 		}
 
@@ -77,22 +126,53 @@ final class AppState: ObservableObject {
 	*/
 	var currentWebsite: Website? { primaryScene.website }
 
-	var isBrowsingMode = false {
-		didSet {
-			guard isEnabled else {
-				return
-			}
+	/**
+	Whether any display is in Browsing Mode.
 
-			for scene in scenes {
-				scene.window.isInteractive = isBrowsingMode
-				scene.applyOpacity()
-				scene.resetTimer()
-			}
+	Rotation and the schedule pause while somebody is interacting with a page, and that is an app-wide
+	pause: a playlist tick on the other screen still steals focus.
+	*/
+	var isBrowsingMode: Bool { !Defaults[.browsingDisplays].isEmpty }
 
-			// Making the window key is not enough when the app is an accessory. The window comes forward, but keystrokes still go to whatever was active before, so nobody can type into the page. Plash#114.
-			if isBrowsingMode {
-				SSApp.forceActivate()
-			}
+	/**
+	Whether `display` is the one being interacted with.
+	*/
+	func isBrowsingMode(on display: Display?) -> Bool {
+		Defaults[.browsingDisplays].contains(Display.settingsKey(for: display))
+	}
+
+	/**
+	Turn Browsing Mode on or off for one display.
+	*/
+	func setBrowsingMode(_ isOn: Bool, on display: Display?) {
+		let key = Display.settingsKey(for: display)
+
+		if isOn {
+			Defaults[.browsingDisplays].insert(key)
+		} else {
+			Defaults[.browsingDisplays].remove(key)
+		}
+
+		applyBrowsingMode()
+	}
+
+	/**
+	Put every window at the level its display's setting asks for.
+	*/
+	func applyBrowsingMode() {
+		guard isEnabled else {
+			return
+		}
+
+		for scene in scenes {
+			scene.window.isInteractive = isBrowsingMode(on: scene.display)
+			scene.applyOpacity()
+			scene.resetTimer()
+		}
+
+		// Making the window key is not enough when the app is an accessory. The window comes forward, but keystrokes still go to whatever was active before, so nobody can type into the page. Plash#114.
+		if isBrowsingMode {
+			SSApp.forceActivate()
 		}
 	}
 
@@ -109,15 +189,20 @@ final class AppState: ObservableObject {
 			}
 
 			for scene in scenes {
+				// A display switched off on its own stays off when the app comes back on. The app-wide
+				// switch is above this one, not instead of it.
+				guard !scene.isDisabledForDisplay else {
+					scene.suspend()
+					continue
+				}
+
 				scene.resume()
 
-				// Replayed, because `isBrowsingMode.didSet` drops its write while the app is disabled and
-				// nothing else puts it back: `resume()` does not read it, and only an unrelated
-				// `rebuildScenes` ever did. Browsing Mode is reachable while disabled from the menu, which
-				// gates on there being a website rather than on `isEnabled`, and from the global shortcut
-				// and the Shortcuts intent, which gate on nothing — so the menu drew a checkmark over
-				// windows still sitting at `.desktop`. `finishCropSelection` already restores it this way.
-				scene.window.isInteractive = isBrowsingMode
+				// Replayed, because `applyBrowsingMode` returns early while the app is disabled and nothing
+				// else puts it back: `resume()` does not read it, and only an unrelated `rebuildScenes`
+				// ever did. Browsing Mode is reachable while disabled, so the panel drew a lit button over
+				// windows still sitting at `.desktop`.
+				scene.window.isInteractive = isBrowsingMode(on: scene.display)
 
 				scene.loadWebsite()
 				scene.resetTimer()
@@ -274,8 +359,18 @@ final class AppState: ObservableObject {
 			// after its window closed, until the next playlist tick noticed.
 			scene.website = WebsitesController.shared.scheduled(for: scene.display)
 			scene.installContentView()
-			scene.window.isInteractive = isBrowsingMode
+			scene.window.isInteractive = isBrowsingMode(on: scene.display)
 			scene.applyOpacity(animated: false)
+
+			// A rebuild happens on every edit to the website list, and it used to hand every scene a
+			// page and a timer whether or not its display was switched off. So pressing Next on one
+			// display brought back every display that was off, each with a website nobody asked for.
+			guard isEnabled, !scene.isDisabledForDisplay else {
+				scene.suspend()
+				continue
+			}
+
+			scene.resume()
 			scene.resetTimer()
 			scene.resetPlaylistTimer()
 		}
@@ -297,6 +392,31 @@ final class AppState: ObservableObject {
 		Defaults[.latestKnownVersion] = latest
 
 		return UpdateCheck.isNewer(latest, than: SSApp.version) ? .newer(latest) : .upToDate
+	}
+
+	/**
+	Switch one display off, or back on, without touching the others.
+	*/
+	func setDisplayEnabled(_ isEnabledForDisplay: Bool, on display: Display?) {
+		guard let scene = scenes.first(where: { $0.display == display }) else {
+			return
+		}
+
+		scene.isDisabledForDisplay = !isEnabledForDisplay
+
+		guard isEnabled else {
+			// The app is off anyway; the setting is recorded and applies when it comes back.
+			return
+		}
+
+		if isEnabledForDisplay {
+			scene.resume()
+			scene.loadWebsite()
+			scene.resetTimer()
+			scene.resetPlaylistTimer()
+		} else {
+			scene.suspend()
+		}
 	}
 
 	func resetTimer() {
@@ -397,7 +517,7 @@ final class AppState: ObservableObject {
 	*/
 	func applyAudioSetting() {
 		for scene in scenes {
-			scene.webViewController.webView.setAudioMuted(scene.website?.audio != .unmuted)
+			scene.webViewController.webView.setAudioMuted(!scene.shouldPlaySound)
 		}
 	}
 
