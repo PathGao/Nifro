@@ -36,7 +36,11 @@ final class WebViewController: NSViewController {
 
 	var response: HTTPURLResponse?
 
-	private func createWebView() -> SSWebView {
+	/**
+	Build a web view for this scene: the live one, its replacement while a new page loads out of sight,
+	and the empty one that takes over when the page is dropped.
+	*/
+	func createWebView() -> SSWebView {
 		let configuration = WKWebViewConfiguration()
 		configuration.allowsAirPlayForMediaPlayback = false
 
@@ -128,11 +132,6 @@ final class WebViewController: NSViewController {
 					"""
 				)
 			}
-
-			// Google Sheets shows an error message when we use the Safari or Chrome user agent.
-			if website.url.hasDomain("google.com") {
-				webView.customUserAgent = ""
-			}
 		}
 
 		// Hidden from birth. A fresh web view is a blank page, and showing one is a flash of white
@@ -141,13 +140,6 @@ final class WebViewController: NSViewController {
 		webView.isHidden = true
 
 		return webView
-	}
-
-	/**
-	A second web view, configured exactly like the live one, for loading a replacement page out of sight.
-	*/
-	func makeReplacementWebView() -> SSWebView {
-		createWebView()
 	}
 
 	/**
@@ -268,10 +260,12 @@ extension WebViewController: WKNavigationDelegate {
 		// everything it loaded afterwards.
 		if
 			navigationAction.targetFrame?.isMainFrame == true,
-			let host = navigationAction.request.url?.host
+			let url = navigationAction.request.url,
+			// An address with no host is not a site to decide anything about, and the user agent stays
+			// whatever the last real navigation made it.
+			url.host != nil
 		{
-			let useBlankUserAgent = host == "google.com" || host.hasSuffix(".google.com")
-			webView.customUserAgent = useBlankUserAgent ? "" : SSWebView.safariUserAgent
+			webView.customUserAgent = url.hasDomain("google.com") ? "" : SSWebView.safariUserAgent
 		}
 
 		return .allow

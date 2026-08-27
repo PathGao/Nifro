@@ -59,7 +59,7 @@ extension WallpaperScene {
 		// is what tells the panel this display is busy — and a task body does not run until the next
 		// hop, which is long enough for the panel to draw one frame of a column that has not noticed
 		// the click yet.
-		let replacement = webViewController.makeReplacementWebView()
+		let replacement = webViewController.createWebView()
 		pendingWebView = replacement
 
 		pendingLoad = Task { [weak self] in
