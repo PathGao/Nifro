@@ -49,6 +49,29 @@ func currentFlags<Screen: Equatable>(
 }
 
 /**
+Which of the shipped websites goes on which display, the first time the app runs.
+
+The Nth display gets the Nth shipped website: one display shows the first one, two displays show the
+first and the second, and three show three. The rule is stated for any number of displays rather
+than for the one and two cases, because "the first website" alone left every display after the first
+with an empty wallpaper and nothing saying so.
+
+`display` is an index into the attached displays, and `nil` for the first one — a website with no
+display of its own already means "the display in Settings", which is the main display, and the main
+display is the first one. Pinning it explicitly would say the same thing while making the website
+carry a display badge and stop following the setting.
+
+More displays than websites gets the websites; more websites than displays leaves the rest in the
+list, unshown, which is where a list of eight is meant to be. No displays at all still places the
+first website, because there is always one wallpaper: `displaysInUse` falls back to the main display.
+*/
+func firstLaunchPlacements(displayCount: Int, websiteCount: Int) -> [(website: Int, display: Int?)] {
+	(0..<min(max(displayCount, 1), websiteCount)).map {
+		($0, $0 == 0 ? nil : $0)
+	}
+}
+
+/**
 The position after `current` in a rotation of `count` websites, wrapping at the end.
 
 `nil` means no website on this display is marked, which is the state a display should never be left

@@ -16,11 +16,6 @@ Scoped to replacing a page. The first load of the session still goes straight in
 */
 extension WallpaperScene {
 	/**
-	How long to let a replacement load before giving up on it and keeping what is already on screen.
-	*/
-	private static let swapTimeout = Duration.seconds(30)
-
-	/**
 	Whether there is anything on the wallpaper worth keeping while the next page loads.
 
 	A still counts. It used to be only a live page with a URL, which is why entering Browsing Mode on
@@ -42,6 +37,14 @@ extension WallpaperScene {
 	Falls back to loading in place when there is nothing on screen worth protecting.
 	*/
 	func loadBySwapping(_ url: URL?) {
+		// The other half of the gate in `load`. A suspended scene has nothing on screen, so this would
+		// fall through to `load` and be refused there anyway — but "anyway" is the word that stops
+		// being true the first time something switches a display off without suspending it, and the
+		// swap path is the one that spends a whole page fetch before it finds out.
+		guard !isSwitchedOff else {
+			return
+		}
+
 		guard
 			let url,
 			hasSomethingOnScreen
@@ -52,29 +55,29 @@ extension WallpaperScene {
 
 		pendingLoad?.cancel()
 
+		// Built and recorded here rather than as the task's first statement, because `pendingWebView`
+		// is what tells the panel this display is busy — and a task body does not run until the next
+		// hop, which is long enough for the panel to draw one frame of a column that has not noticed
+		// the click yet.
+		let replacement = webViewController.makeReplacementWebView()
+		pendingWebView = replacement
+
 		pendingLoad = Task { [weak self] in
 			guard let self else {
 				return
 			}
 
-			AppState.shared.beginLoadingIndicator()
-
 			defer {
-				AppState.shared.endLoadingIndicator()
-			}
-
-			let replacement = webViewController.makeReplacementWebView()
-
-			defer {
+				// Only if it is still ours. A load started while this one was in flight has already put
+				// its own replacement here, and clearing that would tell the panel the newer load had
+				// finished.
 				if pendingWebView === replacement {
 					pendingWebView = nil
 				}
 			}
 
-			pendingWebView = replacement
-
 			do {
-				try await replacement.loadAndWait(url, timeout: Self.swapTimeout)
+				try await replacement.loadAndWait(url, timeout: Self.loadTimeout)
 			} catch {
 				// The page on screen is still the last one that worked. Leaving it there is the whole point, so the error goes to the tooltip rather than the desktop.
 				guard !Task.isCancelled else {

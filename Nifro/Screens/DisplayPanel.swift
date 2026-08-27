@@ -33,9 +33,19 @@ struct DisplayPanel: View {
 				.padding(.horizontal, 16)
 				.padding(.vertical, 10)
 		}
+		// A popover wears the system's vibrancy, which is tuned for a window over other windows. What is
+		// behind this one is the wallpaper, and a wallpaper is whatever the user pointed it at — a busy
+		// page reads straight through the panel's own labels.
+		//
+		// A thin wash of the window colour over the vibrancy, rather than an opaque background: still
+		// glass, still taking its colour from what is behind it, just less of it. The window colour
+		// because it is the one that already follows the appearance, so this is a pale wash in light
+		// mode and a dark one in dark mode without a second definition.
+		.background(PanelMetrics.glassWash)
 		.task {
-			// The controller drives the refreshes; this is only for the first paint, and for a preview
-			// where there is no controller at all.
+			// The controller puts the columns up before the panel is shown and starts the refreshes
+			// straight after, so this changes nothing in the app. It is here for a preview, where there
+			// is no controller at all and nothing else would ever ask.
 			await model.refresh()
 		}
 	}
@@ -116,25 +126,37 @@ private struct DisplayColumn: View {
 			displayName
 
 			VStack(spacing: 9) {
-				MarqueeText(text: column.websiteName ?? String(localized: "No Website"), isActive: isHovering)
-					.font(.subheadline)
-					.foregroundStyle(.secondary)
-					.frame(width: PanelMetrics.columnWidth, height: 16)
+				VStack(spacing: 9) {
+					MarqueeText(text: column.websiteName ?? String(localized: "No Website"), isActive: isHovering)
+						.font(.subheadline)
+						.foregroundStyle(.secondary)
+						.frame(width: PanelMetrics.columnWidth, height: 16)
 
-				preview
+					preview
 
-				rotationControls
+					rotationControls
+				}
+				.opacity(inertOpacity)
 
+				// Outside the dimming, and only that. It is disabled with the rest of the column, but
+				// while a page is on its way it is also the thing reporting that — and a pulse under a
+				// 0.45 veil is not one.
 				picker
+					.opacity(column.isFollowing ? 0.45 : 1)
 
 				modeButtons
+					.opacity(inertOpacity)
 			}
 			// A follower shows the leader's wallpaper, so its own controls would be arguing with the next
-			// correction five seconds later. Everything below the title is inert; the sync button in the
-			// title is not, because it is how the arrangement is undone and disabling it would leave a
-			// group with no way out if the leader's display went away.
-			.disabled(column.isFollowing)
-			.opacity(column.isFollowing ? 0.45 : 1)
+			// correction five seconds later. A load is the other reason a column cannot be used: the page
+			// being asked for has not arrived, so every control here would be aimed at a display that is
+			// already on its way somewhere.
+			//
+			// Everything below the title is inert for both. The sync button in the title is exempt from
+			// the first and not the second: a follower keeps its way out, because disabling it would
+			// leave a group with no way out at all if the leader's display went away, while a load lasts
+			// a few seconds and lets go of the button by itself.
+			.disabled(column.isFollowing || column.isLoading)
 		}
 		.frame(width: PanelMetrics.columnWidth)
 		.padding(9)
@@ -159,6 +181,16 @@ private struct DisplayColumn: View {
 			isHovering = $0
 		}
 		.animation(.spring(response: 0.2, dampingFraction: 0.82), value: isHovering)
+	}
+
+	/**
+	How dim a control looks while the column cannot be used.
+
+	One value for both reasons, because they mean the same thing to the person looking at it: nothing
+	here will answer right now.
+	*/
+	private var inertOpacity: Double {
+		column.isFollowing || column.isLoading ? 0.45 : 1
 	}
 
 	/**
@@ -294,6 +326,11 @@ private struct DisplayColumn: View {
 				.menuIndicator(.hidden)
 				.fixedSize()
 				.help(String(localized: "Show the same wallpaper as another display"))
+				// The exemption above is from following, not from loading. A group can outlive the
+				// display that leads it, so a follower has to keep its way out — a load cannot outlive
+				// anything, it is a few seconds and it lets go of the button by itself.
+				.disabled(column.isLoading)
+				.opacity(column.isLoading ? 0.45 : 1)
 			}
 		}
 		.frame(maxWidth: PanelMetrics.columnWidth)
@@ -306,6 +343,29 @@ private struct DisplayColumn: View {
 		column.isFollowing || column.syncOptions.contains { if case .releaseAll = $0 { true } else { false } }
 	}
 
+	/**
+	The wallpaper as it is now, or an honest stand-in for it.
+
+	Four states, because four things can be true, and there used to be two. A picture. "Switched off",
+	where the power button beside it is off — the same two words that button's accessibility label
+	uses, because they are describing the same fact and a column should not have two vocabularies for
+	it. "No Website", but only where the display genuinely has none — that used to be what any column
+	without a picture said, so a display whose page simply had not been photographed yet was told it
+	had nothing on it. And the bare rectangle for the rest: the panel opens without pictures and the
+	first refresh fills them in about a frame later, so this is what a picture looks like in the moment
+	before it arrives. An empty rectangle is not mistaken for anything, which is the whole of what is
+	wanted here — the previous opening's photograph, which is what used to be in this space, is
+	mistaken for the page.
+
+	Switched off is read before the website, because it is the reason there is no picture whatever the
+	website says, and it is the answer to the question the user is actually asking at that moment: they
+	pressed the button a moment ago. It is a new state rather than a fourth thing the bare rectangle
+	covers, because the bare rectangle already means "a picture is a frame away" — and the two were
+	indistinguishable, which is how a display that had been switched off could sit there looking like
+	one still taking its first photograph. There was a live thumbnail in this space instead until the
+	load behind it was refused; without a reading of its own, fixing that would have replaced a wrong
+	picture with a rectangle that says nothing.
+	*/
 	@ViewBuilder
 	private var preview: some View {
 		// A fixed shape whatever the display is. A column that took the screen's own aspect would make
@@ -319,7 +379,11 @@ private struct DisplayColumn: View {
 					.resizable()
 					.scaledToFill()
 					.clipShape(RoundedRectangle(cornerRadius: PanelMetrics.pictureRadius))
-			} else {
+			} else if !column.isShowing {
+				Text("Switched off")
+					.font(.callout)
+					.foregroundStyle(.secondary)
+			} else if column.websiteID == nil {
 				Text("No Website")
 					.font(.callout)
 					.foregroundStyle(.secondary)
@@ -415,7 +479,45 @@ private struct DisplayColumn: View {
 			height: PanelMetrics.height
 		)
 		.padding(.horizontal, PanelMetrics.horizontalPadding)
-		.background(.quinary, in: RoundedRectangle(cornerRadius: PanelMetrics.controlRadius))
+		.background { chooserBackground }
 		.disabled(column.choices.isEmpty)
+	}
+
+	/**
+	The chooser's pill, breathing while this display's page is on its way.
+
+	The chooser rather than a spinner somewhere else in the column, because this is the control the
+	website was picked with: a page takes seconds to arrive and nothing on the desktop changes while it
+	does — swap loading holds the old one up on purpose — so the answer belongs on the thing that was
+	just pressed.
+
+	Orange rather than the system accent, for the reason `PanelMetrics.onTint` exists: the accent is
+	whatever the user chose for their Mac and would read as "selected".
+
+	Beside the menu bar icon rather than instead of it, and at the same cadence — both read
+	`WallpaperScene.loadingPulseDuration`, both ease in and out. This one is SwiftUI and that one is
+	CoreAnimation, so the two are never in phase and no amount of machinery here would make them be;
+	what stops them reading as two separate things is that they breathe at the same rate.
+
+	The animation lives on a view that only exists while the load does, so there is no flag to reset
+	and nothing to stop. That also keeps it clear of the panel rebuilding every column twelve times a
+	second: what changes on a rebuild is the column's *values*, and the view's identity — which is what
+	the animation is attached to — is the display's, which does not.
+	*/
+	@ViewBuilder
+	private var chooserBackground: some View {
+		let pill = RoundedRectangle(cornerRadius: PanelMetrics.controlRadius)
+
+		if column.isLoading {
+			pill
+				.fill(PanelMetrics.onTint)
+				.phaseAnimator([0.25, 0.9]) { fill, opacity in
+					fill.opacity(opacity)
+				} animation: { _ in
+					.easeInOut(duration: WallpaperScene.loadingPulseDuration)
+				}
+		} else {
+			pill.fill(.quinary)
+		}
 	}
 }

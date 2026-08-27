@@ -108,11 +108,17 @@ extension WallpaperScene {
 	*/
 	func installMenuBarBandIfNeeded() {
 		guard
-			// Disabled means nothing of this app is on screen but the menu bar icon, and the band is
-			// on screen. Checked here rather than by whoever takes it down, because installing runs
-			// from every content change — taking it down and then letting one of those put it back is
-			// how it survived being disabled in the first place.
-			AppState.shared.isEnabled,
+			// Off means nothing of this app is on screen for this display, and the band is on screen.
+			// Checked here rather than by whoever takes it down, because installing runs from every
+			// content change — taking it down and then letting one of those put it back is how it
+			// survived being disabled in the first place.
+			//
+			// `isSwitchedOff` rather than the app-wide switch this used to name. The argument above is
+			// about a display having nothing on it, and there are two ways for that to be true; only
+			// one of them was ever asked, so a display switched off on its own kept a band wearing the
+			// colour of the page it was no longer showing. The predicate is where a third way would
+			// join, so this line does not have to be found again.
+			!isSwitchedOff,
 			let screen,
 			screen.statusBarThickness > 0
 		else {

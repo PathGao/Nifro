@@ -60,6 +60,12 @@ def main() -> int:
     for path in sorted(SITES.glob("*.yml")) + sorted(SITES.glob("*.yaml")):
         data = yaml.safe_load(path.read_text())
 
+        # The one place the YAML's three-way `audio` becomes the app's two-way "does it make
+        # noise". Both outputs below read this, so the snapshot and the fetched list cannot
+        # disagree about a site. It used to be worked out here for Swift and left as the raw
+        # string for JSON, which is how `Entry` came to expect a field the JSON never had.
+        plays_sound = data.get("audio") == "unmuted"
+
         index.append({
             "name": data["name"],
             "url": data["url"],
@@ -70,8 +76,10 @@ def main() -> int:
             "css": data.get("css"),
             "javaScript": data.get("js") or data.get("javaScript"),
             "requiresLogin": bool(data.get("requiresLogin")),
-            "audio": data.get("audio", "muted"),
-            "featured": bool(data.get("featured")),
+            "playsSound": plays_sound,
+            # The rank, not a flag. One field answers both "does this ship" and "where in the
+            # order", so the two can never disagree — see `featured` in schema.json.
+            "featuredRank": data.get("featured"),
         })
 
         entries.append(
@@ -85,8 +93,8 @@ def main() -> int:
             f"\t\t\tcss: {swift_optional_string(data.get('css'))},\n"
             f"\t\t\tjavaScript: {swift_optional_string(data.get('js') or data.get('javaScript'))},\n"
             f"\t\t\trequiresLogin: {'true' if data.get('requiresLogin') else 'false'},\n"
-            f"\t\t\tplaysSound: {'true' if data.get('audio') == 'unmuted' else 'false'},\n"
-            f"\t\t\tisFeatured: {'true' if data.get('featured') else 'false'}\n"
+            f"\t\t\tplaysSound: {'true' if plays_sound else 'false'},\n"
+            f"\t\t\tfeaturedRank: {data.get('featured') if data.get('featured') else 'nil'}\n"
             "\t\t)"
         )
 
@@ -99,6 +107,12 @@ def main() -> int:
     # The same data as JSON, served straight from the repo. The app fetches this so
     # entries contributed between releases reach people without an app update; the
     # Swift file above is only the offline fallback.
+    #
+    # Field for field the same shape as the Swift array, because both are read back as the
+    # same `SiteCatalog.Entry`. Writing the YAML's own vocabulary here instead — `audio` as a
+    # string where the Swift snapshot said `playsSound: Bool` — is what made the fetch decode
+    # nothing at all from the day it was written. This file is a wire format for one reader,
+    # not a second publication of the YAML; the YAML is already published, in sites/.
     INDEX.write_text(json.dumps(index, ensure_ascii=False, indent=1, sort_keys=True) + "\n")
 
     print(f"wrote {len(entries)} entries to {OUTPUT.relative_to(ROOT)} and {INDEX.relative_to(ROOT)}")

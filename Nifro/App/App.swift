@@ -40,6 +40,12 @@ private struct AppMain: App {
 	}
 
 	private func setUpConfig() {
+		// First, and it has to be: CFBundle resolves this app's language on the first string anything
+		// asks for and caches it for the life of the process. Nifro is English until somebody picks
+		// otherwise, and the only way to say so is to have written it down before that first lookup.
+		// Everything below this line is capable of asking.
+		Localization.applyDefaultIfUnset()
+
 		UserDefaults.standard.register(defaults: [
 			"NSApplicationCrashOnExceptions": true
 		])

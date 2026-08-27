@@ -185,6 +185,29 @@ extension NSStatusBarButton {
 
 	Subtle and short-lived: it runs only while a page is being fetched, which is seconds, and this is
 	an icon somebody chose to keep in their menu bar rather than a progress bar demanding attention.
+
+	This was briefly deleted in favour of the panel's chooser saying the same thing per column, which
+	is the better report when the panel is open — it names the display, which this cannot. The panel is
+	closed almost all the time. Switching website from a keyboard shortcut, from rotation, from the
+	Websites window or from a Shortcuts intent left nothing on screen saying anything at all, for the
+	several seconds the desktop deliberately does not change. So both say it, and they say it at the
+	same cadence — `WallpaperScene.loadingPulseDuration`, which the panel's chooser animates on too.
+	They are CoreAnimation and SwiftUI and cannot share a clock, so they will not be in phase; matching
+	the duration and the easing is what makes them read as one thing happening rather than two.
+
+	Safe to call with the same value repeatedly, which is what the choke point driving it does: turning
+	it on while it is already running leaves the animation where it is rather than restarting it, so a
+	second display beginning a load does not make the icon jump.
+
+	`wantsLayer` below is not what gives the button a layer, and leaving it set does not change how the
+	icon draws. It reads suspicious — a flag set once and never cleared, on a view the system renders —
+	and the first load of every session now reaches it, where before only a website switch did. So it
+	was measured rather than argued about: a build with that line deleted still reports `layer != nil`
+	on this button by the time anything asks, because the status bar window and the button's superview
+	are both layer-backed and AppKit gives every descendant of a layer-backed host its own layer. The
+	line asserts what is already true. The button's own rendering is byte-identical with the flag on,
+	off, and forced back off after a pulse, and the pulse leaves `alphaValue` and `layer.opacity` at 1
+	with no animation attached.
 	*/
 	func setShowingActivity(_ isShowingActivity: Bool) {
 		guard isShowingActivity else {
@@ -201,7 +224,7 @@ extension NSStatusBarButton {
 		let pulse = CABasicAnimation(keyPath: "opacity")
 		pulse.fromValue = 1
 		pulse.toValue = 0.4
-		pulse.duration = 0.7
+		pulse.duration = WallpaperScene.loadingPulseDuration
 		pulse.autoreverses = true
 		pulse.repeatCount = .infinity
 		pulse.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)

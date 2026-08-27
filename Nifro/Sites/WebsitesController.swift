@@ -227,3 +227,90 @@ final class WebsitesController {
 		}
 	}
 }
+
+// The rest of this file is how a catalogue entry becomes a website. It sits here rather than beside
+// the catalogue because `SiteCatalog` itself is now compiled by `Package.swift` as well as by the
+// app, so that `swift test` can decode the committed `sites/index.json` through the real `Entry`.
+// That only works while the catalogue depends on nothing above Foundation — no `Website`, no
+// `Defaults`, no SwiftUI. Everything that does is below.
+
+extension SiteCatalog.Entry {
+	/**
+	Add this site, carrying over the settings that make it work.
+
+	Returns the website it created, so a caller installing several of them can say something about
+	the ones it added rather than about whatever else is in the list. `nil` when the entry's address
+	will not parse.
+	*/
+	@MainActor
+	@discardableResult
+	func add() -> Website.ID? {
+		guard let parsedURL = URL(string: url) else {
+			return nil
+		}
+
+		let binding = WebsitesController.shared.add(parsedURL, title: name)
+
+		binding.wrappedValue.css = css ?? ""
+		binding.wrappedValue.javaScript = javaScript ?? ""
+		binding.wrappedValue.zoom = zoom
+		// Everything the entry carries is a starting point. From here on the website is the user's:
+		// the Sound item in the menu writes to this same field, and nothing puts the entry's answer
+		// back. Whatever the menu shows a tick against is what the page is actually doing.
+		binding.wrappedValue.audio = playsSound ? .unmuted : .muted
+		binding.wrappedValue.reloadInterval = reloadInterval
+
+		return binding.wrappedValue.id
+	}
+}
+
+extension WebsitesController {
+	/**
+	Put the shipped websites in the list, once, on the first launch.
+
+	A wallpaper app that starts with an empty desktop asks the user to go and find something before
+	it has shown them what it does. These are ordinary websites once installed: editable, reorderable
+	and deletable like anything they add themselves, with no trace of having come from us. That
+	matters more than which ones they are. A built-in you cannot delete is not a starting point, it is
+	furniture.
+
+	Guarded on having been done rather than on the list being empty, so someone who deletes all of
+	them does not get them back on the next launch.
+	*/
+	@MainActor
+	func installFeaturedWebsitesIfNeeded() {
+		guard !Defaults[.hasInstalledFeaturedWebsites] else {
+			return
+		}
+
+		Defaults[.hasInstalledFeaturedWebsites] = true
+
+		// What was added, not what is in the list. The guard is on this having been done rather than
+		// on the list being empty, so somebody upgrading into this may already have websites of their
+		// own — and `all.first` was then one of theirs.
+		let installed = SiteCatalog.featured.compactMap { $0.add() }
+		let displays = Display.all
+
+		// Adding makes each one current in turn, so without this the wallpaper would be whichever was
+		// added last. A second display would have been left with nothing at all: every website was on
+		// the main display, so there was only ever one scene to be current in.
+		for placement in firstLaunchPlacements(displayCount: displays.count, websiteCount: installed.count) {
+			let id = installed[placement.website]
+
+			// Pinned, which is what puts a second scene on the second screen: `displaysInUse` is read
+			// off the websites, so a display nothing names has no wallpaper. The first display is left
+			// unpinned on purpose — see `firstLaunchPlacements`.
+			if let index = placement.display {
+				update(id) {
+					$0.display = displays[index]
+				}
+			}
+
+			guard let website = all[id: id] else {
+				continue
+			}
+
+			makeCurrent(website)
+		}
+	}
+}

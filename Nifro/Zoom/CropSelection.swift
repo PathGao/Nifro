@@ -41,9 +41,11 @@ extension AppState {
 		let starting = website.zoom ?? Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 1)
 		scene.content = .live(zoom: nil)
 
-		// The window is normally click-through and behind everything. Neither helps while the user aims a rectangle at it.
-		scene.window.isInteractive = true
-		scene.window.level = .floating
+		// The window is normally click-through and behind everything. Neither helps while the user aims a
+		// rectangle at it. Said as its own mode rather than by borrowing Browsing Mode's flag, because
+		// everything that writes that flag goes on writing it while the mode is up — see
+		// `DesktopWindow.isFramingRegion`.
+		scene.window.isFramingRegion = true
 		scene.window.alphaValue = 1
 		SSApp.forceActivate()
 
@@ -54,8 +56,11 @@ extension AppState {
 		}
 
 		cropSelectionView = view
+
+		// The view claims the keyboard itself, on every move into a window rather than once here — the
+		// page under it goes on loading and reloading, and each of those replaces the window's content
+		// view out from under the overlay.
 		scene.window.contentView?.addSubview(view)
-		scene.window.makeFirstResponder(view)
 	}
 
 	private func finishCropSelection(with zoom: Zoom?) {
@@ -67,7 +72,9 @@ extension AppState {
 		cropSelectionView?.removeFromSuperview()
 		cropSelectionView = nil
 
-		croppedScene?.window.level = .desktop
+		// The level and the click-through follow from these two, so neither is set here. Browsing Mode
+		// is read again rather than remembered: it is reachable while the overlay is up.
+		croppedScene?.window.isFramingRegion = false
 		croppedScene?.window.isInteractive = isBrowsingMode(on: croppedScene?.display)
 
 		for scene in scenes {

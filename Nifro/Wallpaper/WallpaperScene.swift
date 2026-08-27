@@ -47,7 +47,12 @@ final class WallpaperScene {
 	/**
 	The replacement page being loaded out of sight, and the task driving it.
 	*/
-	var pendingWebView: SSWebView?
+	var pendingWebView: SSWebView? {
+		didSet {
+			loadingStateChanged()
+		}
+	}
+
 	var pendingLoad: Task<Void, Never>?
 
 	/**
@@ -60,14 +65,104 @@ final class WallpaperScene {
 	shows exactly this" from "this scene shows an older version of it" and skip the reload in the
 	first case.
 	*/
-	private(set) var loadedWebsite: Website?
+	private(set) var loadedWebsite: Website? {
+		didSet {
+			loadingStateChanged()
+		}
+	}
 
 	var loadedWebsiteID: Website.ID? { loadedWebsite?.id }
 
 	/**
 	Whether the page for the current load has been put on screen yet.
 	*/
-	private(set) var hasRevealedPage = false
+	private(set) var hasRevealedPage = false {
+		didSet {
+			loadingStateChanged()
+		}
+	}
+
+	/**
+	Whether a page is on its way to this display right now.
+
+	Switching website takes a few seconds and said nothing while it did. Swap loading keeps the old
+	page up for all of it — which is the point — so the wallpaper cannot be the thing that reports it,
+	and choosing a website and watching an unchanged desktop reads as the choice not having
+	registered. Two things report it, and this is the only state either of them reads: the panel's
+	chooser for this column, which names the display, and the menu bar icon, which does not but is on
+	screen when the panel is not — a website switched by keyboard shortcut, by rotation, from the
+	Websites window or from a Shortcuts intent happens with the panel closed, which is nearly always.
+
+	Read rather than counted. There was a counter on `AppState`, incremented and decremented around
+	each load, and it could be left behind: on the plain-load path `load` can run twice before a
+	single reveal, and revealing is idempotent, so the second increment never got its decrement and
+	the icon pulsed until the app was quit. Both loading paths already keep a piece of state saying a
+	page is outstanding. Derived from those, it cannot disagree with them and there is no pairing to
+	get wrong.
+
+	`pendingWebView` covers the swap: it is set for as long as a replacement is being fetched out of
+	sight, and cleared by whoever finishes, fails or is cancelled.
+
+	The second clause covers the plain load, which is the first load of the session or the one after
+	nothing was showing — `load` adopts the website and clears `hasRevealedPage`, and `revealPage` sets
+	it again when the page goes up, on the load settling either way or on the backstop behind it. The
+	`loadedWebsite` check is what keeps a scene that has never loaded anything, or one that was
+	suspended, from reading as busy: both leave it `nil`.
+	*/
+	var isLoading: Bool {
+		pendingWebView != nil || (loadedWebsite != nil && !hasRevealedPage)
+	}
+
+	/**
+	How long a page is given to finish before the app stops believing it will.
+
+	One number for both loading paths, because they ask the same question about the same kind of
+	page. A swap gives up and keeps what is on screen; a plain load has nothing to keep, so it puts
+	up whatever the page has painted by then.
+
+	It used to be five seconds on the plain load and thirty on the swap. Five is not a backstop:
+	measured on a cold launch, it beat `didFinish` on an ordinary site by six seconds, so what the
+	user got as their wallpaper was whatever the page happened to have drawn at the five-second mark,
+	and the rest of it appeared afterwards. A backstop that outruns the thing it is backing up is not
+	a backstop, it is a shorter and worse schedule.
+	*/
+	static let loadTimeout = Duration.seconds(30)
+
+	/**
+	How long one stroke of the "a page is on its way" pulse takes.
+
+	Two animations show it — the panel chooser's pill in `DisplayPanel`, and the menu bar icon in
+	`NSStatusBarButton.setShowingActivity` — and they are SwiftUI and CoreAnimation respectively, so
+	they run off different clocks and will not be in phase. What can be made to agree is the rate, and
+	that is the whole of what makes them read as one thing happening rather than two: both breathe
+	once every `2 * loadingPulseDuration`, both ease in and out.
+
+	Here rather than in either of them, because either one owning it makes the other read a number out
+	of a file it has no business in. This is the state both of them are drawing, and `previewWidth`
+	below is already a drawing number kept here for the same reason.
+	*/
+	static let loadingPulseDuration = 0.7
+
+	/**
+	Re-ask the menu bar whether anything is loading.
+
+	`isLoading` is computed, so nothing is published when it moves and every watcher would otherwise
+	have to be told by hand at each of the six places its inputs are written — `load`, `revealPage`,
+	the backstop, the swap starting, the swap finishing, and `releaseWebView`. Told by hand is told
+	from a list, and a list is what the seventh writer forgets.
+
+	So this hangs off `didSet` on the three stored properties `isLoading` reads, and nothing calls it
+	directly. A new place that starts or ends a load cannot avoid going through one of those
+	properties — that is what starting or ending a load *is* here — so it cannot avoid this. Whether
+	the value actually changed is not checked: `didSet` fires on every assignment, and both sides of
+	this are cheap and idempotent.
+
+	The panel needs no equivalent. It rebuilds every column from the scenes about twelve times a
+	second while it is open, and reads `isLoading` fresh each time.
+	*/
+	private func loadingStateChanged() {
+		AppState.shared.refreshLoadingIndicator()
+	}
 
 	private var reloadTimer: Timer?
 	var playlistTimer: Timer?
@@ -156,13 +251,20 @@ final class WallpaperScene {
 	sight — and installing the new website's region in between applied it to the old website's page,
 	so a framed wallpaper snapped back to the whole page and stayed there until the switch completed.
 	`adopt` calls this again once the new page is actually up.
+
+	The region is not applied while this display is being framed. `beginCropSelection` sets the page
+	to `.live(zoom: nil)` for exactly one reason — the page has to hold still, or the frame's
+	magnification multiplies with the page's and the same drag appears to do two different amounts of
+	the same thing. Everything that reloads, switches website or edits the list comes back through
+	here, so without this the page the user is framing quietly puts its own region back on, taking the
+	frame and its hint panel with it.
 	*/
 	func installContentView() {
 		guard loadedWebsiteID == nil || loadedWebsiteID == website?.id else {
 			return
 		}
 
-		content = .live(zoom: website?.zoom)
+		content = .live(zoom: window.isFramingRegion ? nil : website?.zoom)
 	}
 
 	/**
@@ -246,6 +348,12 @@ final class WallpaperScene {
 		AppState.shared.webViewError = nil
 
 		guard
+			// Nothing is watching this display, so nothing should be fetched for it. Loading is what
+			// made the other two symptoms possible: it sets `loadedWebsite`, which is what let the
+			// panel photograph the page, and it reveals it, which is what let the menu bar band sample
+			// a colour off it. `reloadWebsite` reaches every scene unconditionally, including the one
+			// `rebuildScenes` suspended a line earlier.
+			!isSwitchedOff,
 			var url,
 			url.isValid
 		else {
@@ -270,9 +378,11 @@ final class WallpaperScene {
 
 		hasRevealedPage = false
 
-		// A page that never finishes still has to turn up. Long enough that an ordinary page has
-		// loaded and revealed itself first, so this is the exception rather than the schedule.
-		delay(.seconds(5)) { [weak self] in
+		// Only for a page that settles neither way. A load that finishes or fails reveals the page
+		// itself — see `WebViewController.pageDidSettle` — so what is left is a main frame that never
+		// stops loading at all, which is real: `loadAndWait` polls for the same reason. Without this
+		// the desktop would keep whatever was behind the wallpaper for as long as the app ran.
+		delay(Self.loadTimeout) { [weak self] in
 			self?.revealPage()
 		}
 	}
@@ -304,10 +414,10 @@ final class WallpaperScene {
 	colour taken off a page that had not arrived, so the menu bar changed and the wallpaper followed a
 	second or two later.
 
-	Driven by the load finishing now, with a timeout behind it. Unhides the web view itself rather
-	than whatever view is installed by then: the page may be inside a wrapper, and unhiding the
-	wrapper would leave the real web view hidden for the rest of the session, which is a blank
-	wallpaper with no way back.
+	Driven by the load settling now — finished or failed — with a backstop behind it for the page that
+	does neither. Unhides the web view itself rather than whatever view is installed by then: the page
+	may be inside a wrapper, and unhiding the wrapper would leave the real web view hidden for the
+	rest of the session, which is a blank wallpaper with no way back.
 	*/
 	func revealPage() {
 		guard !hasRevealedPage else {
@@ -345,7 +455,7 @@ final class WallpaperScene {
 		reloadTimer = nil
 
 		guard
-			AppState.shared.isEnabled,
+			!isSwitchedOff,
 			!AppState.shared.isBrowsingMode,
 			let reloadInterval = website?.effectiveReloadInterval
 		else {
@@ -362,6 +472,14 @@ final class WallpaperScene {
 	// MARK: - Appearance
 
 	func applyOpacity(animated: Bool = true) {
+		// A page being framed is shown at full strength, because what is being framed has to be
+		// visible while it is chosen. `beginCropSelection` sets that, and `rebuildScenes` calls this on
+		// every scene a runloop turn later — so the page dimmed a moment after the mode began.
+		// `finishCropSelection` clears the flag before it puts the opacity back.
+		guard !window.isFramingRegion else {
+			return
+		}
+
 		let target = AppState.shared.targetOpacity
 		let window = window
 
@@ -380,16 +498,6 @@ final class WallpaperScene {
 		}
 	}
 
-	/**
-	A picture of what this display is showing right now.
-
-	Taken from our own web view, which needs no permission at all — this is the app photographing its
-	own view, not the screen. Screen Recording would be the other way to get this, and asking a
-	wallpaper app for it to draw a thumbnail is a trade nobody should have to make.
-
-	`nil` when there is nothing up: no website, or a page that has not arrived yet. The panel draws its
-	own empty state rather than a blank rectangle that looks like a broken page.
-	*/
 	/**
 	Where this display's video is, if it has one.
 	*/
@@ -419,8 +527,26 @@ final class WallpaperScene {
 	*/
 	static let previewWidth = 260
 
+	/**
+	A picture of what this display is showing right now.
+
+	Taken from our own web view, which needs no permission at all — this is the app photographing its
+	own view, not the screen. Screen Recording would be the other way to get this, and asking a
+	wallpaper app for it to draw a thumbnail is a trade nobody should have to make.
+
+	`nil` when there is nothing to photograph: this display is switched off, it has no website, or its
+	page has not arrived yet. The panel draws its own reading for each rather than a blank rectangle
+	that looks like a broken page.
+
+	The first of those is not covered by the other two. A switched-off display keeps its website, and
+	the load that should never have happened left `loadedWebsite` set — so this went on handing the
+	panel a live, moving photograph of a page the user had switched off, which is what they saw and
+	reported. `isSwitchedOff` is the same question the load path now asks; with loading refused this
+	is belt and braces, and it is the cheap half of the pair.
+	*/
 	func snapshot() async -> NSImage? {
 		guard
+			!isSwitchedOff,
 			website != nil,
 			loadedWebsite != nil
 		else {

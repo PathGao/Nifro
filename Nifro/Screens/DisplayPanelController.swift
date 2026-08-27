@@ -48,6 +48,18 @@ final class DisplayPanelController {
 		// this the panel comes up behind whatever the user was working in.
 		SSApp.forceActivate()
 
+		// Before the popover, and without waiting for anything. `columns` outlives a close, so the
+		// pictures in it are of what the displays showed the last time the panel was up, and the view's
+		// own `.task` runs after SwiftUI's first render — which is why a reopened panel used to spend
+		// its first frames showing the previous opening's pages.
+		//
+		// Fetching the pictures first was tried and taken back out. It was correct on the first frame
+		// and it cost 25-200ms between the click and anything at all appearing; a menu bar item that
+		// does not open when it is clicked is the more expensive lie. This costs nothing measurable,
+		// keeps the columns and their names, and leaves a placeholder where each picture will be once
+		// the live refresh below has taken it — about a frame.
+		model.prepareForOpening()
+
 		popover.show(relativeTo: button.bounds, of: button, preferredEdge: .maxY)
 		model.startLiveRefresh()
 	}

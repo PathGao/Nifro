@@ -31,7 +31,7 @@ entry's `source` field.
 | `audio` | `muted` \| `unmuted` | no | The sound setting the site **starts** with. Only a starting value: once added, the website belongs to the user and the Sound item in the menu owns this. Omit for muted, which is what a wallpaper wants unless it is a stream. |
 | `requiresLogin` | boolean | no | `true` if the site shows nothing useful unless the user is signed in. |
 | `screenshot` | string | no | Preview image. Leave it out — we will add images later. |
-| `featured` | boolean | no | `true` ships the entry with the app and installs it on first launch, so it is what someone sees before they have chosen anything. Order comes from the file name: featured entries are installed in file-name order, and the first one is the wallpaper that actually shows. Keep the list very short — every featured entry is one a new user has to delete if they do not want it. Eight entries carry it today; adding a ninth needs a reason. |
+| `featured` | integer | no | Where the entry sits in the list the app ships with, counting from 1. Omit it and the entry does not ship. A number rather than `true` because the order is the decision: rank 1 is the wallpaper somebody sees before they have chosen anything, and on a second display they see rank 2. Ranks must be unique — `Tools/validate-sites.py` rejects a duplicate. Keep the list very short: every featured entry is one a new user has to delete if they do not want it. Eight entries carry it today; adding a ninth needs a reason, and a rank. |
 | `source` | string | yes | Where the entry came from. Credit the person, and link the upstream thread if you took their CSS or JS. |
 
 ### `backend`: what the page needs

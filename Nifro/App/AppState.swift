@@ -40,36 +40,35 @@ final class AppState: ObservableObject {
 	private(set) lazy var statusItemButton = statusItem.button!
 
 	/**
-	How many scenes are fetching a replacement page right now.
+	One wallpaper per display in use. Always at least one.
 
-	Counted rather than flagged, because one display finishing does not mean another has.
+	The observer is here for the same reason the ones on `WallpaperScene`'s loading state are: a
+	display unplugged mid-load takes its scene out of this list without any of that scene's own
+	properties moving, so the answer below changes without any of them having said so. Without this
+	the icon would go on pulsing for a load whose display is gone.
 	*/
-	private var loadingScenes = 0 {
+	private(set) var scenes: [WallpaperScene] = [] {
 		didSet {
-			statusItemButton.setShowingActivity(loadingScenes > 0)
+			refreshLoadingIndicator()
 		}
 	}
 
 	/**
-	Say that a page is on its way, and that it has arrived.
+	Say whether any display has a page on its way, on the menu bar icon.
 
-	Switching website takes a few seconds and said nothing while it did. Swap loading keeps the old
-	page up for all of it — which is the point — so the wallpaper cannot be the thing that reports it,
-	and choosing a website and watching an unchanged desktop reads as the choice not having
-	registered.
+	Any, not which — the icon is one glyph and cannot name a display, and that is the whole of what it
+	claims. The panel is where a per-display answer lives, and it is closed most of the time, which is
+	why this exists as well as that rather than instead of it.
+
+	Asked of the scenes rather than tallied as loads begin and end. `WallpaperScene.isLoading` is
+	derived from the state each load already keeps, so re-reading all of them is the cheapest correct
+	answer available and there is no accumulated count to drift. It is called from `didSet` on each of
+	the properties that answer feeds off, which is what keeps a new caller from having to know this
+	exists.
 	*/
-	func beginLoadingIndicator() {
-		loadingScenes += 1
+	func refreshLoadingIndicator() {
+		statusItemButton.setShowingActivity(scenes.contains(where: \.isLoading))
 	}
-
-	func endLoadingIndicator() {
-		loadingScenes = max(0, loadingScenes - 1)
-	}
-
-	/**
-	One wallpaper per display in use. Always at least one.
-	*/
-	private(set) var scenes: [WallpaperScene] = []
 
 	/**
 	The scene the menu and the settings act on when nothing says otherwise.
@@ -176,8 +175,27 @@ final class AppState: ObservableObject {
 		}
 	}
 
+	/**
+	Whether the app is putting wallpapers on screen at all.
+
+	The guard is what keeps this from being taken up twice. `didSet` runs on every assignment, not
+	only on a change, and `setEnabledStatus` recomputes the whole answer from four inputs and assigns
+	it whether or not it moved — so any one of those inputs merely being *observed* replayed the
+	branch below. At launch that is exactly what happens: the `deactivateOnBattery` publisher sends
+	its current value on subscribe, which assigned `true` over `true` and handed every scene a
+	`loadWebsite()` nobody asked for, a fraction of a second before the load that launch is actually
+	built around. Measured on two displays: two full page loads each, of the same website, on every
+	launch.
+
+	Here rather than in `setEnabledStatus`, because this is where all four inputs meet and a fifth
+	will not have to remember.
+	*/
 	var isEnabled = true {
 		didSet {
+			guard isEnabled != oldValue else {
+				return
+			}
+
 			statusItemButton.appearsDisabled = !isEnabled
 
 			guard isEnabled else {
@@ -190,8 +208,10 @@ final class AppState: ObservableObject {
 
 			for scene in scenes {
 				// A display switched off on its own stays off when the app comes back on. The app-wide
-				// switch is above this one, not instead of it.
-				guard !scene.isDisabledForDisplay else {
+				// switch is above this one, not instead of it — which is exactly what `isSwitchedOff`
+				// spells out, and it is asked here rather than re-derived so this loop is not a second
+				// opinion about what "off" means.
+				guard !scene.isSwitchedOff else {
 					scene.suspend()
 					continue
 				}
@@ -365,7 +385,7 @@ final class AppState: ObservableObject {
 			// A rebuild happens on every edit to the website list, and it used to hand every scene a
 			// page and a timer whether or not its display was switched off. So pressing Next on one
 			// display brought back every display that was off, each with a website nobody asked for.
-			guard isEnabled, !scene.isDisabledForDisplay else {
+			guard !scene.isSwitchedOff else {
 				scene.suspend()
 				continue
 			}

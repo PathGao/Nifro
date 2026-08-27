@@ -132,6 +132,12 @@ macOS has a per-app language of its own, three levels into System Settings. It w
 complaint recorded against it was that nobody finds it; sending people there answers a
 discoverability problem with a longer walk.
 
+**There is no "follow the system" entry, because there is no such state to draw.** Nifro starts in
+English and stays in whatever was picked; `Localization` writes that down on the first launch rather
+than leaving the question open, so the picker always has an answer and it is always the one the app
+is actually running in. An entry handing the choice back to macOS would be a third state the rest of
+the app no longer has.
+
 It asks before relaunching rather than restarting under the user.
 */
 private struct LanguageSetting: View {
@@ -140,14 +146,12 @@ private struct LanguageSetting: View {
 
 	var body: some View {
 		Picker(selection: $language) {
-			Text("Follow the system").tag(nil as AppLanguage?)
-			Divider()
 			ForEach(AppLanguage.allCases) {
-				Text($0.displayName).tag($0 as AppLanguage?)
+				Text($0.displayName).tag($0)
 			}
 		} label: {
 			Text("Language")
-				.explained(String(localized: "Nifro follows your Mac's language unless you pick one here. A language that is only half translated falls back to English rather than showing anything raw."))
+				.explained(String(localized: "Nifro is in English until you pick a language here — it does not follow your Mac's language. A language that is only half translated falls back to English rather than showing anything raw."))
 		}
 		.onChange(of: language) { previous, new in
 			guard previous != new else {
@@ -206,6 +210,30 @@ private struct AdvancedSettings: View {
 				OpenExternalLinksInBrowserSetting()
 				HideMenuBarIconSetting()
 			}
+			Section {} // Padding
+			Section {
+				RestoreDefaultsSetting()
+			}
+		}
+	}
+}
+
+/**
+The only irreversible thing in the app, kept away from everything that adds.
+
+Its own section under a spacer, at the very bottom of the last pane. Nothing sits next to it that
+somebody could be reaching for — the workspace rule is that one slip must not turn "add" into
+"delete", and a destructive control is only as safe as its nearest neighbour. Everything above it
+changes a setting that can be changed back.
+
+The ellipsis is the promise that it asks first. What it asks is in `RestoreDefaults`, spelled out
+there and not repeated here: a second copy of those four lists in this pane would be a second copy to
+keep in step, and the one the user actually reads is the one in the dialog.
+*/
+private struct RestoreDefaultsSetting: View {
+	var body: some View {
+		Button("Restore Everything…", role: .destructive) {
+			RestoreDefaults.confirmAndRun()
 		}
 	}
 }
