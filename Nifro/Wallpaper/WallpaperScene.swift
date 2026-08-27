@@ -397,6 +397,11 @@ final class WallpaperScene {
 		await webViewController.webView.alignMedia(to: time, duration: duration, jumpingRegardless: jumpingRegardless)
 	}
 
+	/**
+	How wide the panel draws a preview. Snapshots are taken at this size rather than the display's.
+	*/
+	static let previewWidth = 260
+
 	func snapshot() async -> NSImage? {
 		guard
 			website != nil,
@@ -410,6 +415,11 @@ final class WallpaperScene {
 		// The page is already on screen, so there is nothing to wait for, and waiting on a wallpaper
 		// that animates means waiting forever.
 		configuration.afterScreenUpdates = false
+
+		// At the size it will be looked at, not at the size of the display. Full resolution cost about
+		// 600ms a frame on a 4K screen — a panel meant to look live updating roughly once a second —
+		// and every one of those pixels was thrown away by a 260-point thumbnail anyway.
+		configuration.snapshotWidth = NSNumber(value: Self.previewWidth)
 
 		return try? await webViewController.webView.takeSnapshot(configuration: configuration)
 	}

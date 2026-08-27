@@ -26,9 +26,10 @@ final class DisplayPanelController {
 		$0.contentViewController = NSHostingController(rootView: DisplayPanel(model: model))
 	}
 
-	private lazy var closeWatcher = CloseWatcher {
+	private lazy var closeWatcher = CloseWatcher { [weak self] in
 		// Put back what showing the panel took away.
 		KeyboardShortcuts.enable(Shortcut.allNames)
+		self?.model.stopLiveRefresh()
 	}
 
 	/**
@@ -50,12 +51,7 @@ final class DisplayPanelController {
 		SSApp.forceActivate()
 
 		popover.show(relativeTo: button.bounds, of: button, preferredEdge: .maxY)
-
-		// Fresh pictures every time it opens. A wallpaper that moves would otherwise be shown as it
-		// looked the first time anybody looked.
-		Task {
-			await model.refresh()
-		}
+		model.startLiveRefresh()
 	}
 }
 

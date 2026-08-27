@@ -45,6 +45,36 @@ final class DisplayPanelModel: ObservableObject {
 
 	@Published private(set) var columns: [Column] = []
 
+	private var liveRefresh: Task<Void, Never>?
+
+	/**
+	Keep the pictures moving while the panel is up.
+
+	A single snapshot on open makes a wallpaper look like a screenshot of itself, which is the wrong
+	thing to show for a page whose whole point is that it moves. A snapshot costs a few tens of
+	milliseconds and this is a popover that closes the moment attention goes elsewhere, so it can
+	afford a few a second — and it stops the instant it closes, which is the part that matters. Nothing
+	here runs while nobody is looking.
+	*/
+	func startLiveRefresh() {
+		liveRefresh?.cancel()
+
+		liveRefresh = Task { [weak self] in
+			while !Task.isCancelled {
+				await self?.refresh()
+
+				// After the work rather than before it, so a slow refresh spaces itself out instead of
+				// queueing up behind the last one.
+				try? await Task.sleep(for: .milliseconds(80))
+			}
+		}
+	}
+
+	func stopLiveRefresh() {
+		liveRefresh?.cancel()
+		liveRefresh = nil
+	}
+
 	/**
 	Rebuild every column, pictures included.
 
@@ -75,7 +105,9 @@ final class DisplayPanelModel: ObservableObject {
 		}
 
 		columns = built
+
 	}
+
 
 	/**
 	Every other display, and whether this one is already synced with it.

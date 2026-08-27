@@ -30,6 +30,15 @@ enum PanelMetrics {
 	Three quarters of the picture above it.
 	*/
 	static let chooserWidth = 195.0
+
+	/**
+	The colour a control wears while what it turns on is on.
+
+	Sampled from the app's own icon rather than taken from the system accent: the accent is whatever
+	the user picked for their Mac, and a wallpaper app lighting one of its buttons in it says "this is
+	selected" rather than "this is running". The icon's orange says the second.
+	*/
+	static let onTint = Color(red: 234 / 255, green: 115 / 255, blue: 63 / 255)
 }
 
 struct PanelButton: View {
@@ -75,9 +84,7 @@ struct PanelButton: View {
 
 	private var background: some ShapeStyle {
 		if isOn {
-			// Lit, and lit in the accent colour the user chose rather than one of ours, so "this is on"
-			// reads the same here as it does everywhere else on their Mac.
-			AnyShapeStyle(.tint)
+			AnyShapeStyle(PanelMetrics.onTint)
 		} else if isHovering {
 			AnyShapeStyle(.quaternary)
 		} else {
@@ -141,7 +148,7 @@ struct PanelWideButton: View {
 
 	private var background: some ShapeStyle {
 		if isOn {
-			AnyShapeStyle(.tint)
+			AnyShapeStyle(PanelMetrics.onTint)
 		} else if isHovering {
 			AnyShapeStyle(.quaternary)
 		} else {

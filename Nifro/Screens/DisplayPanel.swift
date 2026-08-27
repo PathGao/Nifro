@@ -34,6 +34,8 @@ struct DisplayPanel: View {
 				.padding(.vertical, 10)
 		}
 		.task {
+			// The controller drives the refreshes; this is only for the first paint, and for a preview
+			// where there is no controller at all.
 			await model.refresh()
 		}
 	}
@@ -94,6 +96,12 @@ private struct DisplayColumn: View {
 	@ObservedObject private var model: DisplayPanelModel
 
 	@State private var isHovering = false
+
+	// The stored value, not `AppState`'s copy of it: the action writes to `Defaults` and `AppState`
+	// catches up through a subscription, so a view reading `AppState` right after the press still sees
+	// the old answer and the button does not light. `@Default` also makes the view observe it, so a
+	// shortcut pressed while the panel is open lights it too.
+	@Default(.isBrowsingMode) private var isBrowsingMode
 
 	init(column: DisplayPanelModel.Column, model: DisplayPanelModel) {
 		self.column = column
@@ -192,7 +200,7 @@ private struct DisplayColumn: View {
 
 			PanelWideButton(
 				title: String(localized: "Browsing Mode"),
-				isOn: model.isBrowsingMode,
+				isOn: isBrowsingMode,
 				isEnabled: column.websiteID != nil
 			) {
 				model.toggleBrowsingMode()
@@ -318,14 +326,20 @@ private struct DisplayColumn: View {
 				}
 			}
 		} label: {
-			HStack(spacing: 4) {
+			HStack(spacing: 0) {
+				// Pinned to the left edge and given a fixed slot, so the name is centred in what is left
+				// rather than the pair of them drifting together as the name changes length.
 				Image(systemName: "chevron.up.chevron.down")
 					.font(PanelMetrics.symbolFont)
 					.foregroundStyle(.secondary)
+					.frame(width: 16, alignment: .leading)
 
 				MarqueeText(text: column.websiteName ?? String(localized: "No Website"), isActive: isHovering)
 					.font(PanelMetrics.font)
 					.frame(maxWidth: .infinity)
+					// The chevron's slot, given back, so the name is centred on the control and not on the
+					// space beside it.
+					.padding(.trailing, 16)
 			}
 			.frame(maxWidth: .infinity)
 			.frame(height: PanelMetrics.height)
@@ -335,7 +349,10 @@ private struct DisplayColumn: View {
 		// Width, then padding, then background, in that order. `borderlessButton` sizes a menu to its
 		// label, so the width has to be forced from outside the label — and the background has to come
 		// after it, or it paints the pill at the label's size and the frame merely centres that.
-		.frame(width: PanelMetrics.chooserWidth - PanelMetrics.horizontalPadding * 2)
+		.frame(
+			width: PanelMetrics.chooserWidth - PanelMetrics.horizontalPadding * 2,
+			height: PanelMetrics.height
+		)
 		.padding(.horizontal, PanelMetrics.horizontalPadding)
 		.background(.quinary, in: RoundedRectangle(cornerRadius: PanelMetrics.cornerRadius))
 		.disabled(column.choices.isEmpty)
