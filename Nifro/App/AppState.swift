@@ -105,7 +105,7 @@ final class AppState: ObservableObject {
 	}
 
 	var primaryScene: WallpaperScene {
-		if let match = scenes.first(where: { $0.display == Defaults[.display] }) {
+		if let match = scenes.first(where: { $0.display == .main }) {
 			return match
 		}
 

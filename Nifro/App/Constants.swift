@@ -39,9 +39,7 @@ extension Defaults.Keys {
 	static let hideMenuBarIcon = Key<Bool>("hideMenuBarIcon", default: false)
 	static let opacity = Key<Double>("opacity", default: 1)
 	static let reloadInterval = Key<Double?>("reloadInterval")
-	static let display = Key<Display?>("display")
 	static let deactivateOnBattery = Key<Bool>("deactivateOnBattery", default: false)
-	static let showOnAllSpaces = Key<Bool>("showOnAllSpaces", default: false)
 
 	// Defaults to what the app already did, so nobody's wallpaper changes on upgrade. There is no
 	// convention to follow here: macOS's own wallpaper stays with its display and goes away with it,

@@ -116,23 +116,9 @@ extension AppState {
 			}
 			.store(in: &cancellables)
 
-		Defaults.publisher(.display, options: [])
-			.sink { [self] _ in
-				rebuildScenes()
-			}
-			.store(in: &cancellables)
-
 		Defaults.publisher(.deactivateOnBattery)
 			.sink { [self] _ in
 				setEnabledStatus()
-			}
-			.store(in: &cancellables)
-
-		Defaults.publisher(.showOnAllSpaces)
-			.sink { [self] change in
-				for scene in scenes {
-					scene.window.collectionBehavior.toggleExistence(.canJoinAllSpaces, shouldExist: change.newValue)
-				}
 			}
 			.store(in: &cancellables)
 

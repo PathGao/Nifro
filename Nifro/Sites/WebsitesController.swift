@@ -183,7 +183,7 @@ final class WebsitesController {
 			}
 		}
 
-		return seen.isEmpty ? [Defaults[.display]] : seen
+		return seen.isEmpty ? [.main] : seen
 	}
 
 	/**
