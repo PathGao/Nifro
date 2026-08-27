@@ -239,12 +239,12 @@
         }
       }
     },
-    "Bring browsing mode to the front": {
+    "Behavior": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "浏览模式时置于最前"
+            "value": "行为"
           }
         }
       }
@@ -569,16 +569,6 @@
         }
       }
     },
-    "Derived from [Plash](https://github.com/sindresorhus/Plash) by Sindre Sorhus, from its last MIT-licensed release. Plash is still developed and still on the App Store; Nifro is a separate project and uses none of its branding or artwork.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "衍生自 Sindre Sorhus 的 [Plash](https://github.com/sindresorhus/Plash)，取自它最后一个 MIT 许可的版本。Plash 仍在开发、仍在 App Store 上；Nifro 是一个独立项目，没有使用它的任何品牌或美术资源。"
-          }
-        }
-      }
-    },
     "Dim while another app is in front": {
       "localizations": {
         "zh-Hans": {
@@ -729,6 +719,16 @@
         }
       }
     },
+    "For a website pinned to a particular display. On, it moves to the main display and takes over from whatever was showing there, until its own display is plugged back in — one desktop shows one page, so the arriving one wins. Off, it goes away with its display, the way the desktop picture on that screen does. Either way the website keeps the display you chose for it, and the page it displaced comes back when that display returns.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "针对固定在某个显示器上的网站。开启后，它会移到主显示器并顶替原本在那里显示的网页，直到它自己的显示器重新接上——一个桌面只显示一个网页，所以后到的那个胜出。关闭后，它随显示器一起消失，就像那块屏幕上的桌面图片一样。两种情况下网站都保留你为它选的显示器，被顶替的网页会在那台显示器回来时回来。"
+          }
+        }
+      }
+    },
     "For a website pinned to a particular display. On, it moves to the main display until that one is plugged back in — which is what Nifro has always done, and what macOS does with an ordinary window. Off, it goes away with its display, the way the desktop picture on that screen does. Either way the website keeps the display you chose for it.": {
       "localizations": {
         "zh-Hans": {
@@ -745,6 +745,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "供没有自己设定的网站使用。设了自己节奏的网站（在该网站的设置里）不受这里影响。"
+          }
+        }
+      }
+    },
+    "Force browsing mode to the front": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浏览模式时强制最前"
           }
         }
       }
@@ -889,6 +899,16 @@
         }
       }
     },
+    "How see-through the wallpaper page is against the desktop behind it. Browsing Mode ignores this and always draws the page fully opaque, because a page you are about to click should not be half transparent.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "壁纸网页相对于它后面桌面的不透明程度。浏览模式不受此设置影响，网页始终完全不透明——正要点击的页面不该是半透明的。"
+          }
+        }
+      }
+    },
     "If a website requires login, you should disable this setting while logging in as the website might require you to navigate to a different page, and you don't want that to open in a browser instead of Nifro.": {
       "localizations": {
         "zh-Hans": {
@@ -935,6 +955,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "给这个网站注入你自己的 CSS 或 JavaScript。绝大多数网站两个都不需要。"
+          }
+        }
+      }
+    },
+    "Inspired by [Plash](https://github.com/sindresorhus/Plash) by Sindre Sorhus.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "灵感来自 Sindre Sorhus 的 [Plash](https://github.com/sindresorhus/Plash)。"
           }
         }
       }
@@ -1309,16 +1339,6 @@
         }
       }
     },
-    "Opacity": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "不透明度"
-          }
-        }
-      }
-    },
     "Open Frame": {
       "localizations": {
         "zh-Hans": {
@@ -1365,6 +1385,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "在默认浏览器中打开外部链接"
+          }
+        }
+      }
+    },
+    "Page opacity": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网页不透明度"
+          }
+        }
+      }
+    },
+    "Page reload interval": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "网页自动刷新间隔"
           }
         }
       }
@@ -1449,16 +1489,6 @@
         }
       }
     },
-    "Put the page back where it was": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "把页面放回原来的位置"
-          }
-        }
-      }
-    },
     "Quit %@": {
       "localizations": {
         "zh-Hans": {
@@ -1529,16 +1559,6 @@
         }
       }
     },
-    "Reload every": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "刷新间隔"
-          }
-        }
-      }
-    },
     "Reload interval": {
       "localizations": {
         "zh-Hans": {
@@ -1559,22 +1579,22 @@
         }
       }
     },
+    "Reload the page when the Mac wakes": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mac 唤醒时刷新网页"
+          }
+        }
+      }
+    },
     "Reload website": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "重新加载网站"
-          }
-        }
-      }
-    },
-    "Reload when the Mac wakes": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mac 唤醒时重新加载"
           }
         }
       }
@@ -1669,22 +1689,12 @@
         }
       }
     },
-    "Restore Everything": {
+    "Restore All Settings": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "全部恢复"
-          }
-        }
-      }
-    },
-    "Restore Everything…": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "全部恢复…"
+            "value": "还原所有设置"
           }
         }
       }
@@ -1695,6 +1705,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "将 Nifro 恢复到出厂时的状态？"
+          }
+        }
+      }
+    },
+    "Restore the page position after a reload": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自动刷新还原页面位置"
           }
         }
       }

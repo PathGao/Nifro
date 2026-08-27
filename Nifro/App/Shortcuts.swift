@@ -35,8 +35,11 @@ enum Shortcut: String, CaseIterable {
 			.w
 		case .toggleBrowsingMode:
 			.b
+		// F, not H, which is what it was. Control-Option-Command-H is the one key in this table macOS
+		// has an opinion about: Command-H hides an app, and the modified forms are close enough to it
+		// that holding the wallpaper open reads as reaching for Hide. F has nothing behind it.
 		case .holdToInteract:
-			.h
+			.f
 		case .toggleSound:
 			.s
 		case .chooseRegion:

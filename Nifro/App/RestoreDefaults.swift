@@ -67,7 +67,7 @@ enum RestoreDefaults {
 				Kept: your logins and cookies, so no site asks you to sign in again. The language you picked for Nifro and whether Nifro launches at login are kept too.
 				"""),
 			buttonTitles: [
-				String(localized: "Restore Everything"),
+				String(localized: "Restore All Settings"),
 				String(localized: "Cancel")
 			],
 			defaultButtonIndex: 1
