@@ -1,3 +1,4 @@
+import Combine
 import WebKit
 
 /**
@@ -9,6 +10,40 @@ The compiled list is cached by WebKit under a name derived from the source, so i
 */
 enum ContentRules {
 	private static let identifier = "user-rules"
+
+	/**
+	What the last refresh made of the address.
+
+	`compiled` was the only thing a refresh wrote down, and it is `nil` for three different reasons —
+	nothing was pasted, the address did not answer, or what came back was not a rule list. Those are
+	three different things for the person who pasted it to do, and the setting could tell none of them
+	apart.
+	*/
+	enum Status: Equatable {
+		/// Nothing pasted, so there is nothing to report.
+		case unset
+
+		/// Fetching and compiling.
+		case loading
+
+		/// A list compiled from the address is attached to every page.
+		case blocking
+
+		/// The address could not be fetched, or did not answer with a file.
+		case unreachable
+
+		/// It arrived, and WebKit would not compile it.
+		case rejected
+	}
+
+	/**
+	The outcome of the last refresh, for the setting to draw.
+
+	A subject rather than a stored property because the two ends never meet: the refresh is kicked off
+	from `setUpEvents`, and the pane that reports it is usually not open — so there is nobody holding
+	it to ask, and nothing to ask at the moment the answer arrives.
+	*/
+	@MainActor static let status = CurrentValueSubject<Status, Never>(.unset)
 
 	/**
 	The list currently compiled and ready to attach to new web views.
@@ -24,12 +59,28 @@ enum ContentRules {
 	*/
 	@MainActor
 	static func refresh() async {
-		guard
-			let source = Defaults[.contentRulesURL]?.trimmed.nilIfEmpty,
-			let url = URL(string: source)
-		else {
+		guard let source = Defaults[.contentRulesURL]?.trimmed.nilIfEmpty else {
 			compiled = nil
+			status.send(.unset)
 			return
+		}
+
+		status.send(.loading)
+		status.send(await load(from: source))
+	}
+
+	/**
+	The fetch and the compile, returning what it made of the address.
+
+	Split off `refresh` for the return type. Every way out of a load now has to name an outcome, so a
+	failure exit added later cannot be a silent one — which is what the three bare `return`s here used
+	to be, and the whole reason the setting had nothing to say.
+	*/
+	@MainActor
+	private static func load(from source: String) async -> Status {
+		guard let url = URL(string: source) else {
+			compiled = nil
+			return .unreachable
 		}
 
 		let store = WKContentRuleListStore.default()
@@ -44,15 +95,16 @@ enum ContentRules {
 			(response as? HTTPURLResponse)?.statusCode == 200,
 			let json = String(data: data, encoding: .utf8)
 		else {
-			return
+			return .unreachable
 		}
 
 		guard let list = try? await store?.compileContentRuleList(forIdentifier: identifier, encodedContentRuleList: json) else {
 			// A list that will not compile is the author's problem, not something to keep retrying.
-			return
+			return .rejected
 		}
 
 		compiled = list
+		return .blocking
 	}
 }
 
