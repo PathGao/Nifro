@@ -12,6 +12,24 @@ final class WebViewController: NSViewController {
 	private var currentDownloadFile: URL?
 
 	/**
+	Whether a download this page is starting is one somebody asked for.
+
+	Downloads were left out of the conversion that put the four `WKUIDelegate` panels behind Browsing
+	Mode, and they need it more than those four do: a refused panel is a dialog nobody sees, while a
+	download writes a file into the user's Downloads folder and bounces the Dock. The three explicit
+	download items are already taken out of the page's context menu, so until this guard the only
+	downloads the app could perform were the ones nobody asked for — including the response path, which
+	needs no click at all: a wallpaper that navigates itself to something WebKit cannot display started
+	a download on a screen nobody was looking at.
+
+	*This display's* Browsing Mode, like the four panels. Browsing one screen is not consent for a page
+	on another screen to write to disk.
+	*/
+	private var isDownloadWanted: Bool {
+		AppState.shared.isBrowsingMode(on: scene?.display)
+	}
+
+	/**
 	Publishes when the web view finishes loading a page.
 	*/
 	lazy var didLoadPublisher = didLoadSubject.eraseToAnyPublisher()
@@ -235,7 +253,7 @@ extension WebViewController: WKNavigationDelegate {
 		}
 
 		if navigationAction.shouldPerformDownload {
-			return .download
+			return isDownloadWanted ? .download : .cancel
 		}
 
 		// Fix signing into Google Account. Google has some stupid protection against fake user agents for "accounts.google.com" and "docs.google.com".
@@ -263,7 +281,11 @@ extension WebViewController: WKNavigationDelegate {
 			self.response = response
 		}
 
-		return navigationResponse.canShowMIMEType ? .allow : .download
+		if navigationResponse.canShowMIMEType {
+			return .allow
+		}
+
+		return isDownloadWanted ? .download : .cancel
 	}
 
 	/**

@@ -213,6 +213,50 @@ struct ScopeTests {
 		}
 	}
 
+
+	/**
+	A download needs somebody to have asked for it.
+
+	The one guard in this file that is not about a dialog. The four `WKUIDelegate` panels were put
+	behind Browsing Mode and the two download paths were left where they were, which left the app in
+	the state this test exists to prevent: the explicit download items are struck from the page's
+	context menu, so every download it could still perform was one nobody requested. The response path
+	is the one that matters — it needs no click, only a page that navigates itself to a response WebKit
+	cannot show, on a screen nobody is looking at.
+
+	Asserted through the named guard rather than by matching `.download` in place, because the action
+	path already reads Browsing Mode for an unrelated reason and would satisfy a looser test without
+	guarding anything.
+	*/
+	@Test("A download needs somebody to have asked for it")
+	func downloadsAreNotStartedBehindTheUsersBack() throws {
+		let source = try Self.source(named: "WebViewController.swift")
+
+		#expect(
+			try Self.body(of: "private var isDownloadWanted: Bool", in: source)
+				.contains("\(Self.appWideReader)(on:"),
+			"`isDownloadWanted` no longer asks about one display, so browsing one screen lets every screen write files."
+		)
+
+		let paths = [
+			"decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy",
+			"decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy"
+		]
+
+		for declaration in paths {
+			let body = try Self.body(of: declaration, in: source)
+
+			guard body.contains(".download") else {
+				continue
+			}
+
+			#expect(
+				body.contains("isDownloadWanted"),
+				"`\(declaration)` can return `.download` without asking whether anybody asked for it."
+			)
+		}
+	}
+
 	/**
 	Switching Browsing Mode settles both clocks, in the one place that runs on the way in and the way
 	out.
