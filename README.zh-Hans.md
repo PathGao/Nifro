@@ -29,7 +29,7 @@
   ·
   <a href="sites/CANDIDATES.zh-Hans.md">候选站点</a>
   ·
-  <a href="docs/ROADMAP.md">路线图</a>
+  <a href="docs/ROADMAP.zh-Hans.md">路线图</a>
   ·
   <a href="CONTRIBUTING.md">参与贡献</a>
   ·
@@ -116,7 +116,7 @@ Nifro 是 Sindre Sorhus 的 [Plash](https://github.com/sindresorhus/Plash) 的�
 这个分支要做的就是拆掉这两条，而第一条比看上去难：两套渲染后端、遮挡测量、静止画面自动识别
 都做过，结果每一样都在替「此刻到底在渲染什么」下判断，而浏览模式也在下同一个判断。它们又被拿了
 出来，一共 811 行，之后一次放回一件，每件都要先有测量。这笔账和「什么条件成立了才放回去」写在
-[docs/ROADMAP.md](docs/ROADMAP.md) 第 4 节；上游每一条未关闭 issue 的分诊见
+[docs/ROADMAP.zh-Hans.md](docs/ROADMAP.zh-Hans.md) 第 2 节；上游每一条未关闭 issue 的分诊见
 [docs/UPSTREAM-ISSUES.md](docs/UPSTREAM-ISSUES.md)。
 
 ## 它比 Plash 多做了什么

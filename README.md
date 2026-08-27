@@ -121,7 +121,7 @@ two assumptions worth revisiting:
 Undoing those is what this fork is about, and the first one has been harder than it looks: two
 rendering backends, occlusion measurement and automatic still detection were all built, and every one
 of them turned out to own an answer that Browsing Mode also owns. They came back out — 811 lines — and
-go back in one piece at a time, each with a measurement first. [docs/ROADMAP.md](docs/ROADMAP.md) §4
+go back in one piece at a time, each with a measurement first. [docs/ROADMAP.md](docs/ROADMAP.md) §2
 has what that cost and what has to be true before any of it returns;
 [docs/UPSTREAM-ISSUES.md](docs/UPSTREAM-ISSUES.md) triages every open upstream issue.
 

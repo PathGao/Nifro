@@ -25,20 +25,20 @@
 | [195](https://github.com/sindresorhus/Plash/issues/195) | Switching displays should not mean digging three levels into settings | S | DO | **Built.** A Display submenu in `Menus.swift`, `addDisplayItemIfNeeded` |
 | [193](https://github.com/sindresorhus/Plash/issues/193) | The `backdrop-filter` blur freezes while the page is not updating | M | LATER | Open. See section 6 |
 | [183](https://github.com/sindresorhus/Plash/issues/183) | A click on the wallpaper should open apps like `vscode://` | S | LATER | Open |
-| [182](https://github.com/sindresorhus/Plash/issues/182) | One swipe of the Mission Control gesture shows the real desktop picture underneath | L | **REJECT** | X8 in ROADMAP section 9 — the only fix was the real-wallpaper route, and that route ends the app |
+| [182](https://github.com/sindresorhus/Plash/issues/182) | One swipe of the Mission Control gesture shows the real desktop picture underneath | L | **REJECT** | X8 in ROADMAP section 12 — the only fix was the real-wallpaper route, and that route ends the app |
 | [177](https://github.com/sindresorhus/Plash/issues/177) | When I am working on something else, the wallpaper should dim and go grey instead of taking attention | S | LATER | **Built.** `Visibility/DimWhenUnfocused.swift` |
 | [173](https://github.com/sindresorhus/Plash/issues/173) | The custom CSS I wrote works in the browser but not in the app | S–M | DO | **Built.** `Support/Extensions.swift`, `createCSSInjectScript` |
 | [169](https://github.com/sindresorhus/Plash/issues/169) | Google Calendar permanently shows "browser version no longer supported" at the top | S | DO | **Built.** `Support/Extensions.swift`, `SSWebView.safariUserAgent` |
 | [164](https://github.com/sindresorhus/Plash/issues/164) | Clicking a link should navigate in place, not open a new window | S | LATER | Open, needs a repro |
-| [162](https://github.com/sindresorhus/Plash/issues/162) | Shrink the page into a corner of the screen and give the rest back to the desktop | M | DO | Open. The L series, ROADMAP section 5 |
+| [162](https://github.com/sindresorhus/Plash/issues/162) | Shrink the page into a corner of the screen and give the rest back to the desktop | M | DO | Open. The L series, ROADMAP section 3 |
 | [158](https://github.com/sindresorhus/Plash/issues/158) | A weather page in the wallpaper should be able to get my location | M | LATER | Open |
 | [154](https://github.com/sindresorhus/Plash/issues/154) | Turning it off for a moment and back on should not lose the page I was part-way through | S | DO | **Part built.** `Wallpaper/ScrollRestoration.swift` puts the address and the scroll back; the page itself still reloads |
 | [140](https://github.com/sindresorhus/Plash/issues/140) | Hold a modifier and click a link to open it in a real browser | S | DO | **Built.** `Wallpaper/WebViewController.swift`, the Command/Option branch |
 | [132](https://github.com/sindresorhus/Plash/issues/132) | Alarm sounds in the page need to actually play | ? | LATER | Open, needs more information |
 | [127](https://github.com/sindresorhus/Plash/issues/127) | Closing the lid and opening it again should not reload the page state away | S | DO | **Built.** The `reloadOnWake` setting, `App/Events.swift` |
-| [125](https://github.com/sindresorhus/Plash/issues/125) | Use a camera or capture card as the wallpaper | M | **REJECT** | X7 in ROADMAP section 9 |
+| [125](https://github.com/sindresorhus/Plash/issues/125) | Use a camera or capture card as the wallpaper | M | **REJECT** | X7 in ROADMAP section 12 |
 | [114](https://github.com/sindresorhus/Plash/issues/114) | After the shortcut switches to browsing mode, let me type straight away without another click | S | DO | **Built.** `AppState.isBrowsingMode` calls `SSApp.forceActivate()` |
-| [93](https://github.com/sindresorhus/Plash/issues/93) | A page as a sidebar, and it has to trigger the mobile layout | M | DO | Open. The L series, ROADMAP section 5 |
+| [93](https://github.com/sindresorhus/Plash/issues/93) | A page as a sidebar, and it has to trigger the mobile layout | M | DO | Open. The L series, ROADMAP section 3 |
 | [88](https://github.com/sindresorhus/Plash/issues/88) | List the configured websites from Alfred and switch to one | — | OBSOLETE | — |
 | [79](https://github.com/sindresorhus/Plash/issues/79) | A link that 301s off-site should also be handed to the browser | M | LATER | Open |
 | [76](https://github.com/sindresorhus/Plash/issues/76) | More ready-made image wallpaper sources | — | OBSOLETE | Absorbed into `sites/` and the Site Gallery |
@@ -49,13 +49,13 @@
 | [37](https://github.com/sindresorhus/Plash/issues/37) | Cookie banners and ads ruin the wallpaper | M | LATER | **Built.** `Wallpaper/ContentRules.swift` |
 | [21](https://github.com/sindresorhus/Plash/issues/21) | Do not let me watch the reload happen; show the page once it has loaded | S | DO | **Built.** `Wallpaper/SwapLoading.swift` |
 | [16](https://github.com/sindresorhus/Plash/issues/16) | The wallpaper should follow the mouse without entering browsing mode | M–L | LATER | Open |
-| [15](https://github.com/sindresorhus/Plash/issues/15) | A static site should not keep a browser process running all day | L | DO | **Built and removed.** ROADMAP sections 2 and 4 |
+| [15](https://github.com/sindresorhus/Plash/issues/15) | A static site should not keep a browser process running all day | L | DO | **Built and removed.** ROADMAP section 2, and X8 in section 12 |
 | [11](https://github.com/sindresorhus/Plash/issues/11) | When the source site goes down, keep the last screen instead of an error dialog | M | DO | **Built.** `Wallpaper/SwapLoading.swift` |
 | [9](https://github.com/sindresorhus/Plash/issues/9) | The first load should not start with a block of grey | S | DO | Open. Swap loading is scoped to replacing a page; the first load of a session still goes straight into the window |
 | [7](https://github.com/sindresorhus/Plash/issues/7) | Make the first-run welcome presentable | S | DO | **Part built.** The copy in `Screens/WelcomeScreen.swift` is current; it is still an `NSAlert` |
 | [5](https://github.com/sindresorhus/Plash/issues/5) | Help polish the App Store copy | — | OBSOLETE | — |
 | [4](https://github.com/sindresorhus/Plash/issues/4) | Rotate through several websites, ideally on a time schedule | L | LATER | **Built.** `Sites/Playlist.swift` and `Support/Schedule.swift`, both per display |
-| [2](https://github.com/sindresorhus/Plash/issues/2) | One page per screen | L | LATER | **Built.** One `WallpaperScene` per display. ROADMAP section 5.6 |
+| [2](https://github.com/sindresorhus/Plash/issues/2) | One page per screen | L | LATER | **Built.** One `WallpaperScene` per display. ROADMAP section 5 |
 
 **Category counts**: DO 17 / LATER 12 / REJECT 2 / OBSOLETE 4, 35 in total. This file is the count; ROADMAP points here rather than keeping its own.
 
@@ -157,7 +157,7 @@ The two changes this section predicted alongside did not happen and should not b
 
 ### Cropping, page side and window side — #162 #93
 
-Both issues are direct evidence for the claim in ROADMAP section 5, "Blocks: a page as a piece of the desktop". Nothing left to argue, only to record:
+Both issues are direct evidence for the claim in ROADMAP section 3, "Blocks: a page as a piece of the desktop". Nothing left to argue, only to record:
 
 - #162: the user shrank Google Calendar with the CSS the author gave in discussion #139, and "the blank space on the right still covers the desktop" — doing the page side without the window side is the same as not doing it.
 - #93: the user wants the page as a sidebar, and points out that changing `:root { width }` in CSS changes the container and not the window, so `@media` queries do not move and what he gets is still the desktop layout. **This is the part the CSS side can never solve**; only actually shrinking the window with `window.setFrame` does it. Two comments backing it.
@@ -166,14 +166,14 @@ Both issues are direct evidence for the claim in ROADMAP section 5, "Blocks: a p
 
 ### Static mode — #15
 
-The author opened this one himself in 2020, and the plan is the snapshot backend described in ROADMAP section 2: load → screenshot → show the screenshot as the desktop → update on the reload interval. In the comments firrae asks whether taking screenshots costs more CPU, and the author answers that a shot is only taken on an interval tick, at most once a second and usually once a minute, so it costs less. Someone in the naming discussion proposed **Snapshot**.
+The author opened this one himself in 2020, and the plan is the snapshot backend refused as X8 in ROADMAP section 12: load → screenshot → show the screenshot as the desktop → update on the reload interval. In the comments firrae asks whether taking screenshots costs more CPU, and the author answers that a shot is only taken on an interval tick, at most once a second and usually once a minute, so it costs less. Someone in the naming discussion proposed **Snapshot**.
 
 **This was built here, measured, and taken out again — around 2400 lines across two removals.** The direction is not pending; it is closed, and the measurements are the reason. Two of them:
 
 - **A snapshot renderer cannot photograph the pages worth photographing.** A window that is not on screen makes WebKit report `visibilityState: hidden`, so `requestAnimationFrame` never runs and anything drawing to a canvas comes out blank. On one page: offscreen, `canvas=none`, 4 tiles, 232KB; on screen, `canvas=2790×1538`, 44 tiles, 2452KB. Overriding `document.hidden` from JavaScript does not help, because the decision is below it.
 - **Two backends cannot coexist**, because each owned the answer to "what is being rendered right now", which is the same answer Browsing Mode changes. Entering Browsing Mode reloaded, leaving it reloaded again, both showed the desktop while they did, and a snapshot finishing could take the page out from under someone reading it.
 
-The full accounting is in ROADMAP sections 2 and 4, including the three conditions any of it has to meet before it comes back. **Do not re-propose the snapshot backend as the answer to #15 without reading them.** #15 remains a real complaint with no cheap answer, which is a different thing from an unstarted plan.
+The full accounting is in ROADMAP section 2 and X8 in section 12, including the three conditions any of it has to meet before it comes back. **Do not re-propose the snapshot backend as the answer to #15 without reading them.** #15 remains a real complaint with no cheap answer, which is a different thing from an unstarted plan.
 
 ### Display selection in the main menu — #195
 
@@ -218,7 +218,7 @@ The reporter of #196 came back two days later to say that once he had played it 
 
 | # | Why it was LATER | Where it landed |
 |---|---|---|
-| **#2 multi-display** | The most-requested item in the table: 47 👍, 36 comments, six years of people bumping it. For five years the answer was a way around it — run several copies of Plash with different bundle ids — and the community ended up writing a `plash-cloner` script to clone the app. It was blocked on `AppState` being a singleton with one window and one web view. Most people wanted **a different URL per screen** (ianiv's comment, +25), not one page spread across all of them, and that is what was built | One `WallpaperScene` per display, each with its own website. **Written on a one-display machine and never run on two** — see the D series, ROADMAP section 5.6, which is a list of unchecked claims rather than a list of known bugs |
+| **#2 multi-display** | The most-requested item in the table: 47 👍, 36 comments, six years of people bumping it. For five years the answer was a way around it — run several copies of Plash with different bundle ids — and the community ended up writing a `plash-cloner` script to clone the app. It was blocked on `AppState` being a singleton with one window and one web view. Most people wanted **a different URL per screen** (ianiv's comment, +25), not one page spread across all of them, and that is what was built | One `WallpaperScene` per display, each with its own website. **Written on a one-display machine and never run on two** — see the D series, ROADMAP section 5 — cut to the two claims that still need two displays; the rest were answered by reading |
 | **#4 playlist** | Blocked behind multi-display for the same reason. The comments add a request the issue body does not state: scheduling by time of day, GitHub activity in the morning and something else at night. The author's 2021 answer was that Plash is scriptable and you can rotate it from bash | `Sites/Playlist.swift`, with the hour arithmetic as a free function in `Support/Schedule.swift` so a window that wraps midnight is testable without a clock. Rotation and the schedule are one mechanism, because both answer "which of this display's websites should be showing right now". Both are per display |
 | **#177 dim / desaturate when unfocused** | The idea is right, and macOS does the same thing to its own desktop widgets. It was parked as a rider on the occlusion detection the power machinery was going to provide | `Visibility/DimWhenUnfocused.swift`, and it needed no occlusion detection at all: "focused" is the Finder being frontmost, which is what clicking the desktop does. The power machinery it was waiting on has since been deleted, so waiting would have meant waiting forever |
 | **#50 clicks on the wallpaper** | Ten comments from users who want interactive widgets on the desktop — a calculator, buttons, a timer. Half was already solved upstream: the 2020 commit that stopped browsing mode covering every window, here `bringBrowsingModeToFront`, off by default; and `isBrowsingMode` is a persisted Default, so "start up in browsing mode" already worked. What was unsolved is taking clicks without also taking selection and scrolling | `Website.allowsInteraction`, a per-website switch, carried into `DesktopWindow.allowsPassiveInteraction` by `WallpaperScene`, which is just `ignoresMouseEvents` inverted. Per website rather than global, because a page that swallows clicks is a wallpaper you cannot click past |
@@ -258,7 +258,7 @@ The request: use a camera or an HDMI capture card as the wallpaper; failing that
 2. **Outside what the app is for.** It is a wallpaper, not video capture software. A request the size of three people buys every user seeing Nifro ask for the camera in Privacy & Security.
 3. **Better tools already exist.** Capture cards and multi-source video compositing go through OBS (virtual camera, or full-screen projection with the window kept at the back); a surveillance wall goes through a dedicated NVR client. These tools already do this, and do it better than we would.
 
-**Recorded as X7 in ROADMAP section 9**, written down together with screen capture / `getDisplayMedia`, so it does not need discussing again later.
+**Recorded as X7 in ROADMAP section 12**, written down together with screen capture / `getDisplayMedia`, so it does not need discussing again later.
 
 The same argument applies to #158 (location), but that one stays in LATER: a one-off coarse location and a live video stream are different sizes of risk, and weather pages are a mainstream use. Even then it would have to be off by default with per-site permission.
 
@@ -271,14 +271,14 @@ The same argument applies to #158 (location), but that one stays in LATER: a one
 | **#196 video autoplay** | The reporter's own conclusion two days later: play it once by hand and autoplay works from then on (WebKit's per-site autoplay quota), and the author could not reproduce it. The issue is a misunderstanding. The only thing to watch is that suspending media playback does not turn it into a real bug; see the end of “DO” above. |
 | **#88 Alfred listing the configured websites** | The author's 2021 plan was to wait for Shortcuts for Mac and return the website list through App Intents. **Our baseline already has it**: `WebsiteAppEntity` in `Intents.swift` comes with an `EnumerableEntityQuery`, paired with `SetCurrentWebsiteIntent`, so Alfred and Shortcuts can list them and switch today. No deeplink needs building. |
 | **#76 more image wallpaper sources** | Upstream's approach was to invite people to each fork his `plash-bing-photo-of-the-day` repository. Our equivalent is `sites/` — a schema-checked list with a way to submit — and the in-app Site Gallery that reads it (`Screens/SiteGalleryScreen.swift`, backed by `Sites/SiteCatalog.swift`). Both exist. That is a better direction than N scattered repositories: one central list with one-click adding, and entries contributed between releases show up without an app update. Void as an issue, and absorbed as a request. |
-| **#5 App Store copy** | We are not going on the Mac App Store; see ROADMAP section 1, and section 8 for how distribution works instead. Every store link and the rating prompt were removed with the fork. |
+| **#5 App Store copy** | We are not going on the Mac App Store; see ROADMAP section 1, and section 11 for how distribution works instead. Every store link and the rating prompt were removed with the fork. |
 
 ---
 
 ## 6. Issues that are really performance issues
 
-Several issues talk about a feature on the surface while really talking about power and render scheduling. That reading was the argument for the power machinery, and the machinery has since been built and removed (ROADMAP sections 2 and 4). What the reading was worth is in the one issue that turned out to be a check on it rather than a case for it.
+Several issues talk about a feature on the surface while really talking about power and render scheduling. That reading was the argument for the power machinery, and the machinery has since been built and removed (ROADMAP section 2, and X8 in section 12). What the reading was worth is in the one issue that turned out to be a check on it rather than a case for it.
 
 **#193 is worth a line of its own**: it is a reality check on the thinking that produced the P series, and it points both ways at once. WebKit already throttles by itself — while a page is not updating it will not even bother recomputing the backdrop. So suspending inactive content is a direction the engine agrees with, and at the same time **anything that replaces a live page with a still will visibly degrade the pages that live on CSS animation and filters**. Those are the same pages people put on a wallpaper.
 
-That is the shape of the whole finding recorded in ROADMAP section 2: the offscreen renderer photographed blank for exactly the pages worth photographing. #193 said so from the outside before the measurement said so from the inside. If a still-based path is ever tried again, it has to be switchable off per site, and the repro script in this issue's body is the regression case that goes with it.
+That is the shape of the whole finding recorded as X8 in ROADMAP section 12: the offscreen renderer photographed blank for exactly the pages worth photographing. #193 said so from the outside before the measurement said so from the inside. If a still-based path is ever tried again, it has to be switchable off per site, and the repro script in this issue's body is the regression case that goes with it.
