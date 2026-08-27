@@ -34,7 +34,7 @@ eleven things the menu could do have no entry point at all (section 8). Most of 
 document is either that wiring or something the panel made visible.
 
 ```
-Open      W1-W9 wiring   K1 K6 K8 K12 K16-K18 K20-K37 bugs   L1-L4  V1-V5  S1 S2 S4  D4 D6  E21 E22  U2 U3
+Open      W1-W9 wiring   K1 K6 K8 K12 K16-K18 K20-K37 bugs   L1-L4  V1-V5  S1 S2 S4  D4 D6  E21-E23  U2 U3
 Parked    K7 HDR (your call), the P series (needs a measurement first)
 Blocked   nothing
 ```
@@ -246,6 +246,7 @@ feature rather than an entry point.
 |---|---|---|
 | **E21** | `nifro://` is registered to stale copies of the app | **Test URL commands with `open -a <path> "nifro:reload"`, never plain `open "nifro:reload"`.** LaunchServices holds the scheme against every build ever made on this machine, `~/.Trash` and derived data included. Nothing in the repo causes it and nothing in the repo can fix it. The plain form once drove a three-week-old build for an afternoon |
 | **E22** | Move localization onto Vorssaint's mechanism | **New, and a rework rather than a bug.** Nifro today: `Localizable.xcstrings`, 244 keys, 2 languages (English is the untranslated source), an `AppleLanguages` write and a **mandatory relaunch**, with a CI script gating completeness. Vorssaint: strings are Swift — a `struct Strings` of 892 fields with one `static let` per language across 13 languages, so a missing field is a compile error and there is no CI gate; `L10n: ObservableObject` publishes the choice and views re-render **with no relaunch**. The delta for Nifro is five steps, and step 3 is the whole cost: (1) replace the catalogue with `struct Strings` + one value per language; (2) add `L10n` with a `systemDefault` mapping and literal `displayName`s; (3) **rewrite 244 literals across ~30 files as `l10n.s.field`**, and make the AppKit surfaces — `DisplayPanel`, `PanelControls`, `Actions` — rebuild on change instead of relying on `AppleLanguages`; (4) delete the relaunch dialog; (5) delete the CI gate, the compiler replaces it. **What it gives up:** `AppleLanguages` localizes third-party package strings for free (`LaunchAtLogin.Toggle`); the Swift-struct scheme does not reach them. Keep a small gate for those |
+| **E23** | Carrying a user's settings across an upgrade | **New.** There is no mechanism for it. What exists is three unrelated things that each cover one case: `rotationInterval(stored:legacySeconds:)` reads an old key when the new one is absent, `@DecodableDefault` fills in a field added to `Website`, and `SS_hasLaunched` is a one-shot flag for the welcome screen. Nothing records which version last ran, and there is no place a one-time upgrade step could be hung. It has not bitten anybody yet because nobody is upgrading from anything — which is also why the shape of it is still free to choose. Changing a shipped default is the case that shows the gap most clearly, and section 12 is not where this belongs: it is worth doing, before the first release makes every choice permanent. |
 
 **A trap, not an item:** a fourth kind of per-page record must be a case of `PerPageDefaults` — that
 is what builds the key, and the sweep is `allCases`.
