@@ -139,31 +139,6 @@ extension Binding {
 		)
 	}
 }
-extension Binding {
-	/**
-	Transform a binding.
-
-	You can even change the type of the binding.
-
-	```
-	$foo.map(
-		get: { $0.uppercased() },
-		set: { $0.lowercased() }
-	)
-	```
-	*/
-	func map<Result>(
-		get: @escaping (Value) -> Result,
-		set: @escaping (Result) -> Value
-	) -> Binding<Result> {
-		.init(
-			get: { get(wrappedValue) },
-			set: { newValue in
-				wrappedValue = set(newValue)
-			}
-		)
-	}
-}
 // MARK: - BindingCollection
 extension BindingCollection where Base.Element: Identifiable {
 	/**
