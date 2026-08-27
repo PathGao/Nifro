@@ -117,7 +117,7 @@ grep -rhoE --include='*.swift' "(cornerRadius|xRadius|yRadius): *[0-9]+" Nifro/S
   面板承担它的全部为止」。`AppState.swift:30` 写着「菜单已经没了」。`Menus.swift` 在 #21 里删掉了，
   `sendAction(on: [.leftMouseUp, .rightMouseUp])`（`AppState.swift:24`）把左右键都送进同一个处理函数。
   前一条注释描述的是一个不再存在的 app，而它恰好是读者问「哪个界面管什么」时最先读到的那条。
-  （它背后那堆死掉的 `SSMenu` 脚手架已经是 ROADMAP W9；这一条说的是注释，不是代码。）
+  （它背后的脚手架是 ROADMAP W9，那一条现在只剩 `CallbackMenuItem.validateCallback`；这一条说的是注释，不是代码。）
 
 ---
 
