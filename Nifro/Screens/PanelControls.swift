@@ -17,24 +17,21 @@ enum PanelMetrics {
 
 	One definition, because "make Quit match the chooser" is a request that comes back every time one
 	of them is adjusted on its own.
+
+	`controlRadius` is the exception that reaches wider than this group: every control the panel draws
+	uses it, 22-point squares and 28-point pills alike. It was two numbers — 5 written four times and
+	6 written once — which is what stopped the question being asked at all. There is no system answer
+	to borrow here: AppKit and SwiftUI expose no standard control radius, and `ConcentricRectangle`
+	answers a different question (what an inner radius should be inside a known outer one) and needs
+	macOS 26, above this app's floor.
 	*/
 	// swiftlint:disable:next hardcoded_font_size - This is the definition the rule redirects to.
 	static let font = Font.system(size: 13)
 	static let height = 28.0
 	static let horizontalPadding = 15.0
-	static let cornerRadius = 6.0
+	static let controlRadius = 5.0
 	// swiftlint:disable:next hardcoded_font_size - This is the definition the rule redirects to.
 	static let symbolFont = Font.system(size: 11, weight: .semibold)
-
-	/**
-	The chrome the 22-point row shares: the icon buttons, the interval field, the sync link.
-
-	A smaller radius than the wide controls' 6, because these are half their height and a 6 on a
-	22-point square reads as a lozenge rather than a button. Whether the two should have converged on
-	one number is a look decision nobody has made; what was wrong before was that 5 was written four
-	times and 6 once, so the question could not even be asked.
-	*/
-	static let smallCornerRadius = 5.0
 
 	/**
 	The column: its width, the card behind it, and the picture inside it.
@@ -101,8 +98,8 @@ struct PanelButton: View {
 				.font(PanelMetrics.font.weight(.medium))
 				.frame(width: 26, height: 22)
 				.foregroundStyle(foreground)
-				.background(background, in: RoundedRectangle(cornerRadius: PanelMetrics.smallCornerRadius))
-				.contentShape(RoundedRectangle(cornerRadius: PanelMetrics.smallCornerRadius))
+				.background(background, in: RoundedRectangle(cornerRadius: PanelMetrics.controlRadius))
+				.contentShape(RoundedRectangle(cornerRadius: PanelMetrics.controlRadius))
 		}
 		.buttonStyle(.plain)
 		.disabled(!isEnabled)
@@ -166,7 +163,7 @@ struct PanelIntervalField: View {
 				.multilineTextAlignment(.center)
 				.font(PanelMetrics.font)
 				.frame(width: 34, height: 22)
-				.background(.quinary, in: RoundedRectangle(cornerRadius: PanelMetrics.smallCornerRadius))
+				.background(.quinary, in: RoundedRectangle(cornerRadius: PanelMetrics.controlRadius))
 				.help(String(localized: "Minutes between websites"))
 				.accessibilityLabel(String(localized: "Minutes between websites"))
 
@@ -214,8 +211,8 @@ struct PanelWideButton: View {
 				.padding(.horizontal, PanelMetrics.horizontalPadding)
 				.frame(height: PanelMetrics.height)
 				.foregroundStyle(isOn ? PanelMetrics.onForeground : AnyShapeStyle(.primary))
-				.background(background, in: RoundedRectangle(cornerRadius: PanelMetrics.cornerRadius))
-				.contentShape(RoundedRectangle(cornerRadius: PanelMetrics.cornerRadius))
+				.background(background, in: RoundedRectangle(cornerRadius: PanelMetrics.controlRadius))
+				.contentShape(RoundedRectangle(cornerRadius: PanelMetrics.controlRadius))
 		}
 		.buttonStyle(.plain)
 		.disabled(!isEnabled)

@@ -287,7 +287,7 @@ private struct DisplayColumn: View {
 						.foregroundStyle(isSynced ? PanelMetrics.onForeground : AnyShapeStyle(.secondary))
 						.background(
 							isSynced ? AnyShapeStyle(PanelMetrics.onTint) : AnyShapeStyle(.quinary),
-							in: RoundedRectangle(cornerRadius: PanelMetrics.smallCornerRadius)
+							in: RoundedRectangle(cornerRadius: PanelMetrics.controlRadius)
 						)
 				}
 				.menuStyle(.borderlessButton)
@@ -415,7 +415,7 @@ private struct DisplayColumn: View {
 			height: PanelMetrics.height
 		)
 		.padding(.horizontal, PanelMetrics.horizontalPadding)
-		.background(.quinary, in: RoundedRectangle(cornerRadius: PanelMetrics.cornerRadius))
+		.background(.quinary, in: RoundedRectangle(cornerRadius: PanelMetrics.controlRadius))
 		.disabled(column.choices.isEmpty)
 	}
 }

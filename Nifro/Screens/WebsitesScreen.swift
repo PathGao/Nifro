@@ -332,7 +332,7 @@ private struct IconView: View {
 			}
 		}
 		.frame(width: 44, height: 44)
-		// A masked favicon in a stock `Form`, not a panel control, so `smallCornerRadius` would be
+		// A masked favicon in a stock `Form`, not a panel control, so `controlRadius` would be
 		// the wrong source: this wants whatever radius macOS masks app icons with, and 5 on 44 points
 		// is the closest hand-written approximation of it. It follows the system if the system ever
 		// exposes the number, not the panel.
