@@ -83,9 +83,13 @@ final class WebsiteIconFetcher: NSObject {
 		return NSImage(data: data)
 	}
 
+	// The leading slash is the whole of it. Relative resolution drops only the last path segment, so
+	// a bare "favicon.ico" asks the directory the page happens to sit in — the site root only for a
+	// URL with no path or one segment. Of the 38 addresses in `sites/`, 17 have two or more segments
+	// or a trailing slash, and for every one of those the last rung of the chain was fetching a 404.
 	private func getFavicon() async throws -> NSImage? {
 		guard
-			let faviconURL = URL(string: "favicon.ico", relativeTo: url)
+			let faviconURL = URL(string: "/favicon.ico", relativeTo: url)
 		else {
 			return nil
 		}
