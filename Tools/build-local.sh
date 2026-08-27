@@ -20,6 +20,19 @@ if ! security find-identity -p codesigning 2>/dev/null | grep -q "$IDENTITY"; th
 	./Tools/setup-signing.sh
 fi
 
+# A locked signing keychain still lists its identity, so the check above passes and codesign then
+# fails halfway through with `errSecInternalComponent` after putting a keychain prompt on screen.
+# Unlocking here is what keeps a build from ever asking for a password. If the passphrase no longer
+# matches — an older script wrote a different one — the keychain is rebuilt, since all it holds is a
+# self-signed local certificate that setup-signing.sh makes from scratch anyway.
+KEYCHAIN="$HOME/Library/Keychains/nifro-signing.keychain-db"
+if [[ -f "$KEYCHAIN" ]] && ! security unlock-keychain -p "nifro-signing" "$KEYCHAIN" 2>/dev/null; then
+	echo "→ Signing keychain will not unlock, rebuilding it."
+	security delete-keychain "$KEYCHAIN"
+	./Tools/setup-signing.sh
+fi
+security set-keychain-settings "$KEYCHAIN"  # No auto-lock, so the next build does not prompt either.
+
 xcodebuild \
 	-project Nifro.xcodeproj \
 	-scheme Nifro \
