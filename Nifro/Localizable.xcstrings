@@ -1509,6 +1509,16 @@
         }
       }
     },
+    "Release every display following this one" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "解除所有跟随这块显示器的同步"
+          }
+        }
+      }
+    },
     "Reload" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1879,6 +1889,16 @@
         }
       }
     },
+    "Show what %@ shows" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "显示 %@ 正在显示的内容"
+          }
+        }
+      }
+    },
     "Showing" : {
       "localizations" : {
         "zh-Hans" : {
@@ -1935,6 +1955,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "固定在这个网站"
+          }
+        }
+      }
+    },
+    "Stop following %@" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "不再跟随 %@"
           }
         }
       }

@@ -235,16 +235,19 @@ private struct DisplayColumn: View {
 				.lineLimit(1)
 				.truncationMode(.middle)
 
-			if !column.syncTargets.isEmpty {
+			if !column.syncOptions.isEmpty {
 				Menu {
-					ForEach(column.syncTargets, id: \.name) { target in
+					ForEach(column.syncOptions) { option in
 						Button {
-							model.toggleSync(column.display, with: target.display)
+							model.apply(option, on: column.display)
 						} label: {
-							if target.isSynced {
-								Label(target.name, systemImage: "checkmark")
-							} else {
-								Text(target.name)
+							switch option {
+							case .follow(_, let name):
+								Text("Show what \(name) shows")
+							case .unfollow(let name):
+								Label(String(localized: "Stop following \(name)"), systemImage: "checkmark")
+							case .releaseAll:
+								Text("Release every display following this one")
 							}
 						}
 					}
@@ -267,8 +270,11 @@ private struct DisplayColumn: View {
 		.frame(maxWidth: 260)
 	}
 
+	/**
+	Lit when this display is part of an arrangement, whether it leads it or follows it.
+	*/
 	private var isSynced: Bool {
-		column.syncTargets.contains(where: \.isSynced)
+		column.isFollowing || column.syncOptions.contains { if case .releaseAll = $0 { true } else { false } }
 	}
 
 	@ViewBuilder

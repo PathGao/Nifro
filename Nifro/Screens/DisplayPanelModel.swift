@@ -36,7 +36,7 @@ final class DisplayPanelModel: ObservableObject {
 		/**
 		The displays this one could be synced with, and whether it already is.
 		*/
-		let syncTargets: [(display: Display?, name: String, isSynced: Bool)]
+		let syncOptions: [SyncOption]
 
 		/**
 		Whether this display is following another rather than leading.
@@ -108,10 +108,8 @@ final class DisplayPanelModel: ObservableObject {
 					// One website has nothing to rotate to, and a control that does nothing should say so
 					// rather than shrug when pressed.
 					canRotate: WebsitesController.shared.all.count { $0.effectiveDisplay == scene.display } > 1,
-					syncTargets: syncTargets(for: scene.display),
-					isFollowing: MediaSync.leader(of: scene.display).map {
-						Display.settingsKey(for: $0) != Display.settingsKey(for: scene.display)
-					} ?? false
+					syncOptions: syncOptions(for: scene.display),
+					isFollowing: SyncGroup.leader(of: scene.display) != nil
 				)
 			)
 		}
@@ -119,52 +117,6 @@ final class DisplayPanelModel: ObservableObject {
 		columns = built
 	}
 
-
-	/**
-	Every other display, and whether this one is already synced with it.
-
-	Every other display rather than every other group: a display already in a group appears once per
-	member, all of them ticked, because "sync with the monitor" and "sync with the group the monitor is
-	in" are the same act and only one of them is a phrase anybody would say.
-	*/
-	private func syncTargets(for display: Display?) -> [(display: Display?, name: String, isSynced: Bool)] {
-		let peers = Set(SyncGroup.peers(of: display).map { Display.settingsKey(for: $0) })
-
-		return AppState.shared.scenes
-			.map(\.display)
-			.filter { Display.settingsKey(for: $0) != Display.settingsKey(for: display) }
-			.map {
-				(
-					display: $0,
-					name: $0?.localizedName ?? String(localized: "Main Display"),
-					isSynced: peers.contains(Display.settingsKey(for: $0))
-				)
-			}
-	}
-
-	/**
-	Sync `display` with `other`, or unsync it if they already are.
-	*/
-	func toggleSync(_ display: Display?, with other: Display?) {
-		if SyncGroup.peers(of: display).contains(where: { Display.settingsKey(for: $0) == Display.settingsKey(for: other) }) {
-			// The one that was picked leaves, not the one whose menu it was. The leader's menu is the one
-			// that stays usable, so "remove myself" would be the wrong thing for every click made there.
-			SyncGroup.leave(other)
-		} else {
-			SyncGroup.join(display, with: other)
-			WebsitesController.shared.mirrorAcrossSyncGroup(from: other)
-		}
-
-		MediaSync.forgetQuietPeriods()
-		MediaSync.restart()
-
-		// Who is audible is a property of the group, so it changes when the group does.
-		AppState.shared.applyAudioSetting()
-
-		Task {
-			await refresh()
-		}
-	}
 
 	func toggleBrowsingMode(on display: Display?) {
 		AppState.shared.setBrowsingMode(!AppState.shared.isBrowsingMode(on: display), on: display)
@@ -187,6 +139,89 @@ final class DisplayPanelModel: ObservableObject {
 		onClose?()
 		WebsitesController.shared.makeCurrent(website)
 		AppState.shared.beginCropSelection(on: scene)
+	}
+
+	/**
+	What this display's sync button offers.
+
+	A follower is offered only the way out: it shows what its leader shows, and picking a third display
+	from there would be asking two screens to decide the same thing.
+
+	A display that is followed is offered the rest, plus the way to release everyone at once. That last
+	entry is the only thing its button has to say when everything else is already following it —
+	otherwise the button would open an empty menu.
+	*/
+	func syncOptions(for display: Display?) -> [SyncOption] {
+		if let leader = SyncGroup.leader(of: display) {
+			return [.unfollow(name: name(of: leader))]
+		}
+
+		let followers = SyncGroup.followers(of: display).map { Display.settingsKey(for: $0) }
+
+		var options: [SyncOption] = AppState.shared.scenes
+			.map(\.display)
+			.filter {
+				let key = Display.settingsKey(for: $0)
+				return key != Display.settingsKey(for: display) && !followers.contains(key)
+			}
+			.map { .follow(display: $0, name: name(of: $0)) }
+
+		if !followers.isEmpty {
+			options.append(.releaseAll)
+		}
+
+		return options
+	}
+
+	enum SyncOption: Identifiable {
+		/// Follow that display: this one stops deciding.
+		case follow(display: Display?, name: String)
+
+		/// Stop following, named so the user can see what they are leaving.
+		case unfollow(name: String)
+
+		/// Let go of everything following this display.
+		case releaseAll
+
+		var id: String {
+			switch self {
+			case .follow(let display, _):
+				"follow-\(Display.settingsKey(for: display))"
+			case .unfollow:
+				"unfollow"
+			case .releaseAll:
+				"release"
+			}
+		}
+	}
+
+	private func name(of display: Display?) -> String {
+		display?.localizedName ?? String(localized: "Main Display")
+	}
+
+	/**
+	Act on one entry of the sync menu.
+	*/
+	func apply(_ option: SyncOption, on display: Display?) {
+		switch option {
+		case .follow(let other, _):
+			SyncGroup.follow(display, following: other)
+			WebsitesController.shared.mirrorAcrossSyncGroup(from: other)
+		case .unfollow:
+			SyncGroup.leave(display)
+		case .releaseAll:
+			SyncGroup.releaseFollowers(of: display)
+		}
+
+		MediaSync.forgetQuietPeriods()
+		MediaSync.restart()
+
+		// Who is audible is a property of the group, so it changes when the group does.
+		AppState.shared.applyAudioSetting()
+
+		Task {
+			await refresh()
+		}
 	}
 
 	/**
