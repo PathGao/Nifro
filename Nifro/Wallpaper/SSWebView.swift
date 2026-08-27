@@ -145,13 +145,23 @@ extension SSWebView {
 		return zoomLevel
 	}
 
+	/**
+	The zoom level of this page, applied to the view and remembered for the address.
+
+	Bounded on the way in rather than at the three menu items, because this setter is where every one
+	of them ends up — and so does `restoreZoomLevel`, which reads the stored level and writes it back
+	on every load. Clamping here therefore also repairs a page left at 0 or below by a version that
+	did not clamp: the next load stores a level that can be seen again, without the user having to
+	find Actual Size in a menu they cannot reach until the wallpaper is raised.
+	*/
 	var zoomLevelWrapper: Double {
 		get { zoomLevelDefaultsValue ?? pageZoom }
 		set {
-			pageZoom = newValue
+			let level = PageZoom.clamped(newValue)
+			pageZoom = level
 
 			if let zoomLevelDefaultsKey {
-				Defaults[zoomLevelDefaultsKey] = newValue
+				Defaults[zoomLevelDefaultsKey] = level
 			}
 		}
 	}

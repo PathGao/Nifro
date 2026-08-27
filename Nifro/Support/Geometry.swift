@@ -242,6 +242,35 @@ extension Comparable {
 }
 
 /**
+How far the page is allowed to be zoomed by the page's own context menu.
+
+Not `Zoom` above. That frames a region and is this app's own idea; this is WebKit's `pageZoom`, the
+browser control, and the reason it needs an end at all is that the chosen level is written to
+`zoomLevel_<address>` and put back on every later load of that page. An unbounded step reaches 0 in
+five presses of Zoom Out and negative on the sixth — a page that is not merely small but absent, on
+every launch from then on, escapable only by finding Actual Size in a menu that needs the wallpaper
+raised before it can be opened at all.
+
+Safari's ends, 50% and 300%. Chrome stops at 25% and 500% and Firefox at 30% and 500%, so this is the
+narrowest of the three, and deliberately: those two are chrome around a page the reader is looking at
+and can undo with one keystroke on the spot, while this is a persisted property of a wallpaper nobody
+is pointing at. Safari is also the WebKit one, which makes its ends the pair this engine's page zoom
+is actually exercised against. The 0.2 step divides 3 exactly, so Zoom In lands on the ceiling rather
+than short of it.
+*/
+enum PageZoom {
+	static let range = 0.5...3.0
+
+	/**
+	The nearest allowed level to `level`, which is also the repair for a level already stored outside
+	the range by a version that had none.
+	*/
+	static func clamped(_ level: Double) -> Double {
+		level.clamped(to: range)
+	}
+}
+
+/**
 How tall the menu bar's strip is on a screen, given the screen's two rectangles.
 
 `visibleFrame` is the screen minus the menu bar and minus the Dock. Only the menu bar is at the top,
