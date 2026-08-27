@@ -39,16 +39,6 @@
         }
       }
     },
-    "%lld minutes": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld 分钟"
-          }
-        }
-      }
-    },
     "A WebKit content-blocking rule list, for hiding cookie banners and ads. Paste the address of a `.json` file and Nifro compiles it once and applies it to every website.\n\nNifro keeps no rules of its own: a blocklist goes stale within weeks, and keeping one working is a full-time job somebody else is already doing. Lists in WebKit's format are published by the content-blocker projects — the one your Safari extension uses can usually be exported, and several are on GitHub as a single raw `.json` file. The address has to be the raw file, not the page it is displayed on.\n\nLeave it empty for no rules at all.": {
       "localizations": {
         "zh-Hans": {
@@ -1119,6 +1109,16 @@
         }
       }
     },
+    "Minutes between websites": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每隔多少分钟换一个网站"
+          }
+        }
+      }
+    },
     "More ideas": {
       "localizations": {
         "zh-Hans": {
@@ -1145,16 +1145,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "在壁纸上摆一个取景框：拖动或滚动移动它，捏合改大小。框住的部分会填满整个屏幕。"
-          }
-        }
-      }
-    },
-    "Moves to the next website on each display in turn. Websites with hours set are skipped outside them.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在每块屏幕上依次切到下一个网站。设了时段的网站在时段外会被跳过。"
           }
         }
       }
@@ -1705,16 +1695,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "还原"
-          }
-        }
-      }
-    },
-    "Rotate between websites every": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "轮换间隔"
           }
         }
       }
@@ -2415,6 +2395,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld 个站点 · 已与 GitHub 同步"
+          }
+        }
+      }
+    },
+    "min": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "分钟"
           }
         }
       }

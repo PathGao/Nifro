@@ -465,6 +465,75 @@ struct CurrentWebsiteTests {
 }
 
 /**
+How long a display waits between websites.
+
+Two things that only look simple. The fallback is what an upgrading user lands on — the interval was
+one number for the whole machine until now, and nobody's setting is allowed to vanish because the
+shape it is stored in changed. The clamp is the other end of a text field, where "0" and a nine-digit
+number are each one keystroke away and both mean a wallpaper that has stopped.
+*/
+@Suite("Rotation interval")
+struct RotationIntervalTests {
+	@Test("A display with a number of its own uses it")
+	func stored() {
+		#expect(rotationInterval(stored: 12, legacySeconds: 60 * 45) == 12)
+	}
+
+	@Test("A display with nothing of its own inherits the machine-wide number it replaced")
+	func legacyFallback() {
+		#expect(rotationInterval(stored: nil, legacySeconds: 60 * 45) == 45)
+	}
+
+	@Test("A machine that never set one gets the default")
+	func noSettingAtAll() {
+		#expect(rotationInterval(stored: nil, legacySeconds: nil) == defaultRotationIntervalMinutes)
+	}
+
+	@Test("Rotation being off is not stored as a missing interval any more")
+	func offIsNotAbsence() {
+		// Up to 0.1.3 a nil interval meant "do not rotate", and that meaning moved to `RotationMode`.
+		// So nil now has to mean a length rather than a refusal, or a display switched to Loop would
+		// come up with no interval and never move.
+		#expect(rotationInterval(stored: nil, legacySeconds: nil) >= rotationIntervalRange.lowerBound)
+	}
+
+	@Test("A stored number outside the range is brought back into it")
+	func storedIsClamped() {
+		#expect(rotationInterval(stored: 0, legacySeconds: nil) == rotationIntervalRange.lowerBound)
+		#expect(rotationInterval(stored: 99_999, legacySeconds: nil) == rotationIntervalRange.upperBound)
+		#expect(rotationInterval(stored: .nan, legacySeconds: nil) == defaultRotationIntervalMinutes)
+	}
+
+	@Test("A number typed in is taken as it is when it makes sense")
+	func enteredIsKept() {
+		#expect(rotationInterval(entered: 90, current: 30) == 90)
+	}
+
+	@Test("Nothing typed in leaves the display where it was")
+	func enteredEmpty() {
+		#expect(rotationInterval(entered: nil, current: 30) == 30)
+		#expect(rotationInterval(entered: .nan, current: 30) == 30)
+		#expect(rotationInterval(entered: .infinity, current: 30) == 30)
+	}
+
+	@Test("Zero and below become the shortest wait on offer, not a display that never moves")
+	func enteredTooSmall() {
+		#expect(rotationInterval(entered: 0, current: 30) == 1)
+		#expect(rotationInterval(entered: -5, current: 30) == 1)
+	}
+
+	@Test("A number too big to be a rotation stops at a day")
+	func enteredTooLarge() {
+		#expect(rotationInterval(entered: 100_000, current: 30) == 60 * 24)
+	}
+
+	@Test("The field is whole minutes, so what it takes is too")
+	func enteredIsWholeMinutes() {
+		#expect(rotationInterval(entered: 4.6, current: 30) == 5)
+	}
+}
+
+/**
 The strip of page the menu bar band takes its colour from.
 
 The band stands in for whatever is drawn behind the menu bar. With a region framed, that is not the

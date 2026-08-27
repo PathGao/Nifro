@@ -139,15 +139,6 @@ extension Binding {
 		)
 	}
 }
-extension Binding<Double> {
-	// TODO: Maybe make a general `Binding#convert()` function that accepts a converter. Something like `binding.convert(.secondsToMinutes)`?
-	var secondsToMinutes: Self {
-		map(
-			get: { $0 / 60 },
-			set: { $0 * 60 }
-		)
-	}
-}
 extension Binding {
 	/**
 	Transform a binding.

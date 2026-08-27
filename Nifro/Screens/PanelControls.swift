@@ -94,6 +94,47 @@ struct PanelButton: View {
 }
 
 /**
+How many minutes this display waits between websites: a number to type in, and the unit beside it.
+
+A typed field rather than the stepper Settings used to carry. The stepper was next to a checkbox that
+was only ever set once, so walking a number up one minute at a time was tolerable; here it sits beside
+the mode button in a popover, and somebody who wants ninety minutes wants to type "90" rather than
+press an arrow ninety times.
+
+Minutes and only minutes, so no unit picker — unlike `IntervalField`, which reloads pages and has to
+reach from seconds to a day. Rotation below a minute is not offered, and above a day is not a
+rotation, so the two ends the picker exists to reach are both outside the range.
+
+Exactly as tall as `PanelButton`, because it shares a row with three of them and a field half a point
+taller would make the whole column grow the moment the mode left `pinned`.
+*/
+struct PanelIntervalField: View {
+	@Binding var minutes: Double
+
+	var body: some View {
+		HStack(spacing: 4) {
+			TextField(
+				"",
+				value: $minutes,
+				format: .number.grouping(.never).precision(.fractionLength(0))
+			)
+				.textFieldStyle(.plain)
+				.multilineTextAlignment(.center)
+				.font(PanelMetrics.font)
+				.frame(width: 34, height: 22)
+				.background(.quinary, in: RoundedRectangle(cornerRadius: 5))
+				.help(String(localized: "Minutes between websites"))
+				.accessibilityLabel(String(localized: "Minutes between websites"))
+
+			Text("min")
+				.font(PanelMetrics.font)
+				.foregroundStyle(.secondary)
+		}
+		.frame(height: 22)
+	}
+}
+
+/**
 A button whose label is a word rather than a symbol, for the two verbs no symbol says plainly.
 */
 struct PanelWideButton: View {

@@ -198,7 +198,6 @@ private struct AdvancedSettings: View {
 				BringBrowsingModeToFrontSetting()
 				Defaults.Toggle(String(localized: "Deactivate while on battery"), key: .deactivateOnBattery)
 				ContentRulesSetting()
-				PlaylistIntervalSetting()
 				Defaults.Toggle(key: .restoreScrollPosition) {
 					Text("Put the page back where it was")
 						.explained(String(localized: "A page that reloads on a timer starts over: a long page goes back to the top, and a map or a drawing goes back to wherever it opens. This puts it back — the scroll position after a reload, and the part of the page a site names after the “#” in its address, which also survives quitting. A site that saves its own position needs none of this and keeps working either way."))
@@ -238,28 +237,6 @@ private struct ContentRulesSetting: View {
 
 					Leave it empty for no rules at all.
 					"""))
-		}
-	}
-}
-
-private struct PlaylistIntervalSetting: View {
-	@Default(.playlistInterval) private var interval
-
-	private static let defaultInterval = 60.0 * 30
-
-	var body: some View {
-		Toggle(isOn: $interval.isNotNil(trueSetValue: Self.defaultInterval)) {
-			Text("Rotate between websites every")
-				.explained(String(localized: "Moves to the next website on each display in turn. Websites with hours set are skipped outside them."))
-		}
-
-		if interval != nil {
-			Stepper(
-				"\(Int((interval ?? Self.defaultInterval) / 60)) minutes",
-				value: $interval.withDefaultValue(Self.defaultInterval).secondsToMinutes,
-				in: 1...(60 * 24),
-				step: 1
-			)
 		}
 	}
 }
