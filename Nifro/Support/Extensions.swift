@@ -2229,16 +2229,45 @@ extension WKUserContentController {
 				return best && best.element;
 			};
 
+			// Of two readings, the one showing more picture — unless the one being held has gone stale,
+			// which is how a player that has been replaced stops holding the answer forever.
+			const better = (held, fresh) => {
+				if (!held || Date.now() - held.at > 3000) {
+					return fresh;
+				}
+
+				return fresh.area >= held.area ? fresh : held;
+			};
+
 			const read = () => {
 				const element = biggest();
 
-				return element ? { time: element.currentTime, duration: element.duration } : null;
+				if (!element) { return null; }
+
+				// The area travels with the reading. Every frame that has a video reports upward, and the
+				// top frame has to choose between them — a page with an advertisement or a preview beside
+				// the player has several, and keeping whichever arrived last meant the clock hopped
+				// between two different videos from one comparison to the next.
+				return {
+					time: element.currentTime,
+					duration: element.duration,
+					area: element.clientWidth * element.clientHeight,
+					at: Date.now()
+				};
 			};
 
-			const align = (target, duration, jump) => {
+			const align = (target, duration) => {
 				const element = biggest();
 
 				if (!element || !duration) {
+					return false;
+				}
+
+				// A player that does not have enough buffered to keep playing is a player that is about
+				// to stall, and correcting it is worse than leaving it: measured, a jump onto a video that
+				// was still buffering landed, and the video then resumed a second and a half behind —
+				// so nothing is spent here until the video can actually run.
+				if (element.readyState < 3) {
 					return false;
 				}
 
@@ -2257,23 +2286,20 @@ extension WKUserContentController {
 
 				const distance = Math.abs(drift);
 
-				// Told to jump: this player has never been put in step, so whatever gap it starts with is
-				// not drift and nudging it away would take most of a minute.
-				if (jump && distance >= \(MediaSync.Tolerance.ignore)) {
-					element.playbackRate = 1;
-					element.currentTime = target;
-					return true;
-				}
-
-				if (distance < \(MediaSync.Tolerance.ignore)) {
-					element.playbackRate = 1;
-					return false;
-				}
-
 				if (distance >= \(MediaSync.Tolerance.seek)) {
 					element.playbackRate = 1;
 					element.currentTime = target;
 					return true;
+				}
+
+				// Already correcting, so hold on until the gap is properly closed rather than until it
+				// is merely acceptable. The player's own rate is the only state this needs.
+				const correcting = element.playbackRate !== 1;
+				const threshold = correcting ? \(MediaSync.Tolerance.release) : \(MediaSync.Tolerance.engage);
+
+				if (distance < threshold) {
+					element.playbackRate = 1;
+					return false;
 				}
 
 				element.playbackRate = drift > 0 ? 1 - \(MediaSync.Tolerance.nudge) : 1 + \(MediaSync.Tolerance.nudge);
@@ -2288,7 +2314,7 @@ extension WKUserContentController {
 				}
 
 				if (data.\(mediaAlignKey)) {
-					const done = align(data.\(mediaAlignKey).time, data.\(mediaAlignKey).duration, !!data.\(mediaAlignKey).jump);
+					const done = align(data.\(mediaAlignKey).time, data.\(mediaAlignKey).duration);
 
 					if (window === window.top) {
 						window.\(mediaSeekedKey) = done;
@@ -2317,7 +2343,7 @@ extension WKUserContentController {
 				}
 
 				if (data.\(mediaReportKey) && window === window.top) {
-					window.\(mediaClockKey) = data.\(mediaReportKey);
+					window.\(mediaClockKey) = better(window.\(mediaClockKey), data.\(mediaReportKey));
 				}
 			});
 
@@ -2333,7 +2359,7 @@ extension WKUserContentController {
 				}
 
 				if (window === window.top) {
-					window.\(mediaClockKey) = own;
+					window.\(mediaClockKey) = better(window.\(mediaClockKey), own);
 					return;
 				}
 
@@ -2444,11 +2470,11 @@ extension WKWebView {
 	Nudge or jump this page's video towards `time`. Returns whether it jumped.
 	*/
 	@discardableResult
-	func alignMedia(to time: Double, duration: Double, jumpingRegardless: Bool = false) async -> Bool {
+	func alignMedia(to time: Double, duration: Double) async -> Bool {
 		let value = try? await callAsyncJavaScript(
 			"""
 			window.\(mediaSeekedKey) = false;
-			window.postMessage({ \(mediaAlignKey): { time: time, duration: duration, jump: jump } }, '*');
+			window.postMessage({ \(mediaAlignKey): { time: time, duration: duration } }, '*');
 
 			// Delivered on the next turn, and a framed player's answer has to come back up as a second
 			// message, so this waits for two hops rather than one.
@@ -2456,7 +2482,7 @@ extension WKWebView {
 
 			return window.\(mediaSeekedKey) === true;
 			""",
-			arguments: ["time": time, "duration": duration, "jump": jumpingRegardless],
+			arguments: ["time": time, "duration": duration],
 			in: nil,
 			contentWorld: .defaultClient
 		)

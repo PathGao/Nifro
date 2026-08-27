@@ -361,6 +361,16 @@ final class AppState: ObservableObject {
 			scene.installContentView()
 			scene.window.isInteractive = isBrowsingMode(on: scene.display)
 			scene.applyOpacity(animated: false)
+
+			// A rebuild happens on every edit to the website list, and it used to hand every scene a
+			// page and a timer whether or not its display was switched off. So pressing Next on one
+			// display brought back every display that was off, each with a website nobody asked for.
+			guard isEnabled, !scene.isDisabledForDisplay else {
+				scene.suspend()
+				continue
+			}
+
+			scene.resume()
 			scene.resetTimer()
 			scene.resetPlaylistTimer()
 		}

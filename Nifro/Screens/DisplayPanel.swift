@@ -201,7 +201,7 @@ private struct DisplayColumn: View {
 		HStack(spacing: 9) {
 			PanelWideButton(
 				title: String(localized: "Crop"),
-				isEnabled: column.websiteID != nil
+				isEnabled: column.isShowing && column.websiteID != nil
 			) {
 				model.chooseRegion(on: column.display)
 			}
@@ -209,7 +209,7 @@ private struct DisplayColumn: View {
 			PanelWideButton(
 				title: String(localized: "Browsing Mode"),
 				isOn: browsingDisplays.contains(Display.settingsKey(for: column.display)),
-				isEnabled: column.websiteID != nil
+				isEnabled: column.isShowing && column.websiteID != nil
 			) {
 				model.toggleBrowsingMode(on: column.display)
 			}

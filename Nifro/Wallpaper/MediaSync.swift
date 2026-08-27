@@ -26,36 +26,53 @@ enum MediaSync {
 	Thresholds, together, because they are the part that wants tuning against real screens.
 	*/
 	enum Tolerance {
-		/// Below this, do nothing. Two screens side by side do not show a sixth of a second.
-		static let ignore = 0.15
+		/// Above this, start correcting. Two screens side by side do not show a sixth of a second.
+		static let engage = 0.15
 
-		/// Above this, jump. Past a couple of seconds it is an event — a stall, a loop, a wake — and
-		/// not drift, and nudging would take minutes to catch up.
+		/// Below this, stop correcting. Separate from `engage` on purpose: one threshold for both
+		/// makes the correction switch on and off around the same number, and every switch costs a
+		/// visible hitch on WebKit — `playbackRate` interrupts playback for a moment on each change
+		/// there (WebKit bug 208142, which dash.js works around by refusing rate changes under 0.25 on
+		/// Safari). With a gap between the two, one correction is one rate change in and one out.
+		static let release = 0.03
+
+		/// Above this, jump. Past a couple of seconds it is an event — a loop, a wake, a page that
+		/// reloaded — and not something playing faster can close.
+		///
+		/// Deliberately not lower, though a second out of step is plainly visible. Seeking a streaming
+		/// player costs a re-buffer, and a re-buffer is about as long as the error being corrected:
+		/// measured against Bilibili on two displays, jumping every five seconds held the gap at 1.2
+		/// seconds indefinitely, because each seek landed and then lost exactly what it had gained.
+		/// Below this threshold the only thing that actually converges is running faster.
 		static let seek = 2.0
 
-		/// How much faster or slower a follower runs while catching up. Invisible on screen and under a
-		/// third of a semitone, which WebKit corrects for anyway.
-		static let nudge = 0.02
+		/// How much faster or slower a follower runs while it is correcting.
+		///
+		/// One value rather than a proportional law, because on WebKit every change of rate costs a
+		/// hitch, so the cheapest correction is the one that changes rate twice: on and off.
+		///
+		/// A tenth is well inside what anybody sees. A hundred observers watching football were not
+		/// spontaneously aware of speed changes up to twelve percent, and asked to discriminate they
+		/// managed about nine — and that was with the sound on. A follower here is always silent, so
+		/// only the picture is on the line. Two percent, which is where this started, closed a second
+		/// in the better part of a minute: slower than the stalls that opened it.
+		static let nudge = 0.10
 
-		/// How often to compare. A wallpaper has nowhere to be.
-		static let period = 5.0
+		/// How often to compare.
+		///
+		/// It was five seconds, on the reasoning that a wallpaper has nowhere to be. That is a
+		/// disturbance arriving every few seconds into a loop that samples slower than the
+		/// disturbance, which cannot converge whatever the correction is — measured, it sat a second
+		/// behind for two minutes. The systems that do this for a living sample far faster than this:
+		/// the W3C MediaSync reference at 100ms, dash.js on every `timeupdate`.
+		static let period = 1.0
 
 		/// Quiet after a jump, so the seek can land before it is judged again.
-		static let settle = 5.0
+		static let settle = 3.0
 	}
 
 	private static var timer: Timer?
 	private static var quietUntil = [Website.ID: Date]()
-
-	/**
-	Which followers have been put in step at least once.
-
-	The nudge is for drift, and drift is small. What two players start with is not drift: they are
-	loaded separately and each begins wherever it begins, which measured about a second apart — and a
-	second closed at two percent takes the better part of a minute, during which the two screens are
-	visibly out of step. So the first alignment jumps, and every one after it nudges.
-	*/
-	private static var aligned = Set<Website.ID>()
 
 	/**
 	Start comparing, or stop if nothing is synced.
@@ -75,49 +92,43 @@ enum MediaSync {
 		}
 	}
 
-	/**
-	The display a group takes its time — and its sound — from.
-
-	The first scene in a group, and never corrected. A fixed leader rather than whoever reported first:
-	two followers correcting towards each other chase a moving target and never settle.
-	*/
-	static func leader(of display: Display?) -> Display? {
-		guard let group = Defaults[.syncGroups][Display.settingsKey(for: display)] else {
-			return nil
-		}
-
-		return AppState.shared.scenes
-			.first { Defaults[.syncGroups][Display.settingsKey(for: $0.display)] == group }?
-			.display
-	}
-
 	private static func tick() async {
-		let groups = Dictionary(grouping: AppState.shared.scenes) {
-			Defaults[.syncGroups][Display.settingsKey(for: $0.display)]
+		var scenesByDisplay = [String: WallpaperScene]()
+
+		for scene in AppState.shared.scenes {
+			scenesByDisplay[Display.settingsKey(for: scene.display)] = scene
 		}
 
-		for (group, scenes) in groups where group != nil && scenes.count > 1 {
-			await align(scenes)
+		// Grouped by leader rather than by "some group id the members share", because the stored
+		// relation is follower-to-leader: a leader has no entry of its own, so grouping on the raw
+		// values left every leader out of its own group and every group one scene short of comparing.
+		for (leaderDisplay, entries) in Dictionary(grouping: Defaults[.syncGroups], by: \.value) {
+			guard let leader = scenesByDisplay[leaderDisplay] else {
+				continue
+			}
+
+			let followers = entries.compactMap { scenesByDisplay[$0.key] }
+
+			if !followers.isEmpty {
+				await align(leader: leader, followers: followers)
+			}
 		}
 	}
 
 	/**
-	The first scene leads and is never corrected; the rest follow.
+	The leader is never corrected; its followers are moved to it.
 
-	A fixed leader rather than "whoever reported first". Two followers correcting towards each other
-	chase a moving target and never settle.
+	Which display leads is stored rather than worked out from the order scenes happen to be in — two
+	followers correcting towards each other chase a moving target and never settle.
 	*/
-	private static func align(_ scenes: [WallpaperScene]) async {
-		guard
-			let leader = scenes.first,
-			let clock = await leader.mediaClock()
-		else {
+	private static func align(leader: WallpaperScene, followers: [WallpaperScene]) async {
+		guard let clock = await leader.mediaClock() else {
 			return
 		}
 
 		let sampledAt = Date()
 
-		for follower in scenes.dropFirst() {
+		for follower in followers {
 			guard
 				let websiteID = follower.website?.id,
 				quietUntil[websiteID].map({ $0 < Date() }) ?? true
@@ -130,19 +141,8 @@ enum MediaSync {
 			// it out would bake in an offset the dead zone then hides.
 			let target = clock.time + Date().timeIntervalSince(sampledAt)
 
-			let isFirst = !aligned.contains(websiteID)
-			let seeked = await follower.alignMedia(
-				to: target,
-				duration: clock.duration,
-				// One jump to get in step, then never again unless something knocks it out.
-				jumpingRegardless: isFirst
-			)
-
-			// Marked only when a jump actually landed. Marking it on the attempt spent the one free jump
-			// on a page whose video had not loaded yet — measured, and it left the two a second apart
-			// for the next minute.
-			if seeked {
-				aligned.insert(websiteID)
+			// Quiet after a jump, so the seek can land before it is judged again.
+			if await follower.alignMedia(to: target, duration: clock.duration) {
 				quietUntil[websiteID] = Date().addingTimeInterval(Tolerance.settle)
 			}
 		}
@@ -154,8 +154,5 @@ enum MediaSync {
 	*/
 	static func forgetQuietPeriods() {
 		quietUntil.removeAll()
-
-		// A display joining a group has never been put in step, whatever it did in a previous one.
-		aligned.removeAll()
 	}
 }

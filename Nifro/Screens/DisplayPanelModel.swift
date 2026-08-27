@@ -248,6 +248,12 @@ final class DisplayPanelModel: ObservableObject {
 	a flag.
 	*/
 	func step(_ direction: Step, on display: Display?) {
+		// Stepping a display that is switched off is how you wake it, and something does appear on it —
+		// so the switch has to agree. It used to light up with a website while still reading as off.
+		if AppState.shared.scenes.first(where: { $0.display == display })?.isDisabledForDisplay == true {
+			AppState.shared.setDisplayEnabled(true, on: display)
+		}
+
 		switch direction {
 		case .previous:
 			WebsitesController.shared.makePreviousCurrent(on: display)

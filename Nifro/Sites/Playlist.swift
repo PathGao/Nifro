@@ -127,11 +127,8 @@ extension WallpaperScene {
 			return false
 		}
 
-		guard let leader = MediaSync.leader(of: display) else {
-			return true
-		}
-
-		return Display.settingsKey(for: leader) == Display.settingsKey(for: display)
+		// A follower is silent; a leader, and a display in no group at all, is not.
+		return SyncGroup.leader(of: display) == nil
 	}
 
 	/**

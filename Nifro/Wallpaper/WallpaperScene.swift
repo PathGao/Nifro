@@ -393,8 +393,8 @@ final class WallpaperScene {
 	/**
 	Move this display's video towards `time`. Returns whether it had to jump.
 	*/
-	func alignMedia(to time: Double, duration: Double, jumpingRegardless: Bool = false) async -> Bool {
-		await webViewController.webView.alignMedia(to: time, duration: duration, jumpingRegardless: jumpingRegardless)
+	func alignMedia(to time: Double, duration: Double) async -> Bool {
+		await webViewController.webView.alignMedia(to: time, duration: duration)
 	}
 
 	/**

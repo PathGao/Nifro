@@ -99,6 +99,32 @@ enum SyncGroup {
 	}
 
 	/**
+	Hand every leader's page back to its followers.
+
+	The group survives a quit, but nothing was re-applying it on the way back up: a follower came back
+	greyed out, correctly, while still showing whatever it had been showing before — so the group
+	looked joined and behaved as two unrelated displays until it was picked again.
+	*/
+	@MainActor
+	static func applyToFollowers() {
+		if AppState.shared.scenes.isEmpty {
+			AppState.shared.rebuildScenes()
+		}
+
+		for leaderKey in Set(Defaults[.syncGroups].values) {
+			guard
+				let leader = AppState.shared.scenes
+					.map(\.display)
+					.first(where: { Display.settingsKey(for: $0) == leaderKey })
+			else {
+				continue
+			}
+
+			WebsitesController.shared.mirrorAcrossSyncGroup(from: leader)
+		}
+	}
+
+	/**
 	Release everything that follows `display`.
 	*/
 	@MainActor
