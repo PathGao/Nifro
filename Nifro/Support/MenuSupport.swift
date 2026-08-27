@@ -136,9 +136,6 @@ extension ControlActionClosureProtocol {
 extension NSMenuItem: ControlActionClosureProtocol {}
 
 
-extension NSMenuItem {
-}
-
 extension NSStatusBarButton {
 	private static let activityAnimationKey = "nifro.activity"
 

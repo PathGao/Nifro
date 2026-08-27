@@ -344,8 +344,6 @@ extension Collection where Index == Int, Element: Equatable {
 		moving(element, to: endIndex - 1)
 	}
 }
-extension Collection where Element: Equatable {
-}
 extension Collection where Element: Identifiable {
 	/**
 	Returns an array where each element's ID in the collection equal to the given ID is modified.
@@ -962,11 +960,6 @@ extension NSItemProvider {
 	}
 }
 
-// MARK: - NSObjectProtocol
-// MARK: - KVO utilities
-extension NSObjectProtocol where Self: NSObject {
-}
-
 // MARK: - NSResponder
 extension NSResponder {
 	// This method is internally implemented on `NSResponder` as `Error` is generic which comes with many limitations.
@@ -995,10 +988,6 @@ extension NSResponder {
 			contextInfo: nil
 		)
 	}
-}
-
-// MARK: - NSStatusBar
-extension NSStatusBar {
 }
 
 // MARK: - NSToolbarItem
@@ -1037,10 +1026,6 @@ extension Notification.Name {
 	Must be used with `DistributedNotificationCenter`.
 	*/
 	static let screenIsUnlocked = Self("com.apple.screenIsUnlocked")
-}
-
-// MARK: - Numeric
-extension Numeric {
 }
 
 // MARK: - ObjectAssociation
@@ -1683,8 +1668,6 @@ extension View {
 	}
 }
 extension View {
-}
-extension View {
 	/**
 	For empty states in the UI. For example, no items in a list, no search results, etc.
 	*/
@@ -1852,8 +1835,6 @@ extension View {
 	}
 }
 extension View {
-}
-extension View {
 	/**
 	Make the view subscribe to the given notification.
 	*/
@@ -1907,8 +1888,6 @@ extension View {
 			} catch {}
 		}
 	}
-}
-extension View {
 }
 extension View {
 	/**
