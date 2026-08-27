@@ -48,21 +48,6 @@ enum SyncGroup {
 	}
 
 	/**
-	Everything showing what `display` shows, or showing what it shows — itself excluded.
-	*/
-	@MainActor
-	static func peers(of display: Display?) -> [Display?] {
-		if let leader = leader(of: display) {
-			// A follower's peers are its leader and its leader's other followers.
-			return [leader] + followers(of: leader).filter {
-				Display.settingsKey(for: $0) != Display.settingsKey(for: display)
-			}
-		}
-
-		return followers(of: display)
-	}
-
-	/**
 	Make `display` follow `other`.
 
 	Anything that was following `display` is handed over rather than left pointing at a display that no

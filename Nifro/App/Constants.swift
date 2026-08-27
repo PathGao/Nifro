@@ -68,6 +68,11 @@ extension Defaults.Keys {
 	// is always "what is this display in", and a list would have to be searched to answer it.
 	static let syncGroups = Key<[String: String]>("syncGroups", default: [:])
 
+	// When each sync group's video was at zero, in seconds since 1970, keyed by the display that
+	// leads it. Every page in the group works out where it should be from this and its own clock, so
+	// this one number is the whole of what the app has to say about synchronised playback.
+	static let syncEpochs = Key<[String: Double]>("syncEpochs", default: [:])
+
 	// Website id -> where the server sent it instead. Only written when WebKit reports an actual
 	// redirect, never inferred by comparing addresses: a page that rewrites its own address as you
 	// drag a map is not a redirect, and telling the user their website is wrong because they moved a

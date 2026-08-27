@@ -203,18 +203,29 @@ final class DisplayPanelModel: ObservableObject {
 	Act on one entry of the sync menu.
 	*/
 	func apply(_ option: SyncOption, on display: Display?) {
+		var anchoring: Display?
+
 		switch option {
 		case .follow(let other, _):
 			SyncGroup.follow(display, following: other)
 			WebsitesController.shared.mirrorAcrossSyncGroup(from: other)
+
+			// From where the display being joined is now, so joining a group does not send it back to
+			// the start of its own video.
+			anchoring = other
 		case .unfollow:
 			SyncGroup.leave(display)
 		case .releaseAll:
 			SyncGroup.releaseFollowers(of: display)
 		}
 
-		MediaSync.forgetQuietPeriods()
-		MediaSync.restart()
+		if let anchoring {
+			Task {
+				await MediaSync.anchor(anchoring)
+			}
+		} else {
+			MediaSync.restart()
+		}
 
 		// Who is audible is a property of the group, so it changes when the group does.
 		AppState.shared.applyAudioSetting()

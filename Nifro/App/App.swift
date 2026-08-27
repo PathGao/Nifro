@@ -60,6 +60,10 @@ private final class AppDelegate: NSObject, NSApplicationDelegate {
 	}
 
 	func applicationDidFinishLaunching(_ notification: Notification) {
+		// Before the clock starts, so a follower is already showing the leader's page rather than a page
+		// of its own the first time it is told where to be.
+		SyncGroup.applyToFollowers()
+
 		// Only runs while something is actually synced; it checks and stops otherwise.
 		MediaSync.restart()
 

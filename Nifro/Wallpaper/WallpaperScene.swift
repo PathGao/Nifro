@@ -391,10 +391,18 @@ final class WallpaperScene {
 	}
 
 	/**
-	Move this display's video towards `time`. Returns whether it had to jump.
+	Tell this display's page which wall-clock moment its video was at zero, or `nil` when it is in no
+	group.
 	*/
-	func alignMedia(to time: Double, duration: Double) async -> Bool {
-		await webViewController.webView.alignMedia(to: time, duration: duration)
+	func setMediaEpoch(_ epoch: Double?) {
+		webViewController.webView.setMediaEpoch(epoch)
+	}
+
+	/**
+	Where somebody dragged this display's video to since this was last asked, if they did.
+	*/
+	func scrubbedPosition() async -> Double? {
+		await webViewController.webView.scrubbedPosition()
 	}
 
 	/**
