@@ -183,7 +183,7 @@ private struct ShortcutsSettings: View {
 			} footer: {
 				// Worth saying once, here, because it is invisible on one display and surprising on two:
 				// a shortcut is pressed by somebody looking at a screen, and this is how it knows which.
-				Text("These act on the display your pointer is on. Automations and nifro:// commands act on the main display, since they can run with nobody at the Mac.")
+				Text("Shortcuts act on the display the pointer is on.")
 					.font(.callout)
 					.foregroundStyle(.secondary)
 			}
