@@ -165,18 +165,27 @@ rule twice, three paragraphs after stating it.
 
 ## 7. Media controls for the panel (the V series)
 
+**Read this before the table.** Every row here used to describe `MediaSync`, the multi-display sync
+feature, as though it were running. None of it is in the tree: no clock, no epoch, no reading, no
+per-page script. `mediaClock()` and `mediaClockCode`, which these rows named as though they were code
+somebody could go and read, appear nowhere in `Nifro/`. What survives of the feature is `docs/shelved/MULTI-DISPLAY-SYNC.md`,
+whose first line says it is removed and built by nothing. So no row here is "half built" — every one
+of them is downstream of rebuilding that, and the rows say which part each needs.
+
 | | The item | What is known |
 |---|---|---|
-| **V1** | Pause, play, and step back or forward on a column | Detection ships: `mediaClock()` yields `nil` when there is no finite-duration video, so "does this column have a video" is answerable today. **There is no pause/play/seek primitive** — Swift writes only an epoch and the page computes its own seek, so stepping needs a new message type in `mediaClockCode`, not a reuse |
-| **V2** | A progress bar under the picture | The reading exists and so does the open/close lifecycle it wanted inventing — the panel's refresh task already starts on open and stops on close. It can ride that loop |
-| **V3** | What a control means in a sync group | Half built: a scrub already moves the whole group, because the leader is re-anchored and the epoch is broadcast. There is no follower-to-leader correction anywhere, so "the follower is dragged back into playing" was never the mechanism |
-| **V4** | Live streams have no transport | The test partly exists: a `<video>` whose `duration` is not finite already reports as having no clock |
+| **V1** | Pause, play, and step back or forward on a column | Nothing exists, detection included: nothing in `Nifro/` reads a `<video>` at all, so "does this column have a video" cannot be answered today. Both halves have to be built. The detection is one line of the shelved script — largest video with a finite duration. The transport was never built even there: that design only ever wrote an epoch and let each page compute its own seek, so pause, play and step are a new message type rather than a reuse of anything |
+| **V2** | A progress bar under the picture | Half the prerequisite exists and it is the cheap half: `DisplayPanelModel.startLiveRefresh` already runs while the panel is up and cancels the moment it closes, so a reading would have a loop to ride. The reading itself does not exist |
+| **V3** | What a control means in a sync group | There are no sync groups. `WallpaperScene.shouldPlaySound` is where the last rule that mentioned one was removed, and it names where the design went. Read § 4 of `docs/shelved/MULTI-DISPLAY-SYNC.md` first — it is the list of defects the feature was pulled for, and this item cannot be specified ahead of deciding what replaces them |
+| **V4** | Live streams have no transport | Nothing reports it, because nothing reads a `<video>` duration. The finiteness test is one line and comes back with V1's detection; there is no separate work here |
 | **V5** | Save the picture a column is showing | Not built at all. A button writes the current frame to the Desktop; held past a second, a short GIF. **At the display's own resolution** — the panel snapshots at 260 points, so this needs a second full-size path, taken only when asked, at roughly 600 ms a frame on 4K |
 
-**The prerequisite both V1 and V2 need.** The freshness cap is the *in-page* reporter at 1000 ms, not
-the app's 2-second tick. A faster panel read means changing the script's interval, and only while the
-panel is open. **V5's GIF** needs frames held at full resolution — a second of a 4K display is tens of
-megabytes, so it wants a frame budget and a hard stop, not "until the user lets go".
+**The prerequisite V1 and V2 share** is a per-page reporter, and there is not one to tune. The panel's
+own loop is 80 ms and is not the constraint; freshness is capped by how often a page can be asked,
+which is a script somebody has to write. The shelved design reported upward every 1000 ms and
+corrected every 250 ms — starting points, not measurements of anything running. **V5's GIF** needs
+frames held at full resolution — a second of a 4K display is tens of megabytes, so it wants a frame
+budget and a hard stop, not "until the user lets go".
 
 ---
 
