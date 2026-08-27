@@ -101,6 +101,20 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	}
 
 	/**
+	Whether this website is on a display it was sent to rather than the one it was given.
+
+	True only for a website pinned to a display that is not attached, and only while such a wallpaper
+	is set to move rather than go away — which is the same pair of conditions `isShowable` reads, from
+	the other side. `display` is left alone either way, so this goes back to false the moment that
+	screen is plugged in again.
+
+	What it is for is the tie it settles once the website has landed: two wallpapers now claim one
+	desktop, and `showingIndex` gives it to this one.
+	*/
+	@MainActor
+	var isEvicted: Bool { isShowable && display?.isConnected == false }
+
+	/**
 	How often this website actually reloads.
 	*/
 	var effectiveReloadInterval: Double? { reloadInterval ?? Defaults[.reloadInterval] }
