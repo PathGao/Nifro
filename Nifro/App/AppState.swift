@@ -629,15 +629,6 @@ final class AppState: ObservableObject {
 		}
 	}
 
-	/**
-	Put the live page back on every scene, now that framing a region is over.
-	*/
-	func installContentView() {
-		for scene in scenes {
-			scene.installContentView()
-		}
-	}
-
 	func reloadWebsite() {
 		for scene in scenes {
 			scene.reload()
