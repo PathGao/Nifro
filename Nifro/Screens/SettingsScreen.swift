@@ -7,12 +7,12 @@ struct SettingsScreen: View {
 		TabView {
 			GeneralSettings()
 				.settingsTabItem(.general)
+			BehaviorSettings()
+				.settingsTabItem(.behavior)
 			ShortcutsSettings()
 				.settingsTabItem(.shortcuts)
 			AdvancedSettings()
 				.settingsTabItem(.advanced)
-			AboutSettings()
-				.settingsTabItem(.about)
 		}
 		.formStyle(.grouped)
 		.frame(width: 400)
@@ -21,6 +21,17 @@ struct SettingsScreen: View {
 	}
 }
 
+/**
+What Nifro is, rather than what it does.
+
+The app's own affairs — how it starts, what language it speaks, which version it is, and who wrote
+it. Everything that changes what appears on the desktop is one tab over in Behavior, so nothing here
+needs a wallpaper on screen to make sense of.
+
+About used to be a fourth tab. Three rows and a licence do not fill a pane, and a tab nobody opens
+twice is a worse home for the version number than the pane that already asks whether to check for a
+new one.
+*/
 private struct GeneralSettings: View {
 	var body: some View {
 		Form {
@@ -33,6 +44,7 @@ private struct GeneralSettings: View {
 					Text("Launch at login")
 						.explained(String(localized: "Starts Nifro when you log in, so the wallpaper is already up when you reach the desktop."))
 				}
+				HideMenuBarIconSetting()
 			}
 			Section {
 				LanguageSetting()
@@ -40,12 +52,40 @@ private struct GeneralSettings: View {
 			Section {
 				UpdateSetting()
 			}
-			Section {
-				ReloadIntervalSetting()
-				OpacitySetting()
-			}
+
+			AboutSection()
+		}
+	}
+}
+
+/**
+Everything that decides what the desktop shows and how it behaves while it is up.
+
+Split out of General and Advanced, which between them had grown into one long list with no order to
+it: a language picker, a reload interval and a content-blocking rule list are three different kinds
+of question. Advanced keeps the two that are genuinely advanced; this is the rest.
+*/
+private struct BehaviorSettings: View {
+	var body: some View {
+		Form {
 			Section {
 				KeepWallpaperWhenDisplayUnpluggedSetting()
+			}
+			Section {
+				OpacitySetting()
+				DimWhenUnfocusedSetting()
+				BringBrowsingModeToFrontSetting()
+			}
+			Section {
+				ReloadIntervalSetting()
+				Defaults.Toggle(key: .restoreScrollPosition) {
+					Text("Put the page back where it was")
+						.explained(String(localized: "A page that reloads on a timer starts over: a long page goes back to the top, and a map or a drawing goes back to wherever it opens. This puts it back — the scroll position after a reload, and the part of the page a site names after the “#” in its address, which also survives quitting. A site that saves its own position needs none of this and keeps working either way."))
+				}
+				Defaults.Toggle(String(localized: "Reload when the Mac wakes"), key: .reloadOnWake)
+			}
+			Section {
+				OpenExternalLinksInBrowserSetting()
 			}
 		}
 	}
@@ -104,7 +144,8 @@ private struct UpdateSetting: View {
 				.disabled(progress == .checking)
 			}
 		} label: {
-			Text("Version \(SSApp.version)")
+			Text("Version \(SSApp.versionWithBuild)")
+				.textSelection(.enabled)
 		}
 	}
 
@@ -194,21 +235,20 @@ private struct ShortcutsSettings: View {
 	}
 }
 
+/**
+The two settings that can leave the app in a state its owner did not mean to reach, and the one that
+undoes everything.
+
+Content blocking takes an address off the internet and compiles it into every page; battery
+deactivation makes the wallpaper disappear for a reason that is nowhere on screen. Both are worth
+having and neither is worth meeting by accident, which is what an "advanced" pane is for.
+*/
 private struct AdvancedSettings: View {
 	var body: some View {
 		Form {
 			Section {
-				BringBrowsingModeToFrontSetting()
-				Defaults.Toggle(String(localized: "Deactivate while on battery"), key: .deactivateOnBattery)
 				ContentRulesSetting()
-				Defaults.Toggle(key: .restoreScrollPosition) {
-					Text("Put the page back where it was")
-						.explained(String(localized: "A page that reloads on a timer starts over: a long page goes back to the top, and a map or a drawing goes back to wherever it opens. This puts it back — the scroll position after a reload, and the part of the page a site names after the “#” in its address, which also survives quitting. A site that saves its own position needs none of this and keeps working either way."))
-				}
-				Defaults.Toggle(String(localized: "Reload when the Mac wakes"), key: .reloadOnWake)
-				DimWhenUnfocusedSetting()
-				OpenExternalLinksInBrowserSetting()
-				HideMenuBarIconSetting()
+				Defaults.Toggle(String(localized: "Deactivate while on battery"), key: .deactivateOnBattery)
 			}
 			Section {} // Padding
 			Section {
@@ -289,7 +329,7 @@ private struct KeepWallpaperWhenDisplayUnpluggedSetting: View {
 	var body: some View {
 		Defaults.Toggle(key: .keepWallpaperWhenDisplayUnplugged) {
 			Text("Keep a wallpaper when its display is unplugged")
-				.explained(String(localized: "For a website pinned to a particular display. On, it moves to the main display until that one is plugged back in — which is what Nifro has always done, and what macOS does with an ordinary window. Off, it goes away with its display, the way the desktop picture on that screen does. Either way the website keeps the display you chose for it."))
+				.explained(String(localized: "For a website pinned to a particular display. On, it moves to the main display and takes over from whatever was showing there, until its own display is plugged back in — one desktop shows one page, so the arriving one wins. Off, it goes away with its display, the way the desktop picture on that screen does. Either way the website keeps the display you chose for it, and the page it displaced comes back when that display returns."))
 		}
 	}
 }
@@ -323,7 +363,7 @@ private struct OpacitySetting: View {
 			step: 0.1
 		) {
 			Text("Opacity")
-				.explained(String(localized: "How far back the wallpaper sits. Browsing Mode always uses full opacity, whatever this says, because a page you are about to click should not be half transparent."))
+				.explained(String(localized: "How see-through the wallpaper page is against the desktop behind it. Browsing Mode ignores this and always draws the page fully opaque, because a page you are about to click should not be half transparent."))
 		}
 	}
 }
@@ -374,20 +414,20 @@ private struct HideMenuBarIconSetting: View {
 
 fileprivate enum SettingsTabType {
 	case general
-	case advanced
+	case behavior
 	case shortcuts
-	case about
+	case advanced
 
 	fileprivate var label: some View {
 		switch self {
 		case .general:
 			Label("General", systemImage: "gearshape")
-		case .advanced:
-			Label("Advanced", systemImage: "gearshape.2")
+		case .behavior:
+			Label("Behavior", systemImage: "slider.vertical.3")
 		case .shortcuts:
 			Label("Shortcuts", systemImage: "command")
-		case .about:
-			Label("About", systemImage: "info.circle")
+		case .advanced:
+			Label("Advanced", systemImage: "gearshape.2")
 		}
 	}
 }

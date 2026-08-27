@@ -1,13 +1,18 @@
 import SwiftUI
 
 /**
-The About tab.
+The bottom of the General pane: what this app is and where to take a problem with it.
 
-Everything here used to live in a "More" submenu hanging off the status item. Three items do not justify a submenu, and it cost two clicks to reach any of them. A settings tab is where a Mac app without a menu bar of its own puts this.
+It was a tab of its own, which put four rows and a licence notice on a page 400pt wide and left the
+rest of it empty. Sections rather than a `Form`, so General owns the one form and this drops into the
+end of it.
+
+The version is not repeated here. It is one row up, beside the button that checks for a newer one,
+which is the only place anybody reads a version number for a reason.
 */
-struct AboutSettings: View {
+struct AboutSection: View {
 	var body: some View {
-		Form {
+		Group {
 			Section {
 				HStack(spacing: 12) {
 					// Not `SSApp.icon`. That force-unwraps, and the icon slot stays empty until this fork has artwork of its own.
@@ -17,15 +22,9 @@ struct AboutSettings: View {
 							.frame(width: 56, height: 56)
 					}
 
-					VStack(alignment: .leading, spacing: 2) {
-						Text(SSApp.name)
-							.font(.title2)
-							.fontWeight(.semibold)
-						Text("Version \(SSApp.versionWithBuild)")
-							.foregroundStyle(.secondary)
-							.font(.callout)
-							.textSelection(.enabled)
-					}
+					Text(SSApp.name)
+						.font(.title2)
+						.fontWeight(.semibold)
 
 					Spacer()
 
