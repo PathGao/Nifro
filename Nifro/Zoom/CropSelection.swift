@@ -77,9 +77,11 @@ extension AppState {
 		croppedScene?.window.isFramingRegion = false
 		croppedScene?.window.isInteractive = isBrowsingMode(on: croppedScene?.display)
 
-		for scene in scenes {
-			scene.applyOpacity(animated: false)
-		}
+		// The framed scene only. Framing forced this one window to full strength and set this one
+		// window's content to the unmagnified page; no other display was touched on the way in, so no
+		// other display has anything to put back. Undoing on every scene is how framing one display
+		// reached the others.
+		croppedScene?.applyOpacity(animated: false)
 
 		let websiteID = croppingWebsiteID
 		croppingWebsiteID = nil
@@ -91,7 +93,7 @@ extension AppState {
 		else {
 			// Cancelled, or the website went away while the overlay was up. The stored region was never
 			// touched, so putting the page back is the whole of undoing this.
-			installContentView()
+			croppedScene?.installContentView()
 			return
 		}
 
@@ -101,6 +103,6 @@ extension AppState {
 			$0.zoom = zoom.scale > 1 ? zoom : nil
 		}
 
-		installContentView()
+		croppedScene?.installContentView()
 	}
 }

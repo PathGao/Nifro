@@ -1,6 +1,28 @@
 import SwiftUI
 import LinkPresentation
 
+/**
+Adding a website, and editing one that is already in the list.
+
+**Opening this does not change what is on screen.** It used to: editing ran `makeCurrent()` on
+appear, so double-clicking a row in the Websites window to read its settings switched that display's
+wallpaper. Neither way out put it back. Escape with nothing edited just dismissed, leaving the new
+wallpaper up. Revert and "Don't Keep" went through `revert()`, which restores this website's own
+fields — including a `false` mark — but cannot restore the sibling's, since `makeCurrent` had cleared
+that as part of marking this one. The display then had no marked website at all, and
+`WebsitesController`'s repair marked whichever one sorts first on it. So the verb was "edit" and the
+effect was either "switch" or "switch to a third thing", depending on which button you pressed.
+
+That was there for a real reason: custom CSS reaches the wallpaper on the next load, so editing it
+against a page you cannot see is guesswork. But making a website current is a deliberate, persisted
+change to somebody's desktop, and the list already offers it deliberately — "Set as Current" is in
+each row's context menu and its leading swipe. Doing it there costs one click, is reversible by the
+same control, and does not depend on which button dismissed a sheet. A preview that has to be undone
+correctly on four exit paths is a worse version of a control that already exists one gesture away.
+
+Choosing a region is unaffected either way: that is done over the wallpaper from the panel, never
+from in here — see `ZoomSetting`.
+*/
 struct AddWebsiteScreen: View {
 	@Environment(\.dismiss) private var dismiss
 	@State private var hostingWindow: NSWindow?
@@ -112,13 +134,6 @@ struct AddWebsiteScreen: View {
 				}
 				.disabled(!isURLValid)
 			}
-		}
-		.task {
-			guard isEditing else {
-				return
-			}
-
-			website.wrappedValue.makeCurrent()
 		}
 	}
 

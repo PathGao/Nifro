@@ -252,19 +252,29 @@ final class WallpaperScene {
 	so a framed wallpaper snapped back to the whole page and stayed there until the switch completed.
 	`adopt` calls this again once the new page is actually up.
 
-	The region is not applied while this display is being framed. `beginCropSelection` sets the page
-	to `.live(zoom: nil)` for exactly one reason — the page has to hold still, or the frame's
-	magnification multiplies with the page's and the same drag appears to do two different amounts of
-	the same thing. Everything that reloads, switches website or edits the list comes back through
-	here, so without this the page the user is framing quietly puts its own region back on, taking the
-	frame and its hint panel with it.
+	Does nothing at all while this display is being framed. Passing `nil` for the region was not
+	enough: `content`'s observer fires on assignment rather than on change, so writing the same value
+	still reaches `applyContent`, which reassigns `window.contentView` — and the framing overlay is a
+	subview of the view being replaced, so it goes with it while `isSelectingCrop` stays true and the
+	mode can no longer be left. Everything that reloads, switches website or edits the list comes back
+	through here, and a rebuild runs on every display change and every wake, so framing had a few
+	seconds to survive rather than as long as the user needed.
+
+	`beginCropSelection` has already set the page to `.live(zoom: nil)`, and it holds until
+	`finishCropSelection` calls this again with the flag cleared. That is the whole of what framing
+	needs from this method: the page holds still, or the frame's magnification multiplies with the
+	page's and one drag appears to do two different amounts of the same thing.
 	*/
 	func installContentView() {
+		guard !window.isFramingRegion else {
+			return
+		}
+
 		guard loadedWebsiteID == nil || loadedWebsiteID == website?.id else {
 			return
 		}
 
-		content = .live(zoom: window.isFramingRegion ? nil : website?.zoom)
+		content = .live(zoom: website?.zoom)
 	}
 
 	/**
@@ -454,9 +464,12 @@ final class WallpaperScene {
 		reloadTimer?.invalidate()
 		reloadTimer = nil
 
+		// This display's own Browsing Mode, not the app's — the same argument `resetPlaylistTimer` makes
+		// beside the same guard: a reload throws away a form somebody is filling in, and only the
+		// display they are filling it in on has one.
 		guard
 			!isSwitchedOff,
-			!AppState.shared.isBrowsingMode,
+			!AppState.shared.isBrowsingMode(on: display),
 			let reloadInterval = website?.effectiveReloadInterval
 		else {
 			return
@@ -480,7 +493,7 @@ final class WallpaperScene {
 			return
 		}
 
-		let target = AppState.shared.targetOpacity
+		let target = AppState.shared.targetOpacity(on: display)
 		let window = window
 
 		guard window.alphaValue != target else {
@@ -496,30 +509,6 @@ final class WallpaperScene {
 			$0.duration = 0.25
 			window.animator().alphaValue = target
 		}
-	}
-
-	/**
-	Where this display's video is, if it has one.
-	*/
-	func mediaClock() async -> (time: Double, duration: Double)? {
-		// Asked of the live web view every time. Swap loading replaces it, and a held reference would
-		// go on talking to the page that left.
-		await webViewController.webView.mediaClock()
-	}
-
-	/**
-	Tell this display's page which wall-clock moment its video was at zero, or `nil` when it is in no
-	group.
-	*/
-	func setMediaEpoch(_ epoch: Double?) {
-		webViewController.webView.setMediaEpoch(epoch)
-	}
-
-	/**
-	Where somebody dragged this display's video to since this was last asked, if they did.
-	*/
-	func scrubbedPosition() async -> Double? {
-		await webViewController.webView.scrubbedPosition()
 	}
 
 	/**

@@ -110,25 +110,17 @@ extension WebsitesController {
 
 extension WallpaperScene {
 	/**
-	Start, restart or stop this scene's rotation to match the current settings.
-	*/
-	/**
 	Whether this display should be the one making the noise.
 
-	The website's own setting, and then one rule on top of it: in a sync group only the leader is
-	audible. The others are showing the same video a fraction of a second apart, and two copies of the
-	same soundtrack that close together is not stereo — it is an echo, and it is worse than either one
-	alone. Supermarket walls of televisions do the same thing: many pictures, one sound.
+	The website's own setting and nothing else. Sound is per display because a website is per display:
+	a display with no website on it has nothing to play, and every other display answers for itself.
 
-	The stored setting is not touched, so a display leaving a group gets its own sound back.
+	There used to be a second rule on top — in a sync group only the leader was audible, because two
+	copies of one soundtrack a fraction of a second apart is an echo rather than stereo. That rule
+	went with sync groups; `docs/shelved/MULTI-DISPLAY-SYNC.md` keeps it, because a rebuild needs it.
 	*/
 	var shouldPlaySound: Bool {
-		guard website?.audio == .unmuted else {
-			return false
-		}
-
-		// A follower is silent; a leader, and a display in no group at all, is not.
-		return SyncGroup.leader(of: display) == nil
+		website?.audio == .unmuted
 	}
 
 	/**
@@ -199,13 +191,35 @@ extension WallpaperScene {
 		set { Defaults[.rotationIntervals][Display.settingsKey(for: display)] = newValue }
 	}
 
+	/**
+	Whether this scene's page is already the one the website list asks for.
+
+	The test `applyWebsiteChanges` uses to decide which pages to reload, and `rebuildScenes` uses to
+	decide whose timers to leave alone. Here rather than written out at both, because two copies of
+	"nothing changed for this display" is how the timers came to disagree with the pages: a rebuild
+	restarted every kept scene's clock, including the scenes `applyWebsiteChanges` had just decided
+	were untouched.
+
+	The whole website and not its identity, for the reason `loadedWebsite` gives: a scene showing an
+	older version of the same website is not up to date.
+	*/
+	var isUpToDate: Bool {
+		loadedWebsite == WebsitesController.shared.scheduled(for: display)
+	}
+
 	func resetPlaylistTimer() {
 		playlistTimer?.invalidate()
 		playlistTimer = nil
 
+		// This display's own Browsing Mode, not the app's. Rotation pauses so that the page somebody is
+		// interacting with does not move under them, and that is a fact about the screen they are
+		// interacting with — the page behind them has nobody typing into it. Measured on two displays:
+		// Browsing Mode on the built-in stopped the external rotating and reloading as well, and
+		// nothing rearmed it afterwards. Nothing on this path takes focus, so there is no app-wide
+		// cost to leaving the other display running — see `AppState.isBrowsingMode`.
 		guard
 			!isSwitchedOff,
-			!AppState.shared.isBrowsingMode
+			!AppState.shared.isBrowsingMode(on: display)
 		else {
 			return
 		}

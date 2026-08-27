@@ -57,9 +57,10 @@ than for the one and two cases, because "the first website" alone left every dis
 with an empty wallpaper and nothing saying so.
 
 `display` is an index into the attached displays, and `nil` for the first one — a website with no
-display of its own already means "the display in Settings", which is the main display, and the main
-display is the first one. Pinning it explicitly would say the same thing while making the website
-carry a display badge and stop following the setting.
+display of its own already means the main display, the one with the menu bar, and that is the first
+of the attached displays. Pinning it explicitly would say the same thing today while freezing it: the
+main display moves when the user rearranges their screens or docks, and an unpinned website follows
+it where a pinned one would not.
 
 More displays than websites gets the websites; more websites than displays leaves the rest in the
 list, unshown, which is where a list of eight is meant to be. No displays at all still places the
@@ -89,4 +90,65 @@ func nextRotationIndex(count: Int, after current: Int?) -> Int? {
 	}
 
 	return (current + 1) % count
+}
+
+/**
+The "is current" flags for a whole list, with exactly one mark per display in use.
+
+`currentFlags` above keeps that true while the app is the one moving the mark. This is for when
+something else moves it, and something else does: a website's "Show on" is a binding straight into the
+stored list, so changing it is a plain list write that carries the website's mark across to the new
+display with it. The display it left is then unmarked, and the display it arrived on has two marks.
+
+Both failures are the same missing invariant and only one of them is loud. An unmarked display reads
+as "nothing is current", which is where a rotation starts counting from, so that display sits on the
+first website in its list for good — that got noticed, and the loop that fixed it only ever *added* a
+mark. Two marks on one display look like nothing at all: `scheduled(for:)` breaks the tie by list
+order and shows one of them. So the website the person just sent to that screen was ignored, the
+websites window drew two ticks, and the screen they had named did not change — which is the one thing
+they asked for.
+
+`wasAlreadyCurrentHere[i]` is whether website `i` held the mark *on this same display* before the
+change. Where a display has more than one mark, the ones that were not already there are arrivals, and
+an arrival is somebody having just said "show this here", so the incumbent stands down. With no
+arrival to prefer — two marks that both predate the change, which is a stored list that was already
+wrong rather than a move — the first in list order wins, because that is the one `scheduled(for:)` was
+already showing, so repairing an old mess does not change anybody's wallpaper.
+
+`Screen` is `Display?` in the app, where `nil` means the main display — the one with the menu bar,
+and not a display named in any setting. That is a display
+like any other here, which is why this keys on the value rather than skipping the ones without one.
+*/
+func repairedCurrentFlags<Screen: Hashable>(
+	displays: [Screen],
+	isCurrent: [Bool],
+	wasAlreadyCurrentHere: [Bool]
+) -> [Bool] {
+	guard
+		displays.count == isCurrent.count,
+		displays.count == wasAlreadyCurrentHere.count
+	else {
+		return isCurrent
+	}
+
+	var repaired = isCurrent
+
+	for display in Set(displays) {
+		let onDisplay = displays.indices.filter { displays[$0] == display }
+		let marked = onDisplay.filter { isCurrent[$0] }
+
+		guard marked.count != 1 else {
+			continue
+		}
+
+		// `onDisplay` is never empty — the display came out of the list — so the last fallback is what
+		// gives a display with no mark at all the first of its websites.
+		let keeping = marked.first { !wasAlreadyCurrentHere[$0] } ?? marked.first ?? onDisplay[0]
+
+		for index in onDisplay {
+			repaired[index] = index == keeping
+		}
+	}
+
+	return repaired
 }

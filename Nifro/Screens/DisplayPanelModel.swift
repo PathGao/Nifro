@@ -44,20 +44,6 @@ final class DisplayPanelModel: ObservableObject {
 		let canRotate: Bool
 
 		/**
-		The displays this one could be synced with, and whether it already is.
-		*/
-		let syncOptions: [SyncOption]
-
-		/**
-		Whether this display is following another rather than leading.
-
-		A follower shows what the leader shows, so its own controls would be arguing with the next
-		correction five seconds later. It is dimmed and inert, except for the one control that can
-		undo the arrangement.
-		*/
-		let isFollowing: Bool
-
-		/**
 		Whether a page is on its way to this display.
 
 		Per display, not per app. A load takes a few seconds, and locking the panel for all of them
@@ -66,8 +52,9 @@ final class DisplayPanelModel: ObservableObject {
 		*/
 		let isLoading: Bool
 
-		// `nil` display means "whatever Settings says", and there is only ever one of those, so the
-		// display's own id is the identity when it has one and a fixed stand-in when it does not.
+		// `nil` display means the main display — the one with the menu bar, not a display named in any
+		// setting — and there is only ever one of those, so the display's own id is the identity when it
+		// has one and a fixed stand-in when it does not.
 		var id: String { display?.id.uuidString ?? "default" }
 	}
 
@@ -178,8 +165,6 @@ final class DisplayPanelModel: ObservableObject {
 			// One website has nothing to rotate to, and a control that does nothing should say so
 			// rather than shrug when pressed.
 			canRotate: WebsitesController.shared.all.count { $0.effectiveDisplay == scene.display } > 1,
-			syncOptions: syncOptions(for: scene.display),
-			isFollowing: SyncGroup.leader(of: scene.display) != nil,
 			isLoading: scene.isLoading
 		)
 	}
@@ -206,100 +191,6 @@ final class DisplayPanelModel: ObservableObject {
 		onClose?()
 		WebsitesController.shared.makeCurrent(website)
 		AppState.shared.beginCropSelection(on: scene)
-	}
-
-	/**
-	What this display's sync button offers.
-
-	A follower is offered only the way out: it shows what its leader shows, and picking a third display
-	from there would be asking two screens to decide the same thing.
-
-	A display that is followed is offered the rest, plus the way to release everyone at once. That last
-	entry is the only thing its button has to say when everything else is already following it —
-	otherwise the button would open an empty menu.
-	*/
-	func syncOptions(for display: Display?) -> [SyncOption] {
-		if let leader = SyncGroup.leader(of: display) {
-			return [.unfollow(name: name(of: leader))]
-		}
-
-		let followers = SyncGroup.followers(of: display).map { Display.settingsKey(for: $0) }
-
-		var options: [SyncOption] = AppState.shared.scenes
-			.map(\.display)
-			.filter {
-				let key = Display.settingsKey(for: $0)
-				return key != Display.settingsKey(for: display) && !followers.contains(key)
-			}
-			.map { .follow(display: $0, name: name(of: $0)) }
-
-		if !followers.isEmpty {
-			options.append(.releaseAll)
-		}
-
-		return options
-	}
-
-	enum SyncOption: Identifiable {
-		/// Follow that display: this one stops deciding.
-		case follow(display: Display?, name: String)
-
-		/// Stop following, named so the user can see what they are leaving.
-		case unfollow(name: String)
-
-		/// Let go of everything following this display.
-		case releaseAll
-
-		var id: String {
-			switch self {
-			case .follow(let display, _):
-				"follow-\(Display.settingsKey(for: display))"
-			case .unfollow:
-				"unfollow"
-			case .releaseAll:
-				"release"
-			}
-		}
-	}
-
-	private func name(of display: Display?) -> String {
-		display?.localizedName ?? String(localized: "Main Display")
-	}
-
-	/**
-	Act on one entry of the sync menu.
-	*/
-	func apply(_ option: SyncOption, on display: Display?) {
-		var anchoring: Display?
-
-		switch option {
-		case .follow(let other, _):
-			SyncGroup.follow(display, following: other)
-			WebsitesController.shared.mirrorAcrossSyncGroup(from: other)
-
-			// From where the display being joined is now, so joining a group does not send it back to
-			// the start of its own video.
-			anchoring = other
-		case .unfollow:
-			SyncGroup.leave(display)
-		case .releaseAll:
-			SyncGroup.releaseFollowers(of: display)
-		}
-
-		if let anchoring {
-			Task {
-				await MediaSync.anchor(anchoring)
-			}
-		} else {
-			MediaSync.restart()
-		}
-
-		// Who is audible is a property of the group, so it changes when the group does.
-		AppState.shared.applyAudioSetting()
-
-		Task {
-			await refresh()
-		}
 	}
 
 	/**

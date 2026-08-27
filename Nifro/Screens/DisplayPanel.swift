@@ -142,21 +142,15 @@ private struct DisplayColumn: View {
 				// while a page is on its way it is also the thing reporting that — and a pulse under a
 				// 0.45 veil is not one.
 				picker
-					.opacity(column.isFollowing ? 0.45 : 1)
 
 				modeButtons
 					.opacity(inertOpacity)
 			}
-			// A follower shows the leader's wallpaper, so its own controls would be arguing with the next
-			// correction five seconds later. A load is the other reason a column cannot be used: the page
-			// being asked for has not arrived, so every control here would be aimed at a display that is
-			// already on its way somewhere.
-			//
-			// Everything below the title is inert for both. The sync button in the title is exempt from
-			// the first and not the second: a follower keeps its way out, because disabling it would
-			// leave a group with no way out at all if the leader's display went away, while a load lasts
-			// a few seconds and lets go of the button by itself.
-			.disabled(column.isFollowing || column.isLoading)
+			// A load is the one reason a column cannot be used: the page being asked for has not
+			// arrived, so every control here would be aimed at a display that is already on its way
+			// somewhere. It lasts a few seconds and lets go by itself, so nothing has to be exempt from
+			// it — the whole column comes back at once.
+			.disabled(column.isLoading)
 		}
 		.frame(width: PanelMetrics.columnWidth)
 		.padding(9)
@@ -186,11 +180,11 @@ private struct DisplayColumn: View {
 	/**
 	How dim a control looks while the column cannot be used.
 
-	One value for both reasons, because they mean the same thing to the person looking at it: nothing
-	here will answer right now.
+	Named rather than written out at each of its two call sites, because it is one statement — nothing
+	here will answer right now — and two literals are two chances for half of the column to say it.
 	*/
 	private var inertOpacity: Double {
-		column.isFollowing || column.isLoading ? 0.45 : 1
+		column.isLoading ? 0.45 : 1
 	}
 
 	/**
@@ -278,69 +272,19 @@ private struct DisplayColumn: View {
 	}
 
 	/**
-	The display's name, with a button beside it for syncing this display to another.
+	Which display this column is about, and nothing else.
 
-	A button rather than a menu on the title itself. The title looked like a title, so the way into
-	syncing was a thing you had to already know was there — the one control in the panel with no
-	affordance at all.
-
-	Lit when this display is in a group. A ticked entry means already synced; choosing it again breaks
-	that pairing, and the entry that leaves is the one that was picked rather than the one whose menu
-	it is — the leader's menu is the one that stays usable.
+	A title rather than a control. Everything a display can be told to do is below it, where the
+	picture is, so the one line above the picture is free to be the label that says which screen the
+	person is looking at — truncated in the middle, because a display's name ends in the part that
+	tells two of them apart.
 	*/
-	@ViewBuilder
 	private var displayName: some View {
-		HStack(spacing: 5) {
-			Text(column.displayName)
-				.font(.headline)
-				.lineLimit(1)
-				.truncationMode(.middle)
-
-			if !column.syncOptions.isEmpty {
-				Menu {
-					ForEach(column.syncOptions) { option in
-						Button {
-							model.apply(option, on: column.display)
-						} label: {
-							switch option {
-							case .follow(_, let name):
-								Text("Show what \(name) shows")
-							case .unfollow(let name):
-								Label(String(localized: "Stop following \(name)"), systemImage: "checkmark")
-							case .releaseAll:
-								Text("Release every display following this one")
-							}
-						}
-					}
-				} label: {
-					Image(systemName: "link")
-						.font(PanelMetrics.symbolFont)
-						.frame(width: 22, height: 20)
-						.foregroundStyle(isSynced ? PanelMetrics.onForeground : AnyShapeStyle(.secondary))
-						.background(
-							isSynced ? AnyShapeStyle(PanelMetrics.onTint) : AnyShapeStyle(.quinary),
-							in: RoundedRectangle(cornerRadius: PanelMetrics.controlRadius)
-						)
-				}
-				.menuStyle(.borderlessButton)
-				.menuIndicator(.hidden)
-				.fixedSize()
-				.help(String(localized: "Show the same wallpaper as another display"))
-				// The exemption above is from following, not from loading. A group can outlive the
-				// display that leads it, so a follower has to keep its way out — a load cannot outlive
-				// anything, it is a few seconds and it lets go of the button by itself.
-				.disabled(column.isLoading)
-				.opacity(column.isLoading ? 0.45 : 1)
-			}
-		}
-		.frame(maxWidth: PanelMetrics.columnWidth)
-	}
-
-	/**
-	Lit when this display is part of an arrangement, whether it leads it or follows it.
-	*/
-	private var isSynced: Bool {
-		column.isFollowing || column.syncOptions.contains { if case .releaseAll = $0 { true } else { false } }
+		Text(column.displayName)
+			.font(.headline)
+			.lineLimit(1)
+			.truncationMode(.middle)
+			.frame(maxWidth: PanelMetrics.columnWidth)
 	}
 
 	/**

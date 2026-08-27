@@ -42,24 +42,43 @@ final class WebsitesController {
 					return
 				}
 
-				// Every display keeps exactly one marked website, not the list as a whole. A display
-				// with none is what `advance` reads as "start from the beginning", so it would never
-				// move past the first website in its list.
-				var marked = change.newValue
-				var didMark = false
+				// Every display keeps exactly one marked website, not the list as a whole — both
+				// halves of that, which is what changed here. A display with none is what `advance`
+				// reads as "start from the beginning", so it would never move past the first website
+				// in its list; a display with two is a tie `scheduled(for:)` breaks by list order, so
+				// a website sent to a display by "Show on" arrived with no effect and that screen did
+				// not change. Only the first half was enforced, and it is the half whose failure is
+				// visible. `repairedCurrentFlags` is where the rule and the argument for it live.
+				//
+				// Here rather than in `update`, because "Show on" never reaches `update`: it writes
+				// the display through a settings binding straight into the stored list. This
+				// publisher is the one place every route to that list meets.
+				let displays = change.newValue.map(\.effectiveDisplay)
+				let wasCurrent = change.newValue.map(\.isCurrent)
 
-				for display in Set(marked.map(\.effectiveDisplay))
-				where !marked.contains(where: { $0.effectiveDisplay == display && $0.isCurrent }) {
-					guard let index = marked.firstIndex(where: { $0.effectiveDisplay == display }) else {
-						continue
+				let repaired = repairedCurrentFlags(
+					displays: displays,
+					isCurrent: wasCurrent,
+					// Matched by id rather than by position: the two lists differ in membership
+					// whenever a website was added or removed, and the same index in each is then a
+					// different website.
+					wasAlreadyCurrentHere: zip(change.newValue, displays).map { website, display in
+						guard let before = change.oldValue.first(where: { $0.id == website.id }) else {
+							return false
+						}
+
+						return before.isCurrent && before.effectiveDisplay == display
 					}
+				)
 
-					marked[index].isCurrent = true
-					didMark = true
-				}
-
-				if didMark {
-					all = marked
+				// Only when it actually changed something. The write goes back through this same
+				// publisher, so repairing a list that was already right is a write per change.
+				if repaired != wasCurrent {
+					all = zip(change.newValue, repaired).map {
+						var updated = $0
+						updated.isCurrent = $1
+						return updated
+					}
 				}
 
 				// We only reset the iterators if a website was added/removed.
@@ -77,10 +96,33 @@ final class WebsitesController {
 	stopped rotation working on more than one screen: each tick of one display's playlist wiped the
 	other display's mark, so `advance` there found nothing current, started again from index 0, and
 	that screen sat on the first website in its list for good.
+
+	Marking a website is a request to *see* it, so a display that is switched off is switched back on.
+	Stepping a display that is off is how you wake it — the panel's own Next and Previous had always
+	said so and did it themselves, and the keyboard shortcut, the `nifro://` commands and the Shortcuts
+	action reached the same verb by another door and skipped it. The mark then moved under a dark
+	screen: nothing was fetched, nothing appeared, so it got pressed again, and the display came back
+	later on a website nobody had chosen. Answered here because here is where all of those meet —
+	Next, Previous and Random are three verbs with three entry points each and all nine end in this
+	method, so the answer is inherited rather than repeated nine times and forgotten in six of them.
+
+	- Parameter switchingDisplayOn: `false` where the mark is bookkeeping rather than a request to
+	look at something. Adding a website has to leave *some* website marked on its display, and that is
+	not a reason to light up a screen the user switched off.
 	*/
-	func makeCurrent(_ website: Website) {
+	func makeCurrent(_ website: Website, switchingDisplayOn: Bool = true) {
 		guard let target = all.firstIndex(where: { $0.id == website.id }) else {
 			return
+		}
+
+		// Before the mark moves rather than after, which is the order the panel already used: the list
+		// change reaches the scenes through a publisher on the next turn of the run loop, so a display
+		// switched on here is already on by the time the page it should be showing is worked out.
+		if
+			switchingDisplayOn,
+			AppState.shared.scenes.first(where: { $0.display == all[target].effectiveDisplay })?.isDisabledForDisplay == true
+		{
+			AppState.shared.setDisplayEnabled(true, on: all[target].effectiveDisplay)
 		}
 
 		let flags = currentFlags(
@@ -103,16 +145,7 @@ final class WebsitesController {
 	seven chances to write back a list built from a stale read.
 	*/
 	func update(_ id: Website.ID, _ change: (inout Website) -> Void) {
-		let display = all[id: id]?.effectiveDisplay
-
 		all = all.modifying(elementWithID: id, update: change)
-
-		// Every edit to a website goes through here, so this is where a synced display hands its change
-		// to the rest of its group. Doing it at each call site instead would mean finding all of them,
-		// and finding all of them again whenever one is added.
-		if let display {
-			mirrorAcrossSyncGroup(from: display)
-		}
 	}
 
 	/**
@@ -122,7 +155,13 @@ final class WebsitesController {
 	func add(_ website: Website) -> Binding<Website> {
 		// The order here is important.
 		all.append(website)
-		makeCurrent(website)
+
+		// Marked, not shown. A new website has to hold its display's mark or that display has none,
+		// but putting something in the list is not a request to look at it — a display the user
+		// switched off stays off, and the gallery installing several at once does not flick a screen
+		// on per website. The screens that do mean "show this now" say so with their own
+		// `makeCurrent` afterwards.
+		makeCurrent(website, switchingDisplayOn: false)
 
 		return allBinding[id: website.id]!
 	}
@@ -160,11 +199,6 @@ final class WebsitesController {
 	}
 
 	/**
-	Every display that has at least one website assigned to it.
-
-	Falls back to the display chosen in Settings so there is always exactly one scene to show, even before anything is configured.
-	*/
-	/**
 	The websites that should be on screen right now, before any question of which display.
 
 	Both of the places that route by display start here, so a wallpaper the user has said should go
@@ -173,6 +207,12 @@ final class WebsitesController {
 	@MainActor
 	var showable: [Website] { all.filter(\.isShowable) }
 
+	/**
+	Every display that has at least one website assigned to it.
+
+	Falls back to the main display — the one with the menu bar — so there is always exactly one scene
+	to show, even before anything is configured.
+	*/
 	var displaysInUse: [Display?] {
 		var seen: [Display?] = []
 

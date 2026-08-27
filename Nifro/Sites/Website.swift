@@ -1,9 +1,9 @@
 import Foundation
 
 struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable {
-	// `var` for one reason: syncing copies a website's contents onto another display's entry, and that
-	// entry has to keep the id it already had — its data store, its thumbnail and its remembered scroll
-	// position are all filed under it. Nothing else assigns this.
+	// `var` only because the whole struct is decoded and re-encoded as one; nothing assigns this after
+	// the entry is made. The id is what a website's data store, its thumbnail and its remembered
+	// scroll position are all filed under, so changing one would orphan all three.
 	var id: UUID
 	var isCurrent: Bool
 	var url: URL
@@ -23,7 +23,11 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	var zoom: Zoom?
 
 	/**
-	Which display to show this website on. `nil` follows the display chosen in Settings.
+	Which display to show this website on. `nil` means the main display — the one with the menu bar.
+
+	`nil` is not "the display Settings names": there is no such setting, and there never has been. It
+	resolves through `Display.main` on every read, so it follows the menu bar when displays are
+	rearranged or the laptop is docked, rather than naming a screen once.
 
 	The most-asked-for thing upstream was a different page on each screen, a calendar on one and a dashboard on the other (Plash#2, 47 reactions). That needs the display to be a property of the website rather than one app-wide setting.
 	*/

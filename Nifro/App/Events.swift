@@ -109,7 +109,12 @@ extension AppState {
 					return
 				}
 
-				resetTimer()
+				// No timer reset here. There was one, and it restarted both timers on every scene on
+				// every edit to the list — which is every playlist tick, since a tick is an edit. So one
+				// display rotating reset the other display's rotation clock, and a display told to
+				// rotate every thirty minutes beside one rotating every five never reached thirty.
+				// `applyWebsiteChanges` decides per scene whether the change reached it, and now settles
+				// that scene's timers on the same answer.
 				applyWebsiteChanges()
 
 				// We never destroy the webview, so we have to make sure it's not in browsing mode when there are no websites.
@@ -152,9 +157,15 @@ extension AppState {
 			}
 			.store(in: &cancellables)
 
+		// The reload timer only, and every scene: the setting is the app-wide fallback for websites that
+		// name no interval of their own, so a change to it can move any display's reload clock and says
+		// nothing about which. The same shape as `rotationIntervals` above, and for the same reason —
+		// and deliberately not the rotation clock, which this number has nothing to do with.
 		Defaults.publisher(.reloadInterval)
 			.sink { [self] _ in
-				resetTimer()
+				for scene in scenes {
+					scene.resetTimer()
+				}
 			}
 			.store(in: &cancellables)
 
