@@ -1869,6 +1869,16 @@
         }
       }
     },
+    "Show the same wallpaper as another display" : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "与另一块显示器显示同一个壁纸"
+          }
+        }
+      }
+    },
     "Showing" : {
       "localizations" : {
         "zh-Hans" : {

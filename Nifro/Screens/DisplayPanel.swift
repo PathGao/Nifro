@@ -115,18 +115,26 @@ private struct DisplayColumn: View {
 		VStack(spacing: 9) {
 			displayName
 
-			MarqueeText(text: column.websiteName ?? String(localized: "No Website"), isActive: isHovering)
-				.font(.subheadline)
-				.foregroundStyle(.secondary)
-				.frame(width: 260, height: 16)
+			VStack(spacing: 9) {
+				MarqueeText(text: column.websiteName ?? String(localized: "No Website"), isActive: isHovering)
+					.font(.subheadline)
+					.foregroundStyle(.secondary)
+					.frame(width: 260, height: 16)
 
-			preview
+				preview
 
-			rotationControls
+				rotationControls
 
-			picker
+				picker
 
-			modeButtons
+				modeButtons
+			}
+			// A follower shows the leader's wallpaper, so its own controls would be arguing with the next
+			// correction five seconds later. Everything below the title is inert; the sync button in the
+			// title is not, because it is how the arrangement is undone and disabling it would leave a
+			// group with no way out if the leader's display went away.
+			.disabled(column.isFollowing)
+			.opacity(column.isFollowing ? 0.45 : 1)
 		}
 		.frame(width: 260)
 		.padding(9)
@@ -209,50 +217,58 @@ private struct DisplayColumn: View {
 	}
 
 	/**
-	The display's name, and the way into syncing it with another.
+	The display's name, with a button beside it for syncing this display to another.
 
-	A menu on the title rather than a control of its own, because syncing is a statement about *this
-	display and that one* and the title is the only thing on the column that names a display. A lit
-	entry means already synced; choosing it again breaks the group.
+	A button rather than a menu on the title itself. The title looked like a title, so the way into
+	syncing was a thing you had to already know was there — the one control in the panel with no
+	affordance at all.
+
+	Lit when this display is in a group. A ticked entry means already synced; choosing it again breaks
+	that pairing, and the entry that leaves is the one that was picked rather than the one whose menu
+	it is — the leader's menu is the one that stays usable.
 	*/
 	@ViewBuilder
 	private var displayName: some View {
-		if column.syncTargets.isEmpty {
+		HStack(spacing: 5) {
 			Text(column.displayName)
 				.font(.headline)
 				.lineLimit(1)
-				.frame(maxWidth: 260)
-		} else {
-			Menu {
-				ForEach(column.syncTargets, id: \.name) { target in
-					Button {
-						model.toggleSync(column.display, with: target.display)
-					} label: {
-						if target.isSynced {
-							Label(target.name, systemImage: "checkmark")
-						} else {
-							Text(target.name)
+				.truncationMode(.middle)
+
+			if !column.syncTargets.isEmpty {
+				Menu {
+					ForEach(column.syncTargets, id: \.name) { target in
+						Button {
+							model.toggleSync(column.display, with: target.display)
+						} label: {
+							if target.isSynced {
+								Label(target.name, systemImage: "checkmark")
+							} else {
+								Text(target.name)
+							}
 						}
 					}
+				} label: {
+					Image(systemName: "link")
+						.font(.system(size: 11, weight: .semibold))
+						.frame(width: 22, height: 20)
+						.foregroundStyle(isSynced ? AnyShapeStyle(.white) : AnyShapeStyle(.secondary))
+						.background(
+							isSynced ? AnyShapeStyle(PanelMetrics.onTint) : AnyShapeStyle(.quinary),
+							in: RoundedRectangle(cornerRadius: 5)
+						)
 				}
-			} label: {
-				HStack(spacing: 3) {
-					Text(column.displayName)
-						.font(.headline)
-						.lineLimit(1)
-						.truncationMode(.middle)
-
-					if column.syncTargets.contains(where: \.isSynced) {
-						Image(systemName: "link")
-							.font(.system(size: 10, weight: .semibold))
-							.foregroundStyle(.tint)
-					}
-				}
+				.menuStyle(.borderlessButton)
+				.menuIndicator(.hidden)
+				.fixedSize()
+				.help(String(localized: "Show the same wallpaper as another display"))
 			}
-			.menuStyle(.borderlessButton)
-			.menuIndicator(.hidden)
-			.fixedSize()
 		}
+		.frame(maxWidth: 260)
+	}
+
+	private var isSynced: Bool {
+		column.syncTargets.contains(where: \.isSynced)
 	}
 
 	@ViewBuilder

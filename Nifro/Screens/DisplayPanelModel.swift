@@ -38,6 +38,15 @@ final class DisplayPanelModel: ObservableObject {
 		*/
 		let syncTargets: [(display: Display?, name: String, isSynced: Bool)]
 
+		/**
+		Whether this display is following another rather than leading.
+
+		A follower shows what the leader shows, so its own controls would be arguing with the next
+		correction five seconds later. It is dimmed and inert, except for the one control that can
+		undo the arrangement.
+		*/
+		let isFollowing: Bool
+
 		// `nil` display means "whatever Settings says", and there is only ever one of those, so the
 		// display's own id is the identity when it has one and a fixed stand-in when it does not.
 		var id: String { display?.id.uuidString ?? "default" }
@@ -99,7 +108,10 @@ final class DisplayPanelModel: ObservableObject {
 					// One website has nothing to rotate to, and a control that does nothing should say so
 					// rather than shrug when pressed.
 					canRotate: WebsitesController.shared.all.count { $0.effectiveDisplay == scene.display } > 1,
-					syncTargets: syncTargets(for: scene.display)
+					syncTargets: syncTargets(for: scene.display),
+					isFollowing: MediaSync.leader(of: scene.display).map {
+						Display.settingsKey(for: $0) != Display.settingsKey(for: scene.display)
+					} ?? false
 				)
 			)
 		}
@@ -135,7 +147,9 @@ final class DisplayPanelModel: ObservableObject {
 	*/
 	func toggleSync(_ display: Display?, with other: Display?) {
 		if SyncGroup.peers(of: display).contains(where: { Display.settingsKey(for: $0) == Display.settingsKey(for: other) }) {
-			SyncGroup.leave(display)
+			// The one that was picked leaves, not the one whose menu it was. The leader's menu is the one
+			// that stays usable, so "remove myself" would be the wrong thing for every click made there.
+			SyncGroup.leave(other)
 		} else {
 			SyncGroup.join(display, with: other)
 			WebsitesController.shared.mirrorAcrossSyncGroup(from: other)
