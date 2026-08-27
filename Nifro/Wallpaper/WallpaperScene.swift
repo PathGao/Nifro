@@ -72,6 +72,15 @@ final class WallpaperScene {
 	private var reloadTimer: Timer?
 	var playlistTimer: Timer?
 
+	/**
+	Minutes since this display last moved to another website.
+
+	The playlist timer ticks once a minute whatever the display's interval is, because the schedule has
+	to be looked at that often regardless — see `resetPlaylistTimer`. This is what turns those ticks
+	back into the interval the user asked for.
+	*/
+	var playlistMinutes = 0
+
 	private var cancellables = Set<AnyCancellable>()
 
 	/**

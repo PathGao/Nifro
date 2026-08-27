@@ -31,6 +31,12 @@ final class DisplayPanelModel: ObservableObject {
 		let isShowing: Bool
 		let isMuted: Bool
 		let rotationMode: RotationMode
+
+		/**
+		How long this display waits between websites. Only shown while it is actually rotating.
+		*/
+		let rotationIntervalMinutes: Double
+
 		let canRotate: Bool
 
 		/**
@@ -105,6 +111,7 @@ final class DisplayPanelModel: ObservableObject {
 					isShowing: !scene.isDisabledForDisplay,
 					isMuted: !scene.shouldPlaySound,
 					rotationMode: scene.rotationMode,
+					rotationIntervalMinutes: scene.rotationIntervalMinutes,
 					// One website has nothing to rotate to, and a control that does nothing should say so
 					// rather than shrug when pressed.
 					canRotate: WebsitesController.shared.all.count { $0.effectiveDisplay == scene.display } > 1,
@@ -289,6 +296,29 @@ final class DisplayPanelModel: ObservableObject {
 
 		scene.rotationMode = scene.rotationMode.next
 		scene.resetPlaylistTimer()
+		objectWillChange.send()
+
+		Task {
+			await refresh()
+		}
+	}
+
+	/**
+	Set how many minutes `display` waits between websites.
+
+	The number is put through `rotationInterval(entered:current:)` on the way in rather than trusted:
+	this is a text field, so "0", "-3" and a number with nine digits in it are all one keystroke away,
+	and each of them means a display that never changes again.
+
+	No `resetPlaylistTimer` here — writing the key is what restarts the timers, through the publisher
+	in `Events`, which also catches the same number being changed from anywhere else.
+	*/
+	func setRotationInterval(_ minutes: Double, on display: Display?) {
+		guard let scene = AppState.shared.scenes.first(where: { $0.display == display }) else {
+			return
+		}
+
+		scene.rotationIntervalMinutes = rotationInterval(entered: minutes, current: scene.rotationIntervalMinutes)
 		objectWillChange.send()
 
 		Task {

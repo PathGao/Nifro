@@ -157,6 +157,22 @@ extension WallpaperScene {
 		set { Defaults[.rotationModes][Display.settingsKey(for: display)] = newValue }
 	}
 
+	/**
+	How many minutes this display waits between websites.
+
+	Falls back to the machine-wide number this replaced when the display has none of its own — see
+	`rotationInterval(stored:legacySeconds:)`, which is where that and the bounds live.
+	*/
+	var rotationIntervalMinutes: Double {
+		get {
+			rotationInterval(
+				stored: Defaults[.rotationIntervals][Display.settingsKey(for: display)],
+				legacySeconds: Defaults[.playlistInterval]
+			)
+		}
+		set { Defaults[.rotationIntervals][Display.settingsKey(for: display)] = newValue }
+	}
+
 	func resetPlaylistTimer() {
 		playlistTimer?.invalidate()
 		playlistTimer = nil
@@ -168,19 +184,32 @@ extension WallpaperScene {
 			return
 		}
 
-		// The schedule needs checking even when rotation is off, otherwise a website whose hours just ended stays up until something else happens. Once a minute is fine for something measured in hours.
-		let interval = Defaults[.playlistInterval] ?? 60
+		// A minute, always, whatever this display's rotation is set to. The schedule needs checking even
+		// when rotation is off, otherwise a website whose hours just ended stays up until something else
+		// happens — and once a minute is fine for something measured in hours.
+		//
+		// So the timer is the tick and the interval is a count of ticks, rather than the timer being set
+		// to the interval. Timing the rotation directly would tie how often the schedule is looked at to
+		// a number that has nothing to do with it: a display told to rotate daily would also check its
+		// hours daily, which is a website stuck up for a day. That was already true of the machine-wide
+		// setting and only invisible because the field it came from was rarely moved off half an hour.
+		playlistMinutes = 0
 
-		playlistTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
+		playlistTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
 			Task { @MainActor in
 				guard let self else {
 					return
 				}
 
+				self.playlistMinutes += 1
+
 				// Rotation used to be inferred from "is an interval set", which made it one answer for the
-				// whole machine. It is this display's own mode now; the interval is still shared, because
-				// how often is a much weaker preference than whether.
-				let rotates = Defaults[.playlistInterval] != nil && self.rotationMode != .pinned
+				// whole machine. Both halves are this display's own now: whether it rotates, and how often.
+				let rotates = self.rotationMode != .pinned && Double(self.playlistMinutes) >= self.rotationIntervalMinutes
+
+				if rotates {
+					self.playlistMinutes = 0
+				}
 
 				self.advancePlaylist(rotating: rotates)
 			}

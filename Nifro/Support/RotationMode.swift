@@ -4,11 +4,12 @@ import Foundation
 /**
 What a display does when its rotation ticks.
 
-Per display, not per app. Almost everything about a wallpaper is already a question per screen — which
-website, how loud, how it is cropped — and rotation was the odd one out: one interval for the whole
-machine, and "rotating at all" derived from whether that interval happened to be set. So turning
-rotation off on the laptop turned it off on the monitor too, and there was no way to say "shuffle over
-here, hold still over there".
+Per display, not per app, as is how often it ticks — see `RotationInterval.swift`. Everything about a
+wallpaper is a question per screen: which website, how loud, how it is cropped, and now both halves of
+how it rotates. Rotation was the odd one out for a while: one interval for the whole machine, and
+"rotating at all" derived from whether that interval happened to be set. So turning rotation off on the
+laptop turned it off on the monitor too, and there was no way to say "shuffle over here every ten
+minutes, hold still over there".
 
 Stored keyed by display rather than as a property of anything, because there is nothing else that is
 one-per-display: a scene is rebuilt whenever screens change, and a website belongs to a display rather

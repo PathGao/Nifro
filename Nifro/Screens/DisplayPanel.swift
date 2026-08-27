@@ -157,11 +157,25 @@ private struct DisplayColumn: View {
 	}
 
 	/**
-	Previous, the rotation mode, next.
+	Previous, the rotation mode, next, and how often it does it.
 
 	The mode is one control that cycles rather than three that are mutually exclusive: it has three
 	values and only one of them is true at a time, which is a switch, and three separate buttons would
 	invite the question of what happens when two are pressed.
+
+	The interval is here rather than in Settings because it is one display's business, the same as the
+	mode it qualifies. It sits directly after the mode, inside the pair of arrows rather than outside
+	them: "loop, every 30 minutes" is one sentence, and putting it beyond the right arrow split that
+	sentence around a button belonging to a different idea — the arrows are a step you take by hand,
+	the interval is how often the app takes one for you.
+
+	It appears only while the display is rotating. There is no interval when nothing is moving, and a
+	field showing a number that changes nothing is a field the user will change and then wonder about.
+	Nothing is held for it in `pinned`: the row keeps the width of its three buttons, so the resting
+	state of every column is the row that shipped, and a placeholder would have moved those three
+	buttons off-centre for the majority of users who never leave `pinned` to make room for a control
+	they never see. The row's height is pinned to the buttons' own 22 points, so the column and the
+	popover around it keep their size when the field does appear.
 	*/
 	@ViewBuilder
 	private var rotationControls: some View {
@@ -183,6 +197,15 @@ private struct DisplayColumn: View {
 				model.cycleRotationMode(on: column.display)
 			}
 
+			if column.rotationMode != .pinned {
+				PanelIntervalField(
+					minutes: .init(
+						get: { column.rotationIntervalMinutes },
+						set: { model.setRotationInterval($0, on: column.display) }
+					)
+				)
+			}
+
 			PanelButton(
 				symbol: "chevron.right",
 				label: String(localized: "Next website"),
@@ -191,6 +214,7 @@ private struct DisplayColumn: View {
 				model.step(.next, on: column.display)
 			}
 		}
+		.frame(height: 22)
 	}
 
 	/**

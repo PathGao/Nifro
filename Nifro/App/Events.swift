@@ -102,7 +102,10 @@ extension AppState {
 			}
 			.store(in: &cancellables)
 
-		Defaults.publisher(.playlistInterval, options: [])
+		// Every scene, not the one whose number changed: the key is one dictionary, so a change to it
+		// says nothing about which display it was, and restarting a timer costs a minute of waiting at
+		// most.
+		Defaults.publisher(.rotationIntervals, options: [])
 			.sink { [self] _ in
 				for scene in scenes {
 					scene.resetPlaylistTimer()
