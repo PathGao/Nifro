@@ -32,9 +32,9 @@ struct CSSInjectionTests {
 	/**
 	The JavaScript that is injected, without the Swift around it.
 
-	The file's prose argues for the very tokens the assertions look for, and it names both of them a
-	few lines above the script. Bounding the search by the string literal keeps a comment from passing
-	a test on the code's behalf.
+	Both the Swift prose around the script and the script's own comments argue for the very tokens the
+	assertions look for, and either would pass a test on the code's behalf. So the search is bounded by
+	the string literal, and the JavaScript comments inside it are struck out.
 	*/
 	private static func injectedScript() throws -> String {
 		let source = try extensions()
@@ -50,6 +50,7 @@ struct CSSInjectionTests {
 		}
 
 		return String(source[start.upperBound..<end.lowerBound])
+			.replacing(try Regex("//[^\\n]*"), with: "")
 	}
 
 	/**
@@ -167,6 +168,40 @@ struct CSSInjectionTests {
 			#expect(
 				(Self.asLatin1(encoded) == css) == css.allSatisfy(\.isASCII),
 				"\(width): a Latin-1 read of this is no longer distinguishable from a UTF-8 one."
+			)
+		}
+	}
+
+	/**
+	The observer watches the two parents the style can go missing from, and not the whole page.
+
+	It exists because a framework can replace `documentElement` or clear `head` out from under a style
+	element injected before the page had finished building. That is a question about two nodes, and it
+	was being asked with `subtree: true` on `document`: every insertion and removal anywhere on the
+	page, one observer per stylesheet injected, one set per frame, none of them ever disconnected. The
+	comment above the script had described the cheap version the whole time, which is why this is
+	asserted rather than written down — prose cannot fail when the code stops matching it.
+
+	The style element only ever goes into `head ?? documentElement`, so there is no deeper subtree for
+	it to be moved out of.
+	*/
+	@Test("The observer watches two nodes, not the whole page")
+	func theObserverDoesNotWatchTheWholePage() throws {
+		let script = try Self.injectedScript()
+
+		#expect(
+			!script.contains("subtree"),
+			"""
+			The style observer is watching the whole document again, so every node inserted or removed \
+			anywhere on the page wakes it, for the lifetime of the wallpaper. The style only ever goes \
+			into `head ?? documentElement`.
+			"""
+		)
+
+		for node in ["observer.observe(document,", "observer.observe(document.documentElement,"] {
+			#expect(
+				script.contains(node),
+				"`\(node)` is gone, so a page that replaces that node takes the user's CSS with it."
 			)
 		}
 	}
