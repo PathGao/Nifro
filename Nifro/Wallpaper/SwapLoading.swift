@@ -138,18 +138,25 @@ extension SSWebView {
 	func loadAndWait(_ url: URL, timeout: Duration) async throws {
 		loadWallpaper(url)
 
-		// Polling rather than racing the navigation delegate against a timer. The delegate belongs to the shared controller and reports for whichever web view is live, so a replacement loading out of sight cannot use it. `isLoading` flips false on both success and failure, and the URL check below tells them apart.
-		let step = Duration.milliseconds(100)
-		var waited = Duration.zero
+		// Not the navigation delegate: it belongs to the shared controller and reports for whichever web view is live, so a replacement loading out of sight would never hear from it. That rules out the delegate, not the web view — `isLoading` is KVO-observable and observation is per instance, so this one can be watched directly. It flips false on both success and failure, and the URL check below tells them apart.
+		let started = ContinuousClock.now
 
-		while isLoading {
-			guard waited < timeout else {
-				stopLoading()
-				throw CocoaError(.userCancelled)
-			}
+		// The timeout has to end the load, not merely stop waiting for it: an address that never answers leaves `isLoading` true forever, and `stopLoading` is what makes it flip.
+		let deadline = Task {
+			try await Task.sleep(for: timeout)
+			stopLoading()
+		}
 
-			try await Task.sleep(for: step)
-			waited += step
+		defer {
+			deadline.cancel()
+		}
+
+		for await isLoading in publisher(for: \.isLoading).values where !isLoading {
+			break
+		}
+
+		guard ContinuousClock.now - started < timeout else {
+			throw CocoaError(.userCancelled)
 		}
 
 		guard self.url != nil else {
