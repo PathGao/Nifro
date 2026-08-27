@@ -97,11 +97,10 @@ private struct DisplayColumn: View {
 
 	@State private var isHovering = false
 
-	// The stored value, not `AppState`'s copy of it: the action writes to `Defaults` and `AppState`
-	// catches up through a subscription, so a view reading `AppState` right after the press still sees
-	// the old answer and the button does not light. `@Default` also makes the view observe it, so a
-	// shortcut pressed while the panel is open lights it too.
-	@Default(.isBrowsingMode) private var isBrowsingMode
+	// The stored set, so the view observes it: a shortcut pressed while the panel is open lights the
+	// button too. Read per display, because Browsing Mode is now one display's business — it used to
+	// light in every column at once, which is what it looked like when it was one flag for the app.
+	@Default(.browsingDisplays) private var browsingDisplays
 
 	init(column: DisplayPanelModel.Column, model: DisplayPanelModel) {
 		self.column = column
@@ -170,7 +169,8 @@ private struct DisplayColumn: View {
 			PanelButton(
 				symbol: column.rotationMode.symbol,
 				label: column.rotationMode.label,
-				isOn: column.rotationMode != .loop
+				// Lit while it is doing something. Pinned is the resting state and says so by staying dark.
+				isOn: column.rotationMode != .pinned
 			) {
 				model.cycleRotationMode(on: column.display)
 			}
@@ -200,10 +200,10 @@ private struct DisplayColumn: View {
 
 			PanelWideButton(
 				title: String(localized: "Browsing Mode"),
-				isOn: isBrowsingMode,
+				isOn: browsingDisplays.contains(Display.settingsKey(for: column.display)),
 				isEnabled: column.websiteID != nil
 			) {
-				model.toggleBrowsingMode()
+				model.toggleBrowsingMode(on: column.display)
 			}
 		}
 	}

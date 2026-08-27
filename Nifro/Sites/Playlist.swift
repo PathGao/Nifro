@@ -156,7 +156,7 @@ extension WallpaperScene {
 	How this display rotates.
 	*/
 	var rotationMode: RotationMode {
-		get { Defaults[.rotationModes][Display.settingsKey(for: display)] ?? .loop }
+		get { Defaults[.rotationModes][Display.settingsKey(for: display)] ?? .pinned }
 		set { Defaults[.rotationModes][Display.settingsKey(for: display)] = newValue }
 	}
 

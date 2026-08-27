@@ -53,6 +53,7 @@ final class WebViewController: NSViewController {
 		configuration.preferences = preferences
 
 		let webView = SSWebView(frame: .zero, configuration: configuration)
+		webView.scene = scene
 
 		webView.publisher(for: \.title)
 			.sink { [weak webView] title in
@@ -197,8 +198,10 @@ extension WebViewController: WKNavigationDelegate {
 			!NSEvent.modifiers.isDisjoint(with: [.command, .option]),
 			let newURL = navigationAction.request.url
 		{
-			if Defaults[.isBrowsingMode], Defaults[.bringBrowsingModeToFront] {
-				Defaults[.isBrowsingMode] = false
+			// This display's own Browsing Mode: opening a link in the browser should put back the screen
+			// the link was on, not every screen.
+			if AppState.shared.isBrowsingMode(on: scene?.display), Defaults[.bringBrowsingModeToFront] {
+				AppState.shared.setBrowsingMode(false, on: scene?.display)
 			}
 
 			newURL.open()
@@ -221,8 +224,10 @@ extension WebViewController: WKNavigationDelegate {
 			siteHost != newURL.host
 		{
 			// Hide Nifro if it's in front of everything.
-			if Defaults[.isBrowsingMode], Defaults[.bringBrowsingModeToFront] {
-				Defaults[.isBrowsingMode] = false
+			// This display's own Browsing Mode: opening a link in the browser should put back the screen
+			// the link was on, not every screen.
+			if AppState.shared.isBrowsingMode(on: scene?.display), Defaults[.bringBrowsingModeToFront] {
+				AppState.shared.setBrowsingMode(false, on: scene?.display)
 			}
 
 			newURL.open()

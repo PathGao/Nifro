@@ -33,14 +33,14 @@ final class HoldToInteract {
 		guard
 			!isHolding,
 			// Already browsing for another reason. Ending the hold must not cancel that.
-			!Defaults[.isBrowsingMode]
+			!AppState.shared.isBrowsingMode
 		else {
 			return
 		}
 
 		isHolding = true
 		requiredModifiers = KeyboardShortcuts.getShortcut(for: Shortcut.holdToInteract.name)?.modifiers ?? []
-		Defaults[.isBrowsingMode] = true
+		AppState.shared.setBrowsingMode(true, on: AppState.shared.actingScene.display)
 
 		watchForReleasedModifiers()
 	}
@@ -52,7 +52,7 @@ final class HoldToInteract {
 
 		isHolding = false
 		stopWatchingModifiers()
-		Defaults[.isBrowsingMode] = false
+		AppState.shared.setBrowsingMode(false, on: AppState.shared.actingScene.display)
 	}
 
 	/**

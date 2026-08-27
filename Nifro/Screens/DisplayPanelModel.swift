@@ -152,9 +152,8 @@ final class DisplayPanelModel: ObservableObject {
 		}
 	}
 
-	func toggleBrowsingMode() {
-		Action.toggleBrowsingMode.run()
-		objectWillChange.send()
+	func toggleBrowsingMode(on display: Display?) {
+		AppState.shared.setBrowsingMode(!AppState.shared.isBrowsingMode(on: display), on: display)
 	}
 
 	/**

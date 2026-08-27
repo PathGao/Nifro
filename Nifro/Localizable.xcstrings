@@ -1909,16 +1909,6 @@
         }
       }
     },
-    "Spaces are the desktops you switch between in Mission Control, not your displays. Off means the wallpaper stays on whichever Space was in front when Nifro started. Which display a website goes on is set on the website itself, not here." : {
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "「桌面」指的是调度中心里来回切换的那些虚拟桌面，不是显示器。关掉时，壁纸只留在 Nifro 启动时最前面的那个桌面上。网站放在哪块显示器上，是在网站自己的设置里定的，不在这里。"
-          }
-        }
-      }
-    },
     "Starts Nifro when you log in, so the wallpaper is already up when you reach the desktop." : {
       "localizations" : {
         "zh-Hans" : {
@@ -2135,6 +2125,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "切换 Nifro 的「浏览模式」。"
+          }
+        }
+      }
+    },
+    "Turn this on and the wallpaper is there on every Mission Control desktop. Turn it off and it stays on the one desktop that was in front when Nifro started, so switching desktop hides it. This is not about displays: which display a website goes on is set on the website itself." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "打开：切换到任何一个「调度中心」桌面，壁纸都在。关闭：壁纸只留在 Nifro 启动时最前面的那个桌面，切走就看不见了。这里说的不是显示器 —— 网站放在哪块显示器上，是在网站自己的设置里定的。"
           }
         }
       }

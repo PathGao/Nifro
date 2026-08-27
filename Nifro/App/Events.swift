@@ -75,15 +75,9 @@ extension AppState {
 
 				// We never destroy the webview, so we have to make sure it's not in browsing mode when there are no websites.
 				if $0.newValue.isEmpty {
-					Defaults[.isBrowsingMode] = false
+					Defaults[.browsingDisplays] = []
+					applyBrowsingMode()
 				}
-			}
-			.store(in: &cancellables)
-
-		Defaults.publisher(.isBrowsingMode)
-			.receive(on: DispatchQueue.main)
-			.sink { [self] change in
-				isBrowsingMode = change.newValue
 			}
 			.store(in: &cancellables)
 

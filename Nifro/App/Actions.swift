@@ -74,7 +74,10 @@ enum Action: String, CaseIterable {
 		case .toggleEnabled:
 			AppState.shared.isManuallyDisabled.toggle()
 		case .toggleBrowsingMode:
-			Defaults[.isBrowsingMode].toggle()
+			AppState.shared.setBrowsingMode(
+				!AppState.shared.isBrowsingMode(on: scene.display),
+				on: scene.display
+			)
 
 			SSApp.runOnce(identifier: "activatedBrowsingMode") {
 				DispatchQueue.main.async {

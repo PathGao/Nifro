@@ -126,22 +126,53 @@ final class AppState: ObservableObject {
 	*/
 	var currentWebsite: Website? { primaryScene.website }
 
-	var isBrowsingMode = false {
-		didSet {
-			guard isEnabled else {
-				return
-			}
+	/**
+	Whether any display is in Browsing Mode.
 
-			for scene in scenes {
-				scene.window.isInteractive = isBrowsingMode
-				scene.applyOpacity()
-				scene.resetTimer()
-			}
+	Rotation and the schedule pause while somebody is interacting with a page, and that is an app-wide
+	pause: a playlist tick on the other screen still steals focus.
+	*/
+	var isBrowsingMode: Bool { !Defaults[.browsingDisplays].isEmpty }
 
-			// Making the window key is not enough when the app is an accessory. The window comes forward, but keystrokes still go to whatever was active before, so nobody can type into the page. Plash#114.
-			if isBrowsingMode {
-				SSApp.forceActivate()
-			}
+	/**
+	Whether `display` is the one being interacted with.
+	*/
+	func isBrowsingMode(on display: Display?) -> Bool {
+		Defaults[.browsingDisplays].contains(Display.settingsKey(for: display))
+	}
+
+	/**
+	Turn Browsing Mode on or off for one display.
+	*/
+	func setBrowsingMode(_ isOn: Bool, on display: Display?) {
+		let key = Display.settingsKey(for: display)
+
+		if isOn {
+			Defaults[.browsingDisplays].insert(key)
+		} else {
+			Defaults[.browsingDisplays].remove(key)
+		}
+
+		applyBrowsingMode()
+	}
+
+	/**
+	Put every window at the level its display's setting asks for.
+	*/
+	func applyBrowsingMode() {
+		guard isEnabled else {
+			return
+		}
+
+		for scene in scenes {
+			scene.window.isInteractive = isBrowsingMode(on: scene.display)
+			scene.applyOpacity()
+			scene.resetTimer()
+		}
+
+		// Making the window key is not enough when the app is an accessory. The window comes forward, but keystrokes still go to whatever was active before, so nobody can type into the page. Plash#114.
+		if isBrowsingMode {
+			SSApp.forceActivate()
 		}
 	}
 
@@ -167,13 +198,11 @@ final class AppState: ObservableObject {
 
 				scene.resume()
 
-				// Replayed, because `isBrowsingMode.didSet` drops its write while the app is disabled and
-				// nothing else puts it back: `resume()` does not read it, and only an unrelated
-				// `rebuildScenes` ever did. Browsing Mode is reachable while disabled from the menu, which
-				// gates on there being a website rather than on `isEnabled`, and from the global shortcut
-				// and the Shortcuts intent, which gate on nothing — so the menu drew a checkmark over
-				// windows still sitting at `.desktop`. `finishCropSelection` already restores it this way.
-				scene.window.isInteractive = isBrowsingMode
+				// Replayed, because `applyBrowsingMode` returns early while the app is disabled and nothing
+				// else puts it back: `resume()` does not read it, and only an unrelated `rebuildScenes`
+				// ever did. Browsing Mode is reachable while disabled, so the panel drew a lit button over
+				// windows still sitting at `.desktop`.
+				scene.window.isInteractive = isBrowsingMode(on: scene.display)
 
 				scene.loadWebsite()
 				scene.resetTimer()
@@ -330,7 +359,7 @@ final class AppState: ObservableObject {
 			// after its window closed, until the next playlist tick noticed.
 			scene.website = WebsitesController.shared.scheduled(for: scene.display)
 			scene.installContentView()
-			scene.window.isInteractive = isBrowsingMode
+			scene.window.isInteractive = isBrowsingMode(on: scene.display)
 			scene.applyOpacity(animated: false)
 			scene.resetTimer()
 			scene.resetPlaylistTimer()

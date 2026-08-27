@@ -3,6 +3,15 @@ import WebKit
 final class SSWebView: WKWebView {
 	override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 
+	/**
+	The scene this web view draws into. Weak because the scene owns it, through its controller.
+
+	Here so the page can be told whether *its* display is in Browsing Mode. It was removed once, when
+	the only thing that read it was a context-menu item that has since gone — and came straight back
+	when Browsing Mode stopped being one flag for the whole app.
+	*/
+	weak var scene: WallpaperScene?
+
 	private var cancellables = Set<AnyCancellable>()
 
 	private var excludedMenuItems: Set<MenuItemIdentifier> = [
@@ -18,7 +27,7 @@ final class SSWebView: WKWebView {
 	override init(frame: CGRect, configuration: WKWebViewConfiguration) {
 		super.init(frame: frame, configuration: configuration)
 
-		Defaults.publisher(.isBrowsingMode)
+		Defaults.publisher(.browsingDisplays)
 			.receive(on: DispatchQueue.main)
 			.sink { [weak self] _ in
 				self?.toggleBrowsingModeClass()
@@ -99,7 +108,10 @@ final class SSWebView: WKWebView {
 
 	func toggleBrowsingModeClass() {
 		// `plash-is-browsing-mode` stays alongside ours so the custom CSS people wrote for Plash keeps working.
-		let method = Defaults[.isBrowsingMode] ? "add" : "remove"
+		//
+		// This page's own display, not any display: a page that styles itself for Browsing Mode should
+		// do it when *it* is the one being interacted with, not when the other screen is.
+		let method = AppState.shared.isBrowsingMode(on: scene?.display) ? "add" : "remove"
 
 		// The async variant hands back `Any`, which cannot cross an actor boundary under Swift 6. Nothing here needs the result.
 		evaluateJavaScript(

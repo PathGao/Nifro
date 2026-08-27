@@ -16,17 +16,7 @@ than being one.
 */
 enum RotationMode: String, CaseIterable, Defaults.Serializable {
 	/**
-	Round the list in order. What the app has always done when an interval was set.
-	*/
-	case loop
-
-	/**
-	A different one each time, chosen at random.
-	*/
-	case random
-
-	/**
-	Stay on this one.
+	Stay on this one. Where a display starts, and the only one that is not lit.
 
 	Rotation stops; nothing else does. The arrows and the picker still work, because "do not change it
 	behind my back" and "do not let me change it" are different requests and only the first was made.
@@ -36,13 +26,23 @@ enum RotationMode: String, CaseIterable, Defaults.Serializable {
 	case pinned
 
 	/**
+	Round the list in order.
+	*/
+	case loop
+
+	/**
+	A different one each time, chosen at random.
+	*/
+	case random
+
+	/**
 	The one after this, for a control that cycles.
 	*/
 	var next: Self {
 		let all = Self.allCases
 
 		guard let index = all.firstIndex(of: self) else {
-			return .loop
+			return .pinned
 		}
 
 		return all[(index + 1) % all.count]

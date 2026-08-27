@@ -68,7 +68,7 @@ extension AppState {
 		cropSelectionView = nil
 
 		croppedScene?.window.level = .desktop
-		croppedScene?.window.isInteractive = Defaults[.isBrowsingMode]
+		croppedScene?.window.isInteractive = AppState.shared.isBrowsingMode(on: croppedScene?.display)
 
 		for scene in scenes {
 			scene.applyOpacity(animated: false)

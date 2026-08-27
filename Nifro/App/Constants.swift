@@ -29,7 +29,11 @@ enum Constants {
 
 extension Defaults.Keys {
 	static let websites = Key<[Website]>("websites", default: [])
-	static let isBrowsingMode = Key<Bool>("isBrowsingMode", default: false)
+	// Which displays are interactive, not whether any is. Browsing Mode was one flag for the whole app,
+	// so entering it on the monitor also raised the laptop's wallpaper over its desktop icons — and its
+	// button lit in every column at once. `DesktopWindow.isInteractive` was always per window; only this
+	// was not.
+	static let browsingDisplays = Key<Set<String>>("browsingDisplays", default: [])
 
 	// Settings
 	static let hideMenuBarIcon = Key<Bool>("hideMenuBarIcon", default: false)

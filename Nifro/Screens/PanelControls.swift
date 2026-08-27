@@ -166,23 +166,23 @@ extension RotationMode {
 	*/
 	var symbol: String {
 		switch self {
+		case .pinned:
+			"pin.fill"
 		case .loop:
 			"repeat"
 		case .random:
 			"shuffle"
-		case .pinned:
-			"pin.fill"
 		}
 	}
 
 	var label: String {
 		switch self {
+		case .pinned:
+			String(localized: "Staying on this website")
 		case .loop:
 			String(localized: "Rotating in order")
 		case .random:
 			String(localized: "Rotating at random")
-		case .pinned:
-			String(localized: "Staying on this website")
 		}
 	}
 }

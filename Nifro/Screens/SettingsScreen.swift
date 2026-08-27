@@ -284,7 +284,7 @@ private struct ShowOnAllSpacesSetting: View {
 	var body: some View {
 		Defaults.Toggle(key: .showOnAllSpaces) {
 			Text("Show on every Space")
-				.explained(String(localized: "Spaces are the desktops you switch between in Mission Control, not your displays. Off means the wallpaper stays on whichever Space was in front when Nifro started. Which display a website goes on is set on the website itself, not here."))
+				.explained(String(localized: "Turn this on and the wallpaper is there on every Mission Control desktop. Turn it off and it stays on the one desktop that was in front when Nifro started, so switching desktop hides it. This is not about displays: which display a website goes on is set on the website itself."))
   }
 	}
 }
