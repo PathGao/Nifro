@@ -216,9 +216,9 @@ final class WallpaperScene {
 					// during a swap is the page on its way out, so it restored the old page's zoom onto
 					// the old page and left the arriving one at 1. It belongs with the scroll position,
 					// on the web view actually being handed the page — see `restorePageState`.
-					AppState.shared.statusItemButton.toolTip = website?.tooltip
+					AppState.shared.refreshStatusItemTooltip()
 				case .failure(let error):
-					AppState.shared.webViewError = error
+					AppState.shared.setWebViewError(error, on: display)
 				}
 			}
 			.store(in: &cancellables)
@@ -355,7 +355,7 @@ final class WallpaperScene {
 	}
 
 	func load(_ url: URL?) {
-		AppState.shared.webViewError = nil
+		AppState.shared.setWebViewError(nil, on: display)
 
 		guard
 			// Nothing is watching this display, so nothing should be fetched for it. Loading is what

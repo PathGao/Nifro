@@ -188,16 +188,17 @@ different preferences file than a real install.
 swift test
 ```
 
-147 tests. Two kinds, and the split is deliberate. The first exercises pure logic that needs no app
+153 tests. Two kinds, and the split is deliberate. The first exercises pure logic that needs no app
 bundle and no window server — crop and zoom geometry, the menu bar strip and what the colour band
 samples from it, schedule windows, which website is current on which display, video embedding, URL
-commands, menu word wrapping.
+commands, the disk budget, the update check.
 
 The second is guardrails: assertions about the source itself, for rules a type cannot carry. Every
 `Timer` sets a tolerance. No `Defaults` key is written and never read. No string is translated and
 never shown. Every `[[placeholder]]` the code substitutes is named in the help text. No KVC key
 reaches into a WebKit class. A field added to `Website` decodes from a payload written before it
-existed. They exist because each of those rules had already been broken once, silently, and nothing
+existed. Nothing keeps a per-display fact — a load failure, which display is being browsed, whether
+a display is switched off — in a slot with room for one answer. They exist because each of those rules had already been broken once, silently, and nothing
 went red.
 
 ## Contributing

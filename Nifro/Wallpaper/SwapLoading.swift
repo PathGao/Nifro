@@ -84,7 +84,7 @@ extension WallpaperScene {
 					return
 				}
 
-				AppState.shared.webViewError = error
+				AppState.shared.setWebViewError(error, on: display)
 				return
 			}
 
@@ -92,7 +92,7 @@ extension WallpaperScene {
 				return
 			}
 
-			AppState.shared.webViewError = nil
+			AppState.shared.setWebViewError(nil, on: display)
 			adopt(replacement)
 		}
 	}
