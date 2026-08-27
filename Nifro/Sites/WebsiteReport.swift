@@ -20,7 +20,7 @@ extension Website {
 			"\(SSApp.name) \(SSApp.versionWithBuild) · macOS \(Device.osVersion) · \(Device.hardwareModel)",
 			"URL: \(url.absoluteString)",
 			"Sound: \(audio.title)",
-			"Region: \(zoom.map { "\(($0.scale * 10).rounded() / 10)× at \(Int(($0.center.x * 100).rounded()))%, \(Int(($0.center.y * 100).rounded()))%" } ?? "whole page")",
+			"Region: \(zoom.summaryText)",
 			"Clickable on the desktop: \(allowsInteraction ? "yes" : "no")",
 			// Same rule as the reload interval below: what this website does, plus where the answer came
 			// from when it is not the website's own.

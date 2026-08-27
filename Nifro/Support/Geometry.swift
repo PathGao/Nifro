@@ -1,4 +1,4 @@
-import CoreGraphics
+import Foundation
 
 // The geometry behind cropping a page and placing it on a screen.
 //
@@ -232,6 +232,35 @@ struct Zoom: Codable, Hashable, Sendable {
 			),
 			scale: scale
 		)
+	}
+}
+
+extension Zoom? {
+	/**
+	What this region reads as, in one line: how far in, and where on the page.
+
+	Here rather than at each place that shows it. The settings row and the text a bug report is
+	copied from both name the same region and both had their own arithmetic for it — the row through
+	`FormatStyle`, the report through `(scale * 10).rounded() / 10` — so they already disagreed:
+	`FormatStyle` follows the system region and the interpolation of a `Double` never does, and a
+	machine set to a comma decimal separator showed `2,5×` in one and `2.5×` in the other. Nothing
+	required them to match, so the next change to how far the number is rounded would have split them
+	again.
+
+	Localized in both places on purpose. A report carries English labels and localized values
+	already — the sound setting, the invert setting and the display's name all come out in the
+	reader's language — so this is the one it was missing rather than an exception being made for it.
+	*/
+	var summaryText: String {
+		guard case .some(let zoom) = self else {
+			return String(localized: "Whole page")
+		}
+
+		let scale = zoom.scale.formatted(.number.precision(.fractionLength(1)))
+		let across = Int((zoom.center.x * 100).rounded())
+		let down = Int((zoom.center.y * 100).rounded())
+
+		return String(localized: "\(scale)× at \(across)%, \(down)%")
 	}
 }
 
