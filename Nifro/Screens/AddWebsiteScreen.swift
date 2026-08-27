@@ -271,6 +271,7 @@ struct AddWebsiteScreen: View {
 		Section {
 			WebsiteAudioSetting(audio: website.audio)
 			WebsiteInteractionSetting(allowsInteraction: website.allowsInteraction)
+			WebsiteExternalLinksSetting(externalLinks: website.externalLinks)
 			WebsiteDisplaySetting(display: website.display)
 			WebsiteScheduleSetting(startHour: website.startHour, endHour: website.endHour)
 			WebsiteReloadSetting(reloadInterval: website.reloadInterval)

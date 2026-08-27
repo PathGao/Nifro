@@ -82,8 +82,9 @@ extension Defaults.Keys {
 	static let contentRulesURL = Key<String?>("contentRulesURL")
 	static let hasInstalledFeaturedWebsites = Key<Bool>("hasInstalledFeaturedWebsites", default: false)
 
-	// What the last check found, so the menu can say it without asking the network. The menu is rebuilt
-	// from scratch every time it opens, so anything it triggers, it triggers on every open.
+	// What the last check found, so the panel can say it without asking the network. The version rather
+	// than a "there is an update" flag: the comparison against the running version is free on every
+	// read, while a stored flag survives the update it was about and goes on being wrong.
 	static let latestKnownVersion = Key<String?>("latestKnownVersion")
 
 	// On by default, off in one click. An app that checks on its own has to be an app that can be told

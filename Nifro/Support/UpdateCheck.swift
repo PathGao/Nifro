@@ -9,8 +9,8 @@ to ever open it and no surface where a new version could be mentioned. Homebrew 
 covered by the cask's `livecheck`, but only when they think to run `brew upgrade`.
 
 Deliberately quiet, following Sparkle's guidance for background apps: no dialog, no notification, no
-focus taken. The result is written down and the menu reads it, so the only time anything is said is
-when the user has already opened the menu to look at something.
+focus taken. The result is written down and the panel's footer reads it, so the only time anything is
+said is when the user has already opened the panel to look at something.
 */
 enum UpdateCheck {
 	/**
@@ -77,8 +77,8 @@ enum UpdateCheck {
 	0.1.9 — and a project that has shipped ten patches is exactly the one that stops being told about
 	them. A missing component counts as zero, so 0.2 is newer than 0.1.9 and the same as 0.2.0.
 
-	Anything unparseable is not newer. The answer drives a menu item that sends people to a download
-	page, and being wrong in that direction is worse than saying nothing.
+	Anything unparseable is not newer. The answer draws a button that sends people to a download page,
+	and being wrong in that direction is worse than saying nothing.
 	*/
 	static func isNewer(_ candidate: String, than current: String) -> Bool {
 		// Empty means "not a version I can read", which is why the caller refuses to act on it. There is

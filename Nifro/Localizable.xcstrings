@@ -329,12 +329,12 @@
         }
       }
     },
-    "Checks once a day, in the background; nothing is ever downloaded or installed for you.": {
+    "Checks once a day in the background and puts a download button in the panel when there is something newer; nothing is ever downloaded or installed for you.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "每天在后台检查一次；从不替你下载或安装任何东西。"
+            "value": "每天在后台检查一次，有更新时在面板里放一个下载按钮；从不替你下载或安装任何东西。"
           }
         }
       }
@@ -355,16 +355,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "选择本地网页"
-          }
-        }
-      }
-    },
-    "Choose Region…": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "选择区域…"
           }
         }
       }
@@ -425,16 +415,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "清除 Cookie、本地存储、缓存、缩略图，以及每个页面记住的位置和缩放；你的网站和它们的设置会保留。"
-          }
-        }
-      }
-    },
-    "Click to edit this website.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "点这里编辑这个网站。"
           }
         }
       }
@@ -545,16 +525,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "使用电池时停用"
-          }
-        }
-      }
-    },
-    "Deactivated While on Battery": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "使用电池时已停用"
           }
         }
       }
@@ -709,6 +679,16 @@
         }
       }
     },
+    "External links": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "外部链接"
+          }
+        }
+      }
+    },
     "Fades the wallpaper back while you work elsewhere, and brings it up again when you click the desktop.": {
       "localizations": {
         "zh-Hans": {
@@ -725,6 +705,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "欢迎反馈"
+          }
+        }
+      }
+    },
+    "Follow Settings": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "跟随设置"
           }
         }
       }
@@ -895,6 +885,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "如果看不到网站，收起一些窗口把桌面露出来。"
+          }
+        }
+      }
+    },
+    "In Nifro": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 Nifro 中"
+          }
+        }
+      }
+    },
+    "In the default browser": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在默认浏览器中"
           }
         }
       }
@@ -1169,16 +1179,6 @@
         }
       }
     },
-    "Move the wallpaper until it shows what you want. Drag or scroll to move it, pinch to zoom.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在壁纸上摆一个取景框：拖动或滚动移动它，捏合改大小。框住的部分会填满整个屏幕。"
-          }
-        }
-      }
-    },
     "Move to the main display when unplugged": {
       "localizations": {
         "zh-Hans": {
@@ -1285,16 +1285,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "不是规则列表"
-          }
-        }
-      }
-    },
-    "Not showing": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "未显示"
           }
         }
       }
@@ -1505,16 +1495,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "上一个网站"
-          }
-        }
-      }
-    },
-    "Quit %@": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "退出 %@"
           }
         }
       }
@@ -2099,6 +2079,16 @@
         }
       }
     },
+    "The default for websites that have not answered this themselves, in their own settings.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有在自己的设置里回答这个问题的网站，用这里的默认值。"
+          }
+        }
+      }
+    },
     "The page is laid out at the size of the wallpaper, so `100vw` and `100vh` mean that area, and `<html>` carries `is-nifro-app` always and `nifro-is-browsing-mode` while Browsing Mode is on.": {
       "localizations": {
         "zh-Hans": {
@@ -2209,16 +2199,6 @@
         }
       }
     },
-    "Turn this off while logging in to a website, since the login may navigate to a page you want to stay in Nifro.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "登录网站时先关掉它——登录过程可能跳到别的页面，而你希望那一页留在 Nifro 里。"
-          }
-        }
-      }
-    },
     "URL": {
       "localizations": {
         "zh-Hans": {
@@ -2249,16 +2229,6 @@
         }
       }
     },
-    "Undo the region and go back to the whole page.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "取消区域，回到整页。"
-          }
-        }
-      }
-    },
     "Until": {
       "localizations": {
         "zh-Hans": {
@@ -2275,16 +2245,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "已是最新"
-          }
-        }
-      }
-    },
-    "Update to %@…": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "更新到 %@…"
           }
         }
       }
@@ -2385,6 +2345,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "深色模式下"
+          }
+        }
+      }
+    },
+    "Where a link off this website goes — a site you sign in to wants “In Nifro”, because signing in navigates away from it and the page you come back to is the one you wanted.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从这个网站点出去的链接在哪里打开——需要登录的网站要选“在 Nifro 中”，因为登录本身就会跳离它，而你想回到的正是那个页面。"
           }
         }
       }
