@@ -229,7 +229,7 @@ extension WebViewController: WKNavigationDelegate {
 		let siteHost = scene?.website?.url.host ?? webView.url?.host
 
 		if
-			Defaults[.openExternalLinksInBrowser],
+			scene?.website?.opensExternalLinksInBrowser ?? Defaults[.openExternalLinksInBrowser],
 			navigationAction.navigationType == .linkActivated,
 			let siteHost,
 			let newURL = navigationAction.request.url,

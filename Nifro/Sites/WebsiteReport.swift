@@ -22,6 +22,9 @@ extension Website {
 			"Sound: \(audio.title)",
 			"Region: \(zoom.map { "\(($0.scale * 10).rounded() / 10)× at \(Int(($0.center.x * 100).rounded()))%, \(Int(($0.center.y * 100).rounded()))%" } ?? "whole page")",
 			"Clickable on the desktop: \(allowsInteraction ? "yes" : "no")",
+			// Same rule as the reload interval below: what this website does, plus where the answer came
+			// from when it is not the website's own.
+			"External links: \(opensExternalLinksInBrowser ? "browser" : "in Nifro")\(externalLinks == .followSettings ? " (from Settings)" : "")",
 			"Invert colours: \(invertColors2.title)",
 			"Print styles: \(usePrintStyles ? "yes" : "no")",
 			"Display: \(display?.localizedName ?? "default")"

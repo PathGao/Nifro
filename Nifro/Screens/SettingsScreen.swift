@@ -384,11 +384,21 @@ private struct BringBrowsingModeToFrontSetting: View {
 	}
 }
 
+/**
+The answer for every website that has not given its own.
+
+It used to be the only answer, and its help text told the user to switch it off before signing in to a
+website and — by implication, since nothing else would — to remember to switch it back on afterwards.
+That is a manual workaround written down rather than removed, and the question it was standing in for
+is a property of the website: a dashboard's links should leave the wallpaper and a site you sign in to
+must not, and one switch cannot say both. Each website now answers for itself in its own settings and
+this is the default they fall back to, so nobody's existing choice changed meaning.
+*/
 private struct OpenExternalLinksInBrowserSetting: View {
 	var body: some View {
 		Defaults.Toggle(key: .openExternalLinksInBrowser) {
 			Text("Open external links in default browser")
-				.explained(String(localized: "Turn this off while logging in to a website, since the login may navigate to a page you want to stay in Nifro."))
+				.explained(String(localized: "The default for websites that have not answered this themselves, in their own settings."))
   }
 	}
 }

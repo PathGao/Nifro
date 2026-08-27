@@ -709,6 +709,16 @@
         }
       }
     },
+    "External links": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "外部链接"
+          }
+        }
+      }
+    },
     "Fades the wallpaper back while you work elsewhere, and brings it up again when you click the desktop.": {
       "localizations": {
         "zh-Hans": {
@@ -725,6 +735,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "欢迎反馈"
+          }
+        }
+      }
+    },
+    "Follow Settings": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "跟随设置"
           }
         }
       }
@@ -895,6 +915,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "如果看不到网站，收起一些窗口把桌面露出来。"
+          }
+        }
+      }
+    },
+    "In Nifro": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在 Nifro 中"
+          }
+        }
+      }
+    },
+    "In the default browser": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在默认浏览器中"
           }
         }
       }
@@ -2099,6 +2139,16 @@
         }
       }
     },
+    "The default for websites that have not answered this themselves, in their own settings.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有在自己的设置里回答这个问题的网站，用这里的默认值。"
+          }
+        }
+      }
+    },
     "The page is laid out at the size of the wallpaper, so `100vw` and `100vh` mean that area, and `<html>` carries `is-nifro-app` always and `nifro-is-browsing-mode` while Browsing Mode is on.": {
       "localizations": {
         "zh-Hans": {
@@ -2205,16 +2255,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "切换"
-          }
-        }
-      }
-    },
-    "Turn this off while logging in to a website, since the login may navigate to a page you want to stay in Nifro.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "登录网站时先关掉它——登录过程可能跳到别的页面，而你希望那一页留在 Nifro 里。"
           }
         }
       }
@@ -2385,6 +2425,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "深色模式下"
+          }
+        }
+      }
+    },
+    "Where a link off this website goes — a site you sign in to wants “In Nifro”, because signing in navigates away from it and the page you come back to is the one you wanted.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "从这个网站点出去的链接在哪里打开——需要登录的网站要选“在 Nifro 中”，因为登录本身就会跳离它，而你想回到的正是那个页面。"
           }
         }
       }

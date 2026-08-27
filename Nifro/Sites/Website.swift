@@ -67,6 +67,23 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	var reloadInterval: Double?
 
 	/**
+	Where a link off this website opens.
+
+	Per website because the answer is a property of the site, and the app-wide switch could only ever
+	give one answer to a question that has two: a dashboard's links should leave the wallpaper, and a
+	site you sign in to must not, because signing in *is* a navigation off the site's own host. The
+	app-wide help text used to say exactly that and then ask the user to turn the switch off and
+	remember to turn it back on afterwards, which is the manual workaround a setting exists to remove.
+
+	Three states rather than two, because "whatever Settings says" is a real answer and the one every
+	website already gives. Named rather than left as `Bool?`, following `audio` above: the same
+	information, and it is a state the interface has to draw and the report has to print, so it is
+	worth a word each. `@DecodableDefault` is what makes a website stored before this existed decode
+	into the state it was already in.
+	*/
+	@DecodableDefault.Custom<ExternalLinks> var externalLinks
+
+	/**
 	The display this website actually appears on.
 
 	Falls back to the main display when the chosen one is not attached, because otherwise this answers
@@ -118,6 +135,23 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	How often this website actually reloads.
 	*/
 	var effectiveReloadInterval: Double? { reloadInterval ?? Defaults[.reloadInterval] }
+
+	/**
+	Whether a link off this website actually opens in the browser.
+
+	A switch rather than a `??`, so a fourth state added to `ExternalLinks` has no answer here until
+	somebody writes one.
+	*/
+	var opensExternalLinksInBrowser: Bool {
+		switch externalLinks {
+		case .followSettings:
+			Defaults[.openExternalLinksInBrowser]
+		case .browser:
+			true
+		case .inPlace:
+			false
+		}
+	}
 
 	/**
 	The CSS this website actually applies, `nil` when it applies none.
@@ -174,6 +208,10 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 
 		if allowsInteraction {
 			symbols.append("hand.tap")
+		}
+
+		if externalLinks != .followSettings {
+			symbols.append("arrow.up.forward.app")
 		}
 
 		return symbols
@@ -271,6 +309,31 @@ extension Website {
 			}
 		}
 	}
+}
+
+extension Website {
+	enum ExternalLinks: String, CaseIterable, Codable, Sendable {
+		case followSettings
+		case browser
+		case inPlace
+
+		var title: String {
+			switch self {
+			case .followSettings:
+				String(localized: "Follow Settings")
+			case .browser:
+				String(localized: "In the default browser")
+			case .inPlace:
+				String(localized: "In Nifro")
+			}
+		}
+	}
+}
+
+extension Website.ExternalLinks: DecodableDefault.Source {
+	// Every website that existed before this setting followed the app-wide switch, and it has to go on
+	// following it — anything else silently changes what a wallpaper does on upgrade.
+	static let defaultValue = followSettings
 }
 
 extension Website.Audio: DecodableDefault.Source {

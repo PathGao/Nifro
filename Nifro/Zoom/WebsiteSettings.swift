@@ -132,6 +132,32 @@ struct WebsiteInteractionSetting: View {
 }
 
 /**
+Where a link that leaves this website opens.
+
+Next to `WebsiteInteractionSetting` because it is the same question one step further on: that one is
+whether the page can be clicked at all, this is what a click that goes somewhere else does.
+
+A picker with three entries rather than a switch, because there really are three answers and only two
+of them are the website's own. "Follow Settings" is the state every website is in until somebody
+decides otherwise, and it is first for the same reason "Main Display" is first in
+`WebsiteDisplaySetting`: the unset state is a real answer, not the absence of one.
+*/
+struct WebsiteExternalLinksSetting: View {
+	@Binding var externalLinks: Website.ExternalLinks
+
+	var body: some View {
+		Picker(selection: $externalLinks) {
+			ForEach(Website.ExternalLinks.allCases, id: \.self) { option in
+				Text(option.title).tag(option)
+			}
+		} label: {
+			Text("External links")
+				.explained(String(localized: "Where a link off this website goes — a site you sign in to wants “In Nifro”, because signing in navigates away from it and the page you come back to is the one you wanted."))
+		}
+	}
+}
+
+/**
 Whether a website is allowed to make noise.
 */
 struct WebsiteAudioSetting: View {
