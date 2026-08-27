@@ -52,7 +52,6 @@ final class WebsitesController {
 
 	private init() {
 		setUpEvents()
-		thumbnailCache.prewarmCacheFromDisk(for: all.map(\.thumbnailCacheKey))
 	}
 
 	private func setUpEvents() {

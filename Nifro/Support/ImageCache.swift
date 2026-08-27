@@ -50,20 +50,37 @@ final class Cache<Key: Hashable, Value> {
 	private let cache = NSCache<WrappedKey, WrappedValue>()
 
 	/**
-	Get, set, or remove an entry from the cache.
+	- Parameter totalCostLimit: The budget the costs passed to `setValue` are spent against. Required
+	rather than defaulted, because `NSCache`'s own default is no limit at all and a cache that grows
+	for the lifetime of the process is what this class was for four years.
+	*/
+	init(totalCostLimit: Int) {
+		cache.totalCostLimit = totalCostLimit
+	}
+
+	/**
+	Get an entry from the cache.
 	*/
 	subscript(key: Key) -> Value? {
-		get { cache.object(forKey: .init(key: key))?.value }
-		set {
-			guard let newValue else {
-				// If the value is `nil`, remove the entry from the cache.
-				cache.removeObject(forKey: .init(key: key))
+		cache.object(forKey: .init(key: key))?.value
+	}
 
-				return
-			}
+	/**
+	Insert an entry, saying what holding it costs against the budget.
 
-			cache.setObject(.init(value: newValue), forKey: .init(key: key))
-		}
+	The cost is not optional and there is no setter without it, so an entry cannot be added that the
+	budget cannot see. `NSCache` charges nothing for an object inserted with no cost and evicts on the
+	total, which makes a partly-costed cache unbounded rather than approximate.
+	*/
+	func setValue(_ value: Value, for key: Key, cost: Int) {
+		cache.setObject(.init(value: value), forKey: .init(key: key), cost: cost)
+	}
+
+	/**
+	Remove an entry from the cache.
+	*/
+	func removeValue(for key: Key) {
+		cache.removeObject(forKey: .init(key: key))
 	}
 
 	/**
@@ -73,6 +90,24 @@ final class Cache<Key: Hashable, Value> {
 		cache.removeAllObjects()
 	}
 }
+
+/**
+What the in-memory half of `SimpleImageCache` is allowed to hold.
+
+These entries are website thumbnails drawn at 44×44 in one window, but they are stored at whatever
+size they arrived at — often video cover art, which is 1280×720. Measured the way `cost` measures, that
+is 3.7 MB apiece against 92 KB for a 152×152 site icon and 4 KB for a favicon, so this is about nine
+covers or three hundred favicons, and rather more in real resident bytes because `cost` over-counts.
+Past it the oldest entries go and the next draw reads the file again, which is the path
+`IconView.fetchIcons` already takes on a miss.
+
+A number at all is the point. There was none, so the ceiling was "every distinct address the list has
+ever held", for the lifetime of the process, in an app whose window this is behind.
+
+Outside the type because a generic one cannot hold a stored static.
+*/
+private let imageCacheMemoryLimit = 32_000_000
+
 // TODO: Rewrite as an actor.
 /**
 Extremely simple and naive image cache.
@@ -84,8 +119,26 @@ You can optionally persist the cache to disk. Reading from the cache is synchron
 final class SimpleImageCache<Key: SimpleImageCacheKeyable> {
 	private let lock = OSAllocatedUnfairLock()
 	private let diskQueue = DispatchQueue(label: "SimpleImageCache")
-	private let cache = Cache<Key, NSImage>()
+	private let cache = Cache<Key, NSImage>(totalCostLimit: imageCacheMemoryLimit)
 	private var cacheDirectory: URL?
+
+	/**
+	What holding this image is charged against the budget.
+
+	Its fully decoded size, which is an upper bound rather than a measurement: `NSImage` keeps what it
+	was made from and decodes at draw, so a 1280×720 cover that this counts as 3.7 MB was measured
+	resident at 2.8 MB while its file on disk was TIFF, and less again once the same file is smaller.
+	Over-counting is the safe direction for a ceiling, and asking for the truth means materialising a
+	representation, which is the allocation the budget exists to avoid. Reading the pixel dimensions
+	forces no decode — measured at zero additional bytes for twenty images.
+	*/
+	private static func cost(of image: NSImage) -> Int {
+		guard let representation = image.representations.first else {
+			return 0
+		}
+
+		return representation.pixelsWide * representation.pixelsHigh * 4
+	}
 
 	private var shouldUseDisk: Bool { cacheDirectory != nil }
 
@@ -211,7 +264,7 @@ final class SimpleImageCache<Key: SimpleImageCacheKeyable> {
 				return nil
 			}
 
-			cache[key] = image
+			cache.setValue(image, for: key, cost: Self.cost(of: image))
 
 			return image
 		}
@@ -233,7 +286,7 @@ final class SimpleImageCache<Key: SimpleImageCacheKeyable> {
 			lock.unlock()
 		}
 
-		cache[key] = image
+		cache.setValue(image, for: key, cost: Self.cost(of: image))
 		saveImageToDiskIfNeeded(image, for: key)
 	}
 
@@ -246,21 +299,8 @@ final class SimpleImageCache<Key: SimpleImageCacheKeyable> {
 			lock.unlock()
 		}
 
-		cache[key] = nil
+		cache.removeValue(for: key)
 		removeImageFromDiskIfNeeded(for: key)
-	}
-
-	/**
-	If the cache items exists on disk but not in the memory cache, this adds it them the memory cache too.
-
-	This is run in a background thread.
-	*/
-	func prewarmCacheFromDisk(for keys: [Key]) {
-		DispatchQueue.global().async { [self] in
-			for key in keys {
-				_ = image(for: key)
-			}
-		}
 	}
 
 	/**
