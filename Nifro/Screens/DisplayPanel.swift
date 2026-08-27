@@ -347,13 +347,12 @@ private struct DisplayColumn: View {
 				PanelButton(
 					symbol: column.isShowing ? "power" : "power.circle",
 					label: column.isShowing ? String(localized: "Showing") : String(localized: "Switched off"),
-					// Lit while the display is switched *off*, which is the one caller that reads
-					// `onTint` as "this button is engaged" rather than as "the thing it turns on is
-					// on". The other four read it the second way, and only the second way is written
-					// down. Left as it ships until somebody picks which reading the app has; both are
-					// defensible and the defect is that the choice is unrecorded, not that this line
-					// is wrong.
-					isOn: !column.isShowing
+					// Lit while the wallpaper is up, like every other lit control in the panel.
+					// It used to be the inverse — orange while the display was switched *off* — which
+					// made this the one caller reading `onTint` as "this button is engaged" instead of
+					// as "the thing it turns on is on". Five controls now answer that question the same
+					// way, which is the reading `onTint` documents.
+					isOn: column.isShowing
 				) {
 					model.toggleShowing(on: column.display)
 				}
