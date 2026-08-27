@@ -2271,6 +2271,9 @@ extension WKWebView {
 }
 extension WKWebView {
 	nonisolated static func createCSSInjectScript(_ css: String) -> String {
+		// Percent-encoded here and decoded in the page, which is what lets the CSS carry quotes, backslashes and newlines through a JavaScript string literal without escaping any of them itself.
+		//
+		// `decodeURIComponent` on the other side, and not `unescape`. Each of those has a partner and they are not the same one: `unescape` is the inverse of `escape`, and both read a `%XX` as a single Latin-1 character, while `addingPercentEncoding` writes the UTF-8 bytes and only `decodeURIComponent` reads them back as UTF-8. Pairing one half of each corrupted every non-ASCII codepoint there is — Foundation percent-encodes non-ASCII whatever the allowed set says, so this was never about one language — and left ASCII untouched, that being the overlap where the two conventions agree and the reason the damage looked random rather than total.
 		let textContent = css.addingPercentEncoding(withAllowedCharacters: .letters) ?? css
 
 		// Injected at document start, so the style element gets appended to a document the page has not finished building. Frameworks that swap out `documentElement` or clear `head` on mount take our style with them, and the user's CSS stops applying. People report this as "my CSS works in Safari but not here".
@@ -2280,7 +2283,7 @@ extension WKWebView {
 			"""
 			(() => {
 				const style = document.createElement('style');
-				style.textContent = unescape('\(textContent)');
+				style.textContent = decodeURIComponent('\(textContent)');
 				style.dataset.nifroInjected = 'css';
 
 				const attach = () => {
