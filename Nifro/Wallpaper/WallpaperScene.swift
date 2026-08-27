@@ -454,9 +454,12 @@ final class WallpaperScene {
 		reloadTimer?.invalidate()
 		reloadTimer = nil
 
+		// This display's own Browsing Mode, not the app's — the same argument `resetPlaylistTimer` makes
+		// beside the same guard: a reload throws away a form somebody is filling in, and only the
+		// display they are filling it in on has one.
 		guard
 			!isSwitchedOff,
-			!AppState.shared.isBrowsingMode,
+			!AppState.shared.isBrowsingMode(on: display),
 			let reloadInterval = website?.effectiveReloadInterval
 		else {
 			return
@@ -480,7 +483,7 @@ final class WallpaperScene {
 			return
 		}
 
-		let target = AppState.shared.targetOpacity
+		let target = AppState.shared.targetOpacity(on: display)
 		let window = window
 
 		guard window.alphaValue != target else {

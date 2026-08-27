@@ -126,10 +126,25 @@ final class AppState: ObservableObject {
 	var currentWebsite: Website? { primaryScene.website }
 
 	/**
-	Whether any display is in Browsing Mode.
+	Whether *any* display is in Browsing Mode.
 
-	Rotation and the schedule pause while somebody is interacting with a page, and that is an app-wide
-	pause: a playlist tick on the other screen still steals focus.
+	Almost nothing should ask this. Browsing Mode is stored per display, `DesktopWindow.isInteractive`
+	is per window, and the panel draws a button per column — this is the one leftover from when it was
+	a single flag, and every reader that took it was asking about one display and being answered about
+	all of them. Measured on two displays: browsing on the built-in stopped the external's rotation and
+	its auto-reload, and pushed the external's window to full opacity while it stayed at desktop level.
+	`isBrowsingMode(on:)` below is the question those readers meant.
+
+	The doc that used to be here argued the pause was deliberate — "a playlist tick on the other screen
+	still steals focus". It does not. Nothing on the rotation path activates the app or takes key: a
+	tick makes another website current, the scene loads it out of sight through swap loading, and the
+	only `forceActivate` in this file is the one below, which runs when Browsing Mode is *entered*.
+	The premise was wrong, so the pause it justified was a bug and not a design.
+
+	Two readers are left and both are app-wide in themselves rather than by oversight: bringing the app
+	forward, which has no per-display form, and `report`, which asks whether to interrupt with a modal
+	alert — a modal is app-modal, and the question it is really asking is "is the user in front of a
+	page of ours right now". `ScopeTests` fails the moment a third joins them.
 	*/
 	var isBrowsingMode: Bool { !Defaults[.browsingDisplays].isEmpty }
 
@@ -156,7 +171,22 @@ final class AppState: ObservableObject {
 	}
 
 	/**
-	Put every window at the level its display's setting asks for.
+	Put every window at the level, the opacity and the timers its display's setting asks for.
+
+	Both timers, which is the half that was missing. Only the reload timer was re-armed here, so
+	entering Browsing Mode never disarmed the rotation — measured with the built-in on loop at one
+	minute: Browsing Mode on at t+50, and the tick still fired at t+61 and replaced the page eleven
+	seconds into it. If you entered Browsing Mode to sign in, the form you were typing into is gone.
+
+	And it never came back. That in-browsing tick writes the website list, which rebuilds the scenes,
+	which re-arms the timers — at a moment when the guard says no. Nothing else re-armed them, so
+	after Browsing Mode ended the display simply stopped rotating for the rest of the session:
+	measured, zero rotations in the 120 seconds after it was switched off, at a one-minute interval.
+	Arming and disarming through the same call, on the way in and on the way out, is what closes both.
+
+	Every scene, because the level and the opacity are read off each display's own answer and both are
+	idempotent — a window already at the right level, an opacity already at its target. The timers are
+	not idempotent, so they are settled only where the answer moved.
 	*/
 	func applyBrowsingMode() {
 		guard isEnabled else {
@@ -166,7 +196,26 @@ final class AppState: ObservableObject {
 		for scene in scenes {
 			scene.window.isInteractive = isBrowsingMode(on: scene.display)
 			scene.applyOpacity()
+
+			// `resetPlaylistTimer` zeroes the minute count, so running it on a display nothing happened
+			// to puts that display back to the start of its rotation interval — the same defect the
+			// rebuild had, reached through a different door. Measured: entering Browsing Mode on the
+			// built-in pushed the external's rotation from t+61 out to t+111.
+			//
+			// `playlistTimer` is the record of which side the timers were last armed for, so nothing has
+			// to be remembered to compare against: it is non-`nil` exactly when this display is running
+			// and not being browsed. The reload timer follows the same guard, so one of them can speak
+			// for the pair — and it is the one that cannot be legitimately absent, where a website with
+			// no reload interval leaves the other `nil` for a reason that has nothing to do with this.
+			//
+			// A display switched off answers "not browsing, no timer", so it takes a reset it does not
+			// need. Both resets refuse it on `isSwitchedOff` and leave it exactly as it was.
+			guard isBrowsingMode(on: scene.display) == (scene.playlistTimer != nil) else {
+				continue
+			}
+
 			scene.resetTimer()
+			scene.resetPlaylistTimer()
 		}
 
 		// Making the window key is not enough when the app is an accessory. The window comes forward, but keystrokes still go to whatever was active before, so nobody can type into the page. Plash#114.
@@ -372,6 +421,23 @@ final class AppState: ObservableObject {
 
 		scenes = kept
 
+		// Browsing Mode is "somebody is interacting with this page *right now*" — the one per-display
+		// entry that is a state rather than a preference, and so the one that cannot outlive the
+		// display. It lives in `Defaults` and nothing removed it, so a display unplugged while its
+		// Browsing Mode was on left the key behind across relaunches. The panel draws one column per
+		// scene, so the departed display had no button to switch it off from, and there was no other
+		// way out.
+		//
+		// Stated as "only displays that have a scene" rather than as a removal beside `tearDown`,
+		// because that also clears a key stranded by a version that had no pruning at all — and this
+		// runs on every display change, so it needs no unplug of its own to find one.
+		//
+		// The other per-display settings are deliberately left alone. `disabledDisplays`,
+		// `rotationModes` and `rotationIntervals` are preferences: a monitor switched off, pinned, or
+		// set to rotate hourly before it was unplugged has to come back that way, which is exactly what
+		// keeping its key buys. Forgetting one for good is a thing to ask for, and Restore Defaults is
+		// where it is asked.
+		Defaults[.browsingDisplays].formIntersection(scenes.map { Display.settingsKey(for: $0.display) })
 
 		for scene in scenes {
 			// `scheduled` rather than a plain lookup: rebuilding happens on display changes and on any
@@ -391,6 +457,24 @@ final class AppState: ObservableObject {
 			}
 
 			scene.resume()
+
+			// Only the scenes the change actually reached — the same test `applyWebsiteChanges` uses to
+			// decide which pages to reload, asked here so a display whose page is untouched keeps its
+			// clock as well as its page. A rebuild runs on every edit to the website list, on every
+			// display change and on every wake, and it used to restart both timers on every scene it
+			// kept. `resetPlaylistTimer` also zeroes the minute count, so the restart was not a
+			// rounding error: it put the display back at the start of its interval.
+			//
+			// Measured on two displays, external on loop at one minute and reloading every twenty
+			// seconds. Undisturbed it reloaded at +20 and +40 and rotated at exactly +60. Pressing Next
+			// on the *built-in* every fourteen seconds gave the external zero reloads and zero
+			// rotations; every twenty-six seconds gave it a reload twenty seconds after each edit and
+			// never a rotation of its own. So a monitor set to rotate every thirty minutes never
+			// rotates if the laptop rotates every five, and a laptop woken often never rotates at all.
+			guard !scene.isUpToDate else {
+				continue
+			}
+
 			scene.resetTimer()
 			scene.resetPlaylistTimer()
 		}
@@ -439,13 +523,6 @@ final class AppState: ObservableObject {
 		}
 	}
 
-	func resetTimer() {
-		for scene in scenes {
-			scene.resetTimer()
-			scene.resetPlaylistTimer()
-		}
-	}
-
 	/**
 	Take up whatever the website list now says.
 
@@ -462,7 +539,12 @@ final class AppState: ObservableObject {
 		// Only the scenes the change actually reached. Every edit republishes the whole list, and with
 		// one scene per display that meant one screen's playlist tick throwing away and re-fetching the
 		// page on every other screen — pages nothing about the edit had touched.
-		let upToDate = scenes.filter { $0.loadedWebsite == WebsitesController.shared.scheduled(for: $0.display) }
+		//
+		// Taken before the rebuild, because the rebuild is what moves each scene's `website` on to what
+		// the list now says. `isUpToDate` compares against the list rather than against that property,
+		// so it gives the same answer on both sides of the call — which is what lets `rebuildScenes`
+		// ask it too, and settle the page and the timers on one test instead of two.
+		let upToDate = scenes.filter(\.isUpToDate)
 
 		rebuildScenes()
 

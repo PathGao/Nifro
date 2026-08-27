@@ -199,13 +199,35 @@ extension WallpaperScene {
 		set { Defaults[.rotationIntervals][Display.settingsKey(for: display)] = newValue }
 	}
 
+	/**
+	Whether this scene's page is already the one the website list asks for.
+
+	The test `applyWebsiteChanges` uses to decide which pages to reload, and `rebuildScenes` uses to
+	decide whose timers to leave alone. Here rather than written out at both, because two copies of
+	"nothing changed for this display" is how the timers came to disagree with the pages: a rebuild
+	restarted every kept scene's clock, including the scenes `applyWebsiteChanges` had just decided
+	were untouched.
+
+	The whole website and not its identity, for the reason `loadedWebsite` gives: a scene showing an
+	older version of the same website is not up to date.
+	*/
+	var isUpToDate: Bool {
+		loadedWebsite == WebsitesController.shared.scheduled(for: display)
+	}
+
 	func resetPlaylistTimer() {
 		playlistTimer?.invalidate()
 		playlistTimer = nil
 
+		// This display's own Browsing Mode, not the app's. Rotation pauses so that the page somebody is
+		// interacting with does not move under them, and that is a fact about the screen they are
+		// interacting with — the page behind them has nobody typing into it. Measured on two displays:
+		// Browsing Mode on the built-in stopped the external rotating and reloading as well, and
+		// nothing rearmed it afterwards. Nothing on this path takes focus, so there is no app-wide
+		// cost to leaving the other display running — see `AppState.isBrowsingMode`.
 		guard
 			!isSwitchedOff,
-			!AppState.shared.isBrowsingMode
+			!AppState.shared.isBrowsingMode(on: display)
 		else {
 			return
 		}

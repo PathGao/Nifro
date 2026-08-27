@@ -390,10 +390,14 @@ extension WebViewController: WKUIDelegate {
 	So it opens where the user is already looking. Only while they are browsing, because outside
 	Browsing Mode nobody clicked anything, and a page moving the wallpaper on its own is not
 	something to allow.
+
+	*This display's* Browsing Mode, like the three panels below it. Asked of the app, browsing one
+	screen let every other screen's page open windows, raise confirms and prompts and put up a file
+	picker — pages nobody had clicked anything on, which is the whole of what the permission rests on.
 	*/
 	func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
 		guard
-			AppState.shared.isBrowsingMode,
+			AppState.shared.isBrowsingMode(on: scene?.display),
 			navigationAction.targetFrame == nil
 		else {
 			return nil
@@ -405,7 +409,7 @@ extension WebViewController: WKUIDelegate {
 	}
 
 	func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo) async -> Bool {
-		guard AppState.shared.isBrowsingMode else {
+		guard AppState.shared.isBrowsingMode(on: scene?.display) else {
 			return false
 		}
 
@@ -413,7 +417,7 @@ extension WebViewController: WKUIDelegate {
 	}
 
 	func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo) async -> String? {
-		guard AppState.shared.isBrowsingMode else {
+		guard AppState.shared.isBrowsingMode(on: scene?.display) else {
 			return nil
 		}
 
@@ -422,7 +426,7 @@ extension WebViewController: WKUIDelegate {
 
 	// swiftlint:disable:next discouraged_optional_collection
 	func webView(_ webView: WKWebView, runOpenPanelWith parameters: WKOpenPanelParameters, initiatedByFrame frame: WKFrameInfo) async -> [URL]? {
-		guard AppState.shared.isBrowsingMode else {
+		guard AppState.shared.isBrowsingMode(on: scene?.display) else {
 			return nil
 		}
 

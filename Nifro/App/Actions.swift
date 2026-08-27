@@ -11,9 +11,14 @@ turning it on by shortcut, by URL, or from Shortcuts silently skipped it — whi
 where the explanation matters most, since the point of it is that the page may be hidden behind your
 windows.
 
-Each one acts on the primary scene, the display Settings points at. An action reached from the menu
-bar has no way to say which screen it means, and moving a screen the person is not looking at is the
-worse of the two answers.
+**Each one acts on one scene, and it is the scene `run` resolves — never the whole list.** Which scene
+that is depends on where the request came from; see `Source`. Two cases used to resolve a scene and
+then ignore it: Reload called `AppState.reloadWebsite()`, which loops every display, and Choose Region
+re-resolved through `actingScene` inside itself. Measured: one `nifro://reload` re-fetched both sites
+and restarted the other display's video from zero — so pressing Reload in front of the monitor threw
+away the laptop's signed-in page as well, and the Shortcuts pane's own footer says it should not have.
+There is no Reload button in the panel, so the menu, the shortcut and the URL are the only ways in and
+all three did it.
 
 What is *not* in here is where each action sits in the menu, when it is greyed out, and what its
 tooltip says. Those differ per item and per entry point, and pulling them in would turn this into a
@@ -96,9 +101,13 @@ enum Action: String, CaseIterable {
 				$0.audio = $0.audio == .unmuted ? .muted : .unmuted
 			}
 		case .chooseRegion:
-			AppState.shared.beginCropSelection()
+			// The scene resolved above, handed over rather than looked up again. `beginCropSelection`
+			// falls back to `actingScene` when it is given nothing, which is the same answer today
+			// because both callers are pointer-resolved — but it is the same answer by coincidence, and
+			// the coincidence ends the first time an automation reaches this case.
+			AppState.shared.beginCropSelection(on: scene)
 		case .reload:
-			AppState.shared.reloadWebsite()
+			scene.reload()
 		case .nextWebsite:
 			WebsitesController.shared.makeNextCurrent(on: scene.display)
 		case .previousWebsite:
