@@ -4,8 +4,8 @@
 //
 // It exists so the pure logic can be exercised by `swift test` without an Xcode test target, an app
 // bundle or a window server: the crop and zoom geometry, the menu bar strip, schedule windows, which
-// website is current on which display and how often it changes, video embedding, URL commands, menu
-// word wrapping and the decoding of the site catalogue. It reads the same source files the app
+// website is current on which display and how often it changes, video embedding, URL commands, the
+// disk budget, the update check and the decoding of the site catalogue. It reads the same source files the app
 // compiles, so there is one implementation and not a copy.
 //
 // Which is the whole point of the `Sites` pair below. `sites/index.json` is published and fetched at

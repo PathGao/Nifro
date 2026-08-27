@@ -77,7 +77,21 @@ final class DesktopWindow: NSWindow {
 	private func applyRaisedState() {
 		guard isRaised else {
 			level = .desktop
-			orderBack(self)
+
+			// `orderBack` puts a window that is *on* screen behind the others, and puts a window that is
+			// not on screen back on it. `suspend()` takes a switched-off display's window off screen
+			// deliberately, and this ran on it anyway: `applyBrowsingMode` assigns `isInteractive` to
+			// every scene, `didSet` fires whether or not the value moved, so browsing one display put
+			// the other display's wallpaper back — the one the user had switched off.
+			//
+			// Guarded here rather than at the assignment, because the assignment is not the only door:
+			// `rebuildScenes` writes the same property on every window, and the
+			// `bringBrowsingModeToFront` subscriber assigns it to itself on purpose to have this run
+			// again. Ordering is about where among the windows on screen this one sits, so it has
+			// nothing to say about a window that is not one of them.
+			if isVisible {
+				orderBack(self)
+			}
 
 			// Even though the window is on `.desktop` level, the user would be able to interact if they hide desktop icons.
 			ignoresMouseEvents = !allowsPassiveInteraction

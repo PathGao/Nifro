@@ -213,4 +213,87 @@ struct SwitchedOffTests {
 		// The same two words the power button already uses for the same fact.
 		#expect(panel.contains("String(localized: \"Switched off\")"))
 	}
+
+	/**
+	Nothing outside `Playlist` reads the per-display switch except the three places argued for here.
+
+	The test above catches a `guard`, which is what refusing to do something looks like — and the panel
+	was not refusing anything. It was *drawing*: `isShowing: !scene.isDisabledForDisplay`, an argument
+	rather than a condition, so it walked past that check for as long as it existed. With the app
+	disabled — on battery, on a locked screen, from the Disable shortcut — every wallpaper was gone and
+	every column still read "on", and the power button under it acted on that reading and switched the
+	display off for real. Turning the app back on then brought back a screen nobody had switched off.
+
+	So the rule is the read and not the guard, and the three left have to argue for themselves here.
+	All three name the per-display switch because it is the only one they can change: `setDisplayEnabled`
+	writes it, and the two that wake a display before acting on it can clear a display's own switch and
+	cannot clear a Disable that came from the battery.
+	*/
+	@Test("Only the writer and the two wake-ups read the switch on its own")
+	func onlyTheArguedSitesReadThePerDisplaySwitch() throws {
+		let allowed = [
+			"AppState.swift": ["func setDisplayEnabled(_ isEnabledForDisplay: Bool, on display: Display?)"],
+			"DisplayPanelModel.swift": ["func step(_ direction: Step, on display: Display?)"],
+			"WebsitesController.swift": ["func makeCurrent(_ website: Website, switchingDisplayOn: Bool = true)"],
+			// The declaration and the predicate that reads it. `isSwitchedOff` is the whole point: it is
+			// the one place allowed to turn the two switches into one answer.
+			"Playlist.swift": ["var isDisabledForDisplay: Bool", "var isSwitchedOff: Bool"]
+		]
+
+		for (name, text) in try Self.sources() {
+			// Declaring the switch is not reading it, and `body(of:)` returns only what is inside the
+			// braces. Struck by name, the way `ScopeTests` strikes the reader it is counting.
+			var remaining = text.replacing("var isDisabledForDisplay", with: "")
+
+			for declaration in allowed[name] ?? [] {
+				remaining = remaining.replacing(try Self.body(of: declaration, in: text), with: "")
+			}
+
+			#expect(
+				!remaining.contains("isDisabledForDisplay"),
+				"""
+				\(name) reads the per-display switch outside the places argued for in this test. Ask \
+				`isSwitchedOff`, which also answers the app-wide one — or add this site here with the \
+				reason it is allowed to see only half of "off".
+				"""
+			)
+		}
+	}
+
+	/**
+	Nothing puts a switched-off display's window back on screen by ordering it.
+
+	`suspend()` takes that window off screen, and `orderBack` is not only "put this behind the others":
+	on a window that is not on screen it is also "show it". `applyBrowsingMode` assigns `isInteractive`
+	to every scene and `didSet` fires whether or not the value moved, so browsing one display ran the
+	unraised branch on the other display's window and put back the wallpaper the user had switched off.
+	Measured on two displays, external switched off: the window went from off screen to on screen on
+	the toggle, and stays off screen now.
+
+	The assertion is on the guard rather than on the assignment because the assignment is not the only
+	door — `rebuildScenes` writes the same property on every window, and the `bringBrowsingModeToFront`
+	subscriber assigns it to itself on purpose so that this branch runs again. `isVisible` and
+	`orderBack` are AppKit's own names, so a rename in this app cannot make this pass by accident.
+	*/
+	@Test("Ordering does not show a window that was taken off screen")
+	func orderingDoesNotRevealASuspendedWindow() throws {
+		let body = try Self.body(of: "private func applyRaisedState()", in: Self.source(named: "DesktopWindow.swift"))
+
+		guard let unraised = body.range(of: "return") else {
+			Issue.record("`applyRaisedState` no longer has an early return, so this is reading nothing.")
+			return
+		}
+
+		let branch = String(body[body.startIndex..<unraised.lowerBound])
+
+		guard let ordering = branch.range(of: "orderBack") else {
+			Issue.record("`applyRaisedState` no longer orders the window at all; check what replaced it.")
+			return
+		}
+
+		#expect(
+			branch[branch.startIndex..<ordering.lowerBound].contains("isVisible"),
+			"`applyRaisedState` orders a window back without asking whether it is on screen, which is how a display that is switched off gets its wallpaper put back."
+		)
+	}
 }

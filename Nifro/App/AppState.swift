@@ -313,10 +313,27 @@ final class AppState: ObservableObject {
 	weak var croppingScene: WallpaperScene?
 	var croppingWebsiteID: Website.ID?
 
-	private var storedWebViewError: Error?
+	/**
+	What went wrong loading each display's page.
+
+	Per display, because every writer already was. All four sit in `WallpaperScene` and `SwapLoading`,
+	which run once per display and know which one they are — and wrote into a single slot anyway, so
+	the last one to finish spoke for every screen. The routine end of a load that worked writes `nil`,
+	which meant a reload timer firing on the monitor erased the laptop's failure without either page
+	having changed. The other order is worse than a lost message: the monitor's page is fine and the
+	app is reporting the laptop's error against it.
+
+	Keyed by `Display.settingsKey(for:)`, the key the other per-display facts already use, so a
+	display unplugged and plugged back in comes back to its own entry rather than to a stranger's.
+
+	Read only by `refreshStatusItemTooltip`, which is the app's one surface for a failure. Giving the
+	panel a per-display reading of it is K26 and wants a column that can say so; this is the store that
+	one would read, kept honest in the meantime rather than built out ahead of it.
+	*/
+	private var storedWebViewErrors: [String: Error] = [:]
 
 	/**
-	The last thing that went wrong loading a page, or `nil`.
+	Record what went wrong on `display`, or that nothing has.
 
 	Cancellations are dropped rather than stored. Superseding a load cancels the one in flight, so a
 	cancelled task reports an error that is not one — and it reached the menu reading
@@ -326,27 +343,57 @@ final class AppState: ObservableObject {
 	Filtered here rather than at each `catch`, because there are four of them and the next one added
 	would have to remember.
 	*/
-	var webViewError: Error? {
-		get { storedWebViewError }
-		set {
-			guard let newValue else {
-				storedWebViewError = nil
+	func setWebViewError(_ error: Error?, on display: Display?) {
+		let key = Display.settingsKey(for: display)
+
+		guard let error else {
+			storedWebViewErrors[key] = nil
+
+			if storedWebViewErrors.isEmpty {
 				statusItemButton.contentTintColor = nil
-				return
 			}
 
-			guard !isCancellation(newValue) else {
-				return
-			}
-
-			storedWebViewError = newValue
-			report(newValue)
+			refreshStatusItemTooltip()
+			return
 		}
+
+		guard !isCancellation(error) else {
+			return
+		}
+
+		storedWebViewErrors[key] = error
+		refreshStatusItemTooltip()
+		report(error)
+	}
+
+	/**
+	Say what the menu bar icon is about: the failure if there is one, and otherwise the page.
+
+	One writer, for the reason `refreshLoadingIndicator` is one — the icon is a single glyph shared by
+	every display, so two per-display paths writing it directly meant whichever ran last spoke for all
+	of them. A routine reload finishing on the monitor replaced the laptop's failure with the monitor's
+	page title, and until the store below was per display the failure was not kept anywhere else
+	either, so it was simply gone.
+
+	A failure outranks a title, because a title is always available and a failure is the thing worth
+	saying. Which failure, when two displays have one, is settled by the display key rather than by the
+	order the loads happened to finish. Which title, when nothing has failed, is the main display's —
+	the display `currentWebsite` means, for the reason given there.
+
+	Deliberately not `primaryScene`: that rebuilds the list when it is empty, and a refresh is called
+	from places that are in the middle of building it.
+	*/
+	func refreshStatusItemTooltip() {
+		if let failure = storedWebViewErrors.min(by: { $0.key < $1.key })?.value {
+			statusItemButton.toolTip = "Error: \(failure.localizedDescription)"
+			return
+		}
+
+		let onMain = scenes.first { $0.display == .main } ?? scenes.first
+		statusItemButton.toolTip = onMain?.website?.tooltip
 	}
 
 	private func report(_ webViewError: Error) {
-		statusItemButton.toolTip = "Error: \(webViewError.localizedDescription)"
-
 		// TODO: There's a macOS bug that makes it black instead of a color.
 //		statusItemButton.contentTintColor = .systemRed
 
@@ -439,6 +486,13 @@ final class AppState: ObservableObject {
 		// keeping its key buys. Forgetting one for good is a thing to ask for, and Restore Defaults is
 		// where it is asked.
 		Defaults[.browsingDisplays].formIntersection(scenes.map { Display.settingsKey(for: $0.display) })
+
+		// A failed load is state in the same sense, and is pruned for the same reason rather than kept
+		// for the opposite one: it describes a page that was on its way to a display that is gone. It
+		// is in memory rather than in `Defaults`, so this is the only place it could be dropped.
+		storedWebViewErrors = storedWebViewErrors.filter { key, _ in
+			scenes.contains { Display.settingsKey(for: $0.display) == key }
+		}
 
 		for scene in scenes {
 			// `scheduled` rather than a plain lookup: rebuilding happens on display changes and on any
@@ -629,4 +683,25 @@ final class AppState: ObservableObject {
 			scene.reload()
 		}
 	}
+}
+
+/**
+Whether an error is a load being superseded rather than a load going wrong.
+
+Here rather than in a file of its own because `setWebViewError` is the only caller and always was.
+The file it came from was called `Text.swift` and held the menu's word wrapping; the wrapping went
+with the menu, and this was left behind under a name that no longer described anything in it.
+*/
+private func isCancellation(_ error: Error) -> Bool {
+	if error is CancellationError {
+		return true
+	}
+
+	let error = error as NSError
+
+	if error.domain == NSURLErrorDomain, error.code == NSURLErrorCancelled {
+		return true
+	}
+
+	return error.domain == NSCocoaErrorDomain && error.code == NSUserCancelledError
 }

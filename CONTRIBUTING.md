@@ -70,7 +70,7 @@ Then build and run the `Nifro` scheme.
 The pure logic has tests that run without an app bundle or a window server — the
 crop and zoom geometry, the menu bar strip and what the colour band samples from
 it, schedule windows, which website is current on which display, video embedding,
-URL commands and menu word wrapping:
+URL commands, the disk budget and the update check:
 
 ```sh
 swift test

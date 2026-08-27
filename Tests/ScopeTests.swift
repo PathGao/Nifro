@@ -406,4 +406,66 @@ struct ScopeTests {
 		let end = text.index(range.upperBound, offsetBy: 60, limitedBy: text.endIndex) ?? text.endIndex
 		return String(text[start..<end]).replacing("\n", with: " ").trimmingCharacters(in: .whitespaces)
 	}
+
+	/**
+	A failed load belongs to the display it failed on.
+
+	There were four writers and one slot. All four sit in `WallpaperScene` and `SwapLoading`, which run
+	once per display and know which one they are, and every one of them wrote `AppState.webViewError`
+	— so the last load to finish spoke for every screen. The clearing half is what made it a defect
+	rather than a wrong word: the routine end of a load that worked writes `nil`, so a reload timer
+	firing on the monitor erased the laptop's failure with neither page having changed.
+
+	An assignment rather than a mention, because the app-wide form was a settable property and the
+	per-display form is a pair of functions. Nothing can assign to those, so a match here is a stored
+	app-wide slot having come back.
+	*/
+	@Test("No load failure is stored for the app")
+	func nothingAssignsAnAppWideLoadError() throws {
+		let assignment = try Regex("webViewError\\s*=")
+
+		for (name, text) in try Self.sources() {
+			for match in text.matches(of: assignment) {
+				Issue.record(
+					"""
+					\(name) assigns `webViewError`, which was one slot shared by every display. \
+					Call `setWebViewError(_:on:)` with the display the load was for. \
+					Around: \(Self.context(around: match.range, in: text))
+					"""
+				)
+			}
+		}
+	}
+
+	/**
+	One place says what the menu bar icon is about.
+
+	The icon is a single glyph shared by every display and its tooltip is the only sentence it has, so
+	a per-display path writing it directly is the same defect in a second place: the scene that
+	finished last spoke for all of them. `WallpaperScene` wrote the page title there on every
+	successful load, which meant a routine reload on one display replaced another display's failure
+	with an unrelated page's name.
+
+	The same argument `refreshLoadingIndicator` makes for the icon itself, applied to the words next
+	to it.
+	*/
+	@Test("Only one place says what the menu bar icon is about")
+	func theTooltipHasOneWriter() throws {
+		let owner = try Self.body(of: "func refreshStatusItemTooltip()", in: Self.source(named: "AppState.swift"))
+		let assignment = try Regex("toolTip\\s*=")
+
+		for (name, text) in try Self.sources() {
+			let outside = name == "AppState.swift" ? text.replacing(owner, with: "") : text
+
+			for match in outside.matches(of: assignment) {
+				Issue.record(
+					"""
+					\(name) writes the status item's tooltip directly. Change what \
+					`refreshStatusItemTooltip()` answers and call it, so one display's page cannot \
+					overwrite another display's failure. Around: \(Self.context(around: match.range, in: outside))
+					"""
+				)
+			}
+		}
+	}
 }

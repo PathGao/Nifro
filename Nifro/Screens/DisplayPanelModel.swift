@@ -171,7 +171,12 @@ final class DisplayPanelModel: ObservableObject {
 			websiteName: scene.website?.menuTitle.nilIfEmpty,
 			snapshot: snapshot,
 			choices: onDisplay,
-			isShowing: !scene.isDisabledForDisplay,
+			// `isSwitchedOff`, not the per-display switch under it. The column was the last reader
+			// asking one of the two switches on its own, so with the app disabled — on battery, on a
+			// locked screen, from the Disable shortcut — every wallpaper was gone and every column still
+			// read "on". The button below then acted on that reading and switched the display off for
+			// real, so turning the app back on brought back a screen the user had never switched off.
+			isShowing: !scene.isSwitchedOff,
 			isMuted: !scene.shouldPlaySound,
 			rotationMode: scene.rotationMode,
 			rotationIntervalMinutes: scene.rotationIntervalMinutes,
@@ -312,7 +317,14 @@ final class DisplayPanelModel: ObservableObject {
 			return
 		}
 
-		AppState.shared.setDisplayEnabled(scene.isDisabledForDisplay, on: display)
+		// The same answer the column drew, so pressing the button means what the button says. Read off
+		// the per-display switch it would have written the opposite of what a user pressing "on" while
+		// the app was disabled had asked for.
+		//
+		// Switching a display on while the app is off records the setting and leaves the screen dark —
+		// `setDisplayEnabled` says so, and it is the only honest answer available here: this button
+		// cannot clear a Disable that came from the battery or the lock screen.
+		AppState.shared.setDisplayEnabled(scene.isSwitchedOff, on: display)
 
 		Task {
 			await refresh()
