@@ -164,7 +164,10 @@ private struct DisplayColumn: View {
 	invite the question of what happens when two are pressed.
 
 	The interval is here rather than in Settings because it is one display's business, the same as the
-	mode it qualifies — and it is next to the mode because it is the rest of that sentence.
+	mode it qualifies. It sits directly after the mode, inside the pair of arrows rather than outside
+	them: "loop, every 30 minutes" is one sentence, and putting it beyond the right arrow split that
+	sentence around a button belonging to a different idea — the arrows are a step you take by hand,
+	the interval is how often the app takes one for you.
 
 	It appears only while the display is rotating. There is no interval when nothing is moving, and a
 	field showing a number that changes nothing is a field the user will change and then wonder about.
@@ -194,14 +197,6 @@ private struct DisplayColumn: View {
 				model.cycleRotationMode(on: column.display)
 			}
 
-			PanelButton(
-				symbol: "chevron.right",
-				label: String(localized: "Next website"),
-				isEnabled: column.canRotate
-			) {
-				model.step(.next, on: column.display)
-			}
-
 			if column.rotationMode != .pinned {
 				PanelIntervalField(
 					minutes: .init(
@@ -209,6 +204,14 @@ private struct DisplayColumn: View {
 						set: { model.setRotationInterval($0, on: column.display) }
 					)
 				)
+			}
+
+			PanelButton(
+				symbol: "chevron.right",
+				label: String(localized: "Next website"),
+				isEnabled: column.canRotate
+			) {
+				model.step(.next, on: column.display)
 			}
 		}
 		.frame(height: 22)
