@@ -57,15 +57,7 @@ enum RestoreDefaults {
 	static func confirmAndRun() {
 		let alert = NSAlert(
 			title: String(localized: "Restore Nifro to how it shipped?"),
-			message: String(localized: """
-				Reset: every setting, every keyboard shortcut, which display each website is on, and which displays are grouped together.
-
-				Reinstalled: the websites Nifro comes with, in the order it comes with them.
-
-				Lost: the websites you added yourself, and every change you made to any website — the region you framed, the CSS and JavaScript you wrote, how often it reloads, and whether it plays sound. There is no undo.
-
-				Kept: your logins and cookies, so no site asks you to sign in again. The language you picked for Nifro and whether Nifro launches at login are kept too.
-				"""),
+			message: String(localized: "Reset: every setting, every keyboard shortcut, and which display each website is on.\n\nReinstalled: the websites Nifro comes with, in the order it comes with them.\n\nLost: the websites you added yourself, and every change you made to any website. There is no undo.\n\nKept: your logins, the language you picked, and whether Nifro launches at login."),
 			buttonTitles: [
 				String(localized: "Restore All Settings"),
 				String(localized: "Cancel")

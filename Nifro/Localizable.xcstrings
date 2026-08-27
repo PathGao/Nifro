@@ -39,32 +39,22 @@
         }
       }
     },
-    "A WebKit content-blocking rule list, for hiding cookie banners and ads. Paste the address of a `.json` file and Nifro compiles it once and applies it to every website.\n\nNifro keeps no rules of its own: a blocklist goes stale within weeks, and keeping one working is a full-time job somebody else is already doing. Lists in WebKit's format are published by the content-blocker projects — the one your Safari extension uses can usually be exported, and several are on GitHub as a single raw `.json` file. The address has to be the raw file, not the page it is displayed on.\n\nLeave it empty for no rules at all.": {
+    "A list of pages that work well as wallpapers, each with the settings that make it work; adding one takes a single file.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "WebKit 的内容拦截规则列表，用来挡掉 Cookie 横幅和广告。粘贴一个 `.json` 文件的地址，Nifro 编译一次，然后应用到所有网站。\n\nNifro 自己不维护规则：拦截列表几周就会过期，让它一直有效是一份全职工作，而已经有人在做了。WebKit 格式的列表由那些内容拦截项目发布——你在 Safari 里用的那个扩展通常可以导出，GitHub 上也有若干现成的单个 raw `.json` 文件。地址必须是原始文件本身，不是显示它的那个网页。\n\n留空表示不使用任何规则。"
+            "value": "一份适合当壁纸的网页清单，每条都带着让它好用的设置；添加一条只需要一个文件。"
           }
         }
       }
     },
-    "A page that reloads on a timer starts over: a long page goes back to the top, and a map or a drawing goes back to wherever it opens. This puts it back — the scroll position after a reload, and the part of the page a site names after the “#” in its address, which also survives quitting. A site that saves its own position needs none of this and keeps working either way.": {
+    "A page that reloads on a timer starts over; this puts back where it was scrolled or moved to.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "定时刷新会让页面从头开始：长页面回到顶部，地图或大图回到它默认打开的地方。这个开关把它放回去 —— 刷新后的滚动位置，以及网站写在地址「#」后面的那部分位置（这一项退出应用也留得住）。本身就会保存位置的网站不需要它，开不开都照常工作。"
-          }
-        }
-      }
-    },
-    "A video page is mostly navigation, recommendations and comments. This is the address of the player on its own, so the video fills the wallpaper without cropping or hiding anything.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "视频页面大部分是导航、推荐和评论。这是播放器单独的地址，视频会直接铺满壁纸，不用裁剪也不用隐藏任何东西。"
+            "value": "定时刷新会让页面从头开始，这个开关把它滚动或移动到的位置放回去。"
           }
         }
       }
@@ -259,16 +249,6 @@
         }
       }
     },
-    "Browsing Mode lets you temporarily interact with the website. For example, to log into an account or scroll to a specific position on the website.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "浏览模式让你临时操作网站，比如登录账号，或者把网页滚到某个位置。"
-          }
-        }
-      }
-    },
     "CSS": {
       "localizations": {
         "zh-Hans": {
@@ -329,6 +309,16 @@
         }
       }
     },
+    "Checks once a day, in the background; nothing is ever downloaded or installed for you.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每天在后台检查一次；从不替你下载或安装任何东西。"
+          }
+        }
+      }
+    },
     "Choose": {
       "localizations": {
         "zh-Hans": {
@@ -365,16 +355,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "选择一个含有「index.html」文件的目录。"
-          }
-        }
-      }
-    },
-    "Choose a region with “Choose Region…” in the Nifro menu: the wallpaper becomes something you can move and zoom, and where you leave it is the region. It is remembered as a place and a magnification rather than as a rectangle, so the same website works on a second display of a different shape.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "用 Nifro 菜单里的「选择区域…」来选：壁纸会变成一张可以拖动和缩放的画面，你把它停在哪里，哪里就是区域。它记住的是位置和倍率而不是一个矩形，所以同一个网站换到形状不同的第二块屏幕上一样成立。"
           }
         }
       }
@@ -419,12 +399,12 @@
         }
       }
     },
-    "Clears cookies, local storage, caches, page thumbnails, and what each page had remembered: where it was scrolled or moved to, and how far it was zoomed in. Your websites and their settings are kept.": {
+    "Clears cookies, local storage, caches, thumbnails and each page's remembered position and zoom; your websites and their settings are kept.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "清除 Cookie、本地存储、缓存、页面缩略图，以及每个页面记住的东西：它滚动到或移动到过的位置，以及它被放大到多少。你的网站和它们的设置会保留。"
+            "value": "清除 Cookie、本地存储、缓存、缩略图，以及每个页面记住的位置和缩放；你的网站和它们的设置会保留。"
           }
         }
       }
@@ -469,12 +449,12 @@
         }
       }
     },
-    "Copies this website's settings as text, ready to paste into an issue. Nearly every question about a wallpaper is decided by these, and it saves being asked for them one at a time. The address is included; the CSS and JavaScript are reported by size rather than by content, since a stylesheet can carry something private and this gets pasted in public.": {
+    "Copies this website's settings as text for pasting into an issue, reporting the CSS and JavaScript by size rather than by content.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "把这个网站的设置复制成文本，可以直接粘进 issue。关于壁纸的问题几乎都由这些设置决定，贴上它们就不用被一项项追问。地址会包含在内；CSS 和 JavaScript 只报行数不报内容——样式表里可能有私人信息，而这段文本是要贴到公开地方的。"
+            "value": "把这个网站的设置复制成文本，方便粘进 issue；CSS 和 JavaScript 只报大小，不报内容。"
           }
         }
       }
@@ -495,16 +475,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "无法检查"
-          }
-        }
-      }
-    },
-    "Creates a fake dark mode for websites without a native dark mode by inverting all the colors on the website.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "对没有原生深色模式的网站反转全部颜色，做出一个假的深色模式。"
           }
         }
       }
@@ -639,12 +609,12 @@
         }
       }
     },
-    "Each website can live on its own screen. “Main Display” is not one particular screen: it is whichever one has the menu bar, so it moves when you rearrange your displays in System Settings or dock your laptop.": {
+    "Each website can live on its own screen; “Main Display” is whichever one has the menu bar, so it moves when you rearrange displays or dock your laptop.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "每个网站可以待在自己的屏幕上。「主显示器」不是某一块固定的屏幕：它指当前显示菜单栏的那一块，所以你在「系统设置」里重新排列显示器、或者给笔记本接上扩展坞时，它会跟着换。"
+            "value": "每个网站可以待在自己的屏幕上；「主显示器」指当前显示菜单栏的那一块，重排显示器或接扩展坞时会跟着换。"
           }
         }
       }
@@ -699,22 +669,22 @@
         }
       }
     },
-    "Every website you are signed in to will be signed out. Your websites and their settings are kept.": {
+    "Every website you are signed in to will be signed out, and your websites and their settings are kept.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "所有已登录的网站都会被登出。你的网站和它们的设置会保留。"
+            "value": "所有已登录的网站都会被登出，你的网站和它们的设置会保留。"
           }
         }
       }
     },
-    "Fades the wallpaper back while you work elsewhere, and brings it up again when you click the desktop. A page bright enough to enjoy when you look at it is often too loud behind a document you are reading.": {
+    "Fades the wallpaper back while you work elsewhere, and brings it up again when you click the desktop.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "你在别处工作时让壁纸淡下去，点桌面时再亮回来。一个看着舒服的网页，垫在你正在读的文档后面往往就太吵了。"
+            "value": "你在别处工作时让壁纸淡下去，点桌面时再亮回来。"
           }
         }
       }
@@ -729,22 +699,12 @@
         }
       }
     },
-    "For a website pinned to a particular display. On, it moves to the main display until that one is plugged back in — which is what Nifro has always done, and what macOS does with an ordinary window. Off, it goes away with its display, the way the desktop picture on that screen does. Either way the website keeps the display you chose for it.": {
+    "For websites that do not set their own; one that does, in its own settings, ignores this.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "针对指定了显示器的网站。打开：它会移到主显示器上，直到那台显示器插回来 —— 这是 Nifro 一直以来的行为，也是 macOS 对待普通窗口的方式。关闭：它跟着那台显示器一起消失，就像那块屏幕上的桌面图片一样。两种情况下，网站自己记着的显示器都不会变。"
-          }
-        }
-      }
-    },
-    "For websites that do not set their own. A website with its own schedule — set in its settings — ignores this.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "供没有自己设定的网站使用。设了自己节奏的网站（在该网站的设置里）不受这里影响。"
+            "value": "供没有自己设定的网站使用；在自己设置里设了节奏的网站不受这里影响。"
           }
         }
       }
@@ -759,12 +719,12 @@
         }
       }
     },
-    "Forces the website to use its print styles (“@media print”) if any. Some websites have a simpler presentation for printing, for example, Google Calendar.": {
+    "Forces the website's print styles (“@media print”) if it has any, which are often simpler.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "强制网站使用它的打印样式（「@media print」），如果有的话。有些网站的打印版式更简洁，比如 Google 日历。"
+            "value": "强制使用网站的打印样式（「@media print」），如果有的话——它通常更简洁。"
           }
         }
       }
@@ -879,62 +839,32 @@
         }
       }
     },
-    "How far back the wallpaper sits. Browsing Mode always uses full opacity, whatever this says, because a page you are about to click should not be half transparent.": {
+    "How often a page goes stale is a property of the page; off follows the interval in Settings.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "壁纸退到多后面。浏览模式下始终是完全不透明的，不管这里设成多少——一个你正要去点的页面不该是半透明的。"
+            "value": "一个页面多久过时是页面自己的性质；关闭则跟随「设置」里的间隔。"
           }
         }
       }
     },
-    "How often a page goes stale is a property of the page: a calendar is wrong after fifteen minutes, a poster never is. Off follows the interval in Settings.": {
+    "How see-through the wallpaper is against the desktop behind it; Browsing Mode always draws it fully opaque.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "一个页面多久过时，是页面自己的性质：日历过十五分钟就不对了，海报永远不会。关闭则跟随「设置」里的间隔。"
+            "value": "壁纸相对于背后桌面的透明程度；浏览模式下始终完全不透明。"
           }
         }
       }
     },
-    "How see-through the wallpaper page is against the desktop behind it. Browsing Mode ignores this and always draws the page fully opaque, because a page you are about to click should not be half transparent.": {
+    "If you cannot see the website, hide some windows to reveal the desktop.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "壁纸网页相对于它后面桌面的不透明程度。浏览模式不受此设置影响，网页始终完全不透明——正要点击的页面不该是半透明的。"
-          }
-        }
-      }
-    },
-    "If a website requires login, you should disable this setting while logging in as the website might require you to navigate to a different page, and you don't want that to open in a browser instead of Nifro.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "如果网站需要登录，登录期间应该关掉这个设置：网站可能要求你跳转到别的页面，而你不希望那个页面开在浏览器里而不是 Nifro 里。"
-          }
-        }
-      }
-    },
-    "If you don't currently see the website, you might need to hide some windows to reveal the desktop.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "如果现在看不到网站，可能需要收起一些窗口把桌面露出来。"
-          }
-        }
-      }
-    },
-    "If you need to access the Nifro menu, launch the app again to reveal the menu bar icon for 5 seconds.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "需要用到 Nifro 菜单时，再次启动这个 app，菜单栏图标会出现 5 秒。"
+            "value": "如果看不到网站，收起一些窗口把桌面露出来。"
           }
         }
       }
@@ -989,6 +919,16 @@
         }
       }
     },
+    "Inverts every colour on the website, as a fake dark mode for sites that have none.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "反转网站的全部颜色，给没有深色模式的网站做一个假的。"
+          }
+        }
+      }
+    },
     "Is Current": {
       "localizations": {
         "zh-Hans": {
@@ -1009,12 +949,12 @@
         }
       }
     },
-    "Its custom CSS, JavaScript, region and schedule go with it, and you will be signed out of the site. There is no undo.": {
+    "Its custom CSS, JavaScript, region and schedule go with it, you will be signed out of the site, and there is no undo.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "为它写的自定义 CSS、JavaScript、缩放区域和排期会一起消失，而且你会从这个网站退出登录。无法撤销。"
+            "value": "为它写的自定义 CSS、JavaScript、缩放区域和排期会一起消失，你会从这个网站退出登录，而且无法撤销。"
           }
         }
       }
@@ -1079,6 +1019,16 @@
         }
       }
     },
+    "Launch Nifro again to bring the menu bar icon back for 5 seconds.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "再次启动 Nifro，菜单栏图标会回来 5 秒。"
+          }
+        }
+      }
+    },
     "Launch at login": {
       "localizations": {
         "zh-Hans": {
@@ -1089,22 +1039,32 @@
         }
       }
     },
-    "Lets you use the page without switching to Browsing Mode. The window then stops letting clicks through, so your desktop icons sit behind it, and the page has to keep rendering.": {
+    "Lets you temporarily interact with the website, to log in or scroll to a particular place.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "不用切到浏览模式就能操作网页。代价是窗口不再让点击穿过去，桌面图标会被挡在后面，而且网页必须一直渲染。"
+            "value": "让你临时操作网站，比如登录，或者滚到某个位置。"
           }
         }
       }
     },
-    "Loads the page even though its certificate is not one macOS trusts. For a device on your own network — a router, a NAS, a dashboard on a Raspberry Pi — that is normal and this is the switch for it. On a page from the public internet an untrusted certificate means somebody may be reading or altering what you load, so leave it off there.": {
+    "Lets you use the page without Browsing Mode, at the cost of your desktop icons sitting behind the window and the page having to keep rendering.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "即使证书不被 macOS 信任也照样加载。对你自己网络里的设备——路由器、NAS、树莓派上的仪表盘——这很正常，这个开关就是为它准备的。而对来自公网的页面，证书不受信任意味着可能有人在读或改你加载的内容，那里请保持关闭。"
+            "value": "不用切到浏览模式就能操作网页，代价是桌面图标被挡在窗口后面，而且网页必须一直渲染。"
+          }
+        }
+      }
+    },
+    "Loads the page even though macOS does not trust its certificate — normal for a device on your own network, unsafe for anything from the public internet.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "即使 macOS 不信任它的证书也照样加载——自己网络里的设备很正常，公网上的页面则不安全。"
           }
         }
       }
@@ -1239,12 +1199,12 @@
         }
       }
     },
-    "Nifro is in English until you pick a language here — it does not follow your Mac's language. A language that is only half translated falls back to English rather than showing anything raw.": {
+    "Nifro is in English until you pick a language here, and a half-translated language falls back to English rather than showing anything raw.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "在你从这里选一种语言之前，Nifro 都是英文 —— 它不跟随你 Mac 的语言。翻译不全的语言会退回英文，而不是显示原始标识。"
+            "value": "在你从这里选之前 Nifro 都是英文；翻译不全的语言会退回英文，而不是显示原始标识。"
           }
         }
       }
@@ -1335,16 +1295,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "关闭时它随显示器一起消失，插回去就回来；开启时它移到主显示器顶替那里的网页，直到自己的显示器接回来。"
-          }
-        }
-      }
-    },
-    "Once a day. Nifro mentions a newer version in the menu and nowhere else — it does not interrupt, and it never installs anything.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "每天一次。有新版本时 Nifro 只在菜单里提一句，不打断你，也从不自动安装任何东西。"
           }
         }
       }
@@ -1445,6 +1395,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "密码"
+          }
+        }
+      }
+    },
+    "Paste the address of a raw WebKit content-blocking `.json` file — the content-blocker projects publish them — and Nifro applies it to every website; empty means no rules.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "粘贴一个 WebKit 内容拦截 `.json` 原始文件的地址（内容拦截项目都有发布），Nifro 会把它应用到所有网站；留空表示不用任何规则。"
           }
         }
       }
@@ -1699,12 +1659,12 @@
         }
       }
     },
-    "Reset: every setting, every keyboard shortcut, which display each website is on, and which displays are grouped together.\n\nReinstalled: the websites Nifro comes with, in the order it comes with them.\n\nLost: the websites you added yourself, and every change you made to any website — the region you framed, the CSS and JavaScript you wrote, how often it reloads, and whether it plays sound. There is no undo.\n\nKept: your logins and cookies, so no site asks you to sign in again. The language you picked for Nifro and whether Nifro launches at login are kept too.": {
+    "Reset: every setting, every keyboard shortcut, and which display each website is on.\n\nReinstalled: the websites Nifro comes with, in the order it comes with them.\n\nLost: the websites you added yourself, and every change you made to any website. There is no undo.\n\nKept: your logins, the language you picked, and whether Nifro launches at login.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "重置：所有设置、所有键盘快捷键、每个网站所在的显示器，以及显示器的分组。\n\n重新安装：Nifro 自带的网站，按它自带的顺序。\n\n丢失：你自己添加的网站，以及你对任何网站所做的全部修改——你框选的区域、你写的 CSS 和 JavaScript、重新载入的频率，以及是否播放声音。无法撤销。\n\n保留：你的登录状态和 Cookie，因此不会有网站要求你重新登录。你为 Nifro 选择的语言，以及 Nifro 是否随登录启动，都会保留。"
+            "value": "重置：所有设置、所有键盘快捷键，以及每个网站所在的显示器。\n\n重新安装：Nifro 自带的网站，按它自带的顺序。\n\n丢失：你自己添加的网站，以及你对任何网站所做的全部修改。无法撤销。\n\n保留：你的登录状态、你选的语言，以及 Nifro 是否随登录启动。"
           }
         }
       }
@@ -2089,22 +2049,22 @@
         }
       }
     },
-    "The page is laid out at the size of the wallpaper — your screen without the menu bar strip — so `100vw`, `100vh` and `@media (min-aspect-ratio: 16/9)` all mean that area. A rule written for a 16:10 laptop and a rule written for a 16:9 monitor can live in the same stylesheet; branch on the aspect ratio rather than guessing.\n\nNifro adds two classes to `<html>` you can target: `is-nifro-app`, always, and `nifro-is-browsing-mode` while Browsing Mode is on — useful for showing controls only when the page can be clicked.\n\nZooming into a region is not done with CSS and cannot be seen from CSS. It is the web view's own magnification, and the page is deliberately never told: if the layout changed when you zoomed, the part you framed would stop being the part you get.": {
+    "The address of the player on its own, so the video fills the wallpaper without the navigation, recommendations and comments around it.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "页面是按壁纸的大小排版的——你的屏幕去掉菜单栏那一条——所以 `100vw`、`100vh` 和 `@media (min-aspect-ratio: 16/9)` 指的都是那块区域。为 16:10 笔记本写的规则和为 16:9 显示器写的规则可以放在同一份样式表里，按宽高比分支，不要靠猜。\n\nNifro 会往 `<html>` 上加两个类供你选中：`is-nifro-app` 一直都在，`nifro-is-browsing-mode` 只在浏览模式开着时出现——适合让某些控件只在页面可点时才显示。\n\n放大到某个区域不是用 CSS 做的，CSS 也看不见它。那是 web view 自己的缩放，而且是故意不告诉页面的：如果缩放时布局跟着变，你框出来的那一部分就不再是你拿到的那一部分了。"
+            "value": "播放器单独的地址，视频直接铺满壁纸，没有周围的导航、推荐和评论。"
           }
         }
       }
     },
-    "The site gallery is a list of pages that work well as wallpapers, each with the settings that make it work. Adding one takes a single file, no Swift and no Xcode.": {
+    "The page is laid out at the size of the wallpaper, so `100vw` and `100vh` mean that area, and `<html>` carries `is-nifro-app` always and `nifro-is-browsing-mode` while Browsing Mode is on.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "推荐站点是一份适合当壁纸的网页清单，每条都带着让它好用的那些设置。添加一条只需要一个文件，不用写 Swift，也不用开 Xcode。"
+            "value": "页面按壁纸的大小排版，所以 `100vw`、`100vh` 指的就是那块区域；`<html>` 上一直有 `is-nifro-app`，浏览模式开着时还有 `nifro-is-browsing-mode`。"
           }
         }
       }
@@ -2119,12 +2079,12 @@
         }
       }
     },
-    "This site sends Nifro somewhere else every time it loads: %@. Click to save that address instead.": {
+    "This site sends Nifro to %@ every time it loads. Click to save that address instead.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "这个站点每次加载都会把 Nifro 送到别处：%@。点一下就把那个地址存下来。"
+            "value": "这个站点每次加载都会把 Nifro 送到 %@。点一下就把那个地址存下来。"
           }
         }
       }
@@ -2209,6 +2169,16 @@
         }
       }
     },
+    "Turn this off while logging in to a website, since the login may navigate to a page you want to stay in Nifro.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录网站时先关掉它——登录过程可能跳到别的页面，而你希望那一页留在 Nifro 里。"
+          }
+        }
+      }
+    },
     "URL": {
       "localizations": {
         "zh-Hans": {
@@ -2289,6 +2259,16 @@
         }
       }
     },
+    "Use the panel's Crop button to move and zoom the wallpaper, and where you leave it is the region — remembered as a place and a magnification rather than a rectangle.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "用面板上的 Crop 拖动和缩放壁纸，你停在哪里哪里就是区域——它记住的是位置和倍率，不是一个矩形。"
+          }
+        }
+      }
+    },
     "Use the player-only page": {
       "localizations": {
         "zh-Hans": {
@@ -2299,12 +2279,12 @@
         }
       }
     },
-    "Useful with rotation. A news page in the morning, something calmer at night. A window that runs past midnight, 22 to 6, works.": {
+    "Useful with rotation — a news page in the morning, something calmer at night; a window that runs past midnight, 22 to 6, works.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "配合轮换很好用。早上放新闻，晚上放安静点的。跨过午夜的时段（22 到 6）也可以。"
+            "value": "配合轮换很好用——早上放新闻，晚上放安静点的；跨过午夜的时段（22 到 6）也可以。"
           }
         }
       }
@@ -2369,22 +2349,12 @@
         }
       }
     },
-    "Whether this website is allowed to make noise. Remembered per website, so a clock stays silent and a live stream does not.": {
+    "Whether this website may make noise, remembered per website; it mutes the page's audio and video elements, not sound made with the Web Audio API.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "这个网站能不能出声。按网站分别记住，所以时钟保持安静而直播不会。"
-          }
-        }
-      }
-    },
-    "Whether this website may make noise. Remembered for this website, so a clock stays silent and a live stream does not, and it is the same setting as Sound in the Nifro menu — change it in either place. Muting works by holding every audio and video element on the page muted, so it covers media and not sound a page generates with the Web Audio API.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "这个网站能不能出声。按网站分别记住，所以时钟保持安静而直播不会；它和 Nifro 菜单里的「声音」是同一个设置，在哪边改都行。静音的做法是把页面上每个音频和视频元素保持静音，所以覆盖媒体元素，不覆盖网页用 Web Audio API 生成的声音。"
+            "value": "这个网站能不能出声，按网站分别记住；静音的是页面里的音频和视频元素，不包括用 Web Audio API 生成的声音。"
           }
         }
       }

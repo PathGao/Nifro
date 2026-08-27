@@ -206,7 +206,7 @@ struct AddWebsiteScreen: View {
 					urlString = player.absoluteString
 					website.wrappedValue.url = player
 				}
-				.help("A video page is mostly navigation, recommendations and comments. This is the address of the player on its own, so the video fills the wallpaper without cropping or hiding anything.")
+				.help("The address of the player on its own, so the video fills the wallpaper without the navigation, recommendations and comments around it.")
 			}
 
 			TextField("Title", text: website.title)
@@ -242,11 +242,11 @@ struct AddWebsiteScreen: View {
 				}
 			} label: {
 				Text("Invert colors")
-					.explained(String(localized: "Creates a fake dark mode for websites without a native dark mode by inverting all the colors on the website."))
+					.explained(String(localized: "Inverts every colour on the website, as a fake dark mode for sites that have none."))
 			}
 			Toggle(isOn: website.usePrintStyles) {
 				Text("Use print styles")
-					.explained(String(localized: "Forces the website to use its print styles (“@media print”) if any. Some websites have a simpler presentation for printing, for example, Google Calendar."))
+					.explained(String(localized: "Forces the website's print styles (“@media print”) if it has any, which are often simpler."))
 			}
 			// Its own panel rather than a fold. Both are empty for almost every website, so they should
 			// not be sitting open; and folding them open resizes the dialog, which reads as the window
@@ -271,7 +271,7 @@ struct AddWebsiteScreen: View {
 		Section("Advanced") {
 			Toggle(isOn: website.allowSelfSignedCertificate) {
 				Text("Allow self-signed certificate")
-					.explained(String(localized: "Loads the page even though its certificate is not one macOS trusts. For a device on your own network — a router, a NAS, a dashboard on a Raspberry Pi — that is normal and this is the switch for it. On a page from the public internet an untrusted certificate means somebody may be reading or altering what you load, so leave it off there."))
+					.explained(String(localized: "Loads the page even though macOS does not trust its certificate — normal for a device on your own network, unsafe for anything from the public internet."))
 			}
 
 			// Last, because it copies everything above it. A button that gathers the settings should
@@ -283,7 +283,7 @@ struct AddWebsiteScreen: View {
 				}
 			} label: {
 				Text("Report a problem")
-					.explained(String(localized: "Copies this website's settings as text, ready to paste into an issue. Nearly every question about a wallpaper is decided by these, and it saves being asked for them one at a time. The address is included; the CSS and JavaScript are reported by size rather than by content, since a stylesheet can carry something private and this gets pasted in public."))
+					.explained(String(localized: "Copies this website's settings as text for pasting into an issue, reporting the CSS and JavaScript by size rather than by content."))
 			}
 		}
 	}
@@ -439,20 +439,7 @@ private struct CustomCodeScreen: View {
 	@Binding var css: String
 	@Binding var javaScript: String
 
-	private static let notes = String(localized: """
-		The page is laid out at the size of the wallpaper — your screen without the menu bar strip — so \
-		`100vw`, `100vh` and `@media (min-aspect-ratio: 16/9)` all mean that area. A rule written for a \
-		16:10 laptop and a rule written for a 16:9 monitor can live in the same stylesheet; branch on \
-		the aspect ratio rather than guessing.
-
-		Nifro adds two classes to `<html>` you can target: `is-nifro-app`, always, and \
-		`nifro-is-browsing-mode` while Browsing Mode is on — useful for showing controls only when the \
-		page can be clicked.
-
-		Zooming into a region is not done with CSS and cannot be seen from CSS. It is the web view's \
-		own magnification, and the page is deliberately never told: if the layout changed when you \
-		zoomed, the part you framed would stop being the part you get.
-		""")
+	private static let notes = String(localized: "The page is laid out at the size of the wallpaper, so `100vw` and `100vh` mean that area, and `<html>` carries `is-nifro-app` always and `nifro-is-browsing-mode` while Browsing Mode is on.")
 
 	var body: some View {
 		VStack(alignment: .leading) {

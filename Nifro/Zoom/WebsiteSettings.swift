@@ -26,7 +26,7 @@ struct ZoomSetting: View {
 			}
 		} label: {
 			Text("Region")
-				.explained(String(localized: "Choose a region with “Choose Region…” in the Nifro menu: the wallpaper becomes something you can move and zoom, and where you leave it is the region. It is remembered as a place and a magnification rather than as a rectangle, so the same website works on a second display of a different shape."))
+				.explained(String(localized: "Use the panel's Crop button to move and zoom the wallpaper, and where you leave it is the region — remembered as a place and a magnification rather than a rectangle."))
 		}
 	}
 
@@ -68,7 +68,7 @@ struct WebsiteDisplaySetting: View {
 				}
 			} label: {
 				Text("Show on")
-					.explained(String(localized: "Each website can live on its own screen. “Main Display” is not one particular screen: it is whichever one has the menu bar, so it moves when you rearrange your displays in System Settings or dock your laptop."))
+					.explained(String(localized: "Each website can live on its own screen; “Main Display” is whichever one has the menu bar, so it moves when you rearrange displays or dock your laptop."))
 			}
 		}
 	}
@@ -96,7 +96,7 @@ struct WebsiteScheduleSetting: View {
 	var body: some View {
 		Toggle(isOn: isEnabled) {
 			Text("Only show at certain hours")
-				.explained(String(localized: "Useful with rotation. A news page in the morning, something calmer at night. A window that runs past midnight, 22 to 6, works."))
+				.explained(String(localized: "Useful with rotation — a news page in the morning, something calmer at night; a window that runs past midnight, 22 to 6, works."))
 		}
 
 		if startHour != nil, endHour != nil {
@@ -126,7 +126,7 @@ struct WebsiteInteractionSetting: View {
 	var body: some View {
 		Toggle(isOn: $allowsInteraction) {
 			Text("Clickable on the desktop")
-				.explained(String(localized: "Lets you use the page without switching to Browsing Mode. The window then stops letting clicks through, so your desktop icons sit behind it, and the page has to keep rendering."))
+				.explained(String(localized: "Lets you use the page without Browsing Mode, at the cost of your desktop icons sitting behind the window and the page having to keep rendering."))
 		}
 	}
 }
@@ -144,7 +144,7 @@ struct WebsiteAudioSetting: View {
 			}
 		} label: {
 			Text("Audio")
-				.explained(String(localized: "Whether this website may make noise. Remembered for this website, so a clock stays silent and a live stream does not, and it is the same setting as Sound in the Nifro menu — change it in either place. Muting works by holding every audio and video element on the page muted, so it covers media and not sound a page generates with the Web Audio API."))
+				.explained(String(localized: "Whether this website may make noise, remembered per website; it mutes the page's audio and video elements, not sound made with the Web Audio API."))
 		}
 	}
 }
@@ -171,7 +171,7 @@ struct WebsiteReloadSetting: View {
 	var body: some View {
 		Toggle(isOn: isOverriding) {
 			Text("Reload on its own schedule")
-				.explained(String(localized: "How often a page goes stale is a property of the page: a calendar is wrong after fifteen minutes, a poster never is. Off follows the interval in Settings."))
+				.explained(String(localized: "How often a page goes stale is a property of the page; off follows the interval in Settings."))
 		}
 
 		if reloadInterval != nil {

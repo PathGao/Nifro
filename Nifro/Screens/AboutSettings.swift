@@ -41,7 +41,7 @@ struct AboutSection: View {
 				}
 				.padding(.vertical, 4)
 			} footer: {
-				Text("The site gallery is a list of pages that work well as wallpapers, each with the settings that make it work. Adding one takes a single file, no Swift and no Xcode.")
+				Text("A list of pages that work well as wallpapers, each with the settings that make it work; adding one takes a single file.")
 					.foregroundStyle(.secondary)
 			}
 

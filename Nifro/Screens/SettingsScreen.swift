@@ -80,7 +80,7 @@ private struct BehaviorSettings: View {
 				ReloadIntervalSetting()
 				Defaults.Toggle(key: .restoreScrollPosition) {
 					Text("Restore the page position after a reload")
-						.explained(String(localized: "A page that reloads on a timer starts over: a long page goes back to the top, and a map or a drawing goes back to wherever it opens. This puts it back — the scroll position after a reload, and the part of the page a site names after the “#” in its address, which also survives quitting. A site that saves its own position needs none of this and keeps working either way."))
+						.explained(String(localized: "A page that reloads on a timer starts over; this puts back where it was scrolled or moved to."))
 				}
 				Defaults.Toggle(String(localized: "Reload the page when the Mac wakes"), key: .reloadOnWake)
 			}
@@ -115,7 +115,7 @@ private struct UpdateSetting: View {
 	var body: some View {
 		Defaults.Toggle(key: .checksForUpdatesAutomatically) {
 			Text("Check for updates automatically")
-				.explained(String(localized: "Once a day. Nifro mentions a newer version in the menu and nowhere else — it does not interrupt, and it never installs anything."))
+				.explained(String(localized: "Checks once a day, in the background; nothing is ever downloaded or installed for you."))
 		}
 
 		LabeledContent {
@@ -192,7 +192,7 @@ private struct LanguageSetting: View {
 			}
 		} label: {
 			Text("Language")
-				.explained(String(localized: "Nifro is in English until you pick a language here — it does not follow your Mac's language. A language that is only half translated falls back to English rather than showing anything raw."))
+				.explained(String(localized: "Nifro is in English until you pick a language here, and a half-translated language falls back to English rather than showing anything raw."))
 		}
 		.onChange(of: language) { previous, new in
 			guard previous != new else {
@@ -292,18 +292,7 @@ private struct ContentRulesSetting: View {
 				.labelsHidden()
 		} label: {
 			Text("Content blocking rules")
-				.explained(String(localized: """
-					A WebKit content-blocking rule list, for hiding cookie banners and ads. Paste the address of a \
-					`.json` file and Nifro compiles it once and applies it to every website.
-
-					Nifro keeps no rules of its own: a blocklist goes stale within weeks, and keeping one working \
-					is a full-time job somebody else is already doing. Lists in WebKit's format are published by \
-					the content-blocker projects — the one your Safari extension uses can usually be exported, \
-					and several are on GitHub as a single raw `.json` file. The address has to be the raw file, \
-					not the page it is displayed on.
-
-					Leave it empty for no rules at all.
-					"""))
+				.explained(String(localized: "Paste the address of a raw WebKit content-blocking `.json` file — the content-blocker projects publish them — and Nifro applies it to every website; empty means no rules."))
 		}
 	}
 }
@@ -315,7 +304,7 @@ private struct DimWhenUnfocusedSetting: View {
 	var body: some View {
 		Defaults.Toggle(key: .dimWhenUnfocused) {
 			Text("Dim while another app is in front")
-				.explained(String(localized: "Fades the wallpaper back while you work elsewhere, and brings it up again when you click the desktop. A page bright enough to enjoy when you look at it is often too loud behind a document you are reading."))
+				.explained(String(localized: "Fades the wallpaper back while you work elsewhere, and brings it up again when you click the desktop."))
 		}
 
 		if isEnabled {
@@ -353,7 +342,7 @@ private struct OpenExternalLinksInBrowserSetting: View {
 	var body: some View {
 		Defaults.Toggle(key: .openExternalLinksInBrowser) {
 			Text("Open external links in default browser")
-				.explained(String(localized: "If a website requires login, you should disable this setting while logging in as the website might require you to navigate to a different page, and you don't want that to open in a browser instead of Nifro."))
+				.explained(String(localized: "Turn this off while logging in to a website, since the login may navigate to a page you want to stay in Nifro."))
   }
 	}
 }
@@ -368,7 +357,7 @@ private struct OpacitySetting: View {
 			step: 0.1
 		) {
 			Text("Page opacity")
-				.explained(String(localized: "How see-through the wallpaper page is against the desktop behind it. Browsing Mode ignores this and always draws the page fully opaque, because a page you are about to click should not be half transparent."))
+				.explained(String(localized: "How see-through the wallpaper is against the desktop behind it; Browsing Mode always draws it fully opaque."))
 		}
 	}
 }
@@ -391,7 +380,7 @@ private struct ReloadIntervalSetting: View {
 				.toggleStyle(.switch)
 		} label: {
 			Text("Page reload interval")
-				.explained(String(localized: "For websites that do not set their own. A website with its own schedule — set in its settings — ignores this."))
+				.explained(String(localized: "For websites that do not set their own; one that does, in its own settings, ignores this."))
 		}
 		.accessibilityLabel("Reload interval")
 		.contentShape(.rect)
@@ -407,7 +396,7 @@ private struct HideMenuBarIconSetting: View {
 				isShowingAlert = $0
 			}
 			.alert2(
-				String(localized: "If you need to access the Nifro menu, launch the app again to reveal the menu bar icon for 5 seconds."),
+				String(localized: "Launch Nifro again to bring the menu bar icon back for 5 seconds."),
 				isPresented: $isShowingAlert
 			)
 	}

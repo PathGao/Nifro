@@ -87,8 +87,8 @@ enum Action: String, CaseIterable {
 			SSApp.runOnce(identifier: "activatedBrowsingMode") {
 				DispatchQueue.main.async {
 					NSAlert.showModal(
-						title: String(localized: "Browsing Mode lets you temporarily interact with the website. For example, to log into an account or scroll to a specific position on the website."),
-						message: String(localized: "If you don't currently see the website, you might need to hide some windows to reveal the desktop.")
+						title: String(localized: "Lets you temporarily interact with the website, to log in or scroll to a particular place."),
+						message: String(localized: "If you cannot see the website, hide some windows to reveal the desktop.")
 					)
 				}
 			}
