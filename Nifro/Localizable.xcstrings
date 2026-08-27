@@ -569,6 +569,16 @@
         }
       }
     },
+    "Delete %@?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除「%@」？"
+          }
+        }
+      }
+    },
     "Dim while another app is in front": {
       "localizations": {
         "zh-Hans": {
@@ -1005,6 +1015,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "已启用"
+          }
+        }
+      }
+    },
+    "Its custom CSS, JavaScript, region and schedule go with it, and you will be signed out of the site. There is no undo.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "为它写的自定义 CSS、JavaScript、缩放区域和排期会一起消失，而且你会从这个网站退出登录。无法撤销。"
           }
         }
       }

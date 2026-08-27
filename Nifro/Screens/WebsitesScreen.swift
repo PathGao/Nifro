@@ -259,6 +259,8 @@ private struct RowView: View {
 	@Binding var website: Website
 	@Binding var selection: Website.ID?
 
+	@State private var isConfirmingDelete = false
+
 	var body: some View {
 		HStack {
 			IconView(website: website)
@@ -313,8 +315,29 @@ private struct RowView: View {
 			}
 			Divider()
 			Button("Delete", role: .destructive) {
+				isConfirmingDelete = true
+			}
+		}
+		// The same consequence the Clear Data button asks about, reached from a one-click menu item
+		// thirty lines away that asked about nothing. Deleting a website drops it out of the set
+		// `removeOrphanedStores` keeps, so its cookies go with it on the next sweep — signing you out
+		// of that site — along with the CSS, JavaScript, region and schedule you wrote for it.
+		//
+		// Mac apps do not normally confirm a Delete in a list, and that is the right convention: they
+		// have Undo. This one does not, and the removal is a write to the stored list rather than
+		// anything a Cmd-Z could reach, so the convention's precondition is missing and the dialog is
+		// what stands in for it. Named in the button rather than "OK", like Clear Data.
+		.confirmationDialog(
+			String(localized: "Delete \(website.menuTitle)?"),
+			isPresented: $isConfirmingDelete
+		) {
+			Button(String(localized: "Delete"), role: .destructive) {
 				website.remove()
 			}
+
+			Button(String(localized: "Cancel"), role: .cancel) {}
+		} message: {
+			Text("Its custom CSS, JavaScript, region and schedule go with it, and you will be signed out of the site. There is no undo.")
 		}
 		.accessibilityElement(children: .combine)
 		.accessibilityAddTraits(.isButton)
