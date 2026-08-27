@@ -30,6 +30,26 @@ final class WebsitesController {
 
 	private let allBinding = Defaults.bindingCollection(for: .websites)
 
+	/**
+	The normalized addresses of the websites that still have no title.
+
+	`recordObservedTitle` runs on every `document.title` a live page writes, and reading `all` there is
+	a JSON decode of the whole website list followed by a `URLComponents` parse per entry — all of it
+	ahead of the guard that makes the call a no-op. A page with a clock, an unread count or a track
+	name in its title rewrites it once a second for as long as the wallpaper is up, and every one of
+	those was paying for the whole table.
+
+	Kept here rather than worked out per call because it is derived from the list, and the list already
+	has one place where every route to it meets: the publisher below. Nothing else may write this, and
+	nothing else needs to — `Defaults.publisher` sees writes through `all`, through `allBinding` and
+	through any settings screen that reaches the key directly, which is why the current-mark repair in
+	the same closure can also be the only one of its kind.
+
+	Subscribed with `ObservationOptions.initial`, which is `Defaults.publisher`'s default, so this is
+	filled from the stored list before `init` returns rather than at the first edit.
+	*/
+	private var addressesAwaitingTitle = Set<URL>()
+
 	private init() {
 		setUpEvents()
 		thumbnailCache.prewarmCacheFromDisk(for: all.map(\.thumbnailCacheKey))
@@ -41,6 +61,12 @@ final class WebsitesController {
 				guard let self else {
 					return
 				}
+
+				addressesAwaitingTitle = Set(
+					change.newValue.lazy
+						.filter(\.title.isEmpty)
+						.map { $0.url.normalized() }
+				)
 
 				// Every display keeps exactly one marked website, not the list as a whole — both
 				// halves of that, which is what changed here. A display with none is what `advance`
@@ -230,10 +256,21 @@ final class WebsitesController {
 	Record a title observed in the live web view, if we do not already have one.
 
 	`LPMetadataProvider` fetches the raw HTML with subresources turned off and gives up after a few seconds. It comes back empty for anything that sets its title from JavaScript or loads slowly, which covers a lot of the sites people use as wallpapers. The web view has already run the page, so its title is more accurate and costs nothing.
+
+	Called once per navigation from `didFinish`, and again on every title the page writes afterwards —
+	which is why `addressesAwaitingTitle` is asked first. It is an index over the last guard below
+	rather than a replacement for it: a wrong answer from it can only cost a title that was going to be
+	filled in, never write one over a title the user already has.
+
+	Keyed on "some website is still without a title" and not on "this has run once", because the case
+	worth keeping is exactly the one that arrives late: a single-page app loads with an empty or
+	placeholder title and sets the real one from script seconds afterwards, and a latch would have
+	closed before it got there.
 	*/
 	func recordObservedTitle(_ title: String, for url: URL?) {
 		guard
 			let url,
+			addressesAwaitingTitle.contains(url.normalized()),
 			let title = title.trimmed.nilIfEmpty,
 			let index = all.firstIndex(where: { $0.url.normalized() == url.normalized() }),
 			all[index].title.isEmpty
