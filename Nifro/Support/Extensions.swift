@@ -4,7 +4,6 @@ import SwiftUI
 import Combine
 import CryptoKit
 import UniformTypeIdentifiers
-import os
 import Defaults
 
 typealias Defaults = _Defaults

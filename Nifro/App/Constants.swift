@@ -1,5 +1,4 @@
 import SwiftUI
-import KeyboardShortcuts
 
 enum Constants {
 	static let repositoryURL = URL("https://github.com/PathGao/Nifro")
