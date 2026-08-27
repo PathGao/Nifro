@@ -152,3 +152,35 @@ func repairedCurrentFlags<Screen: Hashable>(
 
 	return repaired
 }
+
+
+/**
+Which of a display's websites is the one actually on screen.
+
+A display shows one page, and until now the answer was "the first marked one in list order", which is
+fine while every mark belongs to the display it is on. Unplugging a screen breaks that: a website
+pinned to the departed display moves to the main one and arrives still carrying the mark it held over
+there, so the main display has two, and list order — the order the websites happen to have been added
+in — decided which of them the user ended up looking at.
+
+`isEvicted[i]` is whether website `i` is only on this display because its own was unplugged. Those
+come first, which is the whole rule: the arriving wallpaper takes the screen. It is the same
+tie-break `repairedCurrentFlags` makes for a website the user moves by hand — an arrival is the more
+recent statement about what this screen should show — and it is stated separately because it is
+resolved at a different time. A move rewrites the stored list, so the mark can be repaired there. An
+unplug writes nothing, and must not: the mark is what the departed display goes back to when it is
+plugged in again, and a cable being pulled out is not somebody choosing a different wallpaper.
+
+`nil` when there is nothing to show, which is a display with no websites on it.
+*/
+func showingIndex(isCurrent: [Bool], isEvicted: [Bool]) -> Int? {
+	guard isCurrent.count == isEvicted.count else {
+		return isCurrent.firstIndex(of: true) ?? (isCurrent.isEmpty ? nil : 0)
+	}
+
+	let order = isEvicted.indices.filter { isEvicted[$0] } + isEvicted.indices.filter { !isEvicted[$0] }
+
+	// No mark at all is a display that has never been started, and the top of its list is where
+	// `advance` counts from too.
+	return order.first { isCurrent[$0] } ?? order.first
+}

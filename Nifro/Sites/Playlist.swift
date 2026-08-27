@@ -61,7 +61,12 @@ extension WebsitesController {
 	*/
 	func scheduled(for display: Display?, at date: Date = .now) -> Website? {
 		let candidates = eligible(for: display, at: date)
-		return candidates.first(where: \.isCurrent) ?? candidates.first
+
+		return showingIndex(
+			isCurrent: candidates.map(\.isCurrent),
+			isEvicted: candidates.map(\.isEvicted)
+		)
+		.map { candidates[$0] }
 	}
 
 	/**
