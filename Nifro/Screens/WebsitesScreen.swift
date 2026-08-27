@@ -3,7 +3,6 @@ import WebKit
 
 struct WebsitesScreen: View {
 	@Default(.websites) private var websites
-//	@State private var selection: Website.ID? // We need two states as selection must be independent from actually opening the editing because of keyboard navigation and accessibility.
 	@State private var editedWebsite: Website.ID?
 	@State private var isAddWebsiteDialogPresented = false
 	@State private var searchText = ""
@@ -44,18 +43,6 @@ struct WebsitesScreen: View {
 				)
 			}
 			.id(websites) // Workaround for the row not updating when changing the current active website. It's placed here and not on the row to prevent another issue where adding a new website makes it scroll outside the view. (macOS 15.3)
-//			.onKeyboardShortcut(.defaultAction) {
-//				editedWebsite = selection
-//			}
-			.onChange(of: websites) { oldWebsites, websites in
-				// Check that a website was added.
-				guard websites.count > oldWebsites.count else {
-					return
-				}
-
-				withAnimation {
-				}
-			}
 			.overlay {
 				if websites.isEmpty {
 					Text("No Websites")
@@ -83,9 +70,6 @@ struct WebsitesScreen: View {
 			}
 		}
 		.frame(width: 480, height: 500)
-//		.onChange(of: editedWebsite) {
-//			selection = $0
-//		}
 		.sheet(item: $editedWebsite) {
 			AddWebsiteScreen(
 				isEditing: true,
@@ -106,8 +90,6 @@ struct WebsitesScreen: View {
 				isAddWebsiteDialogPresented = true
 			}
 			.keyboardShortcut("+")
-		}
-		.onAppear {
 		}
 		.windowMinimizeBehavior(.disabled)
 		.windowLevel(.floating)

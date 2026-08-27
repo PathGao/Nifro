@@ -172,7 +172,7 @@ D7 原本在这一节，但它不属于这里：它是有明确修法的缺陷�
 | **W6** | 从名字进入「编辑这个网站」 | 面板上的名字那一行不是按钮。**那条半死的路径是删掉了，不是继续摆着：**`.showEditWebsiteDialog` 和它的观察者都已删除——观察者打开的是 `AppState.currentWebsite`，也就是无论请求从哪块屏幕来都取主显示器的网站，于是把它重新接到面板上，只会在用户盯着外接显示器时打开笔记本上的那个网站。要接上这条线，需要的是一条按显示器的路径，而不是把这个通知重新声明一遍 |
 | **W7** | 把网站挪到另一台显示器 | 只在网站编辑弹窗里。加上 K17，从面板出发没有任何路径能把网站放到某台显示器上 |
 | **W8** | 快捷键的可发现性 | `setShortcut(for:)` 没了；面板按钮只有 `.help()` 文案。`Shortcuts.swift:8,15-16` 还在论证「之所以配了默认快捷键，是为了让菜单能显示它们」 |
-| **W9** | 菜单留下的脚手架 | `SSMenu` 已删除。`CallbackMenuItem.validateCallback` 从未被赋值，所以 `validateMenuItem` 恒为 `true`；`WebsitesScreen` 里有一个 body 是空 `withAnimation` 的 `.onChange` 和一个空的 `.onAppear` |
+| **W9** | 菜单留下的脚手架 | `SSMenu`、以及 `WebsitesScreen` 里那个空的 `.onChange` 和空的 `.onAppear` 都已删除。剩下的是 `CallbackMenuItem.validateCallback`：从未被赋值，所以 `validateMenuItem` 恒为 `true` |
 
 W1 和 W3 是让 app 从面板上看起来最不完整的两个；W5 丢的是功能本身，不只是入口。
 
