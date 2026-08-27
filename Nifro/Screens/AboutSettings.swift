@@ -64,7 +64,7 @@ struct AboutSection: View {
 
 			Section {
 				Text("Nifro is open source under the MIT licence.")
-				Text("Inspired by [Plash](https://github.com/sindresorhus/Plash) by Sindre Sorhus. Plash is still developed and still on the App Store; Nifro is a separate project and uses none of its branding or artwork.")
+				Text("Inspired by [Plash](https://github.com/sindresorhus/Plash) by Sindre Sorhus.")
 					.font(.callout)
 					.foregroundStyle(.secondary)
 			}

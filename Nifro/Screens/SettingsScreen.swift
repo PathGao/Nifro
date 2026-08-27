@@ -266,13 +266,18 @@ somebody could be reaching for — the workspace rule is that one slip must not 
 "delete", and a destructive control is only as safe as its nearest neighbour. Everything above it
 changes a setting that can be changed back.
 
-The ellipsis is the promise that it asks first. What it asks is in `RestoreDefaults`, spelled out
-there and not repeated here: a second copy of those four lists in this pane would be a second copy to
-keep in step, and the one the user actually reads is the one in the dialog.
+No ellipsis, though it does ask first and the convention says one belongs here. Read as a sentence
+rather than as punctuation, "Restore All Settings…" trails off in a way that reads as hesitation from
+the one control that should not sound hesitant. It says the same thing as the button in its own
+dialog, which is what somebody comparing the two reads for.
+
+What it asks is in `RestoreDefaults`, spelled out there and not repeated here: a second copy of those
+four lists in this pane would be a second copy to keep in step, and the one the user actually reads
+is the one in the dialog.
 */
 private struct RestoreDefaultsSetting: View {
 	var body: some View {
-		Button("Restore All Settings…", role: .destructive) {
+		Button("Restore All Settings", role: .destructive) {
 			RestoreDefaults.confirmAndRun()
 		}
 	}
