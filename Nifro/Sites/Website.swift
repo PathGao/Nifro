@@ -1,9 +1,9 @@
 import Foundation
 
 struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable {
-	// `var` for one reason: syncing copies a website's contents onto another display's entry, and that
-	// entry has to keep the id it already had — its data store, its thumbnail and its remembered scroll
-	// position are all filed under it. Nothing else assigns this.
+	// `var` only because the whole struct is decoded and re-encoded as one; nothing assigns this after
+	// the entry is made. The id is what a website's data store, its thumbnail and its remembered
+	// scroll position are all filed under, so changing one would orphan all three.
 	var id: UUID
 	var isCurrent: Bool
 	var url: URL

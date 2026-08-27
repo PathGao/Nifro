@@ -499,30 +499,6 @@ final class WallpaperScene {
 	}
 
 	/**
-	Where this display's video is, if it has one.
-	*/
-	func mediaClock() async -> (time: Double, duration: Double)? {
-		// Asked of the live web view every time. Swap loading replaces it, and a held reference would
-		// go on talking to the page that left.
-		await webViewController.webView.mediaClock()
-	}
-
-	/**
-	Tell this display's page which wall-clock moment its video was at zero, or `nil` when it is in no
-	group.
-	*/
-	func setMediaEpoch(_ epoch: Double?) {
-		webViewController.webView.setMediaEpoch(epoch)
-	}
-
-	/**
-	Where somebody dragged this display's video to since this was last asked, if they did.
-	*/
-	func scrubbedPosition() async -> Double? {
-		await webViewController.webView.scrubbedPosition()
-	}
-
-	/**
 	How wide the panel draws a preview. Snapshots are taken at this size rather than the display's.
 	*/
 	static let previewWidth = 260
