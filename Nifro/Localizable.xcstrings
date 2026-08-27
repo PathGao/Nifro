@@ -1839,6 +1839,16 @@
         }
       }
     },
+    "Shortcuts act on the display the pointer is on.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "快捷键作用于鼠标位置所在显示器。"
+          }
+        }
+      }
+    },
     "Show Menu Bar Icon": {
       "localizations": {
         "zh-Hans": {
@@ -2075,16 +2085,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "壁纸会自己回来。"
-          }
-        }
-      }
-    },
-    "These act on the display your pointer is on. Automations and nifro:// commands act on the main display, since they can run with nobody at the Mac.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "这些作用于鼠标所在的那块显示器。自动化和 nifro:// 命令作用于主显示器，因为它们可能在没人用电脑的时候运行。"
           }
         }
       }
