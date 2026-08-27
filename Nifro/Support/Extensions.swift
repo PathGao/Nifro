@@ -2272,7 +2272,9 @@ extension WKWebView {
 
 		// Injected at document start, so the style element gets appended to a document the page has not finished building. Frameworks that swap out `documentElement` or clear `head` on mount take our style with them, and the user's CSS stops applying. People report this as "my CSS works in Safari but not here".
 		//
-		// Re-appending on mutation is the fix. The observer is cheap because it only watches childList on the root, and re-appending the same element is a move, not a duplicate.
+		// Re-appending on mutation is the fix, and re-appending the same element is a move rather than a duplicate.
+		//
+		// `childList` on `document` and on `documentElement`, and no `subtree`. Those are the only two parents the style can go missing from, because the only place it is ever put is `head ?? documentElement`. Watching the whole document instead — which is what this did, while the line above claimed otherwise — means every node inserted or removed anywhere on the page wakes the callback, once for each stylesheet injected and once per frame, for as long as the wallpaper is up. A page with a live feed on it pays that continuously to answer a question about two nodes.
 		return
 			"""
 			(() => {
@@ -2280,20 +2282,28 @@ extension WKWebView {
 				style.textContent = decodeURIComponent('\(textContent)');
 				style.dataset.nifroInjected = 'css';
 
+				let observer;
+
 				const attach = () => {
 					const root = document.head ?? document.documentElement;
 
 					if (root && style.parentNode !== root) {
 						root.appendChild(style);
 					}
+
+					// Re-armed on every attach rather than armed once: a framework that replaces
+					// `documentElement` leaves the old registration watching a node that is no longer
+					// in the document. Observing a node that is already observed replaces its options
+					// instead of adding a second registration, so this does not accumulate.
+					if (document.documentElement) {
+						observer.observe(document.documentElement, { childList: true });
+					}
 				};
 
-				attach();
+				observer = new MutationObserver(attach);
+				observer.observe(document, { childList: true });
 
-				new MutationObserver(attach).observe(document, {
-					childList: true,
-					subtree: true
-				});
+				attach();
 			})();
 			"""
 	}
