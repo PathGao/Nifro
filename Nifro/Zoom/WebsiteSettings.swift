@@ -16,7 +16,7 @@ struct ZoomSetting: View {
 	var body: some View {
 		LabeledContent {
 			HStack {
-				Text(summary)
+				Text(zoom.summaryText)
 					.foregroundStyle(.secondary)
 				if zoom != nil {
 					Button(String(localized: "Show Whole Page")) {
@@ -28,18 +28,6 @@ struct ZoomSetting: View {
 			Text("Region")
 				.explained(String(localized: "Use the panel's Crop button to move and zoom the wallpaper, and where you leave it is the region — remembered as a place and a magnification rather than a rectangle."))
 		}
-	}
-
-	private var summary: String {
-		guard let zoom else {
-			return String(localized: "Whole page")
-		}
-
-		let scale = zoom.scale.formatted(.number.precision(.fractionLength(1)))
-		let across = Int((zoom.center.x * 100).rounded())
-		let down = Int((zoom.center.y * 100).rounded())
-
-		return String(localized: "\(scale)× at \(across)%, \(down)%")
 	}
 }
 
