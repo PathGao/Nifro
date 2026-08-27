@@ -75,7 +75,6 @@ final class DisplayPanelModel: ObservableObject {
 		}
 
 		columns = built
-
 	}
 
 	/**
