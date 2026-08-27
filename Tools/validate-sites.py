@@ -27,6 +27,8 @@ def main() -> int:
         return 1
 
     failures = 0
+    ranks: dict[int, list[str]] = {}
+
     for path in entries:
         name = path.relative_to(ROOT)
 
@@ -45,6 +47,18 @@ def main() -> int:
         for error in sorted(validator.iter_errors(data), key=lambda e: list(e.path)):
             where = ".".join(str(part) for part in error.path) or "(top level)"
             print(f"{name}: {where}: {error.message}", file=sys.stderr)
+            failures += 1
+
+        rank = data.get("featured")
+        if isinstance(rank, int) and not isinstance(rank, bool):
+            ranks.setdefault(rank, []).append(str(name))
+
+    # The one thing the schema cannot see, because it validates one file at a time. Two entries
+    # claiming the same position leave the shipped order to whatever the sort happens to do with a
+    # tie, and the first entry is the wallpaper somebody sees before they have chosen anything.
+    for rank, holders in sorted(ranks.items()):
+        if len(holders) > 1:
+            print(f"featured: {rank} is claimed by {', '.join(holders)} — ranks must be unique", file=sys.stderr)
             failures += 1
 
     print(f"checked {len(entries)} site entries, {failures} problem(s)")

@@ -739,16 +739,6 @@
         }
       }
     },
-    "Follow the system": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "跟随系统"
-          }
-        }
-      }
-    },
     "For a website pinned to a particular display. On, it moves to the main display until that one is plugged back in — which is what Nifro has always done, and what macOS does with an ordinary window. Off, it goes away with its display, the way the desktop picture on that screen does. Either way the website keeps the display you chose for it.": {
       "localizations": {
         "zh-Hans": {
@@ -1219,12 +1209,12 @@
         }
       }
     },
-    "Nifro follows your Mac's language unless you pick one here. A language that is only half translated falls back to English rather than showing anything raw.": {
+    "Nifro is in English until you pick a language here — it does not follow your Mac's language. A language that is only half translated falls back to English rather than showing anything raw.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nifro 默认跟随你 Mac 的语言，除非你在这里选一个。翻译不全的语言会退回英文，而不是显示原始标识。"
+            "value": "在你从这里选一种语言之前，Nifro 都是英文 —— 它不跟随你 Mac 的语言。翻译不全的语言会退回英文，而不是显示原始标识。"
           }
         }
       }
@@ -1685,6 +1675,46 @@
           "stringUnit": {
             "state": "translated",
             "value": "报告问题"
+          }
+        }
+      }
+    },
+    "Reset: every setting, every keyboard shortcut, which display each website is on, and which displays are grouped together.\n\nReinstalled: the websites Nifro comes with, in the order it comes with them.\n\nLost: the websites you added yourself, and every change you made to any website — the region you framed, the CSS and JavaScript you wrote, how often it reloads, and whether it plays sound. There is no undo.\n\nKept: your logins and cookies, so no site asks you to sign in again. The language you picked for Nifro and whether Nifro launches at login are kept too.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重置：所有设置、所有键盘快捷键、每个网站所在的显示器，以及显示器的分组。\n\n重新安装：Nifro 自带的网站，按它自带的顺序。\n\n丢失：你自己添加的网站，以及你对任何网站所做的全部修改——你框选的区域、你写的 CSS 和 JavaScript、重新载入的频率，以及是否播放声音。无法撤销。\n\n保留：你的登录状态和 Cookie，因此不会有网站要求你重新登录。你为 Nifro 选择的语言，以及 Nifro 是否随登录启动，都会保留。"
+          }
+        }
+      }
+    },
+    "Restore Everything": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部恢复"
+          }
+        }
+      }
+    },
+    "Restore Everything…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全部恢复…"
+          }
+        }
+      }
+    },
+    "Restore Nifro to how it shipped?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "将 Nifro 恢复到出厂时的状态？"
           }
         }
       }

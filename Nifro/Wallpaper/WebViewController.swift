@@ -302,9 +302,8 @@ extension WebViewController: WKNavigationDelegate {
 		recordTitleIfNeeded(from: webView)
 
 		// The page is here, so this is the moment it goes on screen — not a fixed delay after asking for
-		// it. `revealPage` refreshes the band itself, and does nothing if the page is already up.
-		scene?.revealPage()
-		scene?.refreshMenuBarBandColor()
+		// it.
+		pageDidSettle(webView)
 		scene?.restorePageState(in: webView)
 
 		internalOnLoaded(nil)
@@ -320,11 +319,43 @@ extension WebViewController: WKNavigationDelegate {
 	}
 
 	func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+		pageDidSettle(webView)
 		internalOnLoaded(error)
 	}
 
 	func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+		pageDidSettle(webView)
 		internalOnLoaded(error)
+	}
+
+	/**
+	This scene's live page has stopped loading, whichever way it went, so it goes on screen.
+
+	Two decisions that each used to sit at one call site now meet here.
+
+	Which web view. The live page and a replacement loading out of sight both report through this one
+	delegate, and the reveal was taken from either of them. Measured on a cold launch: the
+	replacement finished first and unhid the live web view, which was still loading — so the
+	wallpaper went up half-painted, and the page that had actually finished only reached the screen
+	seconds later. A replacement gets there through `adopt`, which reveals and re-samples on its own;
+	nothing about one should touch what is on screen before then.
+
+	Which outcome. A load that fails leaves the desktop showing nothing for exactly as long as one
+	that hangs, and only the backstop timer ever put that right — thirty seconds now, with the panel
+	reporting the display as loading for all of it. A page that has stopped loading is as finished as
+	it is going to get, so it is shown.
+
+	The band is re-sampled beside the reveal rather than left to it: `revealPage` refreshes the band,
+	but it does nothing at all once the page is up, and a reload is a page that is already up with
+	new content on it.
+	*/
+	private func pageDidSettle(_ webView: WKWebView) {
+		guard webView === self.webView else {
+			return
+		}
+
+		scene?.revealPage()
+		scene?.refreshMenuBarBandColor()
 	}
 
 	func webView(_ webView: WKWebView, respondTo challenge: URLAuthenticationChallenge) async -> (URLSession.AuthChallengeDisposition, URLCredential?) {

@@ -58,6 +58,22 @@ final class CropSelectionView: NSView {
 
 	override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 
+	/**
+	Take the keyboard, every time this view is put into a window rather than once when it is installed.
+
+	This sits inside the wallpaper window's content view, and that slot is rewritten by every load,
+	every reload and every edit to the website list — `installContentView` runs from all of them, and
+	the page under the frame goes on loading for the whole time the mode is up. Rewriting it pulls this
+	view out of the window and puts it back, and AppKit hands the keyboard back to the window when the
+	first responder leaves the view hierarchy. Drawing and dragging survived that, because neither
+	needs the keyboard, which is why the frame went on moving under the mouse while Return and Escape
+	did nothing.
+	*/
+	override func viewDidMoveToWindow() {
+		super.viewDidMoveToWindow()
+		window?.makeFirstResponder(self)
+	}
+
 	private var pageSize: CGSize { bounds.size }
 
 	// MARK: - Gestures

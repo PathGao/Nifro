@@ -4,6 +4,21 @@ import KeyboardShortcuts
 
 extension AppState {
 	func setUpEvents() {
+		// The first page of the session goes up here, before anything below can delay it. `didLaunch`
+		// builds the scenes and deliberately loads nothing, so until this runs every display is
+		// showing whatever was behind the wallpaper.
+		//
+		// It used to be the `contentRulesURL` subscription below that did this, by accident of that
+		// publisher sending its current value on subscribe — and the sink awaited a content-rules
+		// refresh first. With no rule list set, the default, that await costs a few milliseconds and
+		// nobody could tell. With one set it is a `URLSession` fetch plus a rule-list compile, and the
+		// desktop stayed empty for the length of the user's network. It was hidden until today by a
+		// second, accidental load fired from `AppState.isEnabled`'s `didSet`, which put a page up
+		// while the fetch was still running; removing that duplicate left the wait showing.
+		//
+		// So the load no longer waits for the rules. The rules catch up with it below.
+		reloadEverything()
+
 		powerSourceWatcher?.didChangePublisher
 			.sink { [self] _ in
 				guard Defaults[.deactivateOnBattery] else {
@@ -28,14 +43,38 @@ extension AppState {
 			}
 			.store(in: &cancellables)
 
-		// Sends its current value on subscribe, which is also what puts the first page on screen at
-		// launch. Rebuilding everything is right either way: the compiled rule list is baked into a web
-		// view when the web view is made, so a new one only reaches a page that is made again — and no
-		// website changed, so `applyWebsiteChanges` would correctly reload nothing.
+		// Sends its current value on subscribe, so this runs once at launch too — now behind the load
+		// above rather than in front of it.
+		//
+		// Nothing happens unless the rules actually changed. That is what keeps the default free: with
+		// no list set `refresh` finds nothing, `compiled` stays `nil`, and the page that just went up
+		// is left alone, so a default launch is still exactly one load per display. It also fixes the
+		// setting itself, which is a text field that republishes on every keystroke — an
+		// unconditional reload here threw every page on screen away once per character typed.
+		//
+		// Taking a new list up needs both halves below. A compiled list is handed to a web view when
+		// the web view is made, so the ones already on screen have to be given it directly; and it
+		// only governs what a page fetches next, so the page has to be loaded again. The direct
+		// hand-over is not made redundant by the reload: a reload builds a fresh web view only when
+		// there is a page worth keeping on screen while it loads, and at launch this can land while
+		// the first page is still arriving — which loads in place, into the web view already there.
+		//
+		// `reloadEverything` rather than `applyWebsiteChanges`, because no website changed and that
+		// would correctly reload nothing.
 		Defaults.publisher(.contentRulesURL)
 			.sink { [self] _ in
 				Task {
+					let previous = ContentRules.compiled
 					await ContentRules.refresh()
+
+					guard ContentRules.compiled !== previous else {
+						return
+					}
+
+					for scene in scenes {
+						scene.webViewController.webView.configuration.applyContentRules()
+					}
+
 					reloadEverything()
 				}
 			}

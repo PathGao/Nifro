@@ -63,6 +63,18 @@ enum PanelMetrics {
 	static let onTint = Color(red: 234 / 255, green: 115 / 255, blue: 63 / 255)
 
 	/**
+	The wash laid over the panel's own vibrancy.
+
+	A popover is glass, and glass over a wallpaper is glass over whatever that page happens to be
+	showing this second — a bright frame of a video puts the column labels on top of it. A thin coat
+	of the window colour keeps the material and takes some of the page back out of it.
+
+	`windowBackgroundColor` rather than a literal: it is already the colour that follows the
+	appearance, so one value is a pale wash in light mode and a dark one in dark mode.
+	*/
+	static let glassWash = Color(nsColor: .windowBackgroundColor).opacity(0.35)
+
+	/**
 	What goes on top of `onTint`.
 
 	Named because the tint was and this was not, so three call sites each decided separately that lit

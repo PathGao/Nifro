@@ -150,6 +150,32 @@ extension WallpaperScene {
 	}
 
 	/**
+	Whether this scene should have anything running, on screen, or worth photographing.
+
+	The one place either "off" is asked, and the reason it exists is that until now nowhere asked
+	both. Three things a switched-off display must not do each consulted its own subset: loading
+	consulted neither switch, so `reloadWebsite` loaded the page `rebuildScenes` had just suspended;
+	the two timers and the menu bar band consulted only the app-wide one, so a display switched off
+	on its own kept its reload timer and kept tinting the menu bar with the colour of a page nobody
+	could see; and the panel's picture consulted only "has something loaded", which the load nobody
+	wanted had just made true. One switch was a member of a mechanism it had never joined.
+
+	Asked here rather than spelled out at each of those sites, so a third thing that means "off"
+	joins this expression and every site inherits it by existing. That is the argument `suspend()`
+	makes for being one method rather than a list of four things at the call site, from the other
+	end: `suspend()` is the one place a scene is stopped, this is the one place it is asked whether
+	it should be running at all.
+
+	Derived, not stored, and the two switches stay separate underneath — see `isDisabledForDisplay`
+	directly above. Merging their storage would lose the thing that doc argues for: what the app-wide
+	switch restores when it comes back on is each display's own setting, and one flag cannot remember
+	that.
+	*/
+	var isSwitchedOff: Bool {
+		!AppState.shared.isEnabled || isDisabledForDisplay
+	}
+
+	/**
 	How this display rotates.
 	*/
 	var rotationMode: RotationMode {
@@ -178,7 +204,7 @@ extension WallpaperScene {
 		playlistTimer = nil
 
 		guard
-			AppState.shared.isEnabled,
+			!isSwitchedOff,
 			!AppState.shared.isBrowsingMode
 		else {
 			return

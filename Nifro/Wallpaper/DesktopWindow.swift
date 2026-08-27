@@ -1,9 +1,9 @@
 import Cocoa
 
 final class DesktopWindow: NSWindow {
-	override var canBecomeMain: Bool { isInteractive }
-	override var canBecomeKey: Bool { isInteractive }
-	override var acceptsFirstResponder: Bool { isInteractive }
+	override var canBecomeMain: Bool { isRaised }
+	override var canBecomeKey: Bool { isRaised }
+	override var acceptsFirstResponder: Bool { isRaised }
 
 	private var cancellables = Set<AnyCancellable>()
 
@@ -35,7 +35,7 @@ final class DesktopWindow: NSWindow {
 	*/
 	var allowsPassiveInteraction = false {
 		didSet {
-			guard !isInteractive else {
+			guard !isRaised else {
 				return
 			}
 
@@ -45,18 +45,50 @@ final class DesktopWindow: NSWindow {
 
 	var isInteractive = false {
 		didSet {
-			if isInteractive {
-				level = Defaults[.bringBrowsingModeToFront] ? .floating : (.desktopIcon + 1) // The `+ 1` fixes a weird issue where the window is sometimes not interactive. (macOS 11.2.1)
-				makeKeyAndOrderFront(self)
-				ignoresMouseEvents = false
-			} else {
-				level = .desktop
-				orderBack(self)
-
-				// Even though the window is on `.desktop` level, the user would be able to interact if they hide desktop icons.
-				ignoresMouseEvents = !allowsPassiveInteraction
-			}
+			applyRaisedState()
 		}
+	}
+
+	/**
+	Whether a region is being framed over this wallpaper.
+
+	Framing needs exactly what Browsing Mode needs — the window in front, taking clicks, and able to
+	become key so the overlay can be typed at. It is a second, temporary reason for the same thing,
+	and it has to be its own property because `isInteractive` is not the framing mode's to hold:
+	`rebuildScenes` writes `isInteractive = isBrowsingMode(on:)` on every window, and it runs on any
+	edit to the website list — including the one the panel's Crop button makes on the way in, one
+	runloop turn later. Held as Browsing Mode, framing was switched back off by the very act that
+	started it, leaving a click-through desktop window that cannot be key and an overlay whose Return
+	and Escape went nowhere.
+
+	Kept here rather than beside each writer because all of them write this one window.
+	*/
+	var isFramingRegion = false {
+		didSet {
+			applyRaisedState()
+		}
+	}
+
+	/**
+	Whether the window is in front and taking input, for either reason.
+	*/
+	private var isRaised: Bool { isInteractive || isFramingRegion }
+
+	private func applyRaisedState() {
+		guard isRaised else {
+			level = .desktop
+			orderBack(self)
+
+			// Even though the window is on `.desktop` level, the user would be able to interact if they hide desktop icons.
+			ignoresMouseEvents = !allowsPassiveInteraction
+			return
+		}
+
+		// Framing is always in front, whatever Browsing Mode is set to: the page being framed is the
+		// thing the user is aiming at, and a page behind another window cannot be aimed at.
+		level = isFramingRegion || Defaults[.bringBrowsingModeToFront] ? .floating : (.desktopIcon + 1) // The `+ 1` fixes a weird issue where the window is sometimes not interactive. (macOS 11.2.1)
+		makeKeyAndOrderFront(self)
+		ignoresMouseEvents = false
 	}
 
 	convenience init(display: Display?) {

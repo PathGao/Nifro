@@ -16,7 +16,11 @@ enum ContentRules {
 	@MainActor private(set) static var compiled: WKContentRuleList?
 
 	/**
-	Load whatever the user pointed at, compile it, and keep it for future web views.
+	Load whatever the user pointed at, compile it, and keep it for the web views that ask for it.
+
+	Nothing waits on this. It is a network fetch and a compile, and the first wallpaper of the session
+	used to sit behind both — see `setUpEvents`. Whoever kicks it off is responsible for handing the
+	result to the pages already up, which is what `applyContentRules` is for.
 	*/
 	@MainActor
 	static func refresh() async {
@@ -55,9 +59,19 @@ enum ContentRules {
 extension WKWebViewConfiguration {
 	/**
 	Attach the compiled rule list, if there is one.
+
+	Called when a web view is built, and again on the live web views once a refresh has landed —
+	because the refresh no longer finishes before the first page of the session starts loading.
+
+	It takes the old list off first, so this is "the rules are now these" rather than "add these
+	rules". Left additive, clearing the setting would leave every page already on screen running the
+	last list it was given for the rest of the session, and a page that loads in place rather than
+	into a fresh web view would accumulate a copy per refresh.
 	*/
 	@MainActor
 	func applyContentRules() {
+		userContentController.removeAllContentRuleLists()
+
 		guard let list = ContentRules.compiled else {
 			return
 		}

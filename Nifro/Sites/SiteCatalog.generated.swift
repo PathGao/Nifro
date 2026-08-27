@@ -17,7 +17,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "Bilibili Live",
@@ -30,7 +30,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "Bing Photo of the Day",
@@ -43,7 +43,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "Calculating Empires",
@@ -56,7 +56,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: true
+			featuredRank: 3
 		),
 		.init(
 			name: "Cocktail Chart",
@@ -69,7 +69,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "Douyu",
@@ -82,7 +82,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "Explore.org Live Cams",
@@ -95,7 +95,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "Faroe Islands in 4K HDR",
@@ -108,7 +108,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: true
+			featuredRank: 8
 		),
 		.init(
 			name: "Flightradar24",
@@ -121,7 +121,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: true
+			featuredRank: 7
 		),
 		.init(
 			name: "Floor796",
@@ -134,7 +134,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: true
+			featuredRank: 1
 		),
 		.init(
 			name: "Gitstalk",
@@ -147,7 +147,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "Google Calendar",
@@ -160,7 +160,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: true,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "Google Trends",
@@ -173,7 +173,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "Gyroscope",
@@ -186,7 +186,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: true,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "Helvetictoc",
@@ -199,7 +199,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "Hoodmaps",
@@ -212,7 +212,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "Infinitown",
@@ -225,7 +225,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "Jellyfish",
@@ -238,7 +238,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "LLM Performance Leaderboard",
@@ -251,7 +251,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "Clouds",
@@ -264,7 +264,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "Minimal Clock",
@@ -277,7 +277,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "Panomax Webcam",
@@ -290,7 +290,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "Pexels Wallpaper",
@@ -303,7 +303,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "Polish TV Clock",
@@ -316,7 +316,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "Random Street View",
@@ -329,7 +329,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "Svalbard — A Journey to the North Pole",
@@ -342,7 +342,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: true
+			featuredRank: 2
 		),
 		.init(
 			name: "Twitch",
@@ -355,7 +355,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "WeatherStar 4000+",
@@ -368,7 +368,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "WeatherStar International",
@@ -381,7 +381,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "WebClock",
@@ -394,7 +394,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "WebGL Fluid Simulation",
@@ -407,7 +407,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "WindowSwap",
@@ -420,7 +420,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: true
+			featuredRank: 4
 		),
 		.init(
 			name: "Windy",
@@ -433,7 +433,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: true
+			featuredRank: 6
 		),
 		.init(
 			name: "World Monitor",
@@ -446,7 +446,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: true
+			featuredRank: 5
 		),
 		.init(
 			name: "Monterey Bay Aquarium",
@@ -459,7 +459,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "Lofi Girl",
@@ -472,7 +472,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: true,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "NASA Live",
@@ -485,7 +485,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		),
 		.init(
 			name: "Zoom Earth",
@@ -498,7 +498,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			isFeatured: false
+			featuredRank: nil
 		)
 	]
 }

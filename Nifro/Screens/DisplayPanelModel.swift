@@ -4,9 +4,13 @@ import SwiftUI
 /**
 What the panel draws, and the one place it is assembled.
 
-Held apart from the view because the snapshots are asynchronous and the scenes are not: the view asks
-once when it appears, this waits for the pictures, and the columns arrive together rather than
-popping in one at a time.
+Held apart from the view because the snapshots are asynchronous and the scenes are not: this waits
+for the pictures and the columns arrive together, rather than popping in one at a time.
+
+Held apart from the view because it also outlives it. The panel is one popover shown over and over,
+and the columns it last drew are still here when it comes back — which is what lets a reopening start
+at the right size instead of growing into it, and is also why `prepareForOpening` exists. The
+pictures in those columns are the one part of them that must not be reused.
 */
 @MainActor
 final class DisplayPanelModel: ObservableObject {
@@ -53,6 +57,15 @@ final class DisplayPanelModel: ObservableObject {
 		*/
 		let isFollowing: Bool
 
+		/**
+		Whether a page is on its way to this display.
+
+		Per display, not per app. A load takes a few seconds, and locking the panel for all of them
+		because one screen is fetching a page would make the other screen's controls unusable for
+		something that is none of its business.
+		*/
+		let isLoading: Bool
+
 		// `nil` display means "whatever Settings says", and there is only ever one of those, so the
 		// display's own id is the identity when it has one and a fixed stand-in when it does not.
 		var id: String { display?.id.uuidString ?? "default" }
@@ -61,6 +74,14 @@ final class DisplayPanelModel: ObservableObject {
 	@Published private(set) var columns: [Column] = []
 
 	private var liveRefresh: Task<Void, Never>?
+
+	/**
+	Which opening of the panel the columns belong to.
+
+	A snapshot is awaited, so a `refresh` begun for one opening can finish after the panel has been
+	closed and opened again. Counting the openings is how a late arrival finds out it is late.
+	*/
+	private var openings = 0
 
 	/**
 	Keep the pictures moving while the panel is up.
@@ -91,37 +112,76 @@ final class DisplayPanelModel: ObservableObject {
 	}
 
 	/**
+	Everything the panel opens with except the pictures.
+
+	Synchronous, and that is the whole point of it. Every field of a column but the snapshot is a value
+	already sitting in memory, so this costs nothing worth measuring. The snapshot is the one part that
+	has to be photographed, at a measured 12.5ms a display, and photographing every display before the
+	popover appears is a menu bar item that does not open for up to a fifth of a second after the click.
+
+	So the panel opens on the click at the right size with the right names, and a bare rectangle stands
+	in for each picture until the first refresh fills it in about a frame later. What it replaces is the
+	pictures the columns are still holding, which are of what the displays showed the last time the
+	panel was up: a real photograph of a real page, which is exactly why nobody reads it as stale.
+	*/
+	func prepareForOpening() {
+		// Before the columns are rebuilt rather than after, so a snapshot already in the air for the
+		// previous opening cannot land on top of what this just put up. `refresh` writes `columns` at
+		// the end, after its awaits.
+		openings += 1
+
+		columns = AppState.shared.scenes.map { column(for: $0, snapshot: nil) }
+	}
+
+	/**
 	Rebuild every column, pictures included.
 
 	One after another rather than at once. A snapshot is a copy of a view that already exists, so it
 	costs milliseconds, and a machine with more displays than that is not the case this is written for.
 	*/
 	func refresh() async {
+		let opening = openings
 		var built: [Column] = []
 
 		for scene in AppState.shared.scenes {
-			built.append(
-				Column(
-					display: scene.display,
-					displayName: scene.display?.localizedName ?? String(localized: "Main Display"),
-					websiteID: scene.website?.id,
-					websiteName: scene.website?.menuTitle.nilIfEmpty,
-					snapshot: await scene.snapshot(),
-					choices: WebsitesController.shared.all.filter { $0.effectiveDisplay == scene.display },
-					isShowing: !scene.isDisabledForDisplay,
-					isMuted: !scene.shouldPlaySound,
-					rotationMode: scene.rotationMode,
-					rotationIntervalMinutes: scene.rotationIntervalMinutes,
-					// One website has nothing to rotate to, and a control that does nothing should say so
-					// rather than shrug when pressed.
-					canRotate: WebsitesController.shared.all.count { $0.effectiveDisplay == scene.display } > 1,
-					syncOptions: syncOptions(for: scene.display),
-					isFollowing: SyncGroup.leader(of: scene.display) != nil
-				)
-			)
+			built.append(column(for: scene, snapshot: await scene.snapshot()))
+		}
+
+		// The panel was closed and opened again while these were being taken, so they are pictures of
+		// the previous opening and `prepareForOpening` has already put the right thing up. Dropping them
+		// is the difference between a placeholder that fills in and a stale photograph that comes back.
+		guard opening == openings else {
+			return
 		}
 
 		columns = built
+	}
+
+	/**
+	One display, described.
+
+	The snapshot is passed in rather than taken here because it is the only part of a column that costs
+	anything: the panel is opened with `nil` and the refreshes fill it in.
+	*/
+	private func column(for scene: WallpaperScene, snapshot: NSImage?) -> Column {
+		Column(
+			display: scene.display,
+			displayName: scene.display?.localizedName ?? String(localized: "Main Display"),
+			websiteID: scene.website?.id,
+			websiteName: scene.website?.menuTitle.nilIfEmpty,
+			snapshot: snapshot,
+			choices: WebsitesController.shared.all.filter { $0.effectiveDisplay == scene.display },
+			isShowing: !scene.isDisabledForDisplay,
+			isMuted: !scene.shouldPlaySound,
+			rotationMode: scene.rotationMode,
+			rotationIntervalMinutes: scene.rotationIntervalMinutes,
+			// One website has nothing to rotate to, and a control that does nothing should say so
+			// rather than shrug when pressed.
+			canRotate: WebsitesController.shared.all.count { $0.effectiveDisplay == scene.display } > 1,
+			syncOptions: syncOptions(for: scene.display),
+			isFollowing: SyncGroup.leader(of: scene.display) != nil,
+			isLoading: scene.isLoading
+		)
 	}
 
 
