@@ -2059,6 +2059,16 @@
         }
       }
     },
+    "These act on the display your pointer is on. Automations and nifro:// commands act on the display chosen in General, since they can run with nobody at the Mac." : {
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "快捷键作用于鼠标所在的那块显示器。自动化和 nifro:// 命令作用于「通用」里选的那块 —— 它们可能在没人在电脑前的时候触发。"
+          }
+        }
+      }
+    },
     "This site sends Nifro somewhere else every time it loads: %@. Click to save that address instead." : {
       "localizations" : {
         "zh-Hans" : {

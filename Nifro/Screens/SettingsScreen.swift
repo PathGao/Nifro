@@ -178,8 +178,16 @@ private struct LanguageSetting: View {
 private struct ShortcutsSettings: View {
 	var body: some View {
 		Form {
-			ForEach(Shortcut.allCases, id: \.self) {
-				KeyboardShortcuts.Recorder($0.title, name: $0.name)
+			Section {
+				ForEach(Shortcut.allCases, id: \.self) {
+					KeyboardShortcuts.Recorder($0.title, name: $0.name)
+				}
+			} footer: {
+				// Worth saying once, here, because it is invisible on one display and surprising on two:
+				// a shortcut is pressed by somebody looking at a screen, and this is how it knows which.
+				Text("These act on the display your pointer is on. Automations and nifro:// commands act on the display chosen in General, since they can run with nobody at the Mac.")
+					.font(.callout)
+					.foregroundStyle(.secondary)
 			}
 		}
 	}

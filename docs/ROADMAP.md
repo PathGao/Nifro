@@ -378,9 +378,19 @@ in hand; what is missing is only the controls and the decision about which pages
 | **V3** | What a control means in a sync group | Pausing one display of a synced pair is a contradiction: the follower is corrected towards the leader every five seconds and would be dragged back into playing. A control pressed on any member has to act on the group, which makes the group the unit a transport acts on rather than the display |
 | **V4** | Live streams have no transport | `currentTime` on a live stream is relative to a sliding window, seeking is often refused, and "back thirty seconds" may not exist. The controls have to be absent rather than present and broken, and the test for it is not the same as "has a video" |
 
-The one thing this needs that does not exist yet: the clock reports the leader's position on a five
-second tick, which is right for correcting drift and far too slow for a progress bar. A transport
-wants its own faster read while the panel is open, and only while it is open.
+| **V5** | Save the picture a column is showing | A button on the column writes the current frame to the Desktop, and a press held past a second writes a short GIF instead. **At the display's own resolution, not the panel's.** The panel takes its snapshots at 260 points because that is all it draws — a saved frame taken the same way would be a thumbnail, so this needs a second snapshot at full size, taken only when asked. The two paths must not be confused: the cheap one runs several times a second while the panel is open, the expensive one runs once and cost about 600ms a frame when it was the default |
+
+Two things these need that do not exist yet.
+
+The clock reports the leader's position on a five second tick, which is right for correcting drift and
+far too slow for a progress bar. A transport wants its own faster read while the panel is open, and
+only while it is open.
+
+And a GIF needs frames held rather than shown. The panel's snapshots are deliberately transient — each
+refresh replaces the last and the previous images are released, which is why forty-five seconds of
+continuous refreshing moves the app's memory by less than it fluctuates on its own. Recording has to
+keep them, at full resolution, for as long as the press lasts: a second of a 4K display is tens of
+megabytes, so it wants a frame budget and a hard stop rather than "until the user lets go".
 
 ---
 
