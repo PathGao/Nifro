@@ -359,16 +359,6 @@
         }
       }
     },
-    "Choose Region…": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "选择区域…"
-          }
-        }
-      }
-    },
     "Choose a directory with a “index.html” file.": {
       "localizations": {
         "zh-Hans": {
@@ -425,16 +415,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "清除 Cookie、本地存储、缓存、缩略图，以及每个页面记住的位置和缩放；你的网站和它们的设置会保留。"
-          }
-        }
-      }
-    },
-    "Click to edit this website.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "点这里编辑这个网站。"
           }
         }
       }
@@ -545,16 +525,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "使用电池时停用"
-          }
-        }
-      }
-    },
-    "Deactivated While on Battery": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "使用电池时已停用"
           }
         }
       }
@@ -1209,16 +1179,6 @@
         }
       }
     },
-    "Move the wallpaper until it shows what you want. Drag or scroll to move it, pinch to zoom.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在壁纸上摆一个取景框：拖动或滚动移动它，捏合改大小。框住的部分会填满整个屏幕。"
-          }
-        }
-      }
-    },
     "Move to the main display when unplugged": {
       "localizations": {
         "zh-Hans": {
@@ -1325,16 +1285,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "不是规则列表"
-          }
-        }
-      }
-    },
-    "Not showing": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "未显示"
           }
         }
       }
@@ -1545,16 +1495,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "上一个网站"
-          }
-        }
-      }
-    },
-    "Quit %@": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "退出 %@"
           }
         }
       }
@@ -2289,16 +2229,6 @@
         }
       }
     },
-    "Undo the region and go back to the whole page.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "取消区域，回到整页。"
-          }
-        }
-      }
-    },
     "Until": {
       "localizations": {
         "zh-Hans": {
@@ -2315,16 +2245,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "已是最新"
-          }
-        }
-      }
-    },
-    "Update to %@…": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "更新到 %@…"
           }
         }
       }
