@@ -172,7 +172,6 @@ extension Binding {
 			}
 		)
 	}
-
 }
 // MARK: - BindingCollection
 extension BindingCollection where Base.Element: Identifiable {
