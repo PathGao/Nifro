@@ -26,7 +26,7 @@ Mac App Store。
 大部分要么是这些接线，要么是被面板照出来的问题。
 
 ```
-未完成    W1-W9 接线   K1 K6 K8 K12 K16-K18 K20-K37 缺陷   L1-L4  V1-V5  S1 S2 S4  D4 D6  E21-E23  U2 U3
+未完成    W1-W9 接线   K1 K6 K8 K12 K16-K18 K20-K24 K26-K31 K33-K38 缺陷   L1-L4  V1-V5  S1 S2 S4  D4 D6  E21-E23  U2 U3
 搁置      K7 HDR（你的决定）、P 系列（要先有测量）
 阻塞      无
 ```
@@ -173,7 +173,7 @@ D7 原本在这一节，但它不属于这里：它是有明确修法的缺陷�
 | | 消失的 | 今天怎么够得着 |
 |---|---|---|
 | **W1** | 全局启用 / 禁用 | 只剩全局快捷键和 Shortcuts intent。UI 里没有任何控件，这正是 K22 严重的原因 |
-| **W2** | 明说「已因电池而停用」 | `Screens/` 里没有任何地方读 `isEnabled` 或 `isManuallyDisabled`。壁纸消失，面板一声不吭 |
+| **W2** | 明说「已因电池而停用」 | `Screens/` 里没有任何地方读 `isEnabled` 或 `isManuallyDisabled`。壁纸消失，面板一声不吭。**#53 之后更糟**：原本解释它的那句状态串是被删菜单留下的孤儿，随其余一起删掉了，所以现在没有任何文字提到这个行为——而它是设置里那一节唯一没有 ⓘ 的一行 |
 | **W3** | Reload | 只有快捷键和 `nifro://reload` |
 | **W4** | Random——立刻随机跳一个 | 面板的 `.random` 轮换模式只影响定时器的 tick |
 | **W5** | "Update Website to Current" | **整个仓库里都不存在了。** `AppState.swift:32-33` 声称它「搬进了网站自己的设置」；并没有。那条注释是假的，而这是 M2 的手动那一半 |
@@ -203,19 +203,20 @@ W1 和 W3 是让 app 从面板上看起来最不完整的两个；W5 丢的是�
 | **K22** | app 被禁用时，面板的电源按钮显示「开着」，按下去反而关掉显示器 | 那一列读的是 `!scene.isDisabledForDisplay`，从不参考 `AppState.isEnabled`。开着「用电池时停用」拔掉电源：所有壁纸消失，每一列仍画成 Showing，按下电源按钮传入 `false`，把那台显示器**关掉**。而 W1 缺失，于是从面板里没有任何办法把 app 重新打开 |
 | **K23** | 网站选择器不会唤醒已关闭的显示器，上面两行的箭头却会 | `step()` 会先重新启用，还带着解释为什么的注释。`show()` 只是裸的 `makeCurrent`，没有这个保护，于是在已关闭的显示器上选网站只会改标题、屏幕依然空白。同一列里的两个相邻控件对「选一个网站」是什么意思给出了不同答案 |
 | **K24** | 轮换箭头可能亮着却按不动 | `canRotate` 按显示器数网站；轮换走的是 `eligible(for:)`，也就是那个集合与排期的交集。一台显示器上有两个网站、其中一个排 08:00–18:00，到 22:00 两个箭头都是亮的，按下去什么也不发生。`RotationMode` 自己的文档承诺固定期间箭头依然可用 |
-| **K25** | 每日更新检查写进了一个没人读的键 | U1 随 #18 落地，它的被动提示面做在 `Menus.swift` 里；#21 删掉了那个文件，没给这个条目重新安家。`latestKnownVersion` 现在只写不读——每 24 小时一次网络请求，结果从不展示——而 `SettingsScreen.swift:78` 还在承诺「Nifro 会在菜单里提到新版本，别处不提」。要么在面板底栏加一个提示，要么删掉每日任务；两样都不做是三个选项里最差的 |
+| ~~**K25**~~ | ~~每日更新检查写进了一个没人读的键~~ **已由 #53 完成。** 面板页脚只在有新版本时长出一个下载按钮，设置里那句话指向它。 | U1 随 #18 落地，它的被动提示面做在 `Menus.swift` 里；#21 删掉了那个文件，没给这个条目重新安家。`latestKnownVersion` 现在只写不读——每 24 小时一次网络请求，结果从不展示——而 `SettingsScreen.swift:78` 还在承诺「Nifro 会在菜单里提到新版本，别处不提」。要么在面板底栏加一个提示，要么删掉每日任务；两样都不做是三个选项里最差的 |
 | **K26** | 页面加载失败，报告在没人会看的地方 | 错误设置了状态栏图标的 tooltip，除非 Browsing Mode 开着，否则到此为止。面板从不读它，所以一个开始返回 500 的壁纸 URL 只会显示成 "No Website"，不给任何原因。被删掉的菜单是把错误放在最顶上的 |
 | **K27** | Browsing Mode 会把已关闭显示器的窗口重新调到前台 | `applyBrowsingMode` 遍历**所有** scene，包括已挂起的，而 `isInteractive.didSet` 每次赋值都会调 `makeKeyAndOrderFront`，哪怕值没变。窗口是透明的所以症状不重——除了对 `allowsInteraction` 的网站，它会不再让点击穿透；而通过全局快捷键触发时，它会以 `.floating` 出现在用户已经关掉的那台显示器上 |
 | **K28** | 任何一次挂起之后 M2 就不再记录 | `releaseWebView` 会新建一个 web view，而两边都没有重新订阅 `addressObserver`，于是它仍绑在已经消失的那个 web view 上。禁用/启用、锁屏、电池切换、按显示器开关之后，那个 scene 再也不会记录它的页面把自己挪到了哪里。`reload()` 是直接捕获的，这掩盖了带 reload 定时器的页面的问题。改一行 |
 | **K29** | 四条 `WKUIDelegate` 路径仍在用全局 Browsing Mode | `createWebViewWith` 以及 confirm、prompt、open 面板读的是 `isBrowsingMode`，含义是「任意一台显示器」；同一文件里的两条导航路径已经改成按显示器的形式，这四条被落下了。笔记本上开着 Browsing Mode 时，显示器壁纸上的 `window.open()` 会被接受，替掉一个没人在交互的页面 |
 | **K30** | 缩略图缓存不清扫、不受预算约束 | `DiskBudget` 每六小时按 100 MB 预算清扫两个 WebKit 根目录。`websiteThumbnailCache` 不在其中任何一个：在 `~/Library/Caches/Nifro/` 下每个 key 一个文件，没有数量上限、没有大小上限、没有按时间清扫，唯一的删除路径是「清除所有网站数据」按钮。key 是 URL，所以改地址或删网站会永久留下孤儿文件——`removeOrphanedStores` 是按网站 *ID* 保留、而且只够得着 WebKit 的数据存储，缩略图永远没有东西来收。上限是「列表里出现过的不同 URL 数」，所以不会失控——但它对现有的那个预算是不可见的。两行：把这个目录加进 `sweptRoots`，或者拿孤儿清扫那套对着缩略图 key 再用一次。**落盘格式是另一个问题，它一条都关不掉。**换更省的编码只是让每个文件更小，而没有上限的目录仍然没有上限；它也不会让已经在盘上的东西变小，因为 `IconView.fetchIcons` 命中缓存就直接返回、而命中是从磁盘读的，所以写过一次的文件永远不会被重写，换格式只会让旧文件和新文件长期并存 |
 | **K31** | 同一个 URL 的两个条目在两台显示器上会互相覆盖页面位置 | 原 D7。按页面的记录（`scrollPosition_`、`lastAddress_`、`zoomLevel_`）按 URL 存，而数据存储按 `website.id` 存。**同步组让这成为常态而不是边角情况**：每个组都会为每台 follower 显示器新建一个带着 leader URL 的条目，于是 ≥2 个 id 不同、URL 相同的条目共用同一套记录。修法是改按 `website.id` 存，代价是已保存的位置丢一次 |
-| **K32** | UI 还在让人去用一个不存在的菜单 | **六处，是数出来的不是估的：**欢迎页的「点它的图标并选择 Add Website…」和「在同一个菜单里」、区域设置的「Nifro 菜单里的 Choose Region…」（面板上它叫 Crop）、声音设置的「和 Nifro 菜单里的 Sound 是同一个设置」、更新设置的「在菜单里」，以及隐藏图标设置的「如果你需要访问 Nifro 菜单…」。这一行原先说的第七处、目录里的那一处，并不存在。**矩形也已经没了：**区域帮助文案描述的是移动和缩放壁纸，那就是 L0 的模型，也是对的那个 |
+| ~~**K32**~~ | ~~UI 还在让人去用一个不存在的菜单~~ **已完成**，由 #40 和 #53 解决。在 `112e9a2` 上重新数过：目录里剩的四条含「menu」的字符串全指菜单栏*图标*，那是真实存在的。 | **六处，是数出来的不是估的：**欢迎页的「点它的图标并选择 Add Website…」和「在同一个菜单里」、区域设置的「Nifro 菜单里的 Choose Region…」（面板上它叫 Crop）、声音设置的「和 Nifro 菜单里的 Sound 是同一个设置」、更新设置的「在菜单里」，以及隐藏图标设置的「如果你需要访问 Nifro 菜单…」。这一行原先说的第七处、目录里的那一处，并不存在。**矩形也已经没了：**区域帮助文案描述的是移动和缩放壁纸，那就是 L0 的模型，也是对的那个 |
 | **K33** | 菜单栏色带采样的位置，和页面实际布局的位置差最多一个缩放因子 | 窗口被刻意设成 `pageFrame.height + 1`，而 `pageLayoutSize` 就是 `pageFrame.height`。`PageView` 从实时 `bounds` 推导，`topStripOfWallpaper` 从 `pageLayoutSize` 推导。和 K2 是同一类差一个点的不一致，而且发生在唯一没有测试的那个界面上 |
 | **K34** | 按住交互键时移动指针，会把起手那台显示器晾在那儿 | `HoldToInteract.begin` 给 `actingScene.display` 打开 Browsing Mode，`end` 给 `actingScene.display` 关掉，两次都是运行的那一刻现问的。松手时人在另一块屏幕上，于是被关掉的是第二台——它本来就没开过——而第一台继续可交互，没有任何东西按着它，只能靠切换快捷键收回来。显示器必须在 `begin` 时记下来，不能到 `end` 再问一遍。**有一条自己的分支在处理它；在这棵树上它仍然能复现，所以照实写在这里，而不是假定它已经没了** |
 | **K35** | 显示器正在重新配置的那一小段时间里，两张全屏壁纸可能叠在同一块屏幕上 | `Display.main` 是套在 `CGDisplayCreateUUIDFromDisplayID` 上的可失败初始化，它会在几十毫秒里返回 `nil`——正是 `Display.underMouse` 已经写下来的那个窗口。在那段时间里，没指定显示器的网站 `effectiveDisplay == nil`，而 `isShowable` 仍然说「该显示」——整条链都是 `nil` 时 `(display ?? .main)?.isConnected != false` 为真——于是 `displaysInUse` 里可以同时装着 `nil` 和一台真实显示器。`rebuildScenes` 给两者各建一个 scene，而两者解析屏幕都走 `Display.mainScreen`，于是同一块屏幕上有两个壁纸窗口、两条菜单栏色带、两套定时器。下一次 `NSScreen.publisher` 事件会让它自愈。**是推出来的，从未复现过：**那个窗口短到手工撞不上，这也是它出错代价低的原因 |
 | **K36** | 一台显示器的加载失败，会被另一台显示器的例行重载抹掉 | `AppState.webViewError` 是一个全 app 唯一的槽位，却是按显示器写的。`load()` 会为正在加载的那个 scene 把它置 `nil`，于是外接显示器上的一次重载定时器，就把「笔记本上的页面开始返回 500」这条记录扔了。状态栏图标的 tooltip 是同一个槽位的另一头：`report` 把错误写上去，而下一个加载完成的 scene 会把它自己网站的 tooltip 盖上去。两者都不说这是哪台显示器。K26 说的是根本没人看得见这个错误；这一条说的是这个错误只有一份 |
 | **K37** | 已经彻底不会再回来的显示器，它的按显示器设置永远不会被忘掉 | `rotationModes`、`rotationIntervals` 和 `disabledDisplays` 都按 `Display.settingsKey`（一台显示器一个 UUID）存，而没有任何地方删条目。对于「拔掉又插回来」的显示器这是对的，那正是当初选字典的理由；但对于一台已经卖掉的显示器，没有任何办法忘掉它。每台接过的显示器一个小条目，任何地方都看不见，所以这是整洁性问题而不是缺陷——值得留一行，免得以后被当成泄漏重新发现一遍。`browsingDisplays` 是例外：`Events.swift` 会把它整个清空 |
+| **K38** | 每次定时重载都起一个新的 WebContent 进程 | 定时重载走 `reload()` → `loadBySwapping` → `createWebView()`，后者新建一整套 `WKWebViewConfiguration`、全部 user script，**以及一个新的 `WKWebsiteDataStore(forIdentifier:)`**——等于每次起一个新渲染进程和新网络会话，再把上一个扔掉。请求还带 `.reloadIgnoringLocalCacheData`，所以子资源全部冷取。15 分钟的条目 × 2 块屏 ≈ **192 次进程启动/天**。修法是替换 URL 与已加载 URL 相同时原地调 `reloadFromOrigin()`——那正是定时重载这条路，区别于切换网站。**仅在这条路上放弃的东西：** swap loading 的失败隔离——Mac 唤醒后网络还没起来时的失败重载会显示错误页，而不是静默保留最后一个好页面。动手前先测：`powermetrics --samplers tasks` 过滤 `com.apple.WebKit.WebContent`，两屏 15 分钟间隔跑一小时，对比改用 `reloadFromOrigin()` 的构建，重载前后各跑一次 `pgrep -c WebContent` |
 
 ---
 
@@ -226,6 +227,21 @@ W1 和 W3 是让 app 从面板上看起来最不完整的两个；W5 丢的是�
 | **E21** | `nifro://` 被注册到了 app 的陈旧副本上 | **测试 URL 命令一律用 `open -a <path> "nifro:reload"`，绝不用裸的 `open "nifro:reload"`。** LaunchServices 把这个 scheme 记在这台机器上构建过的每一份副本上，包括 `~/.Trash` 和 derived data。仓库里没有任何东西导致它，也没有任何东西能修它。裸写法曾经让我们对着一个三周前的构建折腾了一下午 |
 | **E22** | 把本地化迁到 Vorssaint 那套机制 | **新增，而且是重做而非缺陷。** Nifro 现状：`Localizable.xcstrings`，244 个键，2 种语言（英文是未翻译的源），写 `AppleLanguages` 并**强制重启**，外加一个 CI 脚本守完整性。Vorssaint：字符串就是 Swift——一个 892 个字段的 `struct Strings`，13 种语言各一个 `static let`，少一个字段就编译不过，因此不需要 CI 门禁；`L10n: ObservableObject` 发布选择，视图**无需重启**即刻重绘。迁过去是五步，第三步就是全部成本：(1) 用 `struct Strings` 加每语言一个值替掉 catalogue；(2) 加 `L10n`，带 `systemDefault` 映射和字面量 `displayName`；(3) **把约 30 个文件里的 244 处字面量改写成 `l10n.s.field`**，并让 AppKit 那几个界面——`DisplayPanel`、`PanelControls`、`Actions`——在切换时重建，而不是依赖 `AppleLanguages`；(4) 删掉重启对话框；(5) 删掉 CI 门禁，编译器接管。**会失去什么：**`AppleLanguages` 免费顺带本地化了第三方包的字符串（`LaunchAtLogin.Toggle`），Swift struct 方案够不着它们。为这些保留一个小门禁 |
 | **E23** | 升级时用户配置的迁移 | **新增。** 没有这套机制。现有的是三样各管一个 case 的东西：`rotationInterval(stored:legacySeconds:)` 在新键缺失时读旧键，`@DecodableDefault` 给 `Website` 新增的字段补默认值，`SS_hasLaunched` 是欢迎界面的一次性标志。没有任何地方记录上次运行的是哪一版，也没有一个可以挂一次性升级步骤的位置。至今没出事，是因为还没有人从任何版本升上来——这同时也意味着它的形态还可以自由选。改动已发布的默认值是最能暴露这个缺口的 case。它不属于第 12 节：该做，而且该在首个正式版把每个选择变成永久之前做。|
+| **E24** | 五条从未执行过的 lint 规则 | **和 #58 修掉的 periphery 配置是同一个形状。** `.swiftlint.yml` 声明了五条 `analyzer_rules`——`capture_variable`、`typesafe_array_init`、`unneeded_synthesized_initializer`、`unused_declaration`、`unused_import`。analyzer 规则只在 `swiftlint analyze` 下执行，那需要编译日志；而 Xcode 构建阶段和 `ci.yml` 跑的都是 `swiftlint lint`。**所以这五条从写下来那天起就是惰性的。** `unused_import` 本来能点名 #58 里手工删掉的那两个 import。接上它要付出 `xcodebuild ... | tee`、一次 `--compiler-log-path` 运行，以及多一个 lint job 的 CI 分钟数，换五条价值未经测量的规则——但一条不可能触发的规则读起来像是已经查过了。要么让它们跑，要么删掉这一块；声明了却不跑是三者里最糟的 |
+
+**这是一个陷阱，不是一个待办条目：** 给 `Website` 加字段是一次会丢数据的改动，除非这个字段能从早于它的
+载荷里解出来。整张列表是一个 `Defaults` 值，所以一条解不开的记录会把所有网站一起带走，而 `Defaults`
+对解码失败的回答是「用这个键的默认值」——一个空数组。用户看到的是一个全新安装，而磁盘上的文件仍然
+装着全部内容。
+
+`@DecodableDefault` 读起来像是覆盖了这件事，它自己做不到。真正做这件事的是 `Extensions.swift` 里
+`KeyedDecodingContainer.decode(_:forKey:)` 的一个重载，它把包装器转给 `decodeIfPresent`；没有它，
+合成的 `init(from:)` 在包装器跑起来之前就抛 `keyNotFound`。那个 extension 曾经在「碰巧没有成员」时被
+删掉，而这个缺口一直没人发现，直到下一个字段被加进来——因为一个字段只有在**它存在之前**写的记录里
+才会缺席，所以已经在用这个包装器的那四个字段从来没有证明过任何事。`WebsiteMigrationTests` 现在同时
+断言那个重载和那个包装器：「属性被包着」和「缺席能活下来」是两件必须一致、而没有别的东西要求它们
+一致的事。
+
 
 **这是一个坑，不是一个条目：**第四种按页面的记录必须是 `PerPageDefaults` 的一个 case——key 由它构造，
 而清扫走的是 `allCases`。
@@ -293,6 +309,36 @@ U1 已发布，然后在面板重构里丢了它的展示面——那是 K25，�
 | **N3** | 两个动画时长 0.25 和 0.35 | 一个是不透明度过渡，一个是内容淡入。它们因不同原因而变，合并等于制造耦合 |
 | **N4** | 收窄 `Website.InvertColors` 的可见性 | 试了两次，红了两次 |
 | **N6** | 切换网站时做交叉淡入 | 两个页面得同时在窗口里，也就是「`contentView` 里装的是什么」有了第二个答案——正是之前造成空白壁纸的那种歧义。只有在直接切换读起来太生硬时才重新考虑 |
+
+
+### 私有 API：核实过没有公开替代，保留
+
+| 位置 | 为什么保留 |
+|---|---|
+| `WKWebView.drawsBackground` KVC | 让壁纸透明的就是它。**`underPageBackgroundColor` 不是替代品**——它画的是 over-scroll 区域，不是视图的背板，别凭名字就换过去。#45 的护栏按名字单独允许了这一个键，删除这条允许的条件写在旁边 |
+| 24 个 `WKMenuItemIdentifier*` 字符串 | 符号在 `WebKit.tbd` 里，但没有公开头文件声明它们，而 `WKUIDelegate` 在 macOS 上没有受支持的方式识别右键菜单项。没有链接任何私有符号，所以没有审查风险；改名只会让过滤变成 no-op |
+| `com.apple.screenIsLocked` / `Unlocked` | 沙盒 app 拿不到公开的锁屏通知。`NSWorkspace.screensDidSleepNotification` 是**另一个事件**，不是它的安静版本。改名会让挂起失效，但不会崩溃 |
+| `com.apple.DownloadFileFinished` | Dock 弹跳。装饰 |
+| `EnvironmentValues().openWindow` / `openSettings` | macOS 15 上没有受支持的办法从 AppKit 打开 SwiftUI 的 `Window` scene。**但这是无声失败**：SwiftUI 一更新，面板上的「设置」和「网站」按钮就什么都不做，且不报错。从一个长期存活的视图里捕获 `@Environment(\.openWindow)` 会比它活得久 |
+
+### 看着像手搓，其实是对的答案
+
+- **`NSWindow.Level.desktop` / `.desktopIcon`** —— 由 `CGWindowLevelForKey` 构造，那是**公开的** CoreGraphics。不是私有窗口层。
+- **`UpdateCheck.isNewer`** —— `String.compare(options: .numeric)` 会认为 `0.2` 比 `0.2.0` 旧。手写的那版判它们相等，那是对的。
+- **`ScrollRestoration` 不用 `WKWebView.interactionState`** —— 那个 API 会**驱动一次导航**，所以一个陈旧的 blob 会留下一块空白壁纸且无路可退。滚动位置恢复失败是安全的。
+- **`ScrollableTextView`** —— SwiftUI 在 macOS 上**不暴露智能引号和短横线替换的开关**，而用户 CSS 或 JavaScript 里出现一个智能引号会直接把他们的代码弄坏。这个包装存在的全部理由就是这个。
+- **用 `NSStatusItem` + `NSPopover` 而不是 `MenuBarExtra`** —— `MenuBarExtra` 一个都不暴露 `isVisible`、`appearsDisabled`、`behavior`、`contentTintColor`，也没有可以跑加载脉冲的 layer。丢五个能力换零个。
+- **`DisplayPanelModel.startLiveRefresh` 的 80ms 轮询** —— 它是一个正在动的页面的实时预览，没有可以订阅的通知，popover 关闭时会取消。那里真正错的是每帧解码两遍列表，已由 #57 修掉。
+
+### 看着像死的，其实不是
+
+`NSItemProvider: @unchecked Sendable`（**删掉编译失败**，data-race 错误；只有 conformance 的扩展没有成员供索引器看见引用）· `Intents.swift` 里全部 `AppIntent` 和 `WebsiteAppEntity` 的 `@Property`（从 bundle 元数据发现——periphery 15 条原始发现里的 14 条）· `Shortcut.allNames`（三个活调用点加一条测试；它的文档注释过时了，代码没有）· `NSStatusBarButton.setShowingActivity`（一条测试断言它）· 下载 entitlement · `SecurityScopedBookmarks.swift` · `Display.serialize`/`deserialize`（`Defaults.Bridge` 的协议要求，由包调用）· `Constants.playlistInterval`（有意的、有日期的迁移垫片）· `ActionTrampoline`、`CallbackMenuItem`、`addCallbackItem`（`SSWebView` 用它们建右键菜单）。
+
+### 两个否定结果
+
+- **站点目录能表达的比「添加网站」界面更少，不是更多。** `SiteCatalog.Entry` 解码七个字段，`Entry.add()` 只应用五个，而这五个全都有对应控件；目录条目碰不到 `allowsInteraction`、`display` 或 `startHour`/`endHour`。这条路上没藏东西。
+- **九个快捷键全部带默认键位**，并且在设置里都有录制行。专门找过有没有不带绑定就发布的，答案是零。
+
 
 ---
 

@@ -65,6 +65,14 @@ retain_files: []
 # A `Defaults` key that is written and never read is a use as far as any symbol graph is concerned.
 # `Localizable.xcstrings` is not Swift and is outside this tool's world entirely.
 #
+# One inline `periphery:ignore`, in `Extensions.swift`, on the `KeyedDecodingContainer.decode`
+# overload that `@DecodableDefault` is resolved through. Its only caller is a synthesised
+# `init(from:)`, which no index attributes to it — so the scan is not wrong about what it can see, and
+# the annotation sits at the declaration rather than here because the reason is about that code. It is
+# recorded in this file too because a retention nobody can find is the same failure as a retention
+# nobody argued: that overload was already deleted once for looking unreferenced, and the cost was
+# every user's website list on the next field added to `Website`.
+#
 # The three findings that used to be listed here were parameters that `#selector` signatures require
 # and nothing reads. They are written `_` now, which is what they always were — the scan was right,
 # and the honest fix was smaller than the paragraph explaining why it should be ignored.

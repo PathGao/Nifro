@@ -10,8 +10,8 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	@DecodableDefault.EmptyString var title: String
 	@DecodableDefault.Custom<InvertColors> var invertColors2
 	var usePrintStyles: Bool
-	var css = ""
-	var javaScript = ""
+	@DecodableDefault.EmptyString var css: String
+	@DecodableDefault.EmptyString var javaScript: String
 	@DecodableDefault.False var allowSelfSignedCertificate
 
 	/**

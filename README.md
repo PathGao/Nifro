@@ -36,6 +36,10 @@
   <a href="README.zh-Hans.md">简体中文</a>
 </p>
 
+<p align="center">
+  <img src="assets/wallpaper-video.jpg" alt="A film playing as the desktop wallpaper, with the display panel open" width="900">
+</p>
+
 ---
 
 ## Install
@@ -131,7 +135,14 @@ the region is re-rendered rather than scaled up, so text stays sharp.
 than a rectangle, so a screen of a different shape works out its own rectangle around the same part
 of the page.
 
-**One page per display.** Assign a website to a screen; each screen gets its own.
+**One page per display, and a panel that shows them side by side.** Assign a website to a screen and
+each screen gets its own. The menu bar icon opens one column per display: a live preview of what is on
+it, its name, the controls that belong to that screen alone — mute, off, previous and next, pin or
+rotate, Crop, Browsing Mode — and nothing that would apply to a screen you were not looking at.
+
+<p align="center">
+  <img src="assets/panel-two-displays.jpg" alt="The display panel with one column per screen" width="900">
+</p>
 
 **A playlist with hours.** Rotate through the websites on a display, and let a website say when it
 is allowed to be up. A schedule never leaves a display empty.
@@ -144,6 +155,17 @@ wallpaper again.
 **A curated site list.** Pages that work well as wallpapers, each carrying the settings that make it
 work. The in-app gallery reads it straight from this branch, so a merged entry appears without waiting
 for a release. Suggesting one takes a form and the app's Copy Settings button.
+
+**Links decide per website where they open.** A site you sign in to has to keep its links in Nifro,
+because signing in navigates away from it; a dashboard's links belong in your browser. Each website
+answers for itself, or follows the app-wide default.
+
+**Placeholders for the screen it is on.** `[[screenWidth]]` and `[[screenHeight]]` in an address are
+replaced, on every load, with the size of the wallpaper on that display — so one entry is right on
+every machine instead of on the one it was typed on.
+
+**Content blocking says what became of the address.** Paste a rule list and the setting answers:
+blocking, could not download, or not a rule list.
 
 **English and Simplified Chinese**, throughout the app.
 
@@ -162,13 +184,21 @@ rather than signing a build by hand: re-signing an app after Xcode has already s
 the signature and drops the sandbox entitlement with it, and an un-sandboxed Nifro reads a
 different preferences file than a real install.
 
-The pure logic has tests that run without an app bundle or a window server — the crop and zoom
-geometry, the menu bar strip and what the colour band samples from it, schedule windows, which
-website is current on which display, video embedding, URL commands and menu word wrapping:
-
 ```sh
 swift test
 ```
+
+147 tests. Two kinds, and the split is deliberate. The first exercises pure logic that needs no app
+bundle and no window server — crop and zoom geometry, the menu bar strip and what the colour band
+samples from it, schedule windows, which website is current on which display, video embedding, URL
+commands, menu word wrapping.
+
+The second is guardrails: assertions about the source itself, for rules a type cannot carry. Every
+`Timer` sets a tolerance. No `Defaults` key is written and never read. No string is translated and
+never shown. Every `[[placeholder]]` the code substitutes is named in the help text. No KVC key
+reaches into a WebKit class. A field added to `Website` decodes from a payload written before it
+existed. They exist because each of those rules had already been broken once, silently, and nothing
+went red.
 
 ## Contributing
 

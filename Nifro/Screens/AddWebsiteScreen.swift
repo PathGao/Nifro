@@ -32,14 +32,17 @@ struct AddWebsiteScreen: View {
 	@State private var originalWebsite: Website?
 	@State private var urlString = ""
 
-	@State private var newWebsite = Website(
-		id: UUID(),
-		isCurrent: true,
-		url: ".",
-		usePrintStyles: false,
-		css: Website.starterCSS,
-		javaScript: Website.starterJavaScript
-	)
+	// Assigned rather than passed in. `css` and `javaScript` are `@DecodableDefault` now, so old data
+	// decodes without them, and a wrapped property's memberwise parameter is the wrapper rather than
+	// the string — Swift's `init(wrappedValue:)` sugar does not reach a wrapper whose value type is an
+	// associated type. Writing `.init(wrappedValue:)` here would compile and would put a decoding
+	// concern in a screen.
+	@State private var newWebsite: Website = {
+		var website = Website(id: UUID(), isCurrent: true, url: ".", usePrintStyles: false)
+		website.css = Website.starterCSS
+		website.javaScript = Website.starterJavaScript
+		return website
+	}()
 
 	private var isURLValid: Bool {
 		URL.isValid(string: urlString)

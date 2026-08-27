@@ -725,6 +725,29 @@ extension InfoPopoverButton<Text> {
 }
 
 // MARK: - KeyedDecodingContainer
+extension KeyedDecodingContainer {
+	/**
+	Let a `@DecodableDefault` field fall back to its default when the key is absent.
+
+	Without this the wrapper only defaults a key that is *present and null*, which is the one case
+	that never happens: the case it exists for is a field added to a type after something was already
+	stored, so every record written before it simply has no such key. The synthesised `init(from:)`
+	calls `decode(_:forKey:)`, that throws `keyNotFound`, and because the whole array is one
+	`Defaults` value, one old record takes every website with it — the list comes back empty and the
+	app looks like a fresh install.
+
+	This is the overload the property wrapper was designed around; an earlier cleanup removed it when
+	it happened to have no members, and adding `externalLinks` to `Website` in #53 was the first field
+	added since. `WebsiteMigrationTests` pins the behaviour rather than the presence of this code.
+	*/
+	// periphery:ignore - The only caller is a synthesised `init(from:)`, which no index attributes to
+	// this overload. That invisibility is not a footnote here: it is why the extension holding this was
+	// deleted once as an empty shell, and deleting it empties every user's website list on the next
+	// field added to `Website`. Reported by the scan, argued here, and not to be quieted any other way.
+	func decode<T>(_ type: DecodableDefault.Wrapper<T>.Type, forKey key: Key) throws -> DecodableDefault.Wrapper<T> {
+		try decodeIfPresent(type, forKey: key) ?? .init()
+	}
+}
 
 // MARK: - LPLinkMetadata
 extension LPLinkMetadata: @retroactive @unchecked Sendable {}
