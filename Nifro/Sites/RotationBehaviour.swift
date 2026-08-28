@@ -85,7 +85,22 @@ extension WebsitesController {
 	The website that should be showing on `display` right now, taking the schedule into account.
 	*/
 	func scheduled(for display: Display?, at date: Date = .now) -> Website? {
-		let candidates = eligible(for: display, at: date)
+		scheduled(in: eligible(for: display, at: date), on: display)
+	}
+
+	/**
+	The same question asked of a candidate list already in hand.
+
+	Split out for the reason `eligible(in:)` above was, and by the same cut: Next and Previous each
+	want the list *and* the position in it, and asking for the position separately went back through
+	`eligible(for:)` — so one arrow press decoded every website in every playlist twice, `css` and
+	`javaScript` strings and all, and then linear-scanned the second list for a whole `Website` that
+	had come out of the first.
+
+	The pair also each took their own `.now`, so a press landing on the hour could look a position up
+	in a list the schedule had already moved on from. One list resolved once has no such seam.
+	*/
+	private func scheduled(in candidates: [Website], on display: Display?) -> Website? {
 		let current = currentWebsiteID(on: display)
 
 		// At most one of these can be true, because there is one entry per display to be true of. That
@@ -105,7 +120,9 @@ extension WebsitesController {
 	which is the version of this that shipped and is the reason they take a display at all.
 	*/
 	func makeNextCurrent(on display: Display?) {
-		guard let next = eligible(for: display).elementAfterOrFirst(scheduled(for: display)) else {
+		let candidates = eligible(for: display)
+
+		guard let next = candidates.elementAfterOrFirst(scheduled(in: candidates, on: display)) else {
 			return
 		}
 
@@ -113,7 +130,9 @@ extension WebsitesController {
 	}
 
 	func makePreviousCurrent(on display: Display?) {
-		guard let previous = eligible(for: display).elementBeforeOrLast(scheduled(for: display)) else {
+		let candidates = eligible(for: display)
+
+		guard let previous = candidates.elementBeforeOrLast(scheduled(in: candidates, on: display)) else {
 			return
 		}
 

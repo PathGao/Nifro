@@ -81,15 +81,15 @@ enum DiskBudget {
 	}
 
 	/**
-	Drops the re-fetchable types if WebKit's storage is over budget, and reports what that freed.
-	*/
-	@discardableResult
-	@MainActor
-	static func enforce() async -> Int64 {
-		let before = await storedBytes(of: sweptRoots)
+	Drops the re-fetchable types if WebKit's storage is over budget.
 
-		guard before > limit else {
-			return 0
+	Reports nothing: the freed figure this used to return cost a second walk of the same roots to
+	measure — `removeData` cannot say what it removed — and no caller ever read it.
+	*/
+	@MainActor
+	static func enforce() async {
+		guard await storedBytes(of: sweptRoots) > limit else {
+			return
 		}
 
 		// By date, not by record: `removeData(for:)` only reaches what WebKit can attribute to an
@@ -101,8 +101,6 @@ enum DiskBudget {
 		for store in await allStores() {
 			await store.removeData(ofTypes: refetchableTypes, modifiedSince: .distantPast)
 		}
-
-		return max(0, before - (await storedBytes(of: sweptRoots)))
 	}
 
 	/**
