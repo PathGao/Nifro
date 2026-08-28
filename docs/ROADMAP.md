@@ -23,8 +23,9 @@
 > what a display is showing — and were fixed as one change rather than five, because the last five
 > entries of that shape were fixed one at a time and each left the others behind.
 >
-> **Re-confirmed open by reading the code, not carried forward on trust:** K20, K30, K38, K39, W1, W3–W6,
-> W8, W9, E25, and R6. **K37 was closed the other way:** it claimed there is no way
+> **Re-confirmed open by reading the code, not carried forward on trust:** W1, W3–W6, W8, W9, E25 and R6.
+> K20, K30, K38 and K39 were re-confirmed on that pass too and are closed by #75 to #77, which is the
+> whole of what was left of the K series apart from three entries with nothing in common. **K37 was closed the other way:** it claimed there is no way
 > at all to forget a display that was sold, and the code says the opposite in as many words — forgetting
 > one for good is what Restore Defaults is for, and `browsingDisplays` is pruned per entry on every
 > display change rather than only emptied wholesale. The row had also missed `currentPlaylists`, a fifth
@@ -60,7 +61,7 @@ different path and always worked, which is why it read as fine. There is no auto
 have caught this — see the trap in section 10.
 
 ```
-Open      W1 W3-W6 W8 W9 wiring   K1 K6 K8 K20 K30 K38 K39 bugs   L1-L4  V1 V2 V4 V5  S1 S2 S4  D4 D6  E21 E23 E25  U2 U3
+Open      W1 W3-W6 W8 W9 wiring   K1 K6 K8 bugs   L1-L4  V1 V2 V4 V5  S1 S2 S4  D4 D6  E21 E23 E25  U2 U3
 Parked    K7 HDR (your call), the P series (needs a measurement first)
 Blocked   nothing
 ```
@@ -276,10 +277,6 @@ feature rather than an entry point.
 | **K6** | The help text is right in places and thin in others | Counted this time: **30 sites** — 23 `.explained(…)` and 7 `.help(…)` — across three surfaces totalling 2838 lines. The earlier "seven" was wrong by four times. Worth one pass that reads them as a set, but it is a 30-string job, not a small one |
 | **K7** | Nothing anywhere handles HDR | **Parked, your call.** Confirmed by sweep: no API, entitlement or plist key touches it; the only matches are a colour-space option in the menu-bar sampler and the letters "HDR" inside one site's name. Needs a real HDR source and a measurement of what reaches the display before anything is worth designing |
 | **K8** | A Bilibili entry has a generic icon where a YouTube entry has the video's own cover | YouTube's cover is derivable from the video id; Bilibili's is behind `api.bilibili.com` (`data.pic`). Affects the Websites list row icon only — `previewImageURL` has one caller. It would be the first time the app calls a site's API rather than loading a page |
-| **K20** | The panel takes snapshots twelve times a second, and keeps going when nobody can see it | **Your item.** Closing the panel does stop it — every dismissal route reaches `popoverDidClose`. Two things are wrong anyway. The loop sleeps **80 ms**, so it is 12.5 passes a second and one snapshot per display per pass, while the comment beside it says "a few a second" and the snapshot's own comment says "roughly once a second". And the stop condition is *closed*, not *visible*: a transient popover only self-closes on outside interaction, so it survives screen lock, display sleep, a Space switch and Mission Control, spinning the SwiftUI tree at 12.5 Hz the whole time. The comment on `startLiveRefresh` still claims nothing runs while nobody is looking. Fix is a slower cadence plus an occlusion or lock check, and while there, a `Task.isCancelled` between scenes so a close mid-pass does not publish one more frame |
-| **K30** | The thumbnail cache is unswept and unbudgeted | `DiskBudget` sweeps the two WebKit roots on a 100 MB budget every six hours. `websiteThumbnailCache` is in neither root: one file per key under `~/Library/Caches/Nifro/`, no count cap, no size cap, no age sweep, and the only removal is the "Clear all website data" button. The key is the URL, so editing an address or deleting a website orphans its file permanently — `removeOrphanedStores` keeps by website *ID* and reaches only the WebKit stores, so nothing collects a thumbnail, ever. Bounded by distinct URLs ever in the list, so not runaway — but invisible to the budget that exists. Two lines: add the directory to `sweptRoots`, or reuse the orphan sweep against the thumbnail keys. **The on-disk format is a separate question and closes none of this.** A cheaper encoding makes each file smaller and a directory with no cap is still uncapped; it does not shrink what is already there either, because `IconView.fetchIcons` returns on a cache hit and a hit is served from disk, so a file written once is never rewritten and a change of format leaves the old files beside the new ones indefinitely |
-| **K38** | Every timed reload starts a new WebContent process | A timed reload goes `reload()` → `loadBySwapping` → `createWebView()`, which builds a fresh `WKWebViewConfiguration`, every user script, **and a new `WKWebsiteDataStore(forIdentifier:)`** — a new renderer and a new network session each time, with the previous one thrown away. The request also carries `.reloadIgnoringLocalCacheData`, so every subresource is fetched cold. A 15-minute entry on two displays is roughly **192 process launches a day**. The fix is to call `reloadFromOrigin()` in place when the replacement URL equals the loaded one, which is the timed-reload path and not the switch-website path. **What it gives up, on that path only:** swap loading's failure isolation — a reload that fails because the Mac woke before the network did would show an error page instead of silently keeping the last good one. Measure before doing it: `powermetrics --samplers tasks` filtered to `com.apple.WebKit.WebContent`, two displays at a 15-minute interval for an hour, against a build using `reloadFromOrigin()`, plus `pgrep -c WebContent` either side of a reload |
-| **K39** | The Settings-wide reload interval does nothing for almost every website | `Website.effectiveReloadInterval` is `reloadInterval ?? Defaults[.reloadInterval]`, and the compiler says the right side is never used. Both operands are `Double?`, so the optional overload should apply — but `Defaults[.reloadInterval]` goes through the package's generic subscript, and that drives resolution to `T ?? T` with `T == Double?`, where the left side is non-optional and the default is dead. **Measured, not read:** with the right side replaced by a plain `Double?` literal the warning goes away; against the subscript it does not. So a website with no interval of its own answers `nil`, `resetTimer()` returns at its `let reloadInterval =` guard, and no timer is armed. **It is not quite "reaches nothing":** turning on a website's own "Reload on its own schedule" seeds that website's interval from the Settings value, so the number is the default a new override starts at. As the app-wide interval it is drawn, saved, and armed on nothing. Fix is an `if let` rather than a `??`, which is also what stops the next `Defaults` default being swallowed the same way |
 
 
 **One shape was behind six entries, and all six are closed.** K22, K26, K27, K29, K34 and K36 were
@@ -296,10 +293,15 @@ the panel half of W2 were the panel's reading of a scene disagreeing with the sc
 same disagreement one layer down, in who owns the window's content slot. They were fixed as two changes
 rather than five — #66 for the four that share `DisplayPanelModel`, #67 for the one that does not.
 
-**What is left is not a shape.** The seven open entries in the table above have nothing in common: a rewritten
-address, thirty help strings, an icon, a poll cadence, an unswept cache, a process per reload, and a
-dead `??`. That is a healthier backlog than the two rounds before it, and it means the next defect of a
-*new* shape has nowhere to hide behind a cluster.
+**What is left is not a shape, and there is not much of it.** Three entries in the table above, with
+nothing in common: a rewritten address, thirty help strings, and an icon. The four closed with them — a
+poll cadence, an unswept cache, a process per reload and a dead `??` — had nothing in common either,
+which is why they could be done in parallel and why none turned out to be the first of a family.
+
+**One of the four is worth remembering as an ordering rather than as a fix.** K39 meant almost no
+website had a reload timer armed at all, so K38's process churn was mostly theoretical; fixing K39
+turned K38 on. A defect that suppresses another defect's symptom is why "measure before doing it" was
+in K38's entry, and why the two were one change.
 
 ---
 
@@ -405,7 +407,7 @@ them again.
 
 | | Candidate | Why it stays |
 |---|---|---|
-| **R1–R3** | `SecurityScopedBookmarkManager`, `Cache` + `SimpleImageCache`, `WebsiteIconFetcher` | Few call sites each. Replacing any of them is an equivalent rewrite on a trust boundary, and no check would go red if it were done wrong. K30 is about a missing sweep, not about these classes |
+| **R1–R3** | `SecurityScopedBookmarkManager`, `Cache` + `SimpleImageCache`, `WebsiteIconFetcher` | Few call sites each. Replacing any of them is an equivalent rewrite on a trust boundary, and no check would go red if it were done wrong. K30 was about a missing sweep rather than about these classes, and closing it added a function to `DiskBudget` without touching any of them |
 | **R4** | `sites/index.json`, fetched from `main` when the gallery opens | An entry carries `css` and `javaScript`, and adding one is a merge rather than a release — so a bad entry reaches installed copies without a build. **The blast radius is one deliberate click wide:** `featured` comes from the compiled-in snapshot, and a fetched entry's code reaches a web view only when somebody presses Add. Kept, because entries arriving between releases is the point. **Review the site list as release-grade surface** |
 | **R6** | `DesktopWindow.reducedRegion` | Read once, written by nothing. `periphery` cannot see that because the property is read. Kept because shrinking the window to part of the desktop is L1, and this is the shape it needs |
 | **N1–N2** | Loop-to-regex rewrites, and changes whose only verification was "it type-checks" | No assertion could go red |
@@ -498,4 +500,10 @@ feature, not reopening a bug.
 - **K37** Per-display settings — five dictionaries, not the four this row listed — are kept for a display that is unplugged, on purpose, so a monitor comes back in the morning showing what it showed last night. Forgetting one for good is Restore Defaults, which the code says outright. Not a leak, and asked and answered rather than open.
 - **E22** Moved to section 12 as X12 — turned down, not deferred. The criterion that settles it is that the relaunch is acceptable, which is the sentence whose absence made it look worth doing.
 - **K23 (as written)** Picking a website on a switched-off display has never left it dark: `makeCurrent` wakes it. The entry confirmed the shape of the symptom without reading the callee, and stood for weeks. The real gap was `selectPlaylist`, which is a different control.
+**Closed by #75 to #77.**
+
+- **K20** The panel photographs six times a second and stops when nobody can see it, on `NSWindow.occlusionState` and the app's existing lock signal rather than a second notion of either. Three comments stated three different cadences; one number is stated now and the others point at it.
+- **K30** A thumbnail is collected when its website goes, on the same six-hourly pass as the stores. **The other route this entry suggested was a regression, and that is the part to remember:** adding the directory to `sweptRoots` would have counted its bytes toward the budget while `enforce()`, which can only reach WebKit's own stores, had no way to free them — every website's page cache dropped every six hours, forever, without ever getting under.
+- **K38 / K39** A timed reload reuses the page in place instead of building a renderer, a network session and every user script again. **The URL-equality test this entry prescribed was necessary and not sufficient:** an edit and a rule-list recompile both reload the same URL and both need the rebuild, so following it literally would have stopped CSS edits applying, silently. The discriminator is the caller's intent.
+
 - **K36** The load-error store is keyed by display and pruned with the scenes, so one display's reload cannot erase another's failure. Seeing it at all was K26, closed with it.
