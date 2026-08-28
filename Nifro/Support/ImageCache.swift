@@ -322,6 +322,38 @@ final class SimpleImageCache<Key: SimpleImageCacheKeyable> {
 	}
 
 	/**
+	Drop every file in the disk cache that none of these keys names.
+
+	Here rather than at the caller, because this is the only place that knows a file is named for the
+	SHA-256 of its key. `cacheFileFromKey` is private and the directory offers no other way to be read
+	back, so a sweep written anywhere else would have to keep its own copy of the naming — and a copy
+	that drifted would call every file an orphan and delete the lot. The caller hands over the keys
+	that are still live and the mapping is applied here, once.
+
+	**The disk half only.** What is in memory is already held to `imageCacheMemoryLimit` and goes with
+	the process, so a stale entry there costs nothing that is not already capped, and taking a set
+	difference against `NSCache` means enumerating keys it does not offer.
+
+	On `diskQueue` like every other write, so it cannot run between a save's write and the file
+	landing. Deleting a file for a key that has just gone live would cost only a refetch, but there is
+	no reason to leave the window open when the queue that closes it is already there.
+	*/
+	func removeImages(notMatching keys: Set<Key>) {
+		guard
+			shouldUseDisk,
+			let cacheDirectory
+		else {
+			return
+		}
+
+		let fileNames = Set(keys.map { $0.cacheKey.sha256() })
+
+		diskQueue.async {
+			DiskBudget.removeOrphanedFiles(in: cacheDirectory, keeping: fileNames)
+		}
+	}
+
+	/**
 	Remove all images from the cache.
 	*/
 	func removeAllImages() {
