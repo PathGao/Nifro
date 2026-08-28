@@ -2259,6 +2259,16 @@
         }
       }
     },
+    "Takes every wallpaper down when you unplug, leaving the desktop picture underneath, and puts them back when you plug in again.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "拔掉电源后收起所有壁纸，露出下面的系统桌面图片，接上电源时再放回来。"
+          }
+        }
+      }
+    },
     "The address of the player on its own, so the video fills the wallpaper without the navigation, recommendations and comments around it.": {
       "localizations": {
         "zh-Hans": {
@@ -2274,7 +2284,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "内置的默认播放列表不能绑定到显示器，所以先复制一份，再绑定这个副本。"
+            "value": "原生默认播放列表不可绑定显示器。请复制后再绑定。"
           }
         }
       }

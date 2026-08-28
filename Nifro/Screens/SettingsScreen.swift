@@ -238,8 +238,8 @@ The two settings that can leave the app in a state its owner did not mean to rea
 actions there is no way back from.
 
 Content blocking takes an address off the internet and compiles it into every page; battery
-deactivation makes the wallpaper disappear for a reason that is nowhere on screen. Both are worth
-having and neither is worth meeting by accident, which is what an "advanced" pane is for.
+deactivation makes every wallpaper disappear. Both are worth having and neither is worth meeting by
+accident, which is what an "advanced" pane is for.
 
 **The three actions below are ordered by how much they take back, and each keeps a section and a
 spacer to itself.** Two of them could be kept apart by distance, and were. Three cannot: one of them
@@ -259,19 +259,22 @@ private struct AdvancedSettings: View {
 		Form {
 			Section {
 				ContentRulesSetting()
-				Defaults.Toggle(String(localized: "Deactivate while on battery"), key: .deactivateOnBattery)
+				Defaults.Toggle(key: .deactivateOnBattery) {
+					Text("Deactivate while on battery")
+						.explained(String(localized: "Takes every wallpaper down when you unplug, leaving the desktop picture underneath, and puts them back when you plug in again."))
+				}
 			}
-			Section {} // Padding
-
-			// Top of the three, and the only one that adds anything. Argued over the pane above rather
-			// than here, because the position is a statement about all three and not about this one.
-			Section {
-				AddDefaultPlaylistSetting()
-			}
-
 			Section {} // Padding
 			Section {
 				ClearWebsiteDataButton()
+			}
+
+			Section {} // Padding
+			// Under the clear rather than over it. The clear's dialog names this button as the way back,
+			// and the way back is read after the loss, not before it. What keeps a slip from landing on
+			// the clear is still the padding section between them, not the order.
+			Section {
+				AddDefaultPlaylistSetting()
 			}
 
 			Section {} // Padding
@@ -425,16 +428,19 @@ private struct AddDefaultPlaylistSetting: View {
 
 	var body: some View {
 		HStack(spacing: 8) {
+			// The ⓘ rather than the tooltip this used to be: what it says is the reason the button in the
+			// website list is greyed out, and nobody hovers a button to find out why a different control
+			// is disabled.
 			Button("Add the Default Playlist") {
 				isConfirming = true
 			}
+			.explained(String(localized: "The built-in default playlist cannot be bound to a display, so duplicate it first and bind the copy."))
 
 			if hasAdded {
 				Text("Added to your playlists")
 					.foregroundStyle(.secondary)
 			}
 		}
-		.help("The built-in default playlist cannot be bound to a display, so duplicate it first and bind the copy.")
 		// It asks, though it destroys nothing. Pressed with the shipped websites already in the list it
 		// leaves a second copy of each, and undoing that is eight deletions in another window — a bill
 		// worth being told about beforehand rather than found afterwards.
