@@ -207,9 +207,7 @@ jobs:
           missing = [
               key
               for key, entry in catalogue["strings"].items()
-              # The empty string and a bare format placeholder have nothing to translate.
-              if key and key != "%@"
-              and not entry.get("localizations", {}).get("zh-Hans", {}).get("stringUnit", {}).get("value")
+              if not entry.get("localizations", {}).get("zh-Hans", {}).get("stringUnit", {}).get("value")
           ]
 
           if missing:
