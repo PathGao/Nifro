@@ -14,6 +14,11 @@
 // against the committed file, so `SiteCatalog` is kept free of `Website`, `Defaults` and SwiftUI in
 // order to be listed here.
 //
+// `Strings.generated.swift` is listed so `StringsMigrationTests` can hold every field against
+// `Localizable.xcstrings` itself. It is 269 fields of text with no dependencies, and the whole reason
+// it is generated rather than written is that nobody re-reads a hand-made mapping of 269 sentences to
+// 269 names — so the check that it still says what the catalogue says has to be runnable.
+//
 // `PlaylistMigration` is listed for a different reason. It runs once, against a website list the user
 // built by hand, on a build that has no way back, and a grouping that drops an entry drops a website
 // with no error, no half-state and nothing to restore from. Keeping it free of `Website` and
@@ -28,7 +33,7 @@ let package = Package(
 		.target(
 			name: "NifroLogic",
 			path: "Nifro",
-			sources: ["Sites/SiteCatalog.swift", "Sites/SiteCatalog.generated.swift", "Sites/PlaylistMigration.swift", "Support/DiskBudget.swift", "Support/Geometry.swift", "Support/UpdateCheck.swift", "Support/Rotation.swift", "Support/RotationInterval.swift", "Support/Schedule.swift", "Support/URLCommand.swift", "Support/VideoEmbed.swift"]
+			sources: ["Sites/SiteCatalog.swift", "Sites/SiteCatalog.generated.swift", "Sites/PlaylistMigration.swift", "Support/Strings.generated.swift", "Support/DiskBudget.swift", "Support/Geometry.swift", "Support/UpdateCheck.swift", "Support/Rotation.swift", "Support/RotationInterval.swift", "Support/Schedule.swift", "Support/URLCommand.swift", "Support/VideoEmbed.swift"]
 		),
 		.testTarget(
 			name: "NifroTests",
