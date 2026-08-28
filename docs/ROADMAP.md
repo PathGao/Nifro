@@ -61,7 +61,7 @@ different path and always worked, which is why it read as fine. There is no auto
 have caught this — see the trap in section 10.
 
 ```
-Open      W1 W3-W6 W8 W9 wiring   K1 K6 K8 bugs   L1-L4  V1 V2 V4 V5  S1 S2 S4  D4 D6  E21 E23 E25  U2 U3
+Open      W1 W3-W5 W9 wiring   K1 K6 K8 bugs   L1-L4  V1 V2 V4 V5  S1 S2 S4  D4 D6  E21 E23 E25  U2 U3
 Parked    K7 HDR (your call), the P series (needs a measurement first)
 Blocked   nothing
 ```
@@ -252,7 +252,9 @@ budget and a hard stop, not "until the user lets go".
 
 Capabilities the menu had that the panel does not. None of these are broken code; they are things with
 no entry point. Baseline for every row: `git show 54cac6a~1:Nifro/App/Menus.swift`. W2 is closed —
-#66 gave the panel the sentence and #69 gave the settings row its ⓘ. The seven below still hold.
+#66 gave the panel the sentence and #69 gave the settings row its ⓘ. **W6 and W8 are not closed but
+refused**, on a line the series never had and now has: the panel does things to the *screen*, and the
+Websites window does things to the *record*. They are X13 and X14. The five below still hold.
 
 | | Gone | Reachable today |
 |---|---|---|
@@ -260,12 +262,12 @@ no entry point. Baseline for every row: `git show 54cac6a~1:Nifro/App/Menus.swif
 | **W3** | Reload | Hotkey and `nifro://reload` only |
 | **W4** | Random — jump to one now | The panel's `.random` rotation mode only affects the timer tick |
 | **W5** | "Update Website to Current" | **Does not exist anywhere.** `AppState.swift:32-33` asserts it "moved into the website's own settings"; it did not. That comment is false, and this was the manual half of M2 |
-| **W6** | Edit this website, from its name | The panel's name row is not a button. **The half-dead route is gone rather than left lying there:** `.showEditWebsiteDialog` and its observer were deleted, because the observer opened `AppState.currentWebsite` — the main display's website whatever screen the request came from — so re-pointing it at the panel would have opened the laptop's website in front of somebody looking at the monitor. Wiring this up is a per-display route, not a notification to re-declare |
-| **W8** | Keyboard shortcuts, discoverable | `setShortcut(for:)` is gone; panel buttons carry `.help()` text only. `Shortcuts.swift:8,15-16` still argues defaults were shipped so the menu could display them |
 | **W9** | The scaffolding the menu left behind | `SSMenu` and `WebsitesScreen`'s empty `.onChange` and `.onAppear` are deleted. What is left is `CallbackMenuItem.validateCallback`, never assigned, so `validateMenuItem` is a constant `true` |
 
 W1 and W3 are the two that make the app feel unfinished from the panel; W5 is the one that lost a
-feature rather than an entry point.
+feature rather than an entry point. **What is left is a shorter list than the count implies:** three of
+the original nine were never entry points the panel should have had, and saying so took a rule about
+what the panel is for rather than an argument about each one.
 
 ---
 
@@ -397,6 +399,8 @@ the panel footer when there is something newer. Neither half is a U item.
 | **X10** | Go opaque when the content fills the screen | The saving cannot be measured, and it needs a switch that turns the screen black on a page with a transparent background |
 | **X11** | A configurable reload strategy | Nobody asked for it. A setting in search of a complaint |
 | **X12** | Move localization onto Vorssaint's mechanism (was E22) | **Turned down on a criterion nobody had written down: the relaunch is acceptable.** The case was two things — a missing translation becomes a compile error, and changing language stops needing a relaunch — and with the second one no longer worth having, the first is all that is left. The CI gate already does it, and does more: a compile error only sees a key that is in the struct and short a language, while the gate also catches a literal added to the source and never extracted, which no compiler can reach. So the gate does not go away, it gets smaller. Against that: `^[%lld site](inflect: true)` is Foundation choosing the word form, used by three strings today, and in a Swift struct it becomes a hand-written plural rule per language; the `.xcstrings` toolchain goes — the catalogue editor, the `new`/`translated` states, `.xcloc` export, automatic extraction; and one mechanism becomes three, because `AppleLanguages` has to stay for `KeyboardShortcuts`, which ships nine `.lproj` of its own, and `.lproj` has to stay for `InfoPlist.strings`, which the system reads and no app code can touch. **Vorssaint keeps both of those too** — its `Resources/*.lproj` hold `InfoPlist.strings`, and its `Strings` struct has to carry `menuCut`/`menuPaste`/`menuHide` because an accessory app builds its own main menu and does not get the system's words for free. One thing from its implementation is worth *not* copying: it hard-codes each language's `displayName`, where `AppLanguage.displayName` here asks the system, which cannot go stale |
+| **X13** | Edit a website from the panel's name row (was W6) | **The panel is a chooser, not an editor.** Editing a website is an edit to a *record*, and records are edited where they live, in the Websites window. The line the W series was missing is that the panel acts on the screen and the Websites window acts on the list — which is also why Crop belongs on the panel and does not contradict this: framing a region is a gesture against the wallpaper, not a form against an entry. W6 read as an omission only because the deleted menu had the item; the menu was one surface for both jobs, and splitting them was the point of the panel |
+| **X14** | Show a button's keyboard shortcut on the panel (was W8) | **A shortcut's home is where it is rebound.** Settings lists all of them, next to the recorder that changes them, which is where somebody goes to find out. Putting them on the panel too is a second place answering the question, and this document has spent two rounds on defects of exactly that shape — and the panel is 260 points wide with no room that is not taken from something acting on the display. The `.help()` text on each button stays, which is what a person hovering actually wants: what the button does |
 
 ---
 
