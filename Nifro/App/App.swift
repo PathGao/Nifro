@@ -10,6 +10,11 @@ import SwiftUI
 @main
 private struct AppMain: App {
 	@NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+	// periphery:ignore - Read by nothing, which is the whole of what it does: the three screens below
+	// were handed this through `environmentObject` and not one of them ever asked for it, so the
+	// injections are gone and this is what is left naming `AppState.shared` inside the SwiftUI graph.
+	// `AppState.init` schedules `didLaunch`, so deleting this hands the moment the singleton is first
+	// built to whichever of the app delegate's callbacks happens to touch it first.
 	@StateObject private var appState = AppState.shared
 
 	init() {
@@ -19,7 +24,6 @@ private struct AppMain: App {
 	var body: some Scene {
 		Window("Websites", id: "websites") {
 			WebsitesScreen()
-				.environmentObject(appState)
 		}
 		.windowToolbarStyle(.unifiedCompact)
 		.windowResizability(.contentSize)
@@ -27,7 +31,6 @@ private struct AppMain: App {
 		.defaultLaunchBehavior(.suppressed)
 		Window("Site Gallery", id: "site-gallery") {
 			SiteGalleryScreen()
-				.environmentObject(appState)
 		}
 		.windowResizability(.contentSize)
 		.defaultPosition(.center)
@@ -35,7 +38,6 @@ private struct AppMain: App {
 
 		Settings {
 			SettingsScreen()
-				.environmentObject(appState)
 		}
 	}
 

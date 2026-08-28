@@ -17,7 +17,7 @@ final class WallpaperScene {
 	let display: Display?
 
 	let window: DesktopWindow
-	private(set) var webViewController = WebViewController()
+	let webViewController = WebViewController()
 
 	/**
 	The website this scene shows, if any.

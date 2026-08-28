@@ -2,7 +2,13 @@ import Cocoa
 @preconcurrency import Combine
 import WebKit
 
-final class WebViewController: NSViewController {
+// Not an `NSViewController`, though it was one for as long as it has existed. Nothing ever read its
+// `view`: the scene takes the page off `webView` and installs that, so `loadView` never ran and the
+// slot was only ever written to. What it did do is hold a second strong reference to the live web
+// view — the very thing `releaseWebView` exists to drop, which is why that method had to clear the
+// slot before it could work at all.
+@MainActor
+final class WebViewController: NSObject {
 	/**
 	The scene this controller draws into. Weak because the scene owns the controller.
 	*/
@@ -84,6 +90,12 @@ final class WebViewController: NSViewController {
 		webView.scene = scene
 		webView.websiteID = websiteID
 
+		// The only place a title is recorded, and enough on its own. `didFinish` used to read the same
+		// property a second time, for the reason this sink is here: a single-page app loads with a
+		// placeholder title and sets the real one from script a moment later, which is a title change
+		// after the load finished, not before it. WebKit clears the title on every main-frame commit
+		// and posts the real one after, so there is no title the load callback could see that this has
+		// not already been handed.
 		webView.publisher(for: \.title)
 			.sink { [weak webView] title in
 				guard let webView else {
@@ -153,7 +165,6 @@ final class WebViewController: NSViewController {
 	*/
 	func adopt(_ replacement: SSWebView) {
 		webView = replacement
-		view = replacement
 	}
 
 	/**
@@ -162,15 +173,10 @@ final class WebViewController: NSViewController {
 	Upstream left a TODO here and settled for `about:blank` plus hiding the window, which keeps a WebContent process and its memory alive for as long as the app runs. Replacing the web view with a fresh, unloaded one releases the last reference to the old one, and its process exits with it.
 	*/
 	func releaseWebView() {
-		view = NSView()
 		webView = createWebView()
 	}
 
 	private(set) lazy var webView = createWebView()
-
-	override func loadView() {
-		view = webView
-	}
 
 	// TODO: When Swift 6 is out, make this async and throw instead of using `onLoaded` handler.
 	func loadURL(_ url: URL) {
@@ -324,23 +330,12 @@ extension WebViewController: WKNavigationDelegate {
 		// The script starts every page muted and waits to be told. This is the telling.
 		webView.setAudioMuted(!(scene?.shouldPlaySound ?? false))
 
-		recordTitleIfNeeded(from: webView)
-
 		// The page is here, so this is the moment it goes on screen — not a fixed delay after asking for
 		// it.
 		pageDidSettle(webView)
 		scene?.restorePageState(in: webView)
 
 		internalOnLoaded(nil)
-	}
-
-	/**
-	Fill in a missing website title from the page that just loaded.
-
-	Also worth doing on later title changes. Single-page apps often load with an empty or placeholder title and set the real one from script a moment later.
-	*/
-	private func recordTitleIfNeeded(from webView: WKWebView) {
-		WebsitesController.shared.recordObservedTitle(webView.title ?? "", for: webView.url)
 	}
 
 	func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {

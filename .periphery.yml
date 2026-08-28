@@ -70,13 +70,23 @@ retain_files: []
 # A `Defaults` key that is written and never read is a use as far as any symbol graph is concerned.
 # `Localizable.xcstrings` is not Swift and is outside this tool's world entirely.
 #
-# One inline `periphery:ignore`, in `Extensions.swift`, on the `KeyedDecodingContainer.decode`
+# Two inline `periphery:ignore`s, and both are recorded here because a retention nobody can find is
+# the same failure as a retention nobody argued.
+#
+# The second is in `App.swift`, on `AppMain.appState`. It is a `@StateObject` nothing reads, and that
+# is the whole of what it does: the three screens were handed it through `environmentObject` and none
+# of them ever asked, so those injections are gone and this is what still names `AppState.shared`
+# inside the SwiftUI graph. `AppState.init` schedules `didLaunch`, so deleting it hands the moment the
+# singleton is first built to whichever app-delegate callback happens to touch it first. The scan is
+# right about what it can see — nothing reads the property — and wrong about what the property is for,
+# which is being the thing that constructs it, at a time the launch sequence depends on.
+#
+# The first is in `Extensions.swift`, on the `KeyedDecodingContainer.decode`
 # overload that `@DecodableDefault` is resolved through. Its only caller is a synthesised
 # `init(from:)`, which no index attributes to it — so the scan is not wrong about what it can see, and
-# the annotation sits at the declaration rather than here because the reason is about that code. It is
-# recorded in this file too because a retention nobody can find is the same failure as a retention
-# nobody argued: that overload was already deleted once for looking unreferenced, and the cost was
-# every user's website list on the next field added to `Website`.
+# the annotation sits at the declaration rather than here because the reason is about that code. That
+# overload was already deleted once for looking unreferenced, and the cost was every user's website
+# list on the next field added to `Website` — which is where the rule above comes from.
 #
 # The three findings that used to be listed here were parameters that `#selector` signatures require
 # and nothing reads. They are written `_` now, which is what they always were — the scan was right,
