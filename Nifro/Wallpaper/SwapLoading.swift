@@ -171,9 +171,16 @@ extension SSWebView {
 			deadline.cancel()
 		}
 
-		for await isLoading in publisher(for: \.isLoading).values where !isLoading {
-			break
-		}
+		// `first(where:)` rather than a `where` clause on the loop, because `.values` is not a stream
+		// of every value the property takes. Measured on macOS 26.6.2 with a standalone WebKit
+		// harness: a `for await` over `publisher(for: \.isLoading).values` receives exactly one
+		// element — whichever value KVO reports at subscription, which after `loadWallpaper` is
+		// `true` — and then nothing, ever, while a plain `sink` on the same publisher and the same
+		// web view receives all three of `false`, `true`, `false`. The flip this loop exists to see
+		// is the one it could never be handed. Filtering upstream means the single element that does
+		// arrive is the one worth waiting for, and `first` completes the publisher so the sequence
+		// ends by itself.
+		for await _ in publisher(for: \.isLoading).first(where: { !$0 }).values {}
 
 		guard ContinuousClock.now - started < timeout else {
 			throw CocoaError(.userCancelled)
