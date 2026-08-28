@@ -232,10 +232,22 @@ final class WallpaperScene {
 	/**
 	The size the page lays out at, zoomed or not.
 
-	A zoom magnifies one rectangle of a page that still believes it has the whole window. Laying it out at any other size reflows the site, and the region the user framed stops being the region they get. So this is always the frame `DesktopWindow` gives a window it has not shrunk: the screen without the menu bar strip.
+	A zoom magnifies one rectangle of a page that still believes it has the whole window. Laying it out
+	at any other size reflows the site, and the region the user framed stops being the region they get.
 
+	**Read off the window, not worked out from the screen a second time.** The window's content rect is
+	what AppKit resizes `PageView` to, and `PageView` lays the page out against its own `bounds` — so a
+	screen-derived answer is a second opinion that has to be kept in agreement by hand, and was not:
+	`DesktopWindow.setFrame` adds a point to the height on purpose, so this used to describe a page one
+	point shorter than the one on screen.
+
+	One point of page is `scale` points of view: what the band sampled sat `scale - 1` points below what
+	was actually on screen — nothing at 1x, 19 points at the maximum magnification, which is 58% of a
+	33-point menu bar. Measured and pinned in `MenuBarBandSamplingTests`, and independent of the
+	screen's size. Reading the window also makes `reducedRegion` right for free, since shrinking the
+	window is where that lands too and the screen knows nothing about it.
 	*/
-	var pageLayoutSize: CGSize? { screen?.pageFrame.size }
+	var pageLayoutSize: CGSize { window.contentRect(forFrameRect: window.frame).size }
 
 	/**
 	The part of the web view that is actually on the display, in the web view's own coordinates.
@@ -262,14 +274,11 @@ final class WallpaperScene {
 	with a snapshot rectangle rather than with a description of the display.
 	*/
 	var wallpaperRect: CGRect {
-		guard
-			case .live(let zoom?) = content,
-			let pageSize = pageLayoutSize
-		else {
+		guard case .live(let zoom?) = content else {
 			return webViewController.webView.bounds
 		}
 
-		return zoom.onScreenRegion(inPageOfSize: pageSize)
+		return zoom.onScreenRegion(inPageOfSize: pageLayoutSize)
 	}
 
 	/**
@@ -355,10 +364,7 @@ final class WallpaperScene {
 	private func pageView(zoom: Zoom?) -> NSView {
 		let webView = webViewController.webView
 
-		guard
-			let zoom,
-			let pageSize = pageLayoutSize
-		else {
+		guard let zoom else {
 			webView.magnification = 1
 			return webView
 		}
@@ -366,7 +372,7 @@ final class WallpaperScene {
 		return PageView(
 			content: webView,
 			zoom: zoom,
-			pageSize: pageSize
+			pageSize: pageLayoutSize
 		)
 	}
 

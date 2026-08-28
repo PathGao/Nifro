@@ -158,7 +158,16 @@ final class DesktopWindow: NSWindow {
 		}
 
 		var frame = screen.pageFrame
-		frame.size.height += 1 // Probably not needed, but just to ensure it covers all the way up to the menu bar on older Macs (I can only test on M1 Mac)
+
+		// Probably not needed, but just to ensure it covers all the way up to the menu bar on older
+		// Macs (I can only test on M1 Mac).
+		//
+		// Kept, and it is why `WallpaperScene.pageLayoutSize` reads this window instead of asking the
+		// screen: the page lays out at what AppKit gives the content view, which is this, and anything
+		// working the same number out from `pageFrame` is a point short. A point of page is `scale`
+		// points of view once magnified, so before the two were made one answer the menu bar band
+		// sampled `scale - 1` points below the strip that was actually behind the menu bar.
+		frame.size.height += 1
 
 		setFrame(frame, display: true)
 	}

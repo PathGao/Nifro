@@ -584,6 +584,42 @@ struct OnScreenRegionTests {
 		#expect(strip.height == 33)
 	}
 
+	/**
+	Asking with the wrong page size is not a rounding error, and the error has a law.
+
+	The band and the view that lays the page out used to work the page's size out separately — one from
+	the screen, one from the window, which `DesktopWindow.setFrame` makes a point taller on purpose. A
+	point of page is `scale` points of view, so what the band sampled sat below what was on screen by
+	`scale - 1` points: nothing at 1x, 19 at the maximum. Against a 33-point menu bar that is 58% of the
+	strip's own height, so most of what was sampled was not what was behind the menu bar.
+
+	Both readers go through `onScreenRegion` now and `pageLayoutSize` is read off the window, so there
+	is one page size and one rectangle. This is what the disagreement cost while there were two.
+
+	Independent of the screen's size, which is why it is worth pinning: it is a property of the
+	disagreement, not of one Mac. Nothing in the package target can hold `pageLayoutSize` to the window
+	it now reads — that reaches `NSWindow` — so this says what a disagreement costs rather than that
+	there is not one.
+	*/
+	@Test("A point of disagreement about the page height moves the sampled strip by a magnification, less one")
+	func aPointOfPageIsAMagnificationOfView() {
+		for scale in [2.0, 5.0, 10.0, Zoom.maximumScale] {
+			// Pushed to the bottom of the page, where the clamp holds the region against the far edge and
+			// the whole of the extra point lands in the offset.
+			let zoom = Zoom(center: CGPoint(x: 0.5, y: 1), scale: scale)
+
+			let asLaidOut = zoom.onScreenRegion(inPageOfSize: CGSize(width: pageSize.width, height: pageSize.height + 1))
+			let asTheScreenWouldSay = zoom.onScreenRegion(inPageOfSize: pageSize)
+
+			// Compared as `Double` against a `Double`. A `CGRect`'s members are `CGFloat`, and the test
+			// next door records why that matters: a mixed comparison reports as failed with both sides
+			// printing the same number.
+			let drift = Double(asLaidOut.origin.y) - Double(asTheScreenWouldSay.origin.y)
+
+			#expect(drift == scale - 1)
+		}
+	}
+
 	@Test("Magnification follows the clamped region, not the raw scale")
 	func magnificationFollowsTheClampedRegion() {
 		// Below 1 there is nothing left to frame, so the region is the whole page and the page is
