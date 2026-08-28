@@ -18,7 +18,9 @@ has, so adjusting one is the same gesture as making one.
 */
 final class CropSelectionView: NSView {
 	/**
-	Called with the region to keep, or `nil` if the user backed out.
+	Called once with the region to keep, or `nil` if the mode ended without one — the user backed out,
+	or this view was taken out of the window and the mode went with it. Cleared as it is called, so
+	there is exactly one ending however the mode reaches it.
 	*/
 	var onFinish: ((Zoom?) -> Void)?
 
@@ -59,7 +61,8 @@ final class CropSelectionView: NSView {
 	override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 
 	/**
-	Take the keyboard, every time this view is put into a window rather than once when it is installed.
+	Take the keyboard, every time this view is put into a window rather than once when it is installed
+	— and end the mode when it is taken out of one for good.
 
 	This sits inside the wallpaper window's content view, and that slot is rewritten by every load,
 	every reload and every edit to the website list — `installContentView` runs from all of them, and
@@ -68,10 +71,66 @@ final class CropSelectionView: NSView {
 	first responder leaves the view hierarchy. Drawing and dragging survived that, because neither
 	needs the keyboard, which is why the frame went on moving under the mouse while Return and Escape
 	did nothing.
+
+	The rewrites that do not put it back are the other half, and they are the reason this mode could be
+	entered and never left. `installContentView` refuses to touch the slot while a region is being
+	framed, but it is not the only writer: `releaseWebView` builds a fresh web view and installs it —
+	which every screen lock, every battery transition, every Disable and every display switched off
+	reaches through `suspend()` — and `tearDown` empties the slot when the framed display is unplugged.
+	Neither can leave this view where it was, and this view is the only thing that can call `onFinish`,
+	so what was left behind was a window still at `.floating` and full opacity with `isSelectingCrop`
+	still true: a wallpaper pinned above every other window, framing refused for the rest of the
+	session, and nothing but quitting to get out of it.
+
+	Ending here rather than guarding there is the difference between the two. A guard is a thing the
+	next writer of that slot has to remember, and this is the third time that list has been found one
+	short. Leaving the window is not a route, it is every route — including the ones nothing has
+	written yet — and it is the same fact the mode is already defined by: `isSelectingCrop` *is* this
+	view existing.
+
+	On the next turn of the run loop rather than now, because this runs *inside* the assignment to
+	`window.contentView`, and finishing installs a content view of its own — reassigning the slot that
+	is mid-assignment. The window is read again after the hop, so a view taken out and put straight
+	back in one turn keeps its mode, which is what `installContentView` used to do before it learned to
+	refuse.
 	*/
 	override func viewDidMoveToWindow() {
 		super.viewDidMoveToWindow()
-		window?.makeFirstResponder(self)
+
+		guard let window else {
+			Task { @MainActor [weak self] in
+				guard
+					let self,
+					self.window == nil
+				else {
+					return
+				}
+
+				finish(with: nil)
+			}
+
+			return
+		}
+
+		window.makeFirstResponder(self)
+	}
+
+	/**
+	Report the outcome, once.
+
+	`onFinish` takes this view out of the window, which comes straight back through
+	`viewDidMoveToWindow` as a second ending — and a second ending arrives after the scene has already
+	been put back, so it would either frame a region against a restored window or undo a region that
+	had just been stored. Cleared before the call rather than after, so the re-entry finds nothing left
+	to do. Return pressed twice on a slow frame is the same shape and is covered by the same line.
+	*/
+	private func finish(with zoom: Zoom?) {
+		guard let onFinish else {
+			return
+		}
+
+		self.onFinish = nil
+		onFinish(zoom)
 	}
 
 	private var pageSize: CGSize { bounds.size }
@@ -114,9 +173,9 @@ final class CropSelectionView: NSView {
 	override func keyDown(with event: NSEvent) {
 		switch event.keyCode {
 		case 53: // Escape
-			onFinish?(nil)
+			finish(with: nil)
 		case 36, 76: // Return, Enter
-			onFinish?(zoom)
+			finish(with: zoom)
 		case 123: // Left
 			move(x: -Self.keyboardStep)
 		case 124: // Right

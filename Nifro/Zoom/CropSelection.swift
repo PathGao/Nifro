@@ -91,8 +91,9 @@ extension AppState {
 			let websiteID,
 			let website = WebsitesController.shared.all[id: websiteID]
 		else {
-			// Cancelled, or the website went away while the overlay was up. The stored region was never
-			// touched, so putting the page back is the whole of undoing this.
+			// Cancelled, interrupted by something that took the overlay out of the window, or the
+			// website went away while the overlay was up. The stored region was never touched, so
+			// putting the page back is the whole of undoing this.
 			croppedScene?.installContentView()
 			return
 		}

@@ -309,6 +309,11 @@ final class AppState: ObservableObject {
 	scene while the framed one kept `.floating` and full opacity, the only way in the app to pin a
 	wallpaper above every window with no way back. Weak, so a scene torn down with its display reads as
 	gone instead of as some other scene.
+
+	Naming the right scene is all this does. What makes the restore *happen* on an unplug is that
+	`tearDown` empties the window, which takes the overlay out of it, which is an ending — see
+	`CropSelectionView.viewDidMoveToWindow`. The scene is still alive at that point, held by the
+	`departed` list `rebuildScenes` is iterating, so the window it puts back is its own.
 	*/
 	weak var croppingScene: WallpaperScene?
 	var croppingWebsiteID: Website.ID?
