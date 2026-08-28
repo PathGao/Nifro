@@ -392,7 +392,7 @@ struct AddWebsiteScreen: View {
 		do {
 			try SecurityScopedBookmarkManager.saveBookmark(for: url)
 		} catch {
-			await error.present()
+			error.presentAsModal()
 			return nil
 		}
 

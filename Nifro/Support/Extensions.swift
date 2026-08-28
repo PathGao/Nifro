@@ -588,59 +588,25 @@ private struct EmptyStateTextModifier: ViewModifier {
 // MARK: - Error
 extension Error {
 	/**
-	Present the error as an async sheet on the given window.
-
-	The function resumes when the sheet is dismissed.
-
-	- Note: This exists because the built-in `NSResponder#presentError(forModal:)` method requires too many arguments, selector as callback, and it says it's modal but it's not blocking, which is surprising.
-	*/
-	@MainActor
-	func presentAsSheet(for window: NSWindow) async {
-		await withCheckedContinuation { continuation in
-			NSApp.presentErrorAsSheet(self, for: window) {
-				continuation.resume()
-			}
-		}
-	}
-
-
-	/**
 	Present the error as a blocking app-level modal dialog.
 
-	Tread-safe.
+	Off the calling turn through `DispatchQueue.main.async`, which is a workaround rather than a thread
+	hop: presenting straight from the caller does not work reliably ([FB9857161](https://github.com/feedback-assistant/reports/issues/288)),
+	the same report `NSAlert.run()` further down is built around. The direct version stood here as three
+	commented-out lines waiting on that report, so it is the workaround that is the code.
+
+	App-modal is the only way this presents. The window-modal half — `presentAsSheet(for:)`, the
+	`NSResponder` glue under it and the `present(in:)` that chose between the two — went because no
+	call site in this repo's history ever passed a window: it arrived whole with the upstream shared
+	utilities file and every caller took the `nil` default. Attaching an error to a window is a
+	capability to be written, not one to be switched back on.
 	*/
-	func presentAsModalLegacy() {
+	@MainActor
+	func presentAsModal() {
 		DispatchQueue.main.async {
 			SSApp.activateIfAccessory()
 			NSApp.presentError(self)
 		}
-	}
-
-	/**
-	Present the error as a blocking app-level modal dialog.
-	*/
-	@MainActor
-	func presentAsModal() {
-		// It seems this is not yet working correctly: https://github.com/feedback-assistant/reports/issues/288
-//		SSApp.activateIfAccessory()
-//		NSApp.presentError(self)
-
-		presentAsModalLegacy()
-	}
-
-	/**
-	Present the error as an async sheet on the given window if the window is not `nil`, otherwise as an app-modal dialog.
-
-	The function resumes when the dialog is dismissed.
-	*/
-	@MainActor
-	func present(in window: NSWindow? = nil) async {
-		guard let window else {
-			presentAsModal()
-			return
-		}
-
-		await presentAsSheet(for: window)
 	}
 }
 extension Error {
@@ -704,38 +670,33 @@ extension LPMetadataProvider: @retroactive @unchecked Sendable {}
 // MARK: - NSAlert
 extension NSAlert {
 	/**
-	Show an async alert sheet on a window.
+	Show an app-modal alert from an `async` context, resuming when it is dismissed.
 	*/
 	@discardableResult
 	static func show(
-		in window: NSWindow? = nil,
 		title: String,
 		message: String? = nil,
 		style: Style = .warning,
 		buttonTitles: [String] = [],
 		defaultButtonIndex: Int? = nil
 	) async -> NSApplication.ModalResponse {
-		let alert = NSAlert(
+		await NSAlert(
 			title: title,
 			message: message,
 			style: style,
 			buttonTitles: buttonTitles,
 			defaultButtonIndex: defaultButtonIndex
 		)
-
-		guard let window else {
-			return await alert.run()
-		}
-
-		return await alert.beginSheetModal(for: window)
+		.run()
 	}
 
 	/**
-	Show an alert as a window-modal sheet, or as an app-modal (window-indepedendent) alert if the window is `nil` or not given.
+	Show an app-modal alert, blocking until it is dismissed.
+
+	The synchronous twin of `show`, which is the one to reach for from a `Task`.
 	*/
 	@discardableResult
 	static func showModal(
-		for window: NSWindow? = nil,
 		title: String,
 		message: String? = nil,
 		style: Style = .warning,
@@ -749,7 +710,7 @@ extension NSAlert {
 			buttonTitles: buttonTitles,
 			defaultButtonIndex: defaultButtonIndex
 		)
-		.runModal(for: window)
+		.runModal()
 	}
 
 	/**
@@ -793,22 +754,6 @@ extension NSAlert {
 		if let defaultButtonIndex {
 			self.defaultButtonIndex = defaultButtonIndex
 		}
-	}
-
-	/**
-	Runs the alert as a window-modal sheet, or as an app-modal (window-indepedendent) alert if the window is `nil` or not given.
-	*/
-	@discardableResult
-	func runModal(for window: NSWindow? = nil) -> NSApplication.ModalResponse {
-		guard let window else {
-			return runModal()
-		}
-
-		beginSheetModal(for: window) { returnCode in
-			NSApp.stopModal(withCode: returnCode)
-		}
-
-		return NSApp.runModal(for: window)
 	}
 
 	/**
@@ -919,36 +864,6 @@ extension NSItemProvider {
 extension NSItemProvider {
 	func hasItemConforming(to contentType: UTType) -> Bool {
 		hasItemConformingToTypeIdentifier(contentType.identifier)
-	}
-}
-
-// MARK: - NSResponder
-extension NSResponder {
-	// This method is internally implemented on `NSResponder` as `Error` is generic which comes with many limitations.
-	fileprivate func presentErrorAsSheet(
-		_ error: Error,
-		for window: NSWindow,
-		didPresent: (() -> Void)?
-	) {
-		final class DelegateHandler {
-			var didPresent: (() -> Void)?
-
-			@objc
-			func didPresentHandler() {
-				didPresent?()
-			}
-		}
-
-		let delegate = DelegateHandler()
-		delegate.didPresent = didPresent
-
-		presentError(
-			error,
-			modalFor: window,
-			delegate: delegate,
-			didPresent: #selector(delegate.didPresentHandler),
-			contextInfo: nil
-		)
 	}
 }
 
