@@ -133,7 +133,6 @@ extension ControlActionClosureProtocol {
 		}
 	}
 }
-extension NSMenuItem: ControlActionClosureProtocol {}
 
 
 extension NSStatusBarButton {

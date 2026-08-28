@@ -196,25 +196,16 @@ extension CharacterSet {
 struct CocoaButton: NSViewRepresentable {
 	typealias NSViewType = NSButton
 
-	enum KeyEquivalent: String {
-		case escape = "\u{1b}"
-		case `return` = "\r"
-	}
-
-	var title: String?
-	var attributedTitle: NSAttributedString?
-	let keyEquivalent: KeyEquivalent?
+	let title: String
 	let bezelStyle: NSButton.BezelStyle
 	let action: () -> Void
 
 	init(
 		_ title: String,
-		keyEquivalent: KeyEquivalent? = nil,
 		bezelStyle: NSButton.BezelStyle = .rounded,
 		action: @escaping () -> Void
 	) {
 		self.title = title
-		self.keyEquivalent = keyEquivalent
 		self.bezelStyle = bezelStyle
 		self.action = action
 	}
@@ -230,15 +221,7 @@ struct CocoaButton: NSViewRepresentable {
 	}
 
 	func updateNSView(_ nsView: NSViewType, context: Context) {
-		if attributedTitle == nil {
-			nsView.title = title ?? ""
-		}
-
-		if title == nil {
-			nsView.attributedTitle = attributedTitle ?? "".toNSAttributedString
-		}
-
-		nsView.keyEquivalent = keyEquivalent?.rawValue ?? ""
+		nsView.title = title
 		nsView.bezelStyle = bezelStyle
 
 		nsView.onAction = { _ in
@@ -668,7 +651,7 @@ extension Error {
 	}
 }
 extension Error {
-	public var isCancelled: Bool {
+	var isCancelled: Bool {
 		do {
 			throw self
 		} catch is CancellationError, URLError.cancelled, CocoaError.userCancelled {
@@ -900,9 +883,6 @@ extension NSEvent {
 	}
 }
 
-// MARK: - NSGestureRecognizer
-extension NSGestureRecognizer: ControlActionClosureProtocol {}
-
 // MARK: - NSImage
 // TODO: Check if any of these can be removed when targeting macOS 15.
 extension NSImage: @retroactive @unchecked Sendable {}
@@ -974,9 +954,6 @@ extension NSResponder {
 		)
 	}
 }
-
-// MARK: - NSToolbarItem
-extension NSToolbarItem: ControlActionClosureProtocol {}
 
 // MARK: - NSWindow
 extension NSWindow.Level {
@@ -1145,9 +1122,6 @@ extension Sequence where Element: Equatable {
 }
 
 // MARK: - String
-extension String {
-	var toNSAttributedString: NSAttributedString { .init(string: self) }
-}
 extension String {
 	var trimmed: Self {
 		trimmingCharacters(in: .whitespacesAndNewlines)
