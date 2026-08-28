@@ -208,14 +208,54 @@ struct SwitchedOffTests {
 		let panel = try Self.source(named: "DisplayPanel.swift")
 
 		#expect(panel.contains("!column.isShowing"))
-		#expect(panel.contains("Text(\"Switched off\")"))
 
-		// The same two words the power button already uses for the same fact.
-		#expect(panel.contains("String(localized: \"Switched off\")"))
+		// The same two words the power button already uses for the same fact. One literal now where
+		// there were two: the picture area draws every one of its readings through `reading(_:)`, so
+		// the button's phrase and the picture's are the same string and not two spellings of it.
+		#expect(panel.contains("reading(String(localized: \"Switched off\"))"))
 	}
 
 	/**
-	Nothing outside `RotationBehaviour` reads the per-display switch except the three places argued for here.
+	The app being off is a reading of its own, and it is read before the display's.
+
+	The same defect one level up. `isShowing` is both switches at once, so with the app off every
+	column drew the phrase belonging to the power button beside it — on a display nobody had switched
+	off, with a button that could not undo what had actually happened. On battery there is nothing to
+	press at all: the rule in Settings takes every wallpaper away and the panel's whole account of it
+	was every column blaming its own screen.
+
+	Asserted as the order rather than as the words, because the words are in the catalogue and the
+	order is the fix: `disabledReading` is `nil` while the app is running, so reading it first costs
+	nothing and reading it second would never be reached.
+	*/
+	@Test("The app being off outranks the display being off")
+	func theAppsOwnStateIsReadFirst() throws {
+		let panel = try Self.source(named: "DisplayPanel.swift")
+
+		guard
+			let app = panel.range(of: "column.disabledReading"),
+			let display = panel.range(of: "!column.isShowing")
+		else {
+			Issue.record("The picture area no longer reads both, so this test is reading nothing.")
+			return
+		}
+
+		#expect(
+			app.lowerBound < display.lowerBound,
+			"The picture area asks whether this display is switched off before it asks whether the app is, so an app disabled by the battery rule still reads as four screens each switched off on their own."
+		)
+
+		// And the sentence has to come from the app's own answer, not be re-derived beside the column.
+		let model = try Self.source(named: "DisplayPanelModel.swift")
+
+		#expect(
+			model.contains("AppState.shared.disabledReason"),
+			"The panel works out why the app is off for itself. Ask `disabledReason`, which is derived from the same expression `setEnabledStatus` decides with."
+		)
+	}
+
+	/**
+	Nothing outside `RotationBehaviour` reads the per-display switch except the two places argued for here.
 
 	The test above catches a `guard`, which is what refusing to do something looks like — and the panel
 	was not refusing anything. It was *drawing*: `isShowing: !scene.isDisabledForDisplay`, an argument
@@ -224,17 +264,25 @@ struct SwitchedOffTests {
 	every column still read "on", and the power button under it acted on that reading and switched the
 	display off for real. Turning the app back on then brought back a screen nobody had switched off.
 
-	So the rule is the read and not the guard, and the three left have to argue for themselves here.
-	All three name the per-display switch because it is the only one they can change: `setDisplayEnabled`
-	writes it, and the two that wake a display before acting on it can clear a display's own switch and
-	cannot clear a Disable that came from the battery.
+	So the rule is the read and not the guard, and the two left have to argue for themselves here. Both
+	name the per-display switch because it is the only one they can change: `setDisplayEnabled` writes
+	it, and `wakeDisplay` clears it on a display somebody has just asked to see something on, which it
+	can do — while a Disable that came from the battery it cannot touch.
+
+	It was three. The two callers that woke a display before acting on it each asked the switch for
+	themselves, and that is exactly how the panel's own column came to hold two opinions: the arrows
+	woke the display in `step` and inherited the same answer from `makeCurrent` underneath, while the
+	chooser beside them was believed to do neither. One reader, two callers, and the third way of
+	pointing a display at something — picking a playlist, which writes a different key and reaches no
+	`makeCurrent` at all — could be given the answer by calling it.
 	*/
-	@Test("Only the writer and the two wake-ups read the switch on its own")
+	@Test("Only the writer and the wake-up read the switch on its own")
 	func onlyTheArguedSitesReadThePerDisplaySwitch() throws {
 		let allowed = [
-			"AppState.swift": ["func setDisplayEnabled(_ isEnabledForDisplay: Bool, on display: Display?)"],
-			"DisplayPanelModel.swift": ["func step(_ direction: Step, on display: Display?)"],
-			"WebsitesController.swift": ["func makeCurrent(_ website: Website, on display: Display?, switchingDisplayOn: Bool = true)"],
+			"AppState.swift": [
+				"func setDisplayEnabled(_ isEnabledForDisplay: Bool, on display: Display?)",
+				"func wakeDisplay(_ display: Display?)"
+			],
 			// The declaration and the predicate that reads it. `isSwitchedOff` is the whole point: it is
 			// the one place allowed to turn the two switches into one answer.
 			"RotationBehaviour.swift": ["var isDisabledForDisplay: Bool", "var isSwitchedOff: Bool"]
@@ -258,6 +306,46 @@ struct SwitchedOffTests {
 				"""
 			)
 		}
+	}
+
+	/**
+	Every way of asking to see something on a display wakes that display.
+
+	One reader with two callers, which is the shape the rest of this suite argues for applied to the
+	other direction: not "who may refuse", but "who must wake". A mark that moves under a dark screen
+	is the defect — nothing is fetched, nothing appears, so it gets pressed again, and the display
+	comes back later on something nobody chose.
+
+	The panel's own column had both halves of this wrong at once. Its arrows woke the display in
+	`step` *and* inherited the same answer from `makeCurrent` underneath, so the wake looked like the
+	arrows' own business — and the website chooser beside them, which is a bare `makeCurrent`, was read
+	as not doing it. Picking a playlist genuinely did not: it writes a different key and reaches no
+	`makeCurrent` at all, so it is the one caller that has to say `wakeDisplay` in its own body.
+
+	`step` is asserted the other way round, as the absence: the day it grows its own copy back is the
+	day the column has two opinions again.
+	*/
+	@Test("Picking a website, stepping and picking a playlist all wake the display")
+	func everyRequestToSeeSomethingWakesTheDisplay() throws {
+		// That `makeCurrent` is the one place the answer lives is `ScopeTests`'s to assert, and it does.
+		// What is left for here is the three controls in one column that have to reach it, or say the
+		// answer themselves where they cannot.
+		let model = try Self.source(named: "DisplayPanelModel.swift")
+
+		#expect(
+			try Self.body(of: "func selectWebsite(", in: model).contains("makeCurrent("),
+			"The panel's website chooser sets the mark some other way, so it no longer inherits the wake in `makeCurrent`."
+		)
+
+		#expect(
+			try Self.body(of: "func selectPlaylist(", in: model).contains("wakeDisplay"),
+			"Picking a playlist for a switched-off display changes the label and leaves the screen dark. It writes `currentPlaylists` directly, so it is the one caller that cannot inherit the answer."
+		)
+
+		#expect(
+			try !Self.body(of: "func step(", in: model).contains("setDisplayEnabled"),
+			"`step` wakes the display itself as well as through `makeCurrent`, which is two answers to what pointing a display at a website means."
+		)
 	}
 
 	/**

@@ -238,6 +238,41 @@ final class WallpaperScene {
 	var pageLayoutSize: CGSize? { screen?.pageFrame.size }
 
 	/**
+	The part of the web view that is actually on the display, in the web view's own coordinates.
+
+	With no region framed that is the whole view: the page fills the window at its own size, so the
+	view's bounds and what is on screen are the same rectangle. With one framed they are not, and the
+	gap is the whole of this — `PageView` sets the view's frame to the magnified *whole page* and clips
+	it, so the bounds are several screens across and the display is showing one window into them.
+
+	Both things that photograph this view have to say which of the two they mean, and until now only
+	one of them did. `WKSnapshotConfiguration` defaults to the view's bounds, so the panel's thumbnail
+	took the whole magnified page and shrank it into 260 points: the column drew an entire website
+	while the display showed one slice of it. The menu bar band asked for its strip and worked the
+	answer out for itself, which is the other half of the same defect — one rectangle with two
+	derivations, and only one of them ever maintained.
+
+	Reads `content` rather than `website?.zoom`, so it mirrors what is on screen rather than what the
+	website asks for. The two differ for as long as a new website takes to load out of sight, and
+	during that the old page is still up wearing the old region.
+
+	Not clipped to the bounds here. It is worked out from the size the page was laid out at, and a
+	display change moves that before the view holding the page has been rebuilt for it — so every
+	caller intersects with the live bounds and checks what is left is not empty, which is a thing to do
+	with a snapshot rectangle rather than with a description of the display.
+	*/
+	var wallpaperRect: CGRect {
+		guard
+			case .live(let zoom?) = content,
+			let pageSize = pageLayoutSize
+		else {
+			return webViewController.webView.bounds
+		}
+
+		return zoom.onScreenRegion(inPageOfSize: pageSize)
+	}
+
+	/**
 	Record that the page on screen is now this scene's website, exactly as the list has it.
 	*/
 	func adoptLoadedWebsite() {
@@ -541,6 +576,11 @@ final class WallpaperScene {
 	panel a live, moving photograph of a page the user had switched off, which is what they saw and
 	reported. `isSwitchedOff` is the same question the load path now asks; with loading refused this
 	is belt and braces, and it is the cheap half of the pair.
+
+	`nil` also when the region and the view have not caught up with each other, which is what the empty
+	rectangle below means: a display change moves the size the page is laid out at before the view is
+	rebuilt for it, and the panel refreshes about twelve times a second, so it can ask in that gap. A
+	frame of nothing is the honest answer for one turn of that loop.
 	*/
 	func snapshot() async -> NSImage? {
 		guard
@@ -551,18 +591,36 @@ final class WallpaperScene {
 			return nil
 		}
 
+		let webView = webViewController.webView
 		let configuration = WKSnapshotConfiguration()
 
 		// The page is already on screen, so there is nothing to wait for, and waiting on a wallpaper
 		// that animates means waiting forever.
 		configuration.afterScreenUpdates = false
 
+		// What the display is showing, which under a framed region is not the view's bounds — and the
+		// bounds are what this asked for by saying nothing, so the panel drew the whole page shrunk to
+		// a thumbnail while the display showed one slice of it. Clipped rather than trusted, for the
+		// reason `wallpaperRect` gives for not clipping itself, and guarded on what is left the way
+		// `refreshMenuBarBandColor` guards the same pair of lines: `takeSnapshot` on an empty rectangle
+		// is an error rather than an empty image.
+		configuration.rect = wallpaperRect.intersection(webView.bounds)
+
+		guard
+			configuration.rect.width > 0,
+			configuration.rect.height > 0
+		else {
+			return nil
+		}
+
 		// At the size it will be looked at, not at the size of the display. Full resolution cost about
 		// 600ms a frame on a 4K screen — a panel meant to look live updating roughly once a second —
-		// and every one of those pixels was thrown away by a 260-point thumbnail anyway.
+		// and every one of those pixels was thrown away by a 260-point thumbnail anyway. It scales
+		// `rect` rather than the bounds, so the two settings agree by construction: WebKit keeps the
+		// rectangle's aspect ratio, and the rectangle is now the display's.
 		configuration.snapshotWidth = NSNumber(value: Self.previewWidth)
 
-		return try? await webViewController.webView.takeSnapshot(configuration: configuration)
+		return try? await webView.takeSnapshot(configuration: configuration)
 	}
 
 	/**

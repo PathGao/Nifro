@@ -158,6 +158,8 @@ private struct DisplayColumn: View {
 		VStack(spacing: 9) {
 			displayName
 
+			failureLine
+
 			VStack(spacing: 9) {
 				VStack(spacing: 9) {
 					MarqueeText(text: column.websiteName ?? String(localized: "No Website"), isActive: isHovering)
@@ -310,6 +312,35 @@ private struct DisplayColumn: View {
 	}
 
 	/**
+	That this display's page did not load, when it did not.
+
+	At the top of the column, under the display's name and above everything about the page, because it
+	is the reason the rest of the column is not describing what the user expected — the menu this panel
+	replaced put the same message at the very top for the same reason. It says one thing and hangs the
+	error itself off the pointer: this is 260 points wide and a `WKWebView`'s own account of a failure
+	is a sentence and a URL, which would take four lines and push the picture off the panel.
+
+	`onTint` rather than red. It is the colour this panel already uses for something happening — the
+	chooser pulses in it while a page is on its way — and a failure to load is the end of that same
+	story rather than a new vocabulary for the column to carry.
+
+	Outside the dimming and outside the `disabled`, like the chooser below it: a load in flight makes
+	the controls inert and this is not a control. It clears itself, because `load` writes the failure
+	away before it starts the next attempt.
+	*/
+	@ViewBuilder
+	private var failureLine: some View {
+		if let failure = column.failure {
+			Text("This page did not load")
+				.font(.caption)
+				.foregroundStyle(PanelMetrics.onTint)
+				.lineLimit(1)
+				.frame(maxWidth: PanelMetrics.columnWidth)
+				.help(failure)
+		}
+	}
+
+	/**
 	Which display this column is about, and nothing else.
 
 	A title rather than a control. Everything a display can be told to do is below it, where the
@@ -328,14 +359,16 @@ private struct DisplayColumn: View {
 	/**
 	The wallpaper as it is now, or an honest stand-in for it.
 
-	Four states, because four things can be true, and there used to be two. A picture. "Switched off",
-	where the power button beside it is off — the same two words that button's accessibility label
-	uses, because they are describing the same fact and a column should not have two vocabularies for
-	it. "No Website", but only where the display genuinely has none — that used to be what any column
-	without a picture said, so a display whose page simply had not been photographed yet was told it
-	had nothing on it. And the bare rectangle for the rest: the panel opens without pictures and the
-	first refresh fills them in about a frame later, so this is what a picture looks like in the moment
-	before it arrives. An empty rectangle is not mistaken for anything, which is the whole of what is
+	Five states, because five things can be true, and there used to be two. A picture. The app being
+	off, which is not this display's doing and is read first for that reason — see `disabledReading`,
+	and note that the two below it are both about a screen the user chose something for, while this one
+	is about there being no wallpapers anywhere. "Switched off", where the power button beside it is
+	off — the same two words that button's accessibility label uses, because they are describing the
+	same fact and a column should not have two vocabularies for it. "No Website", but only where the
+	display genuinely has none — that used to be what any column without a picture said, so a display
+	whose page simply had not been photographed yet was told it had nothing on it. And the bare
+	rectangle for the rest: the panel opens without pictures and the first refresh fills them in about
+	a frame later, so this is what a picture looks like in the moment before it arrives. An empty rectangle is not mistaken for anything, which is the whole of what is
 	wanted here — the previous opening's photograph, which is what used to be in this space, is
 	mistaken for the page.
 
@@ -361,14 +394,12 @@ private struct DisplayColumn: View {
 					.resizable()
 					.scaledToFill()
 					.clipShape(RoundedRectangle(cornerRadius: PanelMetrics.pictureRadius))
+			} else if let disabledReading = column.disabledReading {
+				reading(disabledReading)
 			} else if !column.isShowing {
-				Text("Switched off")
-					.font(.callout)
-					.foregroundStyle(.secondary)
+				reading(String(localized: "Switched off"))
 			} else if column.websiteID == nil {
-				Text("No Website")
-					.font(.callout)
-					.foregroundStyle(.secondary)
+				reading(String(localized: "No Website"))
 			}
 		}
 		.frame(width: PanelMetrics.columnWidth, height: 162)
@@ -411,6 +442,23 @@ private struct DisplayColumn: View {
 			.background(.thinMaterial, in: RoundedRectangle(cornerRadius: 7))
 			.padding(6)
 		}
+	}
+
+	/**
+	One of the picture area's readings.
+
+	Written once for all of them because there are three now and were two, and each of the two carried
+	its own copy of the same two modifiers — which is how a fourth would have arrived looking slightly
+	different from its neighbours. The text is passed in already localized rather than as a key, so
+	`disabledReading` — which is a sentence chosen in the model, where the app's reason for being off
+	is known — draws through the same call as the two the view chooses itself.
+	*/
+	private func reading(_ text: String) -> some View {
+		Text(text)
+			.font(.callout)
+			.foregroundStyle(.secondary)
+			.multilineTextAlignment(.center)
+			.padding(.horizontal, 9)
 	}
 
 	/**

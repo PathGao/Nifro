@@ -507,58 +507,81 @@ struct RotationIntervalTests {
 }
 
 /**
-The strip of page the menu bar band takes its colour from.
+Which part of the web view the display is actually showing.
 
-The band stands in for whatever is drawn behind the menu bar. With a region framed, that is not the
-top of the page — it is somewhere in the middle of it, magnified — and the version that shipped took
-the colour off the top of the page regardless, so a framed wallpaper tinted the menu bar with a part
-of the page that is usually not on screen at all.
+Two things photograph the wallpaper's own web view: the menu bar band, which takes a strip off the
+top to tint the menu bar with, and the panel's thumbnail, which takes all of it. With a region framed
+neither of them wants the view's bounds — `PageView` lays the page out as the whole thing, several
+times larger than the window, and clips it — so what is on screen is a window into those bounds, and
+that window is what this works out.
+
+Both readers got it wrong in the same direction and for the same reason, which is that they each
+answered it separately. The band took its colour off the top of the whole page, usually a part of it
+not on screen at all. The thumbnail asked for nothing, which `WKSnapshotConfiguration` reads as the
+bounds, so the panel drew an entire website shrunk into 260 points beside a display showing one
+paragraph of it.
 */
-@Suite("Menu bar band sampling")
-struct MenuBarBandSamplingTests {
+@Suite("What of the page is on screen")
+struct OnScreenRegionTests {
 	private let pageSize = CGSize(width: 1470, height: 896)
-	private let height = 33.0
 
-	@Test("With no magnification the strip is the top of the page")
-	func unzoomedIsTheTop() {
-		let strip = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 1).topStrip(inPageOfSize: pageSize, height: height)
+	@Test("With no magnification it is the whole page")
+	func unzoomedIsEverything() {
+		let region = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 1).onScreenRegion(inPageOfSize: pageSize)
 
-		#expect(strip == CGRect(x: 0, y: 0, width: pageSize.width, height: height))
+		#expect(region == CGRect(origin: .zero, size: pageSize))
 	}
 
-	@Test("The strip is as wide as the window, not as wide as the region")
-	func widthIsNotScaled() {
-		let strip = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 2).topStrip(inPageOfSize: pageSize, height: height)
+	@Test("It is the size of the window, not the size of the region")
+	func sizeIsNotScaled() {
+		let region = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 2).onScreenRegion(inPageOfSize: pageSize)
 
 		// Half the page across, centred, magnified twice: the top-left of the region is a quarter of
 		// the page in and down, and that lands at half the page's dimensions once magnified.
-		#expect(strip.origin.x == pageSize.width / 2)
-		#expect(strip.origin.y == pageSize.height / 2)
+		#expect(region.origin.x == pageSize.width / 2)
+		#expect(region.origin.y == pageSize.height / 2)
 
-		// Not `region.width`, and not `pageSize.width * scale`. Both are plausible and both are wrong:
-		// the view's coordinates are already magnified, so the strip stays the width of the window.
-		// Literals rather than the properties above: a rectangle's members are `CGFloat` and these are
-		// `Double`, and `#expect` reports the mixed comparison as failed even when both sides print the
-		// same number.
-		#expect(strip.width == pageSize.width)
-		#expect(strip.height == 33)
+		// Not the region's own size, and not the page magnified. Both are plausible and both are
+		// wrong: the view's coordinates are already magnified, so what is on screen stays one window
+		// across and one window down. Literals rather than the property above: a rectangle's members
+		// are `CGFloat` and these are `Double`, and `#expect` reports the mixed comparison as failed
+		// even when both sides print the same number.
+		#expect(region.width == 1470)
+		#expect(region.height == 896)
 	}
 
-	@Test("A region at the top-left samples the view's own corner")
-	func topLeftRegionSamplesTheCorner() {
-		let strip = Zoom(center: .zero, scale: 4).topStrip(inPageOfSize: pageSize, height: height)
+	@Test("A region at the top-left is the view's own corner")
+	func topLeftRegionIsTheCorner() {
+		let region = Zoom(center: .zero, scale: 4).onScreenRegion(inPageOfSize: pageSize)
 
-		#expect(strip.origin == .zero)
+		#expect(region.origin == .zero)
 	}
 
 	@Test("A region at the bottom-right stays inside the magnified page")
 	func bottomRightRegionStaysInBounds() {
-		let strip = Zoom(center: CGPoint(x: 1, y: 1), scale: 4).topStrip(inPageOfSize: pageSize, height: height)
+		let region = Zoom(center: CGPoint(x: 1, y: 1), scale: 4).onScreenRegion(inPageOfSize: pageSize)
 
 		// The region is clamped to the page's far corner, so its origin is three quarters of the way
 		// along, and magnified that is the far edge of the view minus one window's width.
-		#expect(strip.origin.x == pageSize.width * 3)
-		#expect(strip.maxX == pageSize.width * 4)
+		#expect(region.origin.x == pageSize.width * 3)
+		#expect(region.maxX == pageSize.width * 4)
+
+		// The far corner exactly, which is what makes this safe to hand to `takeSnapshot`: a rectangle
+		// that ran past the end of the magnified page would be asking for pixels that do not exist.
+		#expect(region.maxY == pageSize.height * 4)
+	}
+
+	@Test("The menu bar strip is the top of it")
+	func theBandTakesTheTopOfIt() {
+		let zoom = Zoom(center: CGPoint(x: 0.5, y: 0.5), scale: 2)
+		var strip = zoom.onScreenRegion(inPageOfSize: pageSize)
+		strip.size.height = 33
+
+		// The shortening `MenuBarBand.topStripOfWallpaper` does, kept here so the two readers' one
+		// difference is written down: the origin is shared and only the height is the band's own.
+		#expect(strip.origin == zoom.onScreenRegion(inPageOfSize: pageSize).origin)
+		#expect(strip.width == 1470)
+		#expect(strip.height == 33)
 	}
 
 	@Test("Magnification follows the clamped region, not the raw scale")

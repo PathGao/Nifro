@@ -209,24 +209,15 @@ extension WallpaperScene {
 	The `height` points of web view that end up along the top of the display, in the web view's own
 	coordinates.
 
-	With no region framed that is the web view's own top strip: the page fills the window at its own
-	size, so the two tops are the same place. With one it is somewhere in the middle of the page, and
-	`Zoom.topStrip(inPageOfSize:height:)` is where that is worked out — the same place `PageView` gets
-	its magnification from, so the band cannot drift away from the thing it is standing in for.
-
-	Reads `content` rather than `website?.zoom`, so it mirrors what is on screen rather than what the
-	website asks for. The two differ for as long as a new website takes to load out of sight, and
-	during that the old page is still up wearing the old region.
+	The top of `WallpaperScene.wallpaperRect` and nothing else. That rectangle used to be worked out
+	here, in this shape, and nowhere else — so the panel's thumbnail, which needs the same answer,
+	silently took the view's bounds instead and drew the whole page where the display shows one region
+	of it. Shortened rather than re-derived, so a second reader cannot go on being a second derivation.
 	*/
 	private func topStripOfWallpaper(height: Double) -> CGRect {
-		guard
-			case .live(let zoom?) = content,
-			let pageSize = pageLayoutSize
-		else {
-			return CGRect(x: 0, y: 0, width: webViewController.webView.bounds.width, height: height)
-		}
-
-		return zoom.topStrip(inPageOfSize: pageSize, height: height)
+		var strip = wallpaperRect
+		strip.size.height = height
+		return strip
 	}
 }
 

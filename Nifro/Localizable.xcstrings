@@ -1339,6 +1339,16 @@
         }
       }
     },
+    "Nifro is off": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nifro 已关闭"
+          }
+        }
+      }
+    },
     "Nifro is open source under the MIT licence.": {
       "localizations": {
         "zh-Hans": {
@@ -1445,6 +1455,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "没有匹配的网站"
+          }
+        }
+      }
+    },
+    "Off while this Mac is on battery": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "使用电池供电时已关闭"
           }
         }
       }
@@ -2305,6 +2325,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nifro 自带的网站会进入你的默认播放列表；如果你没有默认播放列表，会新建一个。"
+          }
+        }
+      }
+    },
+    "This page did not load": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "此页面未能载入"
           }
         }
       }

@@ -623,7 +623,7 @@ struct ScopeTests {
 	func steppingWakesADisplayWhereverItIsAskedFrom() throws {
 		#expect(
 			try Self.body(of: "func makeCurrent(", in: Self.source(named: "WebsitesController.swift"))
-				.contains("setDisplayEnabled"),
+				.contains("wakeDisplay"),
 			"`makeCurrent` no longer switches a display back on, so a display that is off takes the mark and stays dark."
 		)
 
@@ -730,6 +730,65 @@ struct ScopeTests {
 				)
 			}
 		}
+	}
+
+	/**
+	A failed load is said somewhere a user will see it.
+
+	The other half of the test above, and the reason that one was only half a fix. Splitting the slot
+	made the store correct — each display's failure kept under its own key, no writer able to erase
+	another's — and left it read by one surface: the tooltip on the menu bar icon, which appears only
+	if somebody rests a pointer on a glyph that gives no sign of having anything to say. A wallpaper
+	whose URL starts answering with an error therefore keeps drawing the last page that worked, on the
+	desktop and in the panel's picture alike, while the column names the website as though nothing had
+	happened.
+
+	The column is where it belongs because the column is per display and so is the failure. Asserted as
+	"the model asks for this display's error and the view draws it", the two ends of one field, because
+	either on its own is the state this had for six releases: a value carried and shown by nothing, or
+	a view with nothing to show.
+	*/
+	@Test("The panel reads the failure recorded for its own display")
+	func theColumnCanSayAPageDidNotLoad() throws {
+		let model = try Self.source(named: "DisplayPanelModel.swift")
+
+		#expect(
+			try Self.body(of: "private func column(for scene: WallpaperScene", in: model).contains("webViewError(on:"),
+			"A column is built without asking whether this display's page loaded, so a page that stopped arriving is reported in a tooltip and nowhere else."
+		)
+
+		#expect(
+			try Self.source(named: "DisplayPanel.swift").contains("column.failure"),
+			"The column carries the failure and nothing draws it, which is the same as not carrying it."
+		)
+	}
+
+	/**
+	What the display is showing is one rectangle, not one per reader.
+
+	The same shape as `canRotate` above, in geometry. Under a framed region the wallpaper's web view is
+	laid out as the whole page several times larger than the window, and `PageView` clips it — so the
+	view's bounds and the part of it on screen are two different rectangles, and everything that
+	photographs that view has to say which one it means. Two things do. The menu bar band worked the
+	answer out for itself; the panel's thumbnail said nothing, which `WKSnapshotConfiguration` reads as
+	the bounds, so the column drew an entire website shrunk into 260 points while the display showed
+	one slice of it.
+
+	One derivation on the scene, `wallpaperRect`, over one pure function in `Geometry`, which is where
+	the numbers are actually tested. What this adds is that both readers go through it — a second
+	`case .live(let zoom?)` appearing anywhere else is the defect coming back, whatever it computes.
+	*/
+	@Test("Everything that photographs the wallpaper asks for the same rectangle")
+	func bothSnapshotsShareOneRectangle() throws {
+		#expect(
+			try Self.body(of: "func snapshot() async -> NSImage?", in: Self.source(named: "WallpaperScene.swift")).contains("wallpaperRect"),
+			"The panel's thumbnail does not say what part of the web view it wants, so it gets the bounds — which under a framed region is the whole page, not what the display is showing."
+		)
+
+		#expect(
+			try Self.body(of: "private func topStripOfWallpaper(height: Double)", in: Self.source(named: "MenuBarBand.swift")).contains("wallpaperRect"),
+			"The band works out what is on screen for itself again. That expression is `wallpaperRect`, and a second copy of it is how the thumbnail came to have none."
+		)
 	}
 
 	/**

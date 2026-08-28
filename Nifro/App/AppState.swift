@@ -295,6 +295,52 @@ final class AppState: ObservableObject {
 	}
 
 	/**
+	Why the app is putting nothing on screen, or `nil` when it is putting something on screen.
+
+	`setEnabledStatus` folds three inputs into one `Bool`, which is everything the app needs in order
+	to act and less than a person needs in order to understand. Off because the user asked and off
+	because the laptop came off its charger are the same value and different sentences, and only one of
+	them is something they did.
+
+	Which matters because of what the panel showed before this existed. Every display's `isSwitchedOff`
+	is true while the app is off, so every column read "Switched off" — the phrase belonging to the
+	power button beside it, on a display nobody had touched. Unplug a laptop with "Deactivate while on
+	battery" set and every wallpaper goes, and the panel's account of it was four columns each blaming
+	their own screen.
+
+	Two readings rather than three. The screen being locked is the third input and cannot be seen from
+	here — there is no panel over a locked screen — so it joins the manual switch under the one word
+	that is true of both.
+	*/
+	var disabledReason: DisabledReason? {
+		guard !isEnabled else {
+			return nil
+		}
+
+		return isDeactivatedOnBattery ? .onBattery : .switchedOff
+	}
+
+	/**
+	Whether the battery rule in Settings is what is keeping the wallpapers off screen.
+
+	One expression, read by `setEnabledStatus` to decide and by `disabledReason` to explain. Written
+	out twice, the explanation would be a second opinion about the decision, and the two would part on
+	the day the rule grows a condition — which is the shape of nearly everything else fixed in this
+	app.
+	*/
+	private var isDeactivatedOnBattery: Bool {
+		Defaults[.deactivateOnBattery] && powerSourceWatcher?.powerSource.isUsingBattery == true
+	}
+
+	enum DisabledReason {
+		/// Somebody, or something with no explaining to do, turned the app off.
+		case switchedOff
+
+		/// The battery rule in Settings is on and the machine is running off its battery.
+		case onBattery
+	}
+
+	/**
 	The overlay the user drags a crop region on.
 	*/
 	var cropSelectionView: CropSelectionView?
@@ -326,11 +372,24 @@ final class AppState: ObservableObject {
 	Keyed by `Display.settingsKey(for:)`, the key the other per-display facts already use, so a
 	display unplugged and plugged back in comes back to its own entry rather than to a stranger's.
 
-	Read only by `refreshStatusItemTooltip`, which is the app's one surface for a failure. Giving the
-	panel a per-display reading of it is K26 and wants a column that can say so; this is the store that
-	one would read, kept honest in the meantime rather than built out ahead of it.
+	Read by `refreshStatusItemTooltip`, which is a tooltip on an icon nobody is pointing at, and by the
+	panel through `webViewError(on:)` — the column that K26 said this store was waiting for. Until that
+	column existed, a wallpaper URL that started answering with an error was recorded here correctly
+	and said nowhere a user would look: the desktop kept the last page that worked, the column named the
+	website, and nothing anywhere reported that the website was no longer arriving.
 	*/
 	private var storedWebViewErrors: [String: Error] = [:]
+
+	/**
+	What went wrong loading `display`'s page, if anything.
+
+	A reader rather than the store, because the store is one dictionary shared by every display and the
+	panel builds one column at a time. Handing out the whole thing is how the app-wide slot this
+	replaced came to be written by four per-display callers.
+	*/
+	func webViewError(on display: Display?) -> Error? {
+		storedWebViewErrors[Display.settingsKey(for: display)]
+	}
 
 	/**
 	Record what went wrong on `display`, or that nothing has.
@@ -442,7 +501,7 @@ final class AppState: ObservableObject {
 	}
 
 	func setEnabledStatus() {
-		isEnabled = !isManuallyDisabled && !isScreenLocked && !(Defaults[.deactivateOnBattery] && powerSourceWatcher?.powerSource.isUsingBattery == true)
+		isEnabled = !isManuallyDisabled && !isScreenLocked && !isDeactivatedOnBattery
 	}
 
 	/**
@@ -591,6 +650,30 @@ final class AppState: ObservableObject {
 		Defaults[.latestKnownVersion] = latest
 
 		return UpdateCheck.isNewer(latest, than: SSApp.version) ? .newer(latest) : .upToDate
+	}
+
+	/**
+	Wake `display` if it is switched off on its own, and do nothing whatever if it is not.
+
+	Every request to *see* something on a display ends here: picking a website, stepping to the next
+	one, pointing the display at another playlist. Each of those on a dark screen used to move a mark
+	and change a label while the display stayed dark, so it got pressed again — and the display came
+	back later on a website nobody had chosen.
+
+	The check is the point, not an optimisation. `setDisplayEnabled(true, on:)` reloads the page and
+	restarts both timers, so calling it on a display that is already on is not free and not invisible:
+	it would throw away the page and reset the rotation clock every time anybody picked anything.
+
+	It cannot clear a Disable that came from the battery, the lock screen or the Disable shortcut.
+	That is one switch above this one — see `WallpaperScene.isSwitchedOff` — and this is the half a
+	request to see something is allowed to answer.
+	*/
+	func wakeDisplay(_ display: Display?) {
+		// `if` rather than `guard`, so this reads as the one place that acts on half of "off" rather
+		// than as another place that refuses on half of it. `SwitchedOffTests` draws that line.
+		if scenes.first(where: { $0.display == display })?.isDisabledForDisplay == true {
+			setDisplayEnabled(true, on: display)
+		}
 	}
 
 	/**
