@@ -10,9 +10,9 @@ final class WebsitesController {
 	/**
 	One shuffled order per display, so Random on one screen leaves the other where it was.
 
-	Keyed by display rather than one iterator over the whole list, for the same reason `isCurrent` is
-	no longer read across displays: a website belongs to one screen, and a pick that can land on
-	another screen's website changes a wallpaper the person is not looking at.
+	Keyed by display rather than one iterator over the whole list, for the same reason the cursor is: a
+	website belongs to one screen, and a pick that can land on another screen's website changes a
+	wallpaper the person is not looking at.
 	*/
 	var randomIterators = [Display?: AnyIterator<Website>]()
 
@@ -31,6 +31,90 @@ final class WebsitesController {
 	private let allBinding = Defaults.bindingCollection(for: .websites)
 
 	/**
+	Which website `display` is showing, and the only two ways to ask.
+
+	Every reader of "what is up on which screen" comes through here, so there is one derivation of the
+	key. That is the part worth guarding rather than the dictionary itself: a per-display fact keyed by
+	something a little different at each call site loses the invariant with nothing to see — the
+	website's own display and the display its scene actually draws on are the same value until a
+	display is unplugged, and then they are not.
+
+	`Display.settingsKey(for:)` is the key `disabledDisplays`, `rotationModes`, `rotationIntervals` and
+	`browsingDisplays` already use, so a display unplugged and plugged back in comes back to its own
+	entry rather than to a stranger's — and its entry is still there, because nothing forgets one.
+	*/
+	func currentWebsiteID(on display: Display?) -> Website.ID? {
+		Defaults[.currentWebsites][Display.settingsKey(for: display)]
+	}
+
+	/**
+	Whether `website` is the one on screen where it lives.
+
+	The question the flat lists ask — the Websites window and the Shortcuts entity — neither of which
+	has a display in hand, because neither is about one screen. Asked of the website's own display
+	rather than of the whole dictionary, and that is not the same question: "Show on" moves a website
+	to another screen without going near the cursor, so the display it left goes on naming it until
+	something else is chosen there. Answered by any entry at all, the list would draw a tick against a
+	website nothing is showing — which is the visible half of the defect this key was made to remove,
+	put back in a different place.
+
+	The stale entry itself is left alone. It names a website that display no longer has, which
+	`scheduled` already reads as "this display has not started" and answers with the top of its list.
+	*/
+	func isShowing(_ website: Website) -> Bool {
+		currentWebsiteID(on: website.effectiveDisplay) == website.id
+	}
+
+	/**
+	Give what a display that has just gone away was showing to the screen its website lands on.
+
+	The eviction rule, stated as a write. A website pinned to a departed display moves to the main one
+	when the user has asked for that, so two wallpapers now claim one desktop, and the arriving one
+	takes it — `showingIndex` argues for that at length. It used to have to be a tie-break, because the
+	two claims were two `Bool`s on two websites and neither could be given up without giving up the
+	other. They are two dictionary entries now, so the answer can simply be written into the entry of
+	the screen the website landed on.
+
+	**Nothing is forgotten here.** The departed display keeps its own entry, for the same reason
+	`rebuildScenes` keeps `disabledDisplays`, `rotationModes` and `rotationIntervals` for it: the user
+	picked that wallpaper for that screen. Unplug a monitor at night and plug it in in the morning and
+	it has to come back showing what it was showing, exactly as it comes back switched off or set to
+	rotate hourly. Browsing Mode is the one that cannot survive its display, and it is the odd one
+	because it means "somebody is typing on this screen right now", which stops being true when the
+	screen is gone. Which website is up does not stop being true, it stops being visible.
+
+	`departed` is the displays whose scenes were just torn down, and it has to be, rather than "every
+	stored key with no scene". The second reading fires again on every rebuild — every edit to the
+	website list, every wake, every display change — for as long as that display stays unplugged, so it
+	would put the evicted website back on the landing screen each time the user rotated away from it.
+	It also writes on every one of those passes, and the write republishes into the rebuild that made
+	it. Taken from the tear-down, this happens once, at the moment the cable comes out, which is what
+	"the arriving wallpaper takes the screen" means.
+	*/
+	func handOverCurrentWebsites(from departed: [Display?]) {
+		let cursors = Defaults[.currentWebsites]
+		var updated = cursors
+
+		for display in departed {
+			guard
+				let id = cursors[Display.settingsKey(for: display)],
+				let website = all[id: id],
+				website.isShowable
+			else {
+				continue
+			}
+
+			updated[Display.settingsKey(for: website.effectiveDisplay)] = id
+		}
+
+		guard updated != cursors else {
+			return
+		}
+
+		Defaults[.currentWebsites] = updated
+	}
+
+	/**
 	The normalized addresses of the websites that still have no title.
 
 	`recordObservedTitle` runs on every `document.title` a live page writes, and reading `all` there is
@@ -42,8 +126,7 @@ final class WebsitesController {
 	Kept here rather than worked out per call because it is derived from the list, and the list already
 	has one place where every route to it meets: the publisher below. Nothing else may write this, and
 	nothing else needs to — `Defaults.publisher` sees writes through `all`, through `allBinding` and
-	through any settings screen that reaches the key directly, which is why the current-mark repair in
-	the same closure can also be the only one of its kind.
+	through any settings screen that reaches the key directly.
 
 	Subscribed with `ObservationOptions.initial`, which is `Defaults.publisher`'s default, so this is
 	filled from the stored list before `init` returns rather than at the first edit.
@@ -66,45 +149,6 @@ final class WebsitesController {
 						.filter(\.title.isEmpty)
 						.map { $0.url.normalized() }
 				)
-
-				// Every display keeps exactly one marked website, not the list as a whole — both
-				// halves of that, which is what changed here. A display with none is what `advance`
-				// reads as "start from the beginning", so it would never move past the first website
-				// in its list; a display with two is a tie `scheduled(for:)` breaks by list order, so
-				// a website sent to a display by "Show on" arrived with no effect and that screen did
-				// not change. Only the first half was enforced, and it is the half whose failure is
-				// visible. `repairedCurrentFlags` is where the rule and the argument for it live.
-				//
-				// Here rather than in `update`, because "Show on" never reaches `update`: it writes
-				// the display through a settings binding straight into the stored list. This
-				// publisher is the one place every route to that list meets.
-				let displays = change.newValue.map(\.effectiveDisplay)
-				let wasCurrent = change.newValue.map(\.isCurrent)
-
-				let repaired = repairedCurrentFlags(
-					displays: displays,
-					isCurrent: wasCurrent,
-					// Matched by id rather than by position: the two lists differ in membership
-					// whenever a website was added or removed, and the same index in each is then a
-					// different website.
-					wasAlreadyCurrentHere: zip(change.newValue, displays).map { website, display in
-						guard let before = change.oldValue.first(where: { $0.id == website.id }) else {
-							return false
-						}
-
-						return before.isCurrent && before.effectiveDisplay == display
-					}
-				)
-
-				// Only when it actually changed something. The write goes back through this same
-				// publisher, so repairing a list that was already right is a write per change.
-				if repaired != wasCurrent {
-					all = zip(change.newValue, repaired).map {
-						var updated = $0
-						updated.isCurrent = $1
-						return updated
-					}
-				}
 
 				// We only reset the iterators if a website was added/removed.
 				if change.newValue.map(\.id) != change.oldValue.map(\.id) {
@@ -136,31 +180,27 @@ final class WebsitesController {
 	not a reason to light up a screen the user switched off.
 	*/
 	func makeCurrent(_ website: Website, switchingDisplayOn: Bool = true) {
-		guard let target = all.firstIndex(where: { $0.id == website.id }) else {
-			return
-		}
+		let display = website.effectiveDisplay
 
-		// Before the mark moves rather than after, which is the order the panel already used: the list
+		// Before the mark moves rather than after, which is the order the panel already used: the
 		// change reaches the scenes through a publisher on the next turn of the run loop, so a display
 		// switched on here is already on by the time the page it should be showing is worked out.
 		if
 			switchingDisplayOn,
-			AppState.shared.scenes.first(where: { $0.display == all[target].effectiveDisplay })?.isDisabledForDisplay == true
+			AppState.shared.scenes.first(where: { $0.display == display })?.isDisabledForDisplay == true
 		{
-			AppState.shared.setDisplayEnabled(true, on: all[target].effectiveDisplay)
+			AppState.shared.setDisplayEnabled(true, on: display)
 		}
 
-		let flags = currentFlags(
-			displays: all.map(\.effectiveDisplay),
-			wasCurrent: all.map(\.isCurrent),
-			makingCurrent: target
-		)
-
-		all = zip(all, flags).map {
-			var updated = $0
-			updated.isCurrent = $1
-			return updated
-		}
+		// One assignment, and it can only reach one display's answer. What it replaced rewrote the
+		// whole website list to move one mark, which is why the mark could travel: the sweep grouped by
+		// `effectiveDisplay`, so it was free to clear a flag belonging to a screen nobody had asked
+		// about. Nothing here can touch another key.
+		//
+		// A website that has since been removed leaves a name nothing answers to, which `scheduled`
+		// already reads as "this display has not started" and answers with the top of its list — the
+		// same place the sweep's repair left it, at no cost and with nothing to run.
+		Defaults[.currentWebsites][Display.settingsKey(for: display)] = website.id
 	}
 
 	/**

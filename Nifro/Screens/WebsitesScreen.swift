@@ -241,7 +241,27 @@ private struct RowView: View {
 	@Binding var website: Website
 	@Binding var selection: Website.ID?
 
+	// The tick used to be a field of the website, so the binding above redrew the row when it moved.
+	// It is a per-display fact now and lives with the other per-display facts, which this row has to
+	// watch for itself or it would go on drawing the tick against the website that used to hold it.
+	@Default(.currentWebsites) private var currentWebsites
+
 	@State private var isConfirmingDelete = false
+
+	/**
+	Whether this website is the one on screen where it lives.
+
+	This list is one list for every screen and a row has no display, so the question it can ask is
+	whether this website is the one on screen where it lives.
+	*/
+	private var isShowing: Bool {
+		// Read for the redraw and not for the answer. Which display is showing what is one question
+		// with one derivation of its key, and a list of rows is the last place that should get a
+		// second one — the tick and the wallpaper disagreeing is the whole failure being fixed here.
+		_ = currentWebsites
+
+		return WebsitesController.shared.isShowing(website)
+	}
 
 	var body: some View {
 		HStack {
@@ -267,7 +287,7 @@ private struct RowView: View {
 			.lineLimit(1)
 			Spacer()
 			RedirectNotice(website: website)
-			if website.isCurrent {
+			if isShowing {
 				Image(systemName: "checkmark.circle.fill")
 					.renderingMode(.original)
 					.font(.title2)
@@ -280,7 +300,7 @@ private struct RowView: View {
 			Button("Set as Current") {
 				website.makeCurrent()
 			}
-			.disabled(website.isCurrent)
+			.disabled(isShowing)
 		}
 		.contentShape(.rect)
 		.onDoubleClick {
@@ -290,7 +310,7 @@ private struct RowView: View {
 			Button("Set as Current") {
 				website.makeCurrent()
 			}
-			.disabled(website.isCurrent)
+			.disabled(isShowing)
 			Divider()
 			Button("Edit…") {
 				selection = website.id
@@ -323,7 +343,7 @@ private struct RowView: View {
 		}
 		.accessibilityElement(children: .combine)
 		.accessibilityAddTraits(.isButton)
-		.if(website.isCurrent) {
+		.if(isShowing) {
 			$0.accessibilityAddTraits(.isSelected)
 		}
 		.accessibilityAction(named: "Edit") { // Doesn't show up in accessibility actions. (macOS 14.0)

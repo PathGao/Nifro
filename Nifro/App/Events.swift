@@ -125,6 +125,20 @@ extension AppState {
 			}
 			.store(in: &cancellables)
 
+		// Moving the mark used to be a write to the website list, so the sink above was what put the new
+		// page on screen. It is a write to a key of its own now, and nothing was watching it — a
+		// rotation tick, a Next, a pick in the panel and every `nifro://` command all changed the answer
+		// and left the wallpaper where it was.
+		//
+		// `applyWebsiteChanges` and deliberately not the live-settings shortcut beside it: which website
+		// a display shows is never something the page already up can absorb, it is a different page.
+		Defaults.publisher(.currentWebsites, options: [])
+			.receive(on: DispatchQueue.main)
+			.sink { [self] _ in
+				applyWebsiteChanges()
+			}
+			.store(in: &cancellables)
+
 		Defaults.publisher(.hideMenuBarIcon)
 			.sink { [self] _ in
 				handleMenuBarIcon()

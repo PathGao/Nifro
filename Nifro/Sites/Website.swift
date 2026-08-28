@@ -5,7 +5,20 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	// the entry is made. The id is what a website's data store, its thumbnail and its remembered
 	// scroll position are all filed under, so changing one would orphan all three.
 	var id: UUID
+
+	/**
+	Dead storage, kept so the list still decodes both ways.
+
+	This was where "is this website the one on screen" lived, and it was the wrong shape for it: one
+	slot per website answering a question per display. The answer is `Defaults[.currentWebsites]` now,
+	one entry per display, and nothing reads this — `ScopeTests` is what says so.
+
+	Still written and still stored, because a website encoded without it will not decode on the build
+	before this one, and somebody who runs this and goes back has to find their list where they left
+	it. It goes when that stops being true, along with `display` above it.
+	*/
 	var isCurrent: Bool
+
 	var url: URL
 	@DecodableDefault.EmptyString var title: String
 	@DecodableDefault.Custom<InvertColors> var invertColors2

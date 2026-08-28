@@ -391,47 +391,19 @@ struct MenuBarStripTests {
 
 
 /**
-Which website is the current one, on a Mac with more than one display.
+Where a display's rotation goes next.
 
-Every part of this was written and shipped on a one-display machine, where a list-wide answer and a
-per-display answer are the same answer. They are not the same on two, and the difference is not
-visible by reading: it shows as one screen quietly refusing to rotate. These are the cheapest way to
-have the two-display case checked at all.
+Which website a display is showing is `Defaults[.currentWebsites]`, one entry per display, so "exactly
+one per display" is the shape of the storage and there is nothing left here to check it with — see
+`ScopeTests` for the two things about it that can still be got wrong, and that a `swift test` can
+reach: that nothing reads the flag it replaced, and that the key is the display.
+
+What is left is the arithmetic the cursor is fed into. It was written and shipped on a one-display
+machine, where a list-wide answer and a per-display answer are the same answer, and the difference is
+not visible by reading: it shows as one screen quietly refusing to rotate.
 */
 @Suite("Current website per display")
 struct CurrentWebsiteTests {
-	@Test("Making one current leaves the other display's mark alone")
-	func otherDisplaysKeepTheirMark() {
-		// Two websites on display A, two on display B, one marked on each.
-		let displays = ["A", "A", "B", "B"]
-		let wasCurrent = [true, false, true, false]
-
-		// Display A advances to its second website.
-		let flags = currentFlags(displays: displays, wasCurrent: wasCurrent, makingCurrent: 1)
-
-		#expect(flags == [false, true, true, false])
-	}
-
-	@Test("A display never ends up with two marked websites")
-	func oneMarkPerDisplay() {
-		let displays = ["A", "A", "A"]
-
-		let flags = currentFlags(displays: displays, wasCurrent: [true, true, false], makingCurrent: 2)
-
-		#expect(flags == [false, false, true])
-	}
-
-	@Test("Websites following the main display are one display, not none")
-	func nilDisplaysGroupTogether() {
-		// `effectiveDisplay` is optional and `nil` means the main display, so two of those are on the
-		// same screen and have to fight over one mark like any other pair.
-		let displays: [String?] = [nil, nil, "B"]
-
-		let flags = currentFlags(displays: displays, wasCurrent: [true, false, true], makingCurrent: 1)
-
-		#expect(flags == [false, true, true])
-	}
-
 	@Test("Rotation goes round its own display and wraps")
 	func rotationWraps() {
 		#expect(nextRotationIndex(count: 3, after: 0) == 1)
@@ -442,25 +414,6 @@ struct CurrentWebsiteTests {
 	func unmarkedDisplayStartsOver() {
 		#expect(nextRotationIndex(count: 3, after: nil) == 0)
 		#expect(nextRotationIndex(count: 0, after: nil) == nil)
-	}
-
-	@Test("Two displays can each advance without disturbing the other")
-	func twoDisplaysRotateIndependently() {
-		// The exact sequence that used to pin display A to its first website. A advances, then B
-		// advances; if B's advance clears A's mark, A's next advance starts from the beginning and A
-		// never gets past index 0.
-		let displays = ["A", "A", "B", "B"]
-
-		var flags = currentFlags(displays: displays, wasCurrent: [true, false, true, false], makingCurrent: 1)
-		flags = currentFlags(displays: displays, wasCurrent: flags, makingCurrent: 3)
-
-		// A is still on its second website.
-		#expect(flags == [false, true, false, true])
-
-		// So A's next tick moves it on rather than back to the start.
-		let aFlags = [flags[0], flags[1]]
-		#expect(nextRotationIndex(count: 2, after: aFlags.firstIndex(of: true)) == 0)
-		#expect(aFlags.firstIndex(of: true) == 1)
 	}
 }
 

@@ -46,7 +46,9 @@ extension WebsitesController {
 			return candidates.first
 		}
 
-		guard let nextIndex = nextRotationIndex(count: candidates.count, after: candidates.firstIndex { $0.isCurrent }) else {
+		let current = currentWebsiteID(on: display)
+
+		guard let nextIndex = nextRotationIndex(count: candidates.count, after: candidates.firstIndex { $0.id == current }) else {
 			return nil
 		}
 
@@ -61,9 +63,14 @@ extension WebsitesController {
 	*/
 	func scheduled(for display: Display?, at date: Date = .now) -> Website? {
 		let candidates = eligible(for: display, at: date)
+		let current = currentWebsiteID(on: display)
 
+		// At most one of these can be true, because there is one entry per display to be true of. That
+		// used to be a promise a sweep made about a flag on every website, and the promise was broken
+		// by anything that wrote the list without going through the sweep — "Show on" was a `Binding`
+		// straight into it, so moving a website carried its mark to a screen that already had one.
 		return showingIndex(
-			isCurrent: candidates.map(\.isCurrent),
+			isCurrent: candidates.map { $0.id == current },
 			isEvicted: candidates.map(\.isEvicted)
 		)
 		.map { candidates[$0] }

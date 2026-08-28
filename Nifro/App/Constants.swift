@@ -41,6 +41,24 @@ extension Defaults.Keys {
 	// `hasInstalledFeaturedWebsites` below, and a sharper reason — deleting what that added undoes it,
 	// and what this adds is everything.
 	static let hasMigratedWebsitesToPlaylists = Key<Bool>("hasMigratedWebsitesToPlaylists", default: false)
+
+	// Which website each display is showing, keyed by `Display.settingsKey(for:)` like every other
+	// per-display fact. It was a `Bool` on each website, kept unique by a sweep over the whole list —
+	// one slot per website answering a question per display, so a sweep run for one screen could rewrite
+	// another screen's answer, and did: one display's rotation tick cleared the other display's mark,
+	// that display then read "nothing is current", started counting from the beginning and never moved
+	// past the first website in its list. Two marks on one display was the same defect the other way up
+	// and silent — a tie broken by list order, so a website sent to a screen never appeared on it.
+	//
+	// A dictionary has room for exactly one answer per display, so the invariant is the storage rather
+	// than something a function has to keep true on every write. That is the whole of the change: there
+	// is no repair pass any more because there is no state a repair could find.
+	//
+	// Nothing forgets an entry, which puts this with `rotationModes` and the two beside it rather than
+	// with `browsingDisplays`: the user picked that wallpaper for that screen, so a monitor unplugged at
+	// night comes back in the morning showing it. What an unplug does do is
+	// `WebsitesController.handOverCurrentWebsites(from:)`.
+	static let currentWebsites = Key<[String: Website.ID]>("currentWebsites", default: [:])
 	// Which displays are interactive, not whether any is. Browsing Mode was one flag for the whole app,
 	// so entering it on the monitor also raised the laptop's wallpaper over its desktop icons — and its
 	// button lit in every column at once. `DesktopWindow.isInteractive` was always per window; only this

@@ -467,7 +467,9 @@ final class AppState: ObservableObject {
 			}
 		}
 
-		for scene in scenes where !kept.contains(where: { $0 === scene }) {
+		let departed = scenes.filter { scene in !kept.contains { $0 === scene } }
+
+		for scene in departed {
 			scene.tearDown()
 		}
 
@@ -490,6 +492,20 @@ final class AppState: ObservableObject {
 		// keeping its key buys. Forgetting one for good is a thing to ask for, and Restore Defaults is
 		// where it is asked.
 		Defaults[.browsingDisplays].formIntersection(scenes.map { Display.settingsKey(for: $0.display) })
+
+		// Which website each display is showing is on the other side of that line, with the three
+		// preferences and not with Browsing Mode, and it is the case the line was drawn for: the user
+		// picked that wallpaper for that screen, so a monitor unplugged at night has to come back in the
+		// morning showing it. Nothing below forgets an entry.
+		//
+		// What does happen is the other half of an unplug. A website pinned to a display that is gone
+		// moves to the main one when the user has asked for that, and the screen it lands on is told so
+		// — once, from the scenes just torn down rather than from "every key with no scene", which would
+		// say it again on every rebuild for as long as the cable stayed out.
+		//
+		// Before the loop below, not after, because that loop is where each scene is handed the website
+		// this has just decided it should be showing.
+		WebsitesController.shared.handOverCurrentWebsites(from: departed.map(\.display))
 
 		// A failed load is state in the same sense, and is pruned for the same reason rather than kept
 		// for the opposite one: it describes a page that was on its way to a display that is gone. It

@@ -240,12 +240,16 @@ struct WebsiteAppEntity: AppEntity {
 	@Property(title: "Is Current")
 	var isCurrent: Bool
 
+	// `@MainActor` for the last line only. What a display is showing is stored beside the other
+	// per-display facts rather than on the website, so answering it is a read the app owns — and the
+	// one caller below that was not already on the main actor says so in one line.
+	@MainActor
 	init(_ website: Website) {
 		self.id = website.id
 		self.title = website.title
 		self.url = website.url
 		self.urlHost = website.url.host ?? ""
-		self.isCurrent = website.isCurrent
+		self.isCurrent = WebsitesController.shared.isShowing(website)
 	}
 
 	var displayRepresentation: DisplayRepresentation {
@@ -274,7 +278,9 @@ extension WebsiteAppEntity {
 		)
 
 		func allEntities() async -> [WebsiteAppEntity] {
-			await WebsitesController.shared.all.map(WebsiteAppEntity.init)
+			await MainActor.run {
+				WebsitesController.shared.all.map(WebsiteAppEntity.init)
+			}
 		}
 
 		func suggestedEntities() async throws -> [WebsiteAppEntity] {
