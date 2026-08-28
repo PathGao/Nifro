@@ -1,3 +1,4 @@
+@preconcurrency import WebKit
 import SwiftUI
 import LaunchAtLogin
 import KeyboardShortcuts
@@ -68,9 +69,6 @@ of question. Advanced keeps the two that are genuinely advanced; this is the res
 private struct BehaviorSettings: View {
 	var body: some View {
 		Form {
-			Section {
-				KeepWallpaperWhenDisplayUnpluggedSetting()
-			}
 			Section {
 				OpacitySetting()
 				DimWhenUnfocusedSetting()
@@ -236,12 +234,25 @@ private struct ShortcutsSettings: View {
 }
 
 /**
-The two settings that can leave the app in a state its owner did not mean to reach, and the one that
-undoes everything.
+The two settings that can leave the app in a state its owner did not mean to reach, and the three
+actions there is no way back from.
 
 Content blocking takes an address off the internet and compiles it into every page; battery
 deactivation makes the wallpaper disappear for a reason that is nowhere on screen. Both are worth
 having and neither is worth meeting by accident, which is what an "advanced" pane is for.
+
+**The three actions below are ordered by how much they take back, and each keeps a section and a
+spacer to itself.** Two of them could be kept apart by distance, and were. Three cannot: one of them
+has to neighbour another, so the rule this pane was built on — nothing a user could be reaching for
+sits next to something that destroys more than they meant — has to be carried by the order rather
+than by the gap. Reading down, each control reaches further than the one above it and never less far:
+the one that puts websites back, then the one that removes them, then the one that puts the whole app
+back to how it shipped, still at the very bottom of the last pane where it already was. So the
+mistake left available to a slip is pressing something that does less than was meant, which is the
+only one of the two that can be corrected by pressing the right thing afterwards.
+
+The spacers are what stop any two of them being neighbouring rows, and the sections are what stop the
+three reading as a list of buttons to work down.
 */
 private struct AdvancedSettings: View {
 	var body: some View {
@@ -251,9 +262,196 @@ private struct AdvancedSettings: View {
 				Defaults.Toggle(String(localized: "Deactivate while on battery"), key: .deactivateOnBattery)
 			}
 			Section {} // Padding
+
+			// Top of the three, and the only one that adds anything. Argued over the pane above rather
+			// than here, because the position is a statement about all three and not about this one.
+			Section {
+				AddDefaultPlaylistSetting()
+			}
+
+			Section {} // Padding
+			Section {
+				ClearWebsiteDataButton()
+			}
+
+			Section {} // Padding
 			Section {
 				RestoreDefaultsSetting()
 			}
+		}
+	}
+}
+
+/**
+Throwing away the websites, not only what they stored.
+
+**It used to keep them, and the change is the whole of why the strings below are different.** The
+button signed every website out and left the list exactly as it was, which made it the only thing in
+the app that took a lot and gave the user nothing to point at afterwards except a number of megabytes.
+What it means now is the plainer reading of its own name: no playlists, no websites, nothing filed
+under one. `WebsitesController.removeEverything` is where that reaches, and it reaches every key that
+named a website or a list rather than only the list itself — a display still pointed at a website that
+is gone is exactly the defect the playlist refactor spent seven changes taking out.
+
+The dialog is where the change actually has to land. A message that says the websites are kept, over
+code that deletes them, is worse than no dialog at all: it is the one sentence somebody reads before
+agreeing to it.
+
+A stock `Button`, like the ones in About and in the site gallery's footer, and not `PanelWideButton`.
+The panel's controls are hand-made because they float over the desktop with nothing around them to
+explain what they are; this is an ordinary window with a toolbar and a grouped form, so it takes the
+ordinary controls those windows use.
+
+Clearing takes a moment and used to say nothing about it. The button disabled itself the instant it was
+pressed and stayed that way, with no sign of work happening, no sign of it finishing, and no way to tell
+whether anything had gone. It is a button whose whole purpose is an effect you cannot see, so it has to
+report one: it says how much it freed, which is the only answer to "did that do anything" that does not
+require taking the app's word for it.
+*/
+private struct ClearWebsiteDataButton: View {
+	private enum Progress: Equatable {
+		case ready
+		case clearing
+		case cleared(bytes: Int64)
+	}
+
+	@State private var progress = Progress.ready
+	@State private var isConfirming = false
+
+	var body: some View {
+		HStack(spacing: 8) {
+			// Not `role: .destructive`. Red would make it the one coloured control in a pane of plain
+			// ones, and what keeps a slip from reaching it is its place in the stack above, not the
+			// colour. Full size too: it was small because it used to sit in a section footer, among
+			// footnote text, and there is no footnote text here.
+			Button("Clear All Website Data") {
+				isConfirming = true
+			}
+			.disabled(progress == .clearing)
+
+			switch progress {
+			case .ready:
+				EmptyView()
+			case .clearing:
+				ProgressView()
+					.controlSize(.small)
+			case .cleared(let bytes):
+				// Zero is a real answer and a common one — pressing it twice frees nothing the second
+				// time — so it says "nothing left to clear" rather than "0 bytes freed", which reads
+				// like a failure.
+				Text(bytes > 0 ? String(localized: "Freed \(bytes.formatted(.byteCount(style: .file)))") : String(localized: "Nothing left to clear"))
+					.foregroundStyle(.secondary)
+			}
+		}
+		.help("Deletes every playlist and every website, along with their cookies, caches, thumbnails and each page's remembered position and zoom.")
+		// The websites are why, and the cookies were why before that. Everything else this throws away
+		// comes back on the next load; a cookie is a login and a website is something the user wrote,
+		// and neither is a thing to discover afterwards from a number of megabytes. It asks here rather
+		// than relying on its place in the stack: that stops a slip, and this is for the press that was
+		// aimed.
+		//
+		// It names the way back, in the dialog rather than only in the pane, because that is where
+		// somebody decides. What it does not say is that the way back is only the shipped websites —
+		// the sentence before it already said the ones they wrote are gone with no undo, and repeating
+		// the loss inside the sentence offering the remedy reads as a second, smaller loss.
+		//
+		// Named in the button rather than "OK", and `role: .destructive` here where the button itself
+		// declines it — a dialog is where a colour means something, since there is nothing else in it
+		// to be the odd coloured control.
+		.confirmationDialog(
+			String(localized: "Clear all website data?"),
+			isPresented: $isConfirming
+		) {
+			Button(String(localized: "Clear Data"), role: .destructive) {
+				clear()
+			}
+
+			Button(String(localized: "Cancel"), role: .cancel) {}
+		} message: {
+			Text("Every playlist and every website goes, along with the custom CSS, JavaScript, regions and schedules written for them. You will be signed out of every site, and there is no undo.\n\nAdd the Default Playlist puts the websites Nifro comes with back.")
+		}
+	}
+
+	/**
+	The order is the argument.
+
+	The list goes first, so that the scenes have let go of their web views by the time the stores are
+	removed — a store that is still open refuses removal, and the failure is silent and leaves an empty
+	directory behind. Then the caches, then the data in every store including the shared one, which is
+	the only one that cannot be removed at all. Then the stores themselves, which is the step that
+	makes this different from what the button used to do: the data going out of a store leaves the
+	store, and a store is filed under a website `id` that no longer names anything.
+
+	`forgetWherePagesWere` and not `forgetOrphanedPageRecords`: the second keeps the records of
+	websites that still exist, and there are none.
+	*/
+	private func clear() {
+		progress = .clearing
+
+		Task {
+			let before = await DiskBudget.storedBytes(of: [.homeDirectory])
+
+			WebsitesController.shared.removeEverything()
+			WebsitesController.shared.thumbnailCache.removeAllImages()
+			AppState.shared.forgetWherePagesWere()
+			await WKWebsiteDataStore.clearAllWebsiteData()
+			await DiskBudget.removeAllStores()
+
+			let after = await DiskBudget.storedBytes(of: [.homeDirectory])
+			progress = .cleared(bytes: max(0, before - after))
+		}
+	}
+}
+
+/**
+Getting a working starting state back without putting the whole app back.
+
+Clearing above leaves no playlists and no websites, and until now the only thing that could rebuild
+them was Restore All Settings — which also resets every preference and every keyboard shortcut. Two
+irreversible actions where one was wanted is how somebody loses the shortcuts they set in order to
+get eight websites back.
+
+It runs what a first launch runs, through the one entry point a restore also goes through. What it
+does when a default playlist already exists is argued over `WebsitesController.installDefaultPlaylist`
+and is a property of that function rather than a decision this view makes — which is the point of
+there being one entry point.
+
+It says something afterwards, for the same reason the button above it does: what it adds appears in
+another window, so a press in this one changes nothing visible from in front of it.
+*/
+private struct AddDefaultPlaylistSetting: View {
+	@State private var isConfirming = false
+	@State private var hasAdded = false
+
+	var body: some View {
+		HStack(spacing: 8) {
+			Button("Add the Default Playlist") {
+				isConfirming = true
+			}
+
+			if hasAdded {
+				Text("Added to your playlists")
+					.foregroundStyle(.secondary)
+			}
+		}
+		.help("The built-in default playlist cannot be bound to a display, so duplicate it first and bind the copy.")
+		// It asks, though it destroys nothing. Pressed with the shipped websites already in the list it
+		// leaves a second copy of each, and undoing that is eight deletions in another window — a bill
+		// worth being told about beforehand rather than found afterwards.
+		.confirmationDialog(
+			String(localized: "Add the default playlist?"),
+			isPresented: $isConfirming
+		) {
+			// No `role: .destructive`. It is the one action in this pane that adds, and the dialog is
+			// where that reads: the two above it are red in theirs.
+			Button(String(localized: "Add Playlist")) {
+				WebsitesController.shared.installDefaultPlaylist()
+				hasAdded = true
+			}
+
+			Button(String(localized: "Cancel"), role: .cancel) {}
+		} message: {
+			Text("The websites Nifro comes with go into your default playlist, and a default playlist is made if you do not have one.")
 		}
 	}
 }
@@ -361,15 +559,6 @@ private struct DimWhenUnfocusedSetting: View {
 			) {
 				Text("Dimmed to")
 			}
-		}
-	}
-}
-
-private struct KeepWallpaperWhenDisplayUnpluggedSetting: View {
-	var body: some View {
-		Defaults.Toggle(key: .keepWallpaperWhenDisplayUnplugged) {
-			Text("Move to the main display when unplugged")
-				.explained(String(localized: "Off, it goes away with its display and returns when you plug it back in; on, it moves to the main display and takes over there until its own returns."))
 		}
 	}
 }

@@ -63,15 +63,19 @@ struct WebsiteMigrationTests {
 	}
 
 	/**
-	The fields that were in the first release.
+	The fields that were in the first release and are still here.
 
 	Every payload ever written by this app has them, so a decoder that requires them cannot fail on
 	stored data — which is the only reason they are allowed to be non-optional with no default. They
-	are named rather than counted so that a fifth has to be argued for here before it can be added:
+	are named rather than counted so that a fourth has to be argued for here before it can be added:
 	the argument for any new one is "no stored payload can lack it", and for a field added after
 	release that argument is never available.
+
+	`isCurrent` was here and is gone with the field. Deleting a field is the safe direction — a key the
+	decoder is not looking for is ignored, so every payload that still carries one decodes exactly as
+	before — which is why this list only ever shrinks, and never by argument.
 	*/
-	private static let fieldsFromTheFirstRelease = ["id", "isCurrent", "url", "usePrintStyles"]
+	private static let fieldsFromTheFirstRelease = ["id", "url", "usePrintStyles"]
 
 	/**
 	The stored properties of `Website`, in declaration order.
@@ -258,6 +262,100 @@ struct WebsiteMigrationTests {
 			"""
 			The overload is there but no longer routes to `decodeIfPresent`, which is the whole of what \
 			makes an absent key survivable.
+			"""
+		)
+	}
+
+	/**
+	The one field a payload written by an older build is still read *for*, and how it is got at.
+
+	`Website` has no display any more, and the display each website was pinned to is the whole input to
+	`migrateToPlaylistsIfNeeded` — so `PinnedWebsite` decodes it out of the stored payload beside the
+	website rather than off the model. It is the only bridge between the two eras of this app's storage
+	and it runs exactly once, against a list the user built by hand, on a build with no way back.
+
+	Two things about it can be wrong in silence, and both are checked. The first is the language rule
+	the type rests on: `Website(from: decoder)` is handed the decoder itself, not a nested container,
+	because the payload is one flat object per website. Written as `decode(Website.self, forKey:)` it
+	would look for a `website` object that has never been written, fail, and hand every user an empty
+	list. The second is the sibling read — the display sat beside the website's own fields — which a
+	decoder that descends into a container of its own cannot see, and whose failure is not an error at
+	all: every pinned website lands in one flat playlist and the user's per-display lists are gone with
+	nothing to say that anything happened.
+
+	Run on a stand-in, following `optionalMeansTheKeyMayBeAbsent` above, because `PinnedWebsite` reaches
+	`Website` and `Defaults` and this target compiles neither. The shape assertion underneath is what
+	ties the stand-in to the real one.
+	*/
+	@Test("A pinned website's display is read out of the payload it was stored beside")
+	func aFlatPayloadYieldsBothHalves() throws {
+		struct Inner: Codable, Equatable {
+			var url: String
+		}
+
+		struct Outer: Codable, Equatable {
+			var inner: Inner
+			var display: String?
+
+			private enum CodingKeys: String, CodingKey {
+				case display
+			}
+
+			init(from decoder: any Decoder) throws {
+				inner = try Inner(from: decoder)
+				display = try decoder.container(keyedBy: CodingKeys.self).decodeIfPresent(String.self, forKey: .display)
+			}
+
+			func encode(to encoder: any Encoder) throws {
+				try inner.encode(to: encoder)
+
+				var container = encoder.container(keyedBy: CodingKeys.self)
+				try container.encodeIfPresent(display, forKey: .display)
+			}
+		}
+
+		// One flat object, carrying a key this build no longer knows about, as an older build wrote it.
+		let pinned = try JSONDecoder().decode(
+			Outer.self,
+			from: Data(#"{"url":"https://example.com","isCurrent":true,"display":"A"}"#.utf8)
+		)
+
+		#expect(pinned.inner.url == "https://example.com")
+		#expect(pinned.display == "A")
+
+		// And a website that was on no display in particular, which is most of them.
+		let unpinned = try JSONDecoder().decode(Outer.self, from: Data(#"{"url":"https://b.example"}"#.utf8))
+
+		#expect(unpinned.display == nil)
+
+		// The encoder writes back what the decoder reads. Nothing calls it, and a `Codable` whose two
+		// halves disagree about the shape is a trap for whoever first does.
+		#expect(try JSONDecoder().decode(Outer.self, from: JSONEncoder().encode(pinned)) == pinned)
+	}
+
+	/**
+	And the real type is still written that way.
+	*/
+	@Test("The migration's decoder still reads the website out of the payload it is handed")
+	func thePinnedWebsiteDecoderIsFlat() throws {
+		let controller = try Self.source("Nifro/Sites/WebsitesController.swift")
+
+		#expect(
+			controller.contains("website = try Website(from: decoder)"),
+			"""
+			`PinnedWebsite` no longer decodes the website from the decoder it is handed. A stored website \
+			is one flat object, so anything that descends into a container first is looking for a key that \
+			has never been written — and `Defaults` answers a failed decode with an empty list, which is \
+			every website the user had before playlists existed.
+			"""
+		)
+
+		#expect(
+			controller.contains("forKey: .display"),
+			"""
+			`PinnedWebsite` no longer reads the display each website was pinned to, which is the whole of \
+			what the migration groups by. It would not fail: every list a user had per display becomes one \
+			flat playlist instead, once, with nothing to restore from.
 			"""
 		)
 	}

@@ -234,7 +234,7 @@ struct SwitchedOffTests {
 		let allowed = [
 			"AppState.swift": ["func setDisplayEnabled(_ isEnabledForDisplay: Bool, on display: Display?)"],
 			"DisplayPanelModel.swift": ["func step(_ direction: Step, on display: Display?)"],
-			"WebsitesController.swift": ["func makeCurrent(_ website: Website, switchingDisplayOn: Bool = true)"],
+			"WebsitesController.swift": ["func makeCurrent(_ website: Website, on display: Display?, switchingDisplayOn: Bool = true)"],
 			// The declaration and the predicate that reads it. `isSwitchedOff` is the whole point: it is
 			// the one place allowed to turn the two switches into one answer.
 			"RotationBehaviour.swift": ["var isDisabledForDisplay: Bool", "var isSwitchedOff: Bool"]

@@ -27,7 +27,63 @@ enum Constants {
 }
 
 extension Defaults.Keys {
-	static let websites = Key<[Website]>("websites", default: [])
+	// The website list as it was before playlists, read exactly once and never written. It is the only
+	// input `migrateToPlaylistsIfNeeded` has, which is why it is typed as `PinnedWebsite` rather than
+	// `Website`: the display each website was pinned to is what the migration groups by, and `Website`
+	// does not carry one any more.
+	//
+	// Left on disk rather than removed. Nothing in this build touches the stored value, so a list
+	// carried across by the migration is still there in its old shape — which is the only copy of it
+	// there will ever be, and the thing to look at if the playlists come out wrong. Nothing puts edits
+	// made here back into it, so an older build opened after this one shows the list as it stood when
+	// the migration ran.
+	static let websites = Key<[PinnedWebsite]>("websites", default: [])
+
+	// The lists a display picks between, and the whole of where a website is stored. Built once by
+	// `migrateToPlaylistsIfNeeded` out of the key above.
+	static let playlists = Key<[Playlist]>("playlists", default: [])
+
+	// Whether the list above has been built from `websites` yet. A flag of its own, and not "there are
+	// no playlists": an empty list is a state the user can reach and stay in, so reading it as "not
+	// done yet" would rebuild their playlists out of a website list they stopped editing long ago,
+	// every launch, for as long as they left it that way. Same shape and same reason as
+	// `hasInstalledFeaturedWebsites` below, and a sharper reason — deleting what that added undoes it,
+	// and what this adds is everything.
+	static let hasMigratedWebsitesToPlaylists = Key<Bool>("hasMigratedWebsitesToPlaylists", default: false)
+
+	// Which website each display is showing, keyed by `Display.settingsKey(for:)` like every other
+	// per-display fact. It was a `Bool` on each website, kept unique by a sweep over the whole list —
+	// one slot per website answering a question per display, so a sweep run for one screen could rewrite
+	// another screen's answer, and did: one display's rotation tick cleared the other display's mark,
+	// that display then read "nothing is current", started counting from the beginning and never moved
+	// past the first website in its list. Two marks on one display was the same defect the other way up
+	// and silent — a tie broken by list order, so a website sent to a screen never appeared on it.
+	//
+	// A dictionary has room for exactly one answer per display, so the invariant is the storage rather
+	// than something a function has to keep true on every write. That is the whole of the change: there
+	// is no repair pass any more because there is no state a repair could find.
+	//
+	// Nothing forgets an entry, which puts this with `rotationModes` and the two beside it rather than
+	// with `browsingDisplays`: the user picked that wallpaper for that screen, so a monitor unplugged at
+	// night comes back in the morning showing it. An unplug does nothing else at all — a display that
+	// is gone has no scene, so there is nothing on that screen to move anywhere.
+	static let currentWebsites = Key<[String: Website.ID]>("currentWebsites", default: [:])
+
+	// Which playlist each display is pointed at, keyed by `Display.settingsKey(for:)` like every other
+	// per-display fact. Written in one place — the picker in the panel — and read in one place,
+	// `WebsitesController.playlist(for:in:)`, which is where the rule below lives.
+	//
+	// **An absent entry is the default playlist, not "nothing".** Every attached display gets a scene
+	// now, so a display the user has never picked for still has to show something, and the mechanism
+	// that used to answer that — the Nth shipped website pinned to the Nth screen — was deleted by the
+	// same change that built the scenes from the displays. Without the fallback a second monitor on a
+	// fresh install draws "No Website" and waits to be told. It is also why the default playlist
+	// refuses a binding: it is the one every picker offers and every display falls back to.
+	//
+	// Nothing forgets an entry, which puts this with `currentWebsites` above rather than with
+	// `browsingDisplays`: the list a user chose for a screen is a choice about that screen, so a
+	// monitor unplugged at night comes back in the morning showing it.
+	static let currentPlaylists = Key<[String: Playlist.ID]>("currentPlaylists", default: [:])
 	// Which displays are interactive, not whether any is. Browsing Mode was one flag for the whole app,
 	// so entering it on the monitor also raised the laptop's wallpaper over its desktop icons — and its
 	// button lit in every column at once. `DesktopWindow.isInteractive` was always per window; only this
@@ -39,12 +95,6 @@ extension Defaults.Keys {
 	static let opacity = Key<Double>("opacity", default: 1)
 	static let reloadInterval = Key<Double?>("reloadInterval")
 	static let deactivateOnBattery = Key<Bool>("deactivateOnBattery", default: false)
-
-	// Defaults to what the app already did, so nobody's wallpaper changes on upgrade. There is no
-	// convention to follow here: macOS's own wallpaper stays with its display and goes away with it,
-	// AppKit moves a window off a departed screen rather than losing it, and this wallpaper is a
-	// window.
-	static let keepWallpaperWhenDisplayUnplugged = Key<Bool>("keepWallpaperWhenDisplayUnplugged", default: true)
 	static let bringBrowsingModeToFront = Key<Bool>("bringBrowsingModeToFront", default: false)
 	static let openExternalLinksInBrowser = Key<Bool>("openExternalLinksInBrowser", default: false)
 

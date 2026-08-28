@@ -28,7 +28,7 @@ struct AddWebsiteIntent: AppIntent {
 	@MainActor
 	func perform() async throws -> some IntentResult & ReturnsValue<WebsiteAppEntity> {
 		ensureRunning()
-		let website = WebsitesController.shared.add(url, title: title?.nilIfEmptyOrWhitespace).wrappedValue
+		let website = WebsitesController.shared.add(url, title: title?.nilIfEmptyOrWhitespace)
 		return .result(value: .init(website))
 	}
 }
@@ -149,7 +149,7 @@ struct SetCurrentWebsiteIntent: AppIntent {
 		// A website that is no longer in the list is not an error worth raising here: Shortcuts holds
 		// entities from whenever the action was configured, and the list is the user's to edit.
 		if let website = website.toNative {
-			WebsitesController.shared.makeCurrent(website)
+			WebsitesController.shared.makeCurrent(website, on: Display.main)
 		}
 
 		return .result()
@@ -240,12 +240,16 @@ struct WebsiteAppEntity: AppEntity {
 	@Property(title: "Is Current")
 	var isCurrent: Bool
 
+	// `@MainActor` for the last line only. What a display is showing is stored beside the other
+	// per-display facts rather than on the website, so answering it is a read the app owns — and the
+	// one caller below that was not already on the main actor says so in one line.
+	@MainActor
 	init(_ website: Website) {
 		self.id = website.id
 		self.title = website.title
 		self.url = website.url
 		self.urlHost = website.url.host ?? ""
-		self.isCurrent = website.isCurrent
+		self.isCurrent = WebsitesController.shared.isShowing(website)
 	}
 
 	var displayRepresentation: DisplayRepresentation {
@@ -274,7 +278,9 @@ extension WebsiteAppEntity {
 		)
 
 		func allEntities() async -> [WebsiteAppEntity] {
-			await WebsitesController.shared.all.map(WebsiteAppEntity.init)
+			await MainActor.run {
+				WebsitesController.shared.all.map(WebsiteAppEntity.init)
+			}
 		}
 
 		func suggestedEntities() async throws -> [WebsiteAppEntity] {

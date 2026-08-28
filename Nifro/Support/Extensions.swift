@@ -138,18 +138,6 @@ extension Binding {
 		)
 	}
 }
-// MARK: - BindingCollection
-extension BindingCollection where Base.Element: Identifiable {
-	/**
-	Get the element with the given `ID` in a collection of `Identifible` elements.
-
-	It assumes there are no duplicates and it will just get the first matching element.
-	*/
-	subscript(id id: Base.Element.ID) -> Binding<Base.Element>? {
-		first { $0.wrappedValue.id == id }
-	}
-}
-
 // MARK: - CFUUID
 extension CFUUID {
 	var toUUID: UUID {
@@ -564,29 +552,6 @@ extension DecodableDefault.Wrapper: Encodable where Value: Encodable {
 protocol DecodableDefaultSource {
 	associatedtype Value: Decodable
 	static var defaultValue: Value { get }
-}
-
-// MARK: - Defaults
-extension Defaults {
-	/**
-	Get a `Binding` for a `Defaults` key.
-	*/
-	static func binding<Value>(for key: Key<Value>) -> Binding<Value> {
-		.init(
-			get: { self[key] },
-			set: {
-				self[key] = $0
-			}
-		)
-	}
-}
-extension Defaults {
-	/**
-	Get a `BindingCollection` for a `Defaults` key.
-	*/
-	static func bindingCollection<Value>(for key: Key<Value>) -> BindingCollection<Value> where Value: MutableCollection & RandomAccessCollection {
-		.init(base: binding(for: key))
-	}
 }
 
 // MARK: - Dictionary
@@ -2691,36 +2656,5 @@ struct InfoPopoverButton<Content: View>: View {
 					$0.frame(width: $1)
 				}
 		}
-	}
-}
-/**
-A helper that converts a binding to a collection of elements into a collection of bindings to the individual elements.
-*/
-struct BindingCollection<Base: MutableCollection & RandomAccessCollection>: RandomAccessCollection {
-	let base: Binding<Base>
-
-	typealias Element = Binding<Base.Element>
-	typealias Index = Base.Index
-
-	var startIndex: Index { base.wrappedValue.startIndex }
-	var endIndex: Index { base.wrappedValue.endIndex }
-
-	subscript(position: Base.Index) -> Binding<Base.Element> {
-		Binding(
-			get: { base.wrappedValue[position] },
-			set: {
-				var result = base.wrappedValue
-				result[position] = $0
-				base.wrappedValue = result
-			}
-		)
-	}
-
-	func index(before index: Base.Index) -> Base.Index {
-		base.wrappedValue.index(before: index)
-	}
-
-	func index(after index: Base.Index) -> Base.Index {
-		base.wrappedValue.index(after: index)
 	}
 }

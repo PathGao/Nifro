@@ -116,6 +116,25 @@ enum DiskBudget {
 	}
 
 	/**
+	Deletes every per-website store, because every website is gone.
+
+	The sweep above refuses an empty website list, and the refusal is right where it is: it works out
+	what an orphan is by reading the list, and a list that reads as empty is far likelier to be a bad
+	read than a user with nothing left. This is the one caller for which "there are no websites" is not
+	a reading at all — it is what the user asked for, in a dialog that said the stores went with them.
+
+	The shared store is not reached here because it cannot be removed, only emptied, which
+	`clearAllWebsiteData` does on the same run. A store still open in a web view refuses removal and is
+	left holding nothing instead, which is why the websites are dropped before this is called.
+	*/
+	@MainActor
+	static func removeAllStores() async {
+		for identifier in await WKWebsiteDataStore.allDataStoreIdentifiers {
+			try? await WKWebsiteDataStore.remove(forIdentifier: identifier)
+		}
+	}
+
+	/**
 	Which stores belong to no website any more.
 
 	An empty website list collects nothing, rather than everything. Nothing here can put a store back,

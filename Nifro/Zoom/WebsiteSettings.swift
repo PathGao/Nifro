@@ -32,37 +32,6 @@ struct ZoomSetting: View {
 }
 
 /**
-Which display a website appears on.
-
-Only offered when there is more than one display. Showing a different page on each screen is the most-asked-for thing there has ever been here, and it needs the display to belong to the website rather than to the app.
-
-The unpinned option is "Main Display" and not "Default display". There is no app-wide display setting
-for a default to come from — unpinned means `Display.main`, whichever screen currently has the menu
-bar — and "default" sends the reader looking for the place it was set. "Main Display" is the same
-string the panel puts at the top of a column for a website with no display of its own, so the two
-surfaces name one thing once.
-*/
-struct WebsiteDisplaySetting: View {
-	@Binding var display: Display?
-
-	@ObservedObject private var displays = Display.observable
-
-	var body: some View {
-		if displays.wrappedValue.all.count > 1 {
-			Picker(selection: $display) {
-				Text("Main Display").tag(nil as Display?)
-				ForEach(displays.wrappedValue.all) { candidate in
-					Text(candidate.localizedName).tag(candidate as Display?)
-				}
-			} label: {
-				Text("Show on")
-					.explained(String(localized: "Each website can live on its own screen; “Main Display” is whichever one has the menu bar, so it moves when you rearrange displays or dock your laptop."))
-			}
-		}
-	}
-}
-
-/**
 The hours a website is allowed to be showing.
 
 Off by default, because most wallpapers should just stay up. When it is on, both ends are required. One end alone gives no window, so a half-filled schedule never reaches the model.
@@ -127,8 +96,7 @@ whether the page can be clicked at all, this is what a click that goes somewhere
 
 A picker with three entries rather than a switch, because there really are three answers and only two
 of them are the website's own. "Follow Settings" is the state every website is in until somebody
-decides otherwise, and it is first for the same reason "Main Display" is first in
-`WebsiteDisplaySetting`: the unset state is a real answer, not the absence of one.
+decides otherwise, and it is first because the unset state is a real answer, not the absence of one.
 */
 struct WebsiteExternalLinksSetting: View {
 	@Binding var externalLinks: Website.ExternalLinks

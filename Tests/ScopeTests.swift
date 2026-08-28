@@ -370,6 +370,47 @@ struct ScopeTests {
 	}
 
 	/**
+	Which displays get a wallpaper is asked of the displays, not of the website list.
+
+	The same wrong scope as the rest of this suite, in its largest form. `displaysInUse` was the
+	distinct `effectiveDisplay` over the websites, and `rebuildScenes` built one scene per entry, so a
+	list-wide fact — "some website names this screen" — decided whether a screen existed at all. A
+	second display plugged in after the first launch was named by nothing and stayed black, and there
+	was no column for it in the panel to fix it from, because the panel draws one column per scene. The
+	shipped websites were pinned one per display to paper over exactly this, which is why that pinning
+	went with it.
+
+	Both halves are asserted, because each fails on its own. Building from the displays without the
+	fallback leaves no wallpaper at all in the moments `Display.all` is empty — reconfiguration, every
+	screen asleep — and those are the moments a display change puts this on the stack.
+	*/
+	@Test("Every attached display gets a scene, and there is always one")
+	func scenesAreBuiltFromTheDisplays() throws {
+		let rebuild = try Self.body(of: "func rebuildScenes()", in: Self.source(named: "AppState.swift"))
+		let controller = try Self.source(named: "WebsitesController.swift")
+
+		#expect(
+			rebuild.contains("Display.all"),
+			"`rebuildScenes` no longer starts from the attached displays. A display no website names gets no scene, and there is nothing on that screen to say so."
+		)
+
+		#expect(
+			!rebuild.contains("WebsitesController.shared.displays"),
+			"`rebuildScenes` asks the website list which displays exist again. That is the direction this refactor inverted."
+		)
+
+		#expect(
+			!controller.contains("displaysInUse"),
+			"`WebsitesController` derives a display list from the websites again. Which screens exist is not a fact about the list."
+		)
+
+		#expect(
+			rebuild.contains("[nil]"),
+			"Nothing keeps one scene when `Display.all` is empty, so a reconfiguration or a sleeping screen leaves no wallpaper at all."
+		)
+	}
+
+	/**
 	A display that goes away takes its Browsing Mode and nothing else.
 
 	The one per-display entry that is a state rather than a preference, and the only one with teeth: it
@@ -380,6 +421,13 @@ struct ScopeTests {
 	that looks obviously right and takes the good half with it: a monitor switched off, pinned, or set
 	to rotate hourly before it was unplugged has to come back that way. Forgetting one for good is
 	Restore Defaults, which is a thing the user asks for.
+
+	`currentWebsites` and `currentPlaylists` are in that list for the same reason and are the case it
+	was drawn for: which wallpaper is up on a screen, and which list it is drawn from, are choices the
+	user made about that screen. Unplug the monitor at night and it has to come back in the morning
+	showing what it was showing. Which website is up does not stop being true when the cable comes out,
+	it stops being visible — and there is nothing else for an unplug to do, because a display with no
+	scene has no wallpaper to move anywhere.
 	*/
 	@Test("Unplugging clears Browsing Mode and leaves the preferences alone")
 	func onlyTheStateIsPruned() throws {
@@ -390,10 +438,214 @@ struct ScopeTests {
 			"Nothing clears Browsing Mode for a display whose scene is torn down, so an unplugged display keeps it for good."
 		)
 
-		for preference in ["disabledDisplays", "rotationModes", "rotationIntervals"] {
+		for preference in ["disabledDisplays", "rotationModes", "rotationIntervals", "currentWebsites", "currentPlaylists"] {
 			#expect(
 				!rebuild.contains(preference),
-				"`rebuildScenes` touches `\(preference)`. A display switched off or pinned before it went away has to come back that way."
+				"`rebuildScenes` touches `\(preference)`. A display switched off, pinned, or showing a website it was given before it went away has to come back that way."
+			)
+		}
+	}
+
+	/**
+	Nothing reads a website's own "is current" flag.
+
+	The third per-display fact to be found living in a slot with room for one answer, after Browsing
+	Mode and the load error above. `Website.isCurrent` is a `Bool` on each website, and one website
+	belongs to one screen, so it looks per display and is not: keeping it unique needed a sweep over the
+	whole list, the sweep grouped the list by display, and every writer that did not go through it broke
+	the rule. Both halves were seen. A rotation tick on one display cleared the other display's mark, so
+	that display read "nothing is current", counted from the beginning and sat on its first website for
+	good. "Show on" wrote the list directly and carried a website's mark to a screen that already had
+	one, so the display the person had just named did not change and the list drew two ticks.
+
+	The answer is `Defaults[.currentWebsites]` now, one entry per display, so neither is expressible —
+	and the field itself is gone, which is what the first assertion below says. A payload that still
+	carries the key decodes exactly as before, because a decoder ignores what it is not looking for.
+
+	`display` is asserted with it, and it is the same claim one step out: a website belonged to a
+	screen, so "which website is up" looked like a fact about the website. Neither field can come back
+	without this going red.
+
+	Then reads, because a field can be reintroduced under any name. An assignment is not a second home:
+	the Shortcuts entity has a property of its own called `isCurrent` that it fills from the app.
+	*/
+	@Test("Nothing asks a website whether it is the current one")
+	func nothingReadsTheFlagOnTheWebsite() throws {
+		let website = try Self.source(named: "Website.swift")
+
+		for field in ["isCurrent", "display"] {
+			#expect(
+				!website.contains("var \(field)"),
+				"""
+				`Website` carries `\(field)` again. A website does not belong to a screen and does not \
+				know whether it is on one: both of those are one entry per display in `Defaults`, and a \
+				slot on the website is a slot with room for one answer to a question that has one per \
+				display.
+				"""
+			)
+		}
+
+		let read = try Regex("\\.isCurrent(?!\\s*=[^=])")
+
+		for (name, text) in try Self.sources() {
+			for match in text.matches(of: read) {
+				Issue.record(
+					"""
+					\(name) reads `isCurrent` off a website, which is one slot per website answering a \
+					question per display. Ask `WebsitesController.currentWebsiteID(on:)` with the display \
+					this code is acting for, or `isShowing(_:)` where there is no display to name. \
+					Around: \(Self.context(around: match.range, in: text))
+					"""
+				)
+			}
+		}
+	}
+
+	/**
+	One place decides what a display is showing.
+
+	The other half of I1, and the half a dictionary does not give for free. Storage with one entry per
+	display makes two answers *for one screen* impossible; it does nothing about two places deciding
+	what that entry says, which is how the flag it replaced went wrong — `makeCurrent` moved the mark
+	and a `Binding` into the stored list moved it too, and only one of them knew the rule.
+
+	Absolute, with no allowlist. `WebsitesController` is where the verb lives and where every route to it
+	already meets — Next, Previous and Random are three verbs with three entry points each and all nine
+	end in `makeCurrent`, which is the argument that file makes at length. A second writer elsewhere is
+	the defect this whole change was made to remove.
+	*/
+	@Test("Only one file writes what a display is showing")
+	func theCursorHasOneWriter() throws {
+		let assignment = try Regex("Defaults\\[\\.currentWebsites\\](\\[[^\\]]*\\])?\\s*=[^=]")
+
+		for (name, text) in try Self.sources() where name != "WebsitesController.swift" {
+			for match in text.matches(of: assignment) {
+				Issue.record(
+					"""
+					\(name) writes `currentWebsites`. Moving what a display shows goes through \
+					`WebsitesController.makeCurrent(_:switchingDisplayOn:)`, which is where every route to \
+					it already meets. Around: \(Self.context(around: match.range, in: text))
+					"""
+				)
+			}
+		}
+	}
+
+	/**
+	And it is keyed by the display, which is the part that can be wrong while everything is green.
+
+	A dictionary makes "at most one website is current per display" a property of the storage instead of
+	something a sweep has to keep true — but only if the key is the display. Keyed by anything else it
+	holds a different invariant perfectly and says nothing about screens, and there is no symptom until
+	somebody attaches a second one.
+
+	`Display.settingsKey(for:)` by name, because that is the key `disabledDisplays`, `rotationModes`,
+	`rotationIntervals` and `browsingDisplays` are already stored under: a display unplugged and plugged
+	back in has to come back to its own entry, and that function is where "the main display is a display
+	like any other" is settled.
+	*/
+	@Test("What a display is showing is one entry per display")
+	func theCursorIsKeyedByTheDisplay() throws {
+		#expect(
+			try Self.source(named: "Constants.swift").contains("Key<[String: Website.ID]>(\"currentWebsites\""),
+			"`currentWebsites` no longer holds one website id per display key, so uniqueness per display is not the storage any more."
+		)
+
+		let controller = try Self.source(named: "WebsitesController.swift")
+
+		for declaration in ["func currentWebsiteID(on display: Display?)", "func makeCurrent("] {
+			#expect(
+				try Self.body(of: declaration, in: controller).contains("Display.settingsKey(for:"),
+				"`\(declaration)` no longer keys on the display, so what it reads or writes is not a per-display answer."
+			)
+		}
+	}
+
+	/**
+	Stepping is one answer, in the one place every route to it passes through.
+
+	Pressing Next over a display that is switched off moved that display's mark under a dark screen and
+	asked for nothing, so pressing it a few times looking for a reaction left the display to come back
+	later on a website nobody chose. The panel's own two buttons had always handled it — stepping a
+	switched-off display is how you wake it — and the keyboard shortcut, the `nifro://` commands and the
+	Shortcuts action reached the same verb by another door and skipped it. One verb, one display, two
+	answers depending on which control was pressed.
+
+	Shape rather than behaviour, for the reason this suite gives at the top: there is no `AppState` here
+	to switch a display off on and no scene to ask. What can be checked is the property that makes the
+	fix hold tomorrow — that the answer is not written at a call site, where the next route added will
+	not inherit it. The behaviour was observed instead, on a running unsigned build.
+	*/
+	@Test("Every route to Next and Previous meets the switch in one place")
+	func steppingWakesADisplayWhereverItIsAskedFrom() throws {
+		#expect(
+			try Self.body(of: "func makeCurrent(", in: Self.source(named: "WebsitesController.swift"))
+				.contains("setDisplayEnabled"),
+			"`makeCurrent` no longer switches a display back on, so a display that is off takes the mark and stays dark."
+		)
+
+		// Next, Previous and Random are three verbs and three entry points each. What makes one answer
+		// enough is that all nine end here.
+		let rotation = try Self.source(named: "RotationBehaviour.swift")
+
+		for verb in ["func makeNextCurrent(", "func makePreviousCurrent(", "func makeRandomCurrent("] {
+			#expect(
+				try Self.body(of: verb, in: rotation).contains("makeCurrent("),
+				"`\(verb)` sets the mark some other way, so it no longer inherits the answer in `makeCurrent`."
+			)
+		}
+	}
+
+	/**
+	Whether a display can rotate is the question it rotates by.
+
+	I2, and the last of this suite's shape: one question with two derivations. `canRotate` lit the
+	panel's arrows off the count of the websites naming that display, and pressing one stepped through
+	`eligible(for:)` — that set narrowed by the schedule and by whether a website can be shown at all. A
+	display with two websites and one of them unshowable therefore lit both arrows and did nothing when
+	either was pressed, which is K24. Nothing was wrong with either expression. What was wrong is that
+	there were two, so every narrowing added to one of them is a new way for the arrows to lie.
+
+	Asserted as "the value names `eligible`" rather than as a copy of the expression, so the day a third
+	narrowing joins it this test is testing the new answer without anybody editing this file — the same
+	shape `SwitchedOffTests` uses for `isSwitchedOff`.
+
+	**The ceiling.** This reads the line `canRotate:` is written on, so a derivation spread over several
+	lines with `eligible` on none of them would pass. That is a thing somebody would have to do on
+	purpose; what it catches is the thing that happens by accident, which is a count of a list that is
+	already in the function.
+	*/
+	@Test("Whether a display can rotate is the question it rotates by")
+	func canRotateIsDerivedFromEligible() throws {
+		let column = try Self.body(
+			of: "private func column(for scene: WallpaperScene",
+			in: Self.source(named: "DisplayPanelModel.swift")
+		)
+
+		guard let assignment = column.range(of: "canRotate:") else {
+			Issue.record("`column(for:)` no longer fills `canRotate` in, so this test is reading nothing.")
+			return
+		}
+
+		let value = column[assignment.upperBound...].prefix { $0 != "\n" }
+
+		#expect(
+			value.contains("eligible("),
+			"""
+			`canRotate` is worked out without asking `eligible`, which is what the arrows it lights step \
+			through. Two derivations of one question is how an arrow comes to be lit and inert. \
+			Around: \(value.trimmingCharacters(in: .whitespaces))
+			"""
+		)
+
+		// And the expression it names has to be the one the arrows actually use, or the two have parted
+		// again with this test still passing.
+		let rotation = try Self.source(named: "RotationBehaviour.swift")
+
+		for verb in ["func makeNextCurrent(", "func makePreviousCurrent("] {
+			#expect(
+				try Self.body(of: verb, in: rotation).contains("eligible("),
+				"`\(verb)` steps through something other than `eligible`, so the arrows and what they do are two answers again."
 			)
 		}
 	}

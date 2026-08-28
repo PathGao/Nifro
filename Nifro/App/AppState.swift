@@ -416,6 +416,13 @@ final class AppState: ObservableObject {
 
 	private func didLaunch() {
 		_ = statusItemButton
+		// Before the line below, not after it. Adding a website means adding it to a playlist, so the
+		// order that used to be right is now the wrong way round: on a first launch, the shipped
+		// websites would be filed under a default playlist made on the spot, and the migration would
+		// then run against the mirror those writes had produced and replace that playlist with another
+		// one holding the same eight sites. The list a display picks would have changed identity
+		// between two lines of the same launch.
+		WebsitesController.shared.migrateToPlaylistsIfNeeded()
 		WebsitesController.shared.installFeaturedWebsitesIfNeeded()
 		rebuildScenes()
 		setUpEvents()
@@ -439,14 +446,38 @@ final class AppState: ObservableObject {
 	}
 
 	/**
-	Create one scene per display that should show a wallpaper, reusing the ones that already match.
+	Create one scene per attached display, reusing the ones that already match.
 
-	Call this whenever the displays change or a website moves to another display. Scenes for displays that went away get torn down — which depends entirely on `displaysInUse` no longer naming them, and it used to name them forever. The rest keep their web views and whatever they had loaded.
+	The list of displays is where this starts, and that is the inversion. It used to start from
+	`WebsitesController.displaysInUse` — the distinct display named by some website — so a screen no
+	website had been assigned to got no wallpaper at all, and the workaround for that was to pin the
+	Nth shipped website to the Nth display on first launch. That pinning was never curation. It existed
+	so the second screen would be named by something, and it only covered the displays attached the
+	first time the app ran: plug in a monitor afterwards and it stayed black, with the website editor
+	the only place to fix it from and nothing on the screen itself saying so.
+
+	`Display.all` instead. The screen claims the content rather than the content claiming the screen, so
+	a display no website names still gets a scene — `scheduled(for:)` hands it no website, and the panel
+	draws the "No Website" state it already has for that. An empty column the user can pick from is a
+	different thing from a screen that is missing.
+
+	One scene survives the empty case, with no display of its own. `Display.all` is empty while the
+	displays are being reconfigured and while every screen is asleep, and a rebuild runs on every
+	display change, so this sees those moments. `nil` already means "the main screen" for everything
+	below — `DesktopWindow.setFrame` and `WallpaperScene.screen` both resolve it through
+	`Display.mainScreen` — so the app is never in a state with no wallpaper at all. That is the one
+	thing `displaysInUse` bought with its fallback to the main display, and it is worth keeping.
+
+	Call this whenever the displays change or a website moves to another display. Scenes for displays
+	that went away get torn down. The rest keep their web views and whatever they had loaded.
 
 	This brings a scene up to date with everything app-wide; it does not load anything. Callers that need a page on screen go through `applyWebsiteChanges`.
 	*/
 	func rebuildScenes() {
-		let wanted = WebsitesController.shared.displaysInUse
+		// Read once rather than twice. Displays come and go between two reads of `NSScreen.screens`,
+		// and this runs on the notification that says they just did.
+		let attached = Display.all
+		let wanted: [Display?] = attached.isEmpty ? [nil] : attached
 
 		var kept: [WallpaperScene] = []
 
@@ -463,7 +494,9 @@ final class AppState: ObservableObject {
 			}
 		}
 
-		for scene in scenes where !kept.contains(where: { $0 === scene }) {
+		let departed = scenes.filter { scene in !kept.contains { $0 === scene } }
+
+		for scene in departed {
 			scene.tearDown()
 		}
 
@@ -487,6 +520,13 @@ final class AppState: ObservableObject {
 		// where it is asked.
 		Defaults[.browsingDisplays].formIntersection(scenes.map { Display.settingsKey(for: $0.display) })
 
+		// Which website each display is showing, and which playlist it is pointed at, are on the other
+		// side of that line, with the three preferences and not with Browsing Mode — and they are the
+		// case the line was drawn for: the user picked that wallpaper for that screen, so a monitor
+		// unplugged at night has to come back in the morning showing it. Nothing here forgets either
+		// entry, and nothing has to move one anywhere: a display that is gone has no scene, so there is
+		// no wallpaper on it to be pushed onto a screen the user did not choose it for.
+		//
 		// A failed load is state in the same sense, and is pruned for the same reason rather than kept
 		// for the opposite one: it describes a page that was on its way to a display that is gone. It
 		// is in memory rather than in `Defaults`, so this is the only place it could be dropped.

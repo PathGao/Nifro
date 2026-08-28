@@ -148,10 +148,6 @@ private struct DisplayColumn: View {
 		self.model = model
 	}
 
-	private func onSelect(_ id: Website.ID) {
-		model.show(id)
-	}
-
 	var body: some View {
 		VStack(spacing: 9) {
 			displayName
@@ -168,6 +164,12 @@ private struct DisplayColumn: View {
 					rotationControls
 				}
 				.opacity(inertOpacity)
+
+				// Above the website chooser, not instead of it: the two say what to show at different
+				// grains, and a display picks a list before it picks a page out of it. Inside the
+				// dimming, unlike the chooser below, because it is not the control reporting the load.
+				playlistChooser
+					.opacity(inertOpacity)
 
 				// Outside the dimming, and only that. It is disabled with the rest of the column, but
 				// while a page is on its way it is also the thing reporting that — and a pulse under a
@@ -408,23 +410,73 @@ private struct DisplayColumn: View {
 	}
 
 	/**
-	The website on this display, from the ones it already owns.
+	The playlist this display is showing, from the ones it may be offered.
+
+	Built to match the website chooser below rather than as a `Picker`, for the reason that one is a
+	`Menu`: a picker draws the chosen value itself and truncates it, and a playlist's name is the user's
+	own word for a list they made. Two controls that mean "what to show", one above the other, that do
+	not look alike would read as two unrelated things.
+
+	Never empty in practice — the default playlist takes no binding, so every display is offered at
+	least it — but disabled when it is, rather than drawing a menu that opens onto nothing.
+	*/
+	private var playlistChooser: some View {
+		chooser(
+			title: column.playlistName,
+			width: PanelMetrics.chooserWidth,
+			isEnabled: !column.playlistChoices.isEmpty,
+			isLoading: false
+		) {
+			ForEach(column.playlistChoices) { choice in
+				Button(choice.name) {
+					model.selectPlaylist(choice.id, on: column.display)
+				}
+			}
+		}
+	}
+
+	/**
+	The website on this display, from the playlist it is showing.
+
+	Adding a website is a different act with a different home, so a playlist with nothing in it offers
+	nothing here rather than a form: the panel points displays at things that exist.
+	*/
+	private var picker: some View {
+		chooser(
+			title: column.websiteName ?? String(localized: "No Website"),
+			width: PanelMetrics.websiteChooserWidth,
+			isEnabled: !column.choices.isEmpty,
+			isLoading: column.isLoading
+		) {
+			ForEach(column.choices, id: \.id) { choice in
+				Button(choice.menuTitle) {
+					model.selectWebsite(choice, on: column.display)
+				}
+			}
+		}
+	}
+
+	/**
+	One of the column's two choosers.
 
 	A `Menu` rather than a `Picker` because the label has to be ours: a picker draws the chosen value
 	itself, truncated, and the name is the one thing in the column that needs room. Fixed width, so
 	two columns do not end up different sizes because one website has a longer title.
 
-	Adding a website is a different act with a different home, so an empty display offers nothing here
-	rather than a form: the panel points displays at things that exist.
+	Written once for both, because they are the same control twice and the second one arriving is
+	exactly when a copy would have been made — the chevron's fixed slot, the marquee, and the order the
+	width, padding and background have to be applied in are three things that look arbitrary and are
+	not.
 	*/
-	@ViewBuilder
-	private var picker: some View {
+	private func chooser(
+		title: String,
+		width: Double,
+		isEnabled: Bool,
+		isLoading: Bool,
+		@ViewBuilder items: () -> some View
+	) -> some View {
 		Menu {
-			ForEach(column.choices, id: \.id) { choice in
-				Button(choice.menuTitle) {
-					onSelect(choice.id)
-				}
-			}
+			items()
 		} label: {
 			HStack(spacing: 0) {
 				// Pinned to the left edge and given a fixed slot, so the name is centred in what is left
@@ -434,7 +486,7 @@ private struct DisplayColumn: View {
 					.foregroundStyle(.secondary)
 					.frame(width: 16, alignment: .leading)
 
-				MarqueeText(text: column.websiteName ?? String(localized: "No Website"), isActive: isHovering)
+				MarqueeText(text: title, isActive: isHovering)
 					.font(PanelMetrics.font)
 					.frame(maxWidth: .infinity)
 					// The chevron's slot, given back, so the name is centred on the control and not on the
@@ -450,16 +502,16 @@ private struct DisplayColumn: View {
 		// label, so the width has to be forced from outside the label — and the background has to come
 		// after it, or it paints the pill at the label's size and the frame merely centres that.
 		.frame(
-			width: PanelMetrics.chooserWidth - PanelMetrics.horizontalPadding * 2,
+			width: width - PanelMetrics.horizontalPadding * 2,
 			height: PanelMetrics.height
 		)
 		.padding(.horizontal, PanelMetrics.horizontalPadding)
-		.background { chooserBackground }
-		.disabled(column.choices.isEmpty)
+		.background { chooserBackground(isLoading: isLoading) }
+		.disabled(!isEnabled)
 	}
 
 	/**
-	The chooser's pill, breathing while this display's page is on its way.
+	A chooser's pill, breathing while this display's page is on its way.
 
 	The chooser rather than a spinner somewhere else in the column, because this is the control the
 	website was picked with: a page takes seconds to arrive and nothing on the desktop changes while it
@@ -478,12 +530,15 @@ private struct DisplayColumn: View {
 	and nothing to stop. That also keeps it clear of the panel rebuilding every column twelve times a
 	second: what changes on a rebuild is the column's *values*, and the view's identity — which is what
 	the animation is attached to — is the display's, which does not.
+
+	Only the website chooser ever asks for the pulse. The playlist above it changes what a display may
+	show and not what it is fetching, so a load is not its answer to give.
 	*/
 	@ViewBuilder
-	private var chooserBackground: some View {
+	private func chooserBackground(isLoading: Bool) -> some View {
 		let pill = RoundedRectangle(cornerRadius: PanelMetrics.controlRadius)
 
-		if column.isLoading {
+		if isLoading {
 			pill
 				.fill(PanelMetrics.onTint)
 				.phaseAnimator([0.25, 0.9]) { fill, opacity in

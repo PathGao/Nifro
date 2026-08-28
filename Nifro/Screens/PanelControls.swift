@@ -53,6 +53,16 @@ enum PanelMetrics {
 	static let chooserWidth = columnWidth * 0.75
 
 	/**
+	The website chooser, which is wider than the playlist chooser above it.
+
+	Halfway between that control and the picture over both of them, so the column reads as three widths
+	narrowing to a point rather than two identical pills under a wider rectangle. It is the name that
+	wants the room: a playlist is something the user named and kept short, and a website's title is
+	whatever the page calls itself.
+	*/
+	static let websiteChooserWidth = columnWidth * 0.875
+
+	/**
 	The colour a control wears while what it turns on is on.
 
 	Sampled from the app's own icon rather than taken from the system accent: the accent is whatever

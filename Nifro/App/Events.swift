@@ -98,13 +98,19 @@ extension AppState {
 			}
 			.store(in: &cancellables)
 
-		Defaults.publisher(.websites, options: [])
+		// The playlists, which are where a website is stored. This watched the `websites` key while that
+		// was a mirror written from these, so every edit reached the scenes one turn of the run loop
+		// after it was made. The mirror is gone and so is the delay.
+		Defaults.publisher(.playlists, options: [])
 			.receive(on: DispatchQueue.main)
 			.sink { [self] in
+				let old = $0.oldValue.flatMap(\.websites)
+				let new = $0.newValue.flatMap(\.websites)
+
 				// Sound and the framed region are the settings people change while looking at the thing
 				// they apply to, and they are the two the page already up can absorb. Everything else is
 				// baked into the page when it is created, so everything else needs a new one.
-				if differOnlyInLiveSettings($0.oldValue, $0.newValue) {
+				if differOnlyInLiveSettings(old, new) {
 					applyLiveSettings()
 					return
 				}
@@ -118,10 +124,33 @@ extension AppState {
 				applyWebsiteChanges()
 
 				// We never destroy the webview, so we have to make sure it's not in browsing mode when there are no websites.
-				if $0.newValue.isEmpty {
+				if new.isEmpty {
 					Defaults[.browsingDisplays] = []
 					applyBrowsingMode()
 				}
+			}
+			.store(in: &cancellables)
+
+		// Moving the mark used to be a write to the website list, so the sink above was what put the new
+		// page on screen. It is a write to a key of its own now, and nothing was watching it — a
+		// rotation tick, a Next, a pick in the panel and every `nifro://` command all changed the answer
+		// and left the wallpaper where it was.
+		//
+		// `applyWebsiteChanges` and deliberately not the live-settings shortcut beside it: which website
+		// a display shows is never something the page already up can absorb, it is a different page.
+		//
+		// The playlist alongside it, because "which website" is now worked out from "which list": the
+		// picker in the panel writes a key of its own and never touches the cursor, so on its own it
+		// changed which websites the display was choosing between and left the one on screen where it
+		// was. Two keys and one sink, like the four inputs to opacity below — a second sink calling the
+		// same function is a second place to forget it.
+		Publishers.MergeMany(
+			Defaults.publisher(.currentWebsites, options: []).map { _ in }.eraseToAnyPublisher(),
+			Defaults.publisher(.currentPlaylists, options: []).map { _ in }.eraseToAnyPublisher()
+		)
+			.receive(on: DispatchQueue.main)
+			.sink { [self] in
+				applyWebsiteChanges()
 			}
 			.store(in: &cancellables)
 

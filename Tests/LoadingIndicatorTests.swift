@@ -148,4 +148,43 @@ struct LoadingIndicatorTests {
 		#expect(menuBar.contains("pulse.duration = WallpaperScene.loadingPulseDuration"))
 		#expect(panel.contains(".easeInOut(duration: WallpaperScene.loadingPulseDuration)"))
 	}
+
+	/**
+	The swap says the page it adopted has arrived.
+
+	`isLoading` is computed from `pendingWebView` and `hasRevealedPage`, and the swap clears only the
+	first. The second is set by `WebViewController.pageDidSettle`, which guards on the web view being
+	the live one — and a replacement finishes loading while it is still the pending one. So the only
+	thing that can say a swapped-in page is up is the swap itself.
+
+	Asserted on `adopt`, because that is the moment the page becomes the one on screen, and against
+	`revealPage` by name rather than against `hasRevealedPage`: the flag is `private(set)` and reveal
+	is two things, the flag and unhiding `window.contentView`. A swap that set the flag alone would
+	stop the pulse and leave the desktop showing whatever was behind the wallpaper.
+	*/
+	@Test("A swapped-in page is revealed by the swap")
+	func adoptingRevealsThePage() throws {
+		let source = try Self.source("Nifro/Wallpaper/SwapLoading.swift")
+
+		// Sliced rather than brace-matched: `adopt` is the last method in its extension, so the next
+		// declaration is the end of it, and a slice that is too long can only make this pass by
+		// accident on a `revealPage` somewhere else in the file — which there is not, and which the
+		// second expectation below rules out anyway.
+		guard let start = source.range(of: "private func adopt(_ replacement: SSWebView)") else {
+			Issue.record("`adopt` is no longer written that way, so this test is reading nothing.")
+			return
+		}
+
+		let body = String(source[start.upperBound...])
+
+		#expect(
+			source.components(separatedBy: "revealPage()").count == 2,
+			"More than one place in `SwapLoading` reveals the page, so the slice below no longer says which one does."
+		)
+
+		#expect(
+			body.contains("revealPage()"),
+			"`adopt` does not reveal the page it just put on screen, so `isLoading` stays true until the backstop from the previous load fires — and `window.contentView` stays hidden, which is a wallpaper that does not appear at all."
+		)
+	}
 }

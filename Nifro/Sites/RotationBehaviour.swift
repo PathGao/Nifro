@@ -25,14 +25,36 @@ extension Website {
 
 extension WebsitesController {
 	/**
-	The websites on `display` that are allowed to be showing right now, in list order.
+	The websites the playlist on `display` allows to be showing right now, in list order.
+
+	The filter used to be "the websites pinned to this display" over the whole website list, which is
+	the direction the playlists inverted: a display could only offer what already named it, so a second
+	monitor's chooser had exactly one item in it and its rotation arrows had nothing to step to.
 	*/
 	private func eligible(for display: Display?, at date: Date = .now) -> [Website] {
-		let onDisplay = showable.filter { $0.effectiveDisplay == display }
-		let scheduled = onDisplay.filter { $0.isScheduled(at: date) }
+		eligible(in: playlist(for: display, in: Defaults[.playlists]), at: date)
+	}
+
+	/**
+	The same question asked of a playlist already in hand.
+
+	Split out because the panel asks it too, and that is the whole of I2: "can this display rotate" and
+	"rotate to what" have to be one expression. They were two — the arrows lit on the count of the
+	display's websites and stepped through this, which narrowed it by the schedule — so a display with
+	one website it could show and one it could not lit both arrows and did nothing when either was
+	pressed. Deriving the first from the second is what closes that, and it only works if there is one
+	of these to derive from.
+
+	Handed the playlist rather than the display, because the panel resolves it once per refresh and
+	builds a column per display off the same list; going back through `Defaults[.playlists]` here would
+	decode every website in every playlist again, once per display, twelve times a second.
+	*/
+	func eligible(in playlist: Playlist?, at date: Date = .now) -> [Website] {
+		let members = playlist?.websites ?? []
+		let scheduled = members.filter { $0.isScheduled(at: date) }
 
 		// Never let a schedule empty a display.
-		return scheduled.isEmpty ? onDisplay : scheduled
+		return scheduled.isEmpty ? members : scheduled
 	}
 
 	/**
@@ -46,12 +68,14 @@ extension WebsitesController {
 			return candidates.first
 		}
 
-		guard let nextIndex = nextRotationIndex(count: candidates.count, after: candidates.firstIndex { $0.isCurrent }) else {
+		let current = currentWebsiteID(on: display)
+
+		guard let nextIndex = nextRotationIndex(count: candidates.count, after: candidates.firstIndex { $0.id == current }) else {
 			return nil
 		}
 
 		let next = candidates[nextIndex]
-		makeCurrent(next)
+		makeCurrent(next, on: display)
 
 		return next
 	}
@@ -61,12 +85,14 @@ extension WebsitesController {
 	*/
 	func scheduled(for display: Display?, at date: Date = .now) -> Website? {
 		let candidates = eligible(for: display, at: date)
+		let current = currentWebsiteID(on: display)
 
-		return showingIndex(
-			isCurrent: candidates.map(\.isCurrent),
-			isEvicted: candidates.map(\.isEvicted)
-		)
-		.map { candidates[$0] }
+		// At most one of these can be true, because there is one entry per display to be true of. That
+		// used to be a promise a sweep made about a flag on every website, and the promise was broken
+		// by anything that wrote the list without going through the sweep — "Show on" was a `Binding`
+		// straight into it, so moving a website carried its mark to a screen that already had one.
+		return showingIndex(isCurrent: candidates.map { $0.id == current })
+			.map { candidates[$0] }
 	}
 
 	/**
@@ -82,7 +108,7 @@ extension WebsitesController {
 			return
 		}
 
-		makeCurrent(next)
+		makeCurrent(next, on: display)
 	}
 
 	func makePreviousCurrent(on display: Display?) {
@@ -90,7 +116,7 @@ extension WebsitesController {
 			return
 		}
 
-		makeCurrent(previous)
+		makeCurrent(previous, on: display)
 	}
 
 	func makeRandomCurrent(on display: Display?) {
@@ -109,7 +135,7 @@ extension WebsitesController {
 			return
 		}
 
-		makeCurrent(website)
+		makeCurrent(website, on: display)
 	}
 }
 
@@ -296,6 +322,6 @@ extension WallpaperScene {
 			return
 		}
 
-		controller.makeCurrent(next)
+		controller.makeCurrent(next, on: display)
 	}
 }

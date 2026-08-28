@@ -74,13 +74,19 @@ private final class AppDelegate: NSObject, NSApplicationDelegate {
 		// weeks, so a check that runs once per launch is a check that mostly does not run.
 		Task {
 			while !Task.isCancelled {
-				let websiteIDs = Set(Defaults[.websites].map(\.id))
+				// The playlists, which are the whole of the list now. A store is filed under `website.id`
+				// and so is everything a page remembers, and both sweeps delete what no website claims —
+				// deleting a store signs the user out of that site with nothing able to put it back. This
+				// used to be a union with the `websites` key while both were live; that key is read only
+				// by the migration now, and keeping it in the union would preserve stores for websites
+				// the user has since deleted, for good.
+				let websiteIDs = Set(Defaults[.playlists].flatMap { $0.websites.map(\.id) })
 
 				await DiskBudget.removeOrphanedStores(keeping: websiteIDs)
 
-				// The same list, because a page record whose website is gone is exactly a store whose
-				// website is gone — and it is what clears out the records of every build that keyed
-				// them by address.
+				// The same set, because a page record whose website is gone is exactly a store whose
+				// website is gone — and it is what clears out the records of every build that keyed them
+				// by address.
 				AppState.shared.forgetOrphanedPageRecords(keeping: websiteIDs)
 
 				await DiskBudget.enforce()
