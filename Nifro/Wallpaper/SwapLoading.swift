@@ -18,9 +18,13 @@ extension WallpaperScene {
 	/**
 	Whether there is anything on the wallpaper worth keeping while the next page loads.
 
-	A still counts. It used to be only a live page with a URL, which is why entering Browsing Mode on
-	a website drawn from stills showed the desktop: the still was on screen, the live page behind it
-	had been dropped, and "no live page" was read as "nothing to protect".
+	Two questions, because `.empty` is not the only way to be showing nothing. Content only ever goes
+	`.empty` in `tearDown`, where the display has gone and the window with it — a case this path can
+	barely reach. The one it does reach is `releaseWebView`: a suspend, a battery cut, the app being
+	switched off, all of which drop the page and hand the controller a web view built from scratch, and
+	every one of them leaves content at `.live`. A scene that has never loaded at all is the same shape.
+	So the URL is the half that does the work, and reading the case alone would have the swap spend a
+	second web view, a WebContent process and a network session protecting a window with nothing in it.
 	*/
 	private var hasSomethingOnScreen: Bool {
 		switch content {
@@ -54,8 +58,8 @@ extension WallpaperScene {
 	clicked away from in Browsing Mode, is put back rather than reloaded where it drifted to. A file
 	URL and an embedded video also fail this on their own: one loads `index.html` inside the folder and
 	the other a host page around the address, so neither web view is ever showing the URL it was given.
-	- `hasSomethingOnScreen`, the same question the swap asks, so a display drawn from stills is not
-	told to reload a live page it does not have.
+	- `hasSomethingOnScreen`, the same question the swap asks, so a display whose web view was dropped
+	and not loaded into again is not told to reload a page it does not have.
 
 	`reloadFromOrigin` rather than `reload`, because `loadWallpaper` sends the request with
 	`.reloadIgnoringLocalCacheData` and this path has to be as fresh as the one it replaces. Plain

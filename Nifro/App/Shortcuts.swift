@@ -127,11 +127,25 @@ enum Shortcut: String, CaseIterable {
 	}
 
 	/**
-	Every shortcut's name, for turning them all off while a menu is open.
+	Every shortcut's name, for turning them all off while the display panel is open.
 
-	`NSMenu` puts the thread in tracking mode, which stops the global hotkeys being delivered and
-	buffers the key events instead. They then all fire at once when the menu closes, which reads as
-	the app doing something nobody asked for.
+	These are global hotkeys, so putting a window in front of the user does not stop them arriving —
+	and the panel is the one window where that matters, because it is a column of per-display controls
+	drawn over the very displays those controls act on. A shortcut that acts on a display resolves which
+	one from where the pointer is, through `Action.run(from: .pointer)`, and while the panel is up the
+	pointer is on the panel — which hangs off the menu bar and so belongs to whichever screen carries
+	it. So the answer comes out the same wherever somebody was aiming: a key pressed with the panel
+	open skips the column under the pointer and acts on the main display's wallpaper instead.
+	`DisplayPanelController` is where the disable and the re-enable are, and it re-enables through the
+	popover's delegate rather than beside its own dismissal, because a transient popover also closes
+	itself on an outside click and on Escape — a route that missed the re-enable would leave every
+	shortcut dead for the rest of the session.
+
+	This was written for the menu the panel replaced and the reasoning was `NSMenu`'s tracking mode,
+	which is not what happens here and would send the next reader looking for the wrong symptom. A
+	popover runs no tracking loop of its own, and `disable` unregisters the hotkeys rather than
+	withholding their events, so a press while the panel is up is delivered to whatever is in front —
+	the app itself, by then — and is over. Nothing is buffered and nothing fires late.
 	*/
 	@MainActor
 	static var allNames: [KeyboardShortcuts.Name] { allCases.map(\.name) }
