@@ -288,13 +288,23 @@ final class WallpaperScene {
 	so a framed wallpaper snapped back to the whole page and stayed there until the switch completed.
 	`adopt` calls this again once the new page is actually up.
 
-	Does nothing at all while this display is being framed. Passing `nil` for the region was not
-	enough: `content`'s observer fires on assignment rather than on change, so writing the same value
-	still reaches `applyContent`, which reassigns `window.contentView` — and the framing overlay is a
-	subview of the view being replaced, so it goes with it while `isSelectingCrop` stays true and the
-	mode can no longer be left. Everything that reloads, switches website or edits the list comes back
-	through here, and a rebuild runs on every display change and every wake, so framing had a few
-	seconds to survive rather than as long as the user needed.
+	Does nothing at all while this display is being framed. Everything that reloads, switches website or
+	edits the list comes back through here, and a rebuild runs on every display change and every wake,
+	so without the refusal framing had a few seconds to survive rather than as long as the user needed.
+
+	**The reason written here before was wrong, and it is worth saying which part.** It argued that
+	writing the same value still reaches `applyContent` — true, `content`'s observer fires on assignment
+	rather than on change — and that this detaches the overlay. It does not. While framing, the page is
+	`.live(zoom: nil)`, and `pageView(zoom:)` answers that with the bare web view, so `applyContent`
+	puts the *same object* back in the slot and its subviews go nowhere. Detaching needs the view object
+	to change, which is what the two writers below do.
+
+	What this refusal buys is the mode surviving an ordinary reload, and nothing more than that.
+	Losing the overlay is no longer a trap — `CropSelectionView.viewDidMoveToWindow` ends the mode when
+	it is taken out of the window, whichever writer did it — so the two content writers with no guard
+	at all, `releaseWebView` and `tearDown`, cancel the framing rather than strand it. This is why the
+	user does not lose a half-placed frame to a reload timer; it is not what keeps them from losing the
+	window.
 
 	`beginCropSelection` has already set the page to `.live(zoom: nil)`, and it holds until
 	`finishCropSelection` calls this again with the flag cleared. That is the whole of what framing
