@@ -507,7 +507,6 @@ final class WallpaperScene {
 		hasRevealedPage = true
 
 		webViewController.webView.isHidden = false
-		window.contentView?.isHidden = false
 
 		// In this order, and only now: the band stands in for the top of the page, so there has to be
 		// a page for it to stand in for.

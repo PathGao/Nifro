@@ -203,15 +203,27 @@ extension WallpaperScene {
 		//
 		// A swap got away with that for as long as `hasRevealedPage` was already true from the page
 		// being replaced. It is false exactly when the previous load had not settled yet — and then the
-		// swap inherits it: `isLoading` stays true, so the chooser keeps pulsing, and `revealPage` is
-		// also the only thing that unhides `window.contentView`, so the page that just arrived is not
-		// on screen either. Both symptoms are one missing call, and both clear themselves eventually,
+		// swap inherits it, and everything gated on the flag reads the display as still waiting for a
+		// page that is already up. `isLoading` is one of them, so the chooser and the menu bar icon go
+		// on pulsing at a wallpaper that has finished. `refreshMenuBarBandColor` is the other, and it
+		// is the one that shows: it refuses to sample a page it does not believe is on screen, so the
+		// band keeps the colour it took off the page before this one — or, on a display that has never
+		// sampled one, stays off the menu bar entirely, because `updateMenuBarBandVisibility` waits for
+		// `hasSampledColor`. The re-sample at the bottom of this method is behind the same flag and
+		// rescues neither. Both symptoms are one missing call, and both clear themselves eventually,
 		// when the backstop `load` scheduled for the *previous* page fires up to thirty seconds later.
 		//
-		// After `installContentView`, not before it. `applyContent` assigns `window.contentView` a view
-		// it has just built, so revealing ahead of that unhides the view about to be thrown away and
-		// then refuses to touch its replacement — `revealPage` runs once by design. It also reads the
-		// website for the menu bar band, and `adoptLoadedWebsite` above is what makes that this one.
+		// Not the page itself, which is on screen by then either way: `replacement.isHidden = false`
+		// above is what shows it and `installContentView` is what puts it in the window. The reason
+		// written here before was that reveal is also the only thing that unhides `window.contentView`,
+		// and that slot's flag is one nothing in the app has ever set — the single hide anywhere is in
+		// `createWebView`, on the web view, which is the thing reveal unhides. The line that wrote the
+		// slot has been deleted; what a swap needs from reveal is the flag and what hangs off it.
+		//
+		// After `installContentView`, not before it. `applyContent` is what installs the menu bar band,
+		// and everything reveal does past the flag needs a band to exist — both `refreshMenuBarBandColor`
+		// and `updateMenuBarBandVisibility` return on a missing one, and reveal runs once by design. It
+		// also reads the website for the band, and `adoptLoadedWebsite` above is what makes that this one.
 		revealPage()
 
 		restorePageState(in: replacement)

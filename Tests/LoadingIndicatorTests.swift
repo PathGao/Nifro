@@ -169,8 +169,8 @@ struct LoadingIndicatorTests {
 
 	Asserted on `adopt`, because that is the moment the page becomes the one on screen, and against
 	`revealPage` by name rather than against `hasRevealedPage`: the flag is `private(set)` and reveal
-	is two things, the flag and unhiding `window.contentView`. A swap that set the flag alone would
-	stop the pulse and leave the desktop showing whatever was behind the wallpaper.
+	is more than the flag. It samples the menu bar band off the page it has just decided is up, so a
+	swap that set the flag alone would stop the pulse and leave the band on the previous page's colour.
 	*/
 	@Test("A swapped-in page is revealed by the swap")
 	func adoptingRevealsThePage() throws {
@@ -194,7 +194,7 @@ struct LoadingIndicatorTests {
 
 		#expect(
 			body.contains("revealPage()"),
-			"`adopt` does not reveal the page it just put on screen, so `isLoading` stays true until the backstop from the previous load fires — and `window.contentView` stays hidden, which is a wallpaper that does not appear at all."
+			"`adopt` does not reveal the page it just put on screen, so `isLoading` stays true until the backstop from the previous load fires — and the menu bar band keeps the colour it took off the page before this one."
 		)
 	}
 }

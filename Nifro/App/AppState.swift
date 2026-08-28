@@ -413,10 +413,6 @@ final class AppState: ObservableObject {
 		guard let error else {
 			storedWebViewErrors[key] = nil
 
-			if storedWebViewErrors.isEmpty {
-				statusItemButton.contentTintColor = nil
-			}
-
 			refreshStatusItemTooltip()
 			return
 		}

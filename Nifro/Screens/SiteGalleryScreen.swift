@@ -28,6 +28,8 @@ struct SiteGalleryScreen: View {
 	}
 
 	var body: some View {
+		let matches = self.matches
+
 		VStack(spacing: 0) {
 			header
 			Divider()
