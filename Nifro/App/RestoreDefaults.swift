@@ -112,18 +112,16 @@ enum RestoreDefaults {
 			UserDefaults.standard.set(chosenLanguage, forKey: preservedKey)
 		}
 
-		// The migration and then the install, in the order `didLaunch` uses and for the reason argued
-		// there rather than restated here. Behind one call because Advanced has a button that wants the
-		// same state without the wipe above it, and that is the whole of what the call bought: this file
-		// and that button are two callers of one entry point instead of two more copies of the order.
+		// The migration and then the install, in the order `didLaunch` uses — and now literally the same
+		// code rather than the same two lines written down twice. Both routes end in
+		// `WebsitesController.prepareWebsiteStorage`, which is where the order is argued for. There is
+		// one ordering in the app.
 		//
-		// It did not make the order live in one place, and cannot. `installDefaultPlaylist` opens by
-		// forcing `hasInstalledFeaturedWebsites` back to false, which is right after a wipe and right
-		// under a button somebody pressed on purpose, and on the launch path would reinstall the shipped
-		// websites every single run — including the ones the user has since deleted. So `didLaunch`
-		// still writes the pair out itself, and there are two orderings in the app that have to agree.
-		// Extracting the pair on its own, leaving the flag reset in `installDefaultPlaylist`, is what
-		// would make it one.
+		// This file goes through `installDefaultPlaylist` rather than calling that directly, because a
+		// wipe needs one thing the launch path must never have: `hasInstalledFeaturedWebsites` forced
+		// back to false, so the shipped websites come back. On the launch path that same line would
+		// reinstall them every single run, including the ones the user has since deleted. It stays in
+		// `installDefaultPlaylist`, which this and the button in Advanced are the two callers of.
 		//
 		// Nothing else has to be driven from here. Writing the website list is what the rest of the app
 		// already watches, so the scenes are rebuilt and every preference that has a publisher took its

@@ -171,7 +171,8 @@ PR1   Rename today's Playlist.swift                         independent
       resetPlaylistTimer — 33 identifier uses.
 
 PR2   Introduce Playlist, migrate the existing list          independent
-      Everything into one default playlist. Website.display still readable, no longer written.
+      Everything into one default playlist. The stored display beside each website is
+      left on disk and read by nothing — see the third correction below.
 
 PR2.5 Re-key PerPageDefaults from URL to website.id          before PR6
       Scroll position, last address and page zoom are keyed by URL. Two copies of one
@@ -199,7 +200,7 @@ PR7   Delete Website.display, WebsiteDisplaySetting,
 PR1 and PR2 are the first two links of a chain; PR5 and PR6 can be opened in parallel once their
 dependencies land.
 
-**Two corrections, from building it rather than planning it.**
+**Three corrections, from building it rather than planning it.**
 
 PR2 is not independently landable, and the word "independent" above was wrong about it. `periphery
 scan --strict` runs in CI, and a model whose fields are written by the migration and read by nothing
@@ -209,6 +210,15 @@ expires. So PR2 lands with the PRs that give it readers, and PR1 and PR2.5 land 
 
 PR3 and PR4 are not parallel either. They share six files, `WebsitesController.swift` and
 `Website.swift` among them. PR5 and PR6 still are.
+
+"`Website.display` still readable" was a step nothing ever took. PR2 shipped a `PinnedWebsite`
+wrapper that decoded the stored `display` beside each website, and the migration's very next line was
+`stored.map(\.website)` — so the field was read and dropped without anything looking at it, which is
+what "readable" was meant to buy. It is deleted now and `Defaults[.websites]` is a plain
+`Key<[Website]>`. Nothing about the data on disk changes: a synthesised `Codable` asks for the keys it
+declares and skips the rest, so the records that carry a `display` decode exactly as they already did,
+and the field stays on disk as the record of what the list was before the conversion.
+`WebsiteMigrationTests.aRecordWithADisplayStillDecodes` runs one of them.
 
 ## 7. Decided here, because the design forced the question
 
