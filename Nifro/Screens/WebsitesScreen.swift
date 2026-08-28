@@ -1,10 +1,329 @@
 import SwiftUI
 import WebKit
 
+/**
+Two levels: the lists a display can be given, and what is in one of them.
+
+It was one level, and the level it was missing is the whole of the change: a website used to carry the
+display it belonged to, so a flat list was the shape of the model. A screen picks a list now, which
+means there is a thing between the screen and the website that the user has to be able to name,
+reorder, copy and throw away. That thing has no other home — the panel is a popover over the desktop
+with room for a picker and not for management, and Settings is where switches live.
+
+**Reordering is ordering.** Dragging a playlist above another says nothing about which display gets
+it: a binding filters a display's picker and does nothing else, so two playlists bound to one screen
+do not compete and there is no precedence for a drag to express. The order is the order the picker
+lists them in, which is the only thing an order can mean here.
+
+The window's own furniture — the toolbar's Add Website, the bottom bar's Clear Data — stays at the
+root and reaches both levels, because both are about the window rather than about one list. Add
+Website is the one that has to know where it is: `path.last` is the list the user is looking at, and
+`nil` at the root means the one every display falls back to.
+*/
 struct WebsitesScreen: View {
-	@Default(.websites) private var websites
-	@State private var editedWebsite: Website.ID?
+	@Default(.playlists) private var playlists
+
+	// The stack's path rather than a selection of its own, so that "which list is open" has one
+	// answer. Add Website reads it to decide where a website lands, and a second state to say the same
+	// thing is a second thing to keep in step with the back button.
+	@State private var path = [Playlist.ID]()
+
 	@State private var isAddWebsiteDialogPresented = false
+
+	var body: some View {
+		NavigationStack(path: $path) {
+			Form {
+				List($playlists, editActions: .move) { playlist in
+					PlaylistRow(
+						playlist: playlist,
+						duplicate: { duplicate(playlist.wrappedValue) },
+						delete: { delete(playlist.wrappedValue) }
+					)
+				}
+				.overlay {
+					if playlists.isEmpty {
+						Text("No Playlists")
+							.emptyStateTextStyle()
+					}
+				}
+				.accessibilityAction(named: "Add website") {
+					isAddWebsiteDialogPresented = true
+				}
+			}
+			.formStyle(.grouped)
+			.navigationTitle("Playlists")
+			.navigationDestination(for: Playlist.ID.self) { id in
+				// Through the stored list rather than captured at the moment the row was drawn, so a
+				// rename or an edit made in here writes to the playlist that is still there. A playlist
+				// deleted while open leaves nothing to draw, and the stack is popped rather than left
+				// showing a list that no longer exists.
+				if let playlist = $playlists[id: id] {
+					PlaylistWebsites(playlist: playlist)
+				} else {
+					Color.clear.onAppear {
+						path.removeAll { $0 == id }
+					}
+				}
+			}
+		}
+		.frame(width: 480, height: 500)
+		.safeAreaInset(edge: .bottom) {
+			VStack(spacing: 0) {
+				Divider()
+
+				ClearWebsiteDataButton()
+					// Roomier than the site gallery's footer on purpose. One control alone in a bar looks
+					// wedged in if it is given the padding a row of them would share, and being cramped is
+					// what was wrong with where this used to live.
+					.padding(.horizontal, 20)
+					.padding(.vertical, 14)
+					.frame(maxWidth: .infinity, alignment: .leading)
+			}
+		}
+		.sheet(isPresented: $isAddWebsiteDialogPresented) {
+			AddWebsiteScreen(
+				isEditing: false,
+				website: nil,
+				playlist: path.last
+			)
+		}
+		.onNotification(.showAddWebsiteDialog) { _ in
+			isAddWebsiteDialogPresented = true
+		}
+		.toolbar {
+			Button("Add Website", systemImage: "plus") {
+				isAddWebsiteDialogPresented = true
+			}
+			.keyboardShortcut("+")
+		}
+		.windowMinimizeBehavior(.disabled)
+		.windowLevel(.floating)
+	}
+
+	/**
+	Put the copy directly under what it was copied from.
+
+	At the end of the list it is somewhere the user has to go and find, and the gesture that produced
+	it was performed on a row they were already looking at. `duplicated()` is where the copy itself is
+	argued for.
+	*/
+	private func duplicate(_ playlist: Playlist) {
+		guard let index = playlists.firstIndex(where: { $0.id == playlist.id }) else {
+			return
+		}
+
+		playlists.insert(playlist.duplicated(), at: playlists.index(after: index))
+	}
+
+	private func delete(_ playlist: Playlist) {
+		playlists.removeAll { $0.id == playlist.id }
+	}
+}
+
+/**
+One playlist in the list of them: what it is called, what it holds, and the menu that changes all of it.
+
+The `⋮` menu rather than a context menu alone, because everything in it is reachable no other way —
+there is no drawer to open, no inspector, and the row itself is a link into the playlist. A menu the
+user has to guess at by right-clicking is a menu that holds the only route to renaming a thing.
+*/
+private struct PlaylistRow: View {
+	@Binding var playlist: Playlist
+
+	let duplicate: () -> Void
+	let delete: () -> Void
+
+	@ObservedObject private var displays = Display.observable
+
+	@State private var isRenaming = false
+	@State private var draftName = ""
+	@State private var isConfirmingDuplicate = false
+	@State private var isConfirmingDelete = false
+
+	/**
+	The displays this row can offer, which is the attached ones plus the one already chosen.
+
+	The second half is the whole reason `DisplayBinding` stores a name. A binding outlives the cable:
+	the monitor it names is unplugged for the evening, or the laptop is undocked, and the row still has
+	to say which display this list is held back for and still has to let go of it. Built from the
+	attached displays alone, the picker would have no item matching the selection, so the menu would
+	draw a tick against nothing and the only way out of the binding would be to plug the display back
+	in.
+
+	`localizedName` is asked of the attached displays only, and never of the stored binding — it
+	resolves through `NSScreen.screens` and answers `<Unknown name>` for a display that is not there,
+	which is a string that must never reach a user. What the stored binding knows is the name that
+	display had when it was chosen, and that is the honest thing to show: it is the last time the app
+	could see it.
+	*/
+	private var displayOptions: [DisplayBinding] {
+		var options = displays.wrappedValue.all.map {
+			DisplayBinding(id: $0.id, nameWhenBound: $0.localizedName)
+		}
+
+		if let bound = playlist.boundDisplay, !options.contains(where: { $0.id == bound.id }) {
+			options.append(bound)
+		}
+
+		return options
+	}
+
+	// The id rather than the binding itself, because a `Picker` tags its items and `DisplayBinding`
+	// would have to be equal to the tag on every field for the tick to land — including a name that
+	// changes when the display is renamed in System Settings.
+	private var boundDisplayID: Binding<UUID?> {
+		.init(
+			get: { playlist.boundDisplay?.id },
+			set: { chosen in
+				playlist.bind(to: chosen.flatMap { id in displayOptions.first { $0.id == id } })
+			}
+		)
+	}
+
+	private var subtitle: String {
+		let count = String(localized: "^[\(playlist.websites.count) website](inflect: true)")
+
+		guard let bound = playlist.boundDisplay?.nameWhenBound else {
+			return count
+		}
+
+		return "\(count) · \(bound)"
+	}
+
+	var body: some View {
+		HStack {
+			// The rows are dragged to reorder them, and nothing else on the row says so. A `List` on
+			// macOS takes the drag from anywhere in the row, so this is a label for a gesture that
+			// already works rather than the control that performs it — which is why it is hidden from
+			// accessibility, where the same reordering is a move action on the list.
+			Image(systemName: "line.3.horizontal")
+				.foregroundStyle(.tertiary)
+				.accessibilityHidden(true)
+
+			NavigationLink(value: playlist.id) {
+				VStack(alignment: .leading, spacing: 2) {
+					Text(playlist.name)
+					Text(subtitle)
+						.foregroundStyle(.secondary)
+						.font(.subheadline)
+				}
+				.lineLimit(1)
+				.frame(maxWidth: .infinity, alignment: .leading)
+			}
+
+			Menu {
+				// A `Picker` and not four buttons, so that "restricted to one display" reads as one
+				// answer with a tick on it rather than as four independent switches that happen to be
+				// exclusive. "None" is first and is the default: a playlist offered everywhere is the
+				// ordinary case, and a restriction is the thing being added.
+				Picker(selection: boundDisplayID) {
+					Text("None")
+						.tag(UUID?.none)
+
+					ForEach(displayOptions, id: \.id) {
+						Text($0.nameWhenBound)
+							.tag(UUID?.some($0.id))
+					}
+				} label: {
+					Text("Show on Display")
+				}
+				// The one playlist every display falls back to, so restricting it to one display leaves
+				// every other screen with an empty picker — nothing to select, nothing on the screen, and
+				// no way back out from the panel. `Playlist.isDefault` argues for it at length and
+				// `bind(to:)` refuses it as well; this is the half the user sees.
+				.disabled(playlist.isDefault)
+
+				Divider()
+
+				Button("Rename…") {
+					draftName = playlist.name
+					isRenaming = true
+				}
+
+				Button("Duplicate…") {
+					isConfirmingDuplicate = true
+				}
+
+				Divider()
+
+				Button("Delete…", role: .destructive) {
+					isConfirmingDelete = true
+				}
+				// For the same reason the binding is refused: it is what a display with no choice of its
+				// own shows, so deleting it is deleting the fallback rather than deleting a list.
+				.disabled(playlist.isDefault)
+			} label: {
+				Image(systemName: "ellipsis")
+			}
+			.menuStyle(.borderlessButton)
+			.menuIndicator(.hidden)
+			.fixedSize()
+			.accessibilityLabel("Playlist Actions")
+		}
+		.frame(height: 44) // Note: Setting a fixed height prevents a lot of SwiftUI rendering bugs.
+		.padding(.horizontal, 8)
+		.alert(String(localized: "Rename Playlist"), isPresented: $isRenaming) {
+			TextField(String(localized: "Name"), text: $draftName)
+
+			Button(String(localized: "Rename")) {
+				// A name is what the picker in the panel shows, so an empty one leaves a row the user
+				// cannot tell apart from any other. Nothing is written rather than the field being
+				// policed while it is typed in.
+				if let name = draftName.trimmed.nilIfEmpty {
+					playlist.name = name
+				}
+			}
+
+			Button(String(localized: "Cancel"), role: .cancel) {}
+		}
+		// Duplicating destroys nothing, and it still asks — for the one consequence that is invisible
+		// from here and cannot be undone afterwards. A website's stored data is filed under its id, the
+		// copy's websites have new ids, so the copy is signed out of everything the original is signed
+		// in to. Told once, here, rather than built around: keeping the sessions would mean two
+		// playlists sharing one set of logins, and then deleting either one signs the other out.
+		.confirmationDialog(
+			String(localized: "Duplicate \(playlist.name)?"),
+			isPresented: $isConfirmingDuplicate
+		) {
+			Button(String(localized: "Duplicate")) {
+				duplicate()
+			}
+
+			Button(String(localized: "Cancel"), role: .cancel) {}
+		} message: {
+			Text("The copy gets its own websites, so a region, a stylesheet or a reload interval changed in one list leaves the other alone. It does not copy logins: every site the original is signed in to, the copy is signed out of.")
+		}
+		// The same bar a single website's delete has to meet, and the same reason — this app has no
+		// undo and the removal is a write to the stored list, so the convention that Mac apps do not
+		// confirm a delete is missing its precondition. Higher here than there, because this is that
+		// dialog multiplied: everything it warns about happens to every website in the list at once,
+		// and the row says how many that is right up until the moment it is asked.
+		.confirmationDialog(
+			String(localized: "Delete \(playlist.name)?"),
+			isPresented: $isConfirmingDelete
+		) {
+			Button(String(localized: "Delete"), role: .destructive) {
+				delete()
+			}
+
+			Button(String(localized: "Cancel"), role: .cancel) {}
+		} message: {
+			Text("Every website in it goes with it, along with the custom CSS, JavaScript, regions and schedules written for them; you will be signed out of each of those sites, and there is no undo.")
+		}
+	}
+}
+
+/**
+Inside one playlist: the website list this window used to be, made to belong to something.
+
+Nothing about a website's own row changed. What changed is what the list *is* — the members of one
+playlist rather than every website in the app — so the order dragged here is the order that playlist
+rotates in, and a website added while this is open is added to this list.
+*/
+private struct PlaylistWebsites: View {
+	@Binding var playlist: Playlist
+
+	@State private var editedWebsite: Website.ID?
 	@State private var searchText = ""
 
 	/**
@@ -16,7 +335,7 @@ struct WebsitesScreen: View {
 	private var matches: [Binding<Website>] {
 		let query = searchText.trimmed.lowercased()
 
-		return $websites.filter {
+		return $playlist.websites.filter {
 			query.isEmpty
 				|| $0.wrappedValue.title.lowercased().contains(query)
 				|| $0.wrappedValue.url.absoluteString.lowercased().contains(query)
@@ -36,63 +355,30 @@ struct WebsitesScreen: View {
 					}
 				}
 			} else {
-			List($websites, editActions: .all) { website in
+			List($playlist.websites, editActions: .all) { website in
 				RowView(
 					website: website,
 					selection: $editedWebsite
 				)
 			}
-			.id(websites) // Workaround for the row not updating when changing the current active website. It's placed here and not on the row to prevent another issue where adding a new website makes it scroll outside the view. (macOS 15.3)
+			.id(playlist.websites) // Workaround for the row not updating when changing the current active website. It's placed here and not on the row to prevent another issue where adding a new website makes it scroll outside the view. (macOS 15.3)
 			.overlay {
-				if websites.isEmpty {
+				if playlist.websites.isEmpty {
 					Text("No Websites")
 						.emptyStateTextStyle()
 				}
-			}
-			.accessibilityAction(named: "Add website") {
-				isAddWebsiteDialogPresented = true
 			}
 			}
 		}
 		.searchable(text: $searchText, placement: .toolbar, prompt: Text("Search by name or address"))
 		.formStyle(.grouped)
-		.safeAreaInset(edge: .bottom) {
-			VStack(spacing: 0) {
-				Divider()
-
-				ClearWebsiteDataButton()
-					// Roomier than the site gallery's footer on purpose. One control alone in a bar looks
-					// wedged in if it is given the padding a row of them would share, and being cramped is
-					// what was wrong with where this used to live.
-					.padding(.horizontal, 20)
-					.padding(.vertical, 14)
-					.frame(maxWidth: .infinity, alignment: .leading)
-			}
-		}
-		.frame(width: 480, height: 500)
+		.navigationTitle(playlist.name)
 		.sheet(item: $editedWebsite) {
 			AddWebsiteScreen(
 				isEditing: true,
-				website: $websites[id: $0]
+				website: $playlist.websites[id: $0]
 			)
 		}
-		.sheet(isPresented: $isAddWebsiteDialogPresented) {
-			AddWebsiteScreen(
-				isEditing: false,
-				website: nil
-			)
-		}
-		.onNotification(.showAddWebsiteDialog) { _ in
-			isAddWebsiteDialogPresented = true
-		}
-		.toolbar {
-			Button("Add Website", systemImage: "plus") {
-				isAddWebsiteDialogPresented = true
-			}
-			.keyboardShortcut("+")
-		}
-		.windowMinimizeBehavior(.disabled)
-		.windowLevel(.floating)
 	}
 }
 
@@ -265,6 +551,13 @@ private struct RowView: View {
 
 	var body: some View {
 		HStack {
+			// The same label the playlist rows carry, for the same gesture and hidden from
+			// accessibility for the same reason. It is in front of the icon rather than behind it so
+			// that the two levels of this window have their handles in one column.
+			Image(systemName: "line.3.horizontal")
+				.foregroundStyle(.tertiary)
+				.accessibilityHidden(true)
+
 			IconView(website: website)
 			VStack(alignment: .leading, spacing: 2) {
 				// TODO: This should use something like `.lineBreakMode = .byCharWrapping` if SwiftUI ever supports that.

@@ -56,14 +56,29 @@ struct AddWebsiteScreen: View {
 	// TODO: `@OptionalBinding` extension?
 	private var existingWebsite: Binding<Website>?
 
+	/**
+	The playlist a new website is added to, and `nil` for the one every display falls back to.
+
+	Passed in rather than worked out here, because the answer is "the list the user is looking at" and
+	only the screen that opened this knows what that is. Every other way in — the share extension, a
+	`nifro://` command, the Shortcuts action, the site gallery — has no list in hand and means the
+	default, which is what `nil` says.
+
+	Unused while editing: a website already belongs to a playlist, and moving it between them is not
+	this sheet's gesture.
+	*/
+	private let playlist: Playlist.ID?
+
 	private var website: Binding<Website> { existingWebsite ?? $newWebsite }
 
 	init(
 		isEditing: Bool,
-		website: Binding<Website>?
+		website: Binding<Website>?,
+		playlist: Playlist.ID? = nil
 	) {
 		self.isEditing = isEditing
 		self.existingWebsite = website
+		self.playlist = playlist
 		self._originalWebsite = .init(wrappedValue: website?.wrappedValue)
 
 		if isEditing {
@@ -321,7 +336,7 @@ struct AddWebsiteScreen: View {
 	}
 
 	private func add() {
-		WebsitesController.shared.add(website.wrappedValue)
+		WebsitesController.shared.add(website.wrappedValue, to: playlist)
 		dismiss()
 
 		SSApp.runOnce(identifier: "editWebsiteTip") {

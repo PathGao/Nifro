@@ -112,18 +112,16 @@ enum RestoreDefaults {
 			UserDefaults.standard.set(chosenLanguage, forKey: preservedKey)
 		}
 
+		// The migration first, because the wipe took the flag that says it has run and because adding a
+		// website means adding it to a playlist — `didLaunch` orders these two the same way and argues
+		// for it at length.
+		WebsitesController.shared.migrateToPlaylistsIfNeeded()
+
 		// The entry point first launch uses, now that the flag guarding it went with everything else.
 		// Nothing else has to be driven from here: writing the website list is what the rest of the app
-		// already watches, so the scenes are rebuilt, the shipped pages load on the displays they were
-		// seeded onto, and every preference that has a publisher took its default on the way past.
-		// Restoring through the same path as launching means there is one path, not a second one that
-		// has to be kept in step with it.
+		// already watches, so the scenes are rebuilt and every preference that has a publisher took its
+		// default on the way past. Restoring through the same path as launching means there is one
+		// path, not a second one that has to be kept in step with it.
 		WebsitesController.shared.installFeaturedWebsitesIfNeeded()
-
-		// And its migration, because the wipe took the flag that says it has run along with everything
-		// else. Left to the next launch, a restored app would sit with the websites back and no
-		// playlists made from them — which is not a state anything else in the app can produce, and so
-		// is exactly the kind nobody would think to look for.
-		WebsitesController.shared.migrateToPlaylistsIfNeeded()
 	}
 }

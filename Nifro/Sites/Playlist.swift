@@ -96,3 +96,56 @@ struct DisplayBinding: Hashable, Codable, Sendable {
 	let id: UUID
 	let nameWhenBound: String
 }
+
+extension Playlist {
+	/**
+	What the one playlist every display falls back to is called.
+
+	A computed property and not a stored `let`, so it follows a language change in the same launch
+	rather than answering with whatever the language was the first time anything asked. Written once
+	here because two places name it — the migration that makes it and the add that has to find or
+	remake it — and a list called "Default" in one and something else in the other is two default
+	playlists.
+	*/
+	static var defaultName: String { String(localized: "Default") }
+
+	/**
+	Bind this playlist to a display, or to none.
+
+	The refusal that `isDefault` argues for, stated a second time because there are two ways in. The
+	initializer drops a binding handed to the default playlist, and that covers the migration and the
+	copy; this covers the management page, where the user picks a display from a menu. `boundDisplay`
+	is `private(set)` so that these two are the only ways in, and the menu item is disabled as well —
+	a control the user cannot reach is the honest version, and this is what makes reaching it anyway
+	harmless.
+	*/
+	mutating func bind(to display: DisplayBinding?) {
+		guard !isDefault else {
+			return
+		}
+
+		boundDisplay = display
+	}
+
+	/**
+	A copy of this playlist, with its own websites.
+
+	`withFreshIDs` is the whole of what makes it a copy rather than a second name for the same thing;
+	the argument for it is over that function. The other three differences are decisions rather than
+	mechanism:
+
+	- **It starts on no display.** Duplicating a bound playlist would otherwise put a second entry with
+	the same name in that display's picker, which nobody asked for, and the case duplication is for is
+	"copy the default twice, then bind each" — where the binding is the step the user is about to take
+	themselves.
+	- **It is not the default.** There is exactly one playlist every display falls back to, and copying
+	it would make the fallback ambiguous the moment the two lists differ.
+	- **It is named rather than numbered.** Finder's word, because this is Finder's gesture.
+	*/
+	func duplicated() -> Self {
+		Self(
+			name: String(localized: "\(name) copy"),
+			websites: withFreshIDs(websites, id: \.id)
+		)
+	}
+}
