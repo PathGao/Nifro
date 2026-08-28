@@ -38,7 +38,7 @@ struct AddWebsiteScreen: View {
 	// associated type. Writing `.init(wrappedValue:)` here would compile and would put a decoding
 	// concern in a screen.
 	@State private var newWebsite: Website = {
-		var website = Website(id: UUID(), isCurrent: true, url: ".", usePrintStyles: false)
+		var website = Website(id: UUID(), url: ".", usePrintStyles: false)
 		website.css = Website.starterCSS
 		website.javaScript = Website.starterJavaScript
 		return website
@@ -290,7 +290,6 @@ struct AddWebsiteScreen: View {
 			WebsiteAudioSetting(audio: website.audio)
 			WebsiteInteractionSetting(allowsInteraction: website.allowsInteraction)
 			WebsiteExternalLinksSetting(externalLinks: website.externalLinks)
-			WebsiteDisplaySetting(display: website.display)
 			WebsiteScheduleSetting(startHour: website.startHour, endHour: website.endHour)
 			WebsiteReloadSetting(reloadInterval: website.reloadInterval)
 			ZoomSetting(zoom: website.zoom)

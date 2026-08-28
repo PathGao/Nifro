@@ -6,19 +6,6 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	// scroll position are all filed under, so changing one would orphan all three.
 	var id: UUID
 
-	/**
-	Dead storage, kept so the list still decodes both ways.
-
-	This was where "is this website the one on screen" lived, and it was the wrong shape for it: one
-	slot per website answering a question per display. The answer is `Defaults[.currentWebsites]` now,
-	one entry per display, and nothing reads this — `ScopeTests` is what says so.
-
-	Still written and still stored, because a website encoded without it will not decode on the build
-	before this one, and somebody who runs this and goes back has to find their list where they left
-	it. It goes when that stops being true, along with `display` above it.
-	*/
-	var isCurrent: Bool
-
 	var url: URL
 	@DecodableDefault.EmptyString var title: String
 	@DecodableDefault.Custom<InvertColors> var invertColors2
@@ -34,17 +21,6 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	to fill the screen rather than left as a small rectangle with desktop around it.
 	*/
 	var zoom: Zoom?
-
-	/**
-	Which display to show this website on. `nil` means the main display — the one with the menu bar.
-
-	`nil` is not "the display Settings names": there is no such setting, and there never has been. It
-	resolves through `Display.main` on every read, so it follows the menu bar when displays are
-	rearranged or the laptop is docked, rather than naming a screen once.
-
-	The most-asked-for thing has always been a different page on each screen, a calendar on one and a dashboard on the other. That needs the display to be a property of the website rather than one app-wide setting.
-	*/
-	var display: Display?
 
 	/**
 	The hours of the day this website is allowed to be showing, if it should not always be.
@@ -95,57 +71,6 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	into the state it was already in.
 	*/
 	@DecodableDefault.Custom<ExternalLinks> var externalLinks
-
-	/**
-	The display this website actually appears on.
-
-	Falls back to the main display when the chosen one is not attached, because otherwise this answers
-	with a display that is not there and every caller believes it. When scenes were built out of these
-	answers, one was built for an unplugged display, and both `DesktopWindow.setFrame` and
-	`WallpaperScene.screen` then fall back to `.main` on their own — so an undocked laptop ended up with
-	two full-screen wallpaper windows stacked on the built-in screen, each with its own timers and its
-	own menu-bar band competing for one menu bar. Scenes come from the attached displays now, so that
-	particular way of reaching an absent display is closed; the fallback stays because `eligible(for:)`
-	still matches this against a scene's display, and a website answering with a display that has no
-	scene is a website on no screen at all.
-
-	`display` itself is left alone, so plugging the display back in puts the website back on it.
-	*/
-	@MainActor
-	var effectiveDisplay: Display? {
-		guard let chosen = display ?? .main else {
-			return nil
-		}
-
-		return Defaults[.keepWallpaperWhenDisplayUnplugged] ? chosen.withFallbackToMain : chosen
-	}
-
-	/**
-	Whether this website should be on screen at all right now.
-
-	False only for a website pinned to a display that is not attached, and only when the user has said
-	such a wallpaper should go away with its display rather than move. Kept apart from
-	`effectiveDisplay` because that answers *where*, and `nil` there already means "the main display" —
-	there is no value it could return that means nowhere.
-	*/
-	@MainActor
-	var isShowable: Bool {
-		Defaults[.keepWallpaperWhenDisplayUnplugged] || (display ?? .main)?.isConnected != false
-	}
-
-	/**
-	Whether this website is on a display it was sent to rather than the one it was given.
-
-	True only for a website pinned to a display that is not attached, and only while such a wallpaper
-	is set to move rather than go away — which is the same pair of conditions `isShowable` reads, from
-	the other side. `display` is left alone either way, so this goes back to false the moment that
-	screen is plugged in again.
-
-	What it is for is the tie it settles once the website has landed: two wallpapers now claim one
-	desktop, and `showingIndex` gives it to this one.
-	*/
-	@MainActor
-	var isEvicted: Bool { isShowable && display?.isConnected == false }
 
 	/**
 	How often this website actually reloads.
@@ -218,10 +143,6 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 			symbols.append("clock")
 		}
 
-		if display != nil {
-			symbols.append("display")
-		}
-
 		if allowsInteraction {
 			symbols.append("hand.tap")
 		}
@@ -243,17 +164,17 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	var thumbnailCacheKey: String { url.isFileURL ? url.tildePath : url.absoluteString }
 
 	/**
-	Show this website on the display it was pinned to.
+	Show this website on the display with the menu bar.
 
 	The flat list in the Websites window is the one caller with no display in hand, because it is not
-	about a screen — so the website's own answer stands in, written out here rather than hidden inside
-	`makeCurrent`, which every other caller now tells which display it means. A website reachable from
-	two columns has no such answer, which is what this fallback cannot see and the picker in the panel
-	can.
+	about a screen — and a website has no display of its own to fall back to any more, so the fallback
+	is written out here rather than hidden inside `makeCurrent`, which every other caller tells which
+	display it means. A website reachable from two columns has no better answer than this one, which
+	is what the picker in the panel can see and this cannot.
 	*/
 	@MainActor
 	func makeCurrent() {
-		WebsitesController.shared.makeCurrent(self, on: effectiveDisplay)
+		WebsitesController.shared.makeCurrent(self, on: Display.main)
 	}
 
 	@MainActor

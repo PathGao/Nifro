@@ -43,14 +43,6 @@ extension NSScreen {
 	}
 
 	/**
-	This can be useful if you store a reference to a `NSScreen` instance as it may have been disconnected.
-	*/
-	var isConnected: Bool {
-		Self.screens.contains { $0.id == id }
-	}
-
-
-	/**
 	Whether the screen shows a status bar that takes up space.
 	*/
 	var hasStatusBar: Bool { statusBarThickness > 0 }
@@ -92,8 +84,8 @@ struct Display: Hashable, Codable, Identifiable {
 
 	A `var`, because which display that is changes: rearranging displays in System Settings moves the
 	menu bar, and so does docking. As a `let` it was whatever `CGMainDisplayID()` said the first time
-	anything asked, kept for the life of the process — and `withFallbackToMain` leans on it, so a stale
-	answer sends a wallpaper to a display that may itself be gone.
+	anything asked, kept for the life of the process — and the callers with no display of their own to
+	name fall back to this, so a stale answer sends a wallpaper to a display that may itself be gone.
 	*/
 	static var main: Self? { Self(transientID: CGMainDisplayID()) }
 
@@ -143,11 +135,6 @@ struct Display: Hashable, Codable, Identifiable {
 	}
 
 	/**
-	Whether the display is connected.
-	*/
-	var isConnected: Bool { screen?.isConnected ?? false }
-
-	/**
 	The screen a wallpaper with no display of its own belongs on.
 
 	Written out rather than left to `?? .main`, which in an `NSScreen?` position means
@@ -158,11 +145,6 @@ struct Display: Hashable, Codable, Identifiable {
 	*/
 	@MainActor
 	static var mainScreen: NSScreen? { main?.screen ?? NSScreen.screens.first }
-
-	/**
-	Get the main display if the current display is not connected.
-	*/
-	var withFallbackToMain: Self? { isConnected ? self : .main }
 
 	init(_ id: UUID) {
 		self.id = id

@@ -98,13 +98,19 @@ extension AppState {
 			}
 			.store(in: &cancellables)
 
-		Defaults.publisher(.websites, options: [])
+		// The playlists, which are where a website is stored. This watched the `websites` key while that
+		// was a mirror written from these, so every edit reached the scenes one turn of the run loop
+		// after it was made. The mirror is gone and so is the delay.
+		Defaults.publisher(.playlists, options: [])
 			.receive(on: DispatchQueue.main)
 			.sink { [self] in
+				let old = $0.oldValue.flatMap(\.websites)
+				let new = $0.newValue.flatMap(\.websites)
+
 				// Sound and the framed region are the settings people change while looking at the thing
 				// they apply to, and they are the two the page already up can absorb. Everything else is
 				// baked into the page when it is created, so everything else needs a new one.
-				if differOnlyInLiveSettings($0.oldValue, $0.newValue) {
+				if differOnlyInLiveSettings(old, new) {
 					applyLiveSettings()
 					return
 				}
@@ -118,7 +124,7 @@ extension AppState {
 				applyWebsiteChanges()
 
 				// We never destroy the webview, so we have to make sure it's not in browsing mode when there are no websites.
-				if $0.newValue.isEmpty {
+				if new.isEmpty {
 					Defaults[.browsingDisplays] = []
 					applyBrowsingMode()
 				}

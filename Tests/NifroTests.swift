@@ -415,6 +415,26 @@ struct CurrentWebsiteTests {
 		#expect(nextRotationIndex(count: 3, after: nil) == 0)
 		#expect(nextRotationIndex(count: 0, after: nil) == nil)
 	}
+
+	/**
+	And the same answer from the other function, which is the one a display reads on every rebuild.
+
+	These two cases arrived here from a suite about unplugging a display. That suite existed because a
+	website was pinned to a screen, so pulling a cable pushed a second wallpaper onto the screen it
+	landed on and something had to decide between two claims on one desktop. Nothing is pushed onto a
+	screen any more — a display picks a playlist — so the tie-break is gone and these are what is left
+	of it: the marked one wins, and an unmarked display shows the top of its list rather than nothing.
+
+	The second is the case with teeth. "Nothing is marked" is the ordinary state of a display nobody
+	has picked for, and of one whose website was deleted, so answering it with `nil` is a blank screen
+	on a fresh install rather than an edge case.
+	*/
+	@Test("A display shows the marked website, and the top of its list when nothing is marked")
+	func theMarkedWebsiteIsTheOneOnScreen() {
+		#expect(showingIndex(isCurrent: [false, true]) == 1)
+		#expect(showingIndex(isCurrent: [false, false]) == 0)
+		#expect(showingIndex(isCurrent: []) == nil)
+	}
 }
 
 /**
@@ -883,7 +903,7 @@ struct SiteCatalogTests {
 }
 
 /**
-What the app installs on a first launch: which websites, in what order, and on which screen.
+What the app installs on a first launch: which websites, and in what order.
 
 The order is a decision — the entry ranked 1 is the wallpaper a stranger sees before they have chosen
 anything — and it is carried in the entries' own YAML files rather than anywhere in Swift. That makes

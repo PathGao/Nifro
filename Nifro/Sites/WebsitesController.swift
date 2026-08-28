@@ -10,9 +10,9 @@ final class WebsitesController {
 	/**
 	One shuffled order per display, so Random on one screen leaves the other where it was.
 
-	Keyed by display rather than one iterator over the whole list, for the same reason the cursor is: a
-	website belongs to one screen, and a pick that can land on another screen's website changes a
-	wallpaper the person is not looking at.
+	Keyed by display rather than one iterator over the whole list, for the same reason the cursor is:
+	each display walks its own playlist, and one iterator shared between them would let Random on the
+	screen in front of you move the wallpaper on the one behind you.
 	*/
 	var randomIterators = [Display?: AnyIterator<Website>]()
 
@@ -21,10 +21,9 @@ final class WebsitesController {
 	/**
 	All websites, in the order the playlists hold them.
 
-	Read from `playlists` and not from `websites`, which is a mirror of this now — see `mirrorWebsites`
-	below for what that key still is and who still reads it. Reading the mirror instead would be one
-	turn of the run loop behind at the worst moment: a screen that has just added, deleted or reordered
-	a website asks this in the same pass, and would be told the list as it was.
+	`playlists` is the whole of where a website is stored. The `websites` key it replaced is read once
+	by `migrateToPlaylistsIfNeeded` and by nothing else ever again — see `Constants.swift` for what is
+	left of it.
 
 	No setter. There was one, and every caller of it was writing a whole list back to say one thing —
 	change this website, drop that one, put this at the end — which is a shape that cannot say *which
@@ -37,9 +36,8 @@ final class WebsitesController {
 
 	Every reader of "what is up on which screen" comes through here, so there is one derivation of the
 	key. That is the part worth guarding rather than the dictionary itself: a per-display fact keyed by
-	something a little different at each call site loses the invariant with nothing to see — the
-	website's own display and the display its scene actually draws on are the same value until a
-	display is unplugged, and then they are not.
+	something a little different at each call site holds a different invariant perfectly and says
+	nothing about screens, with no symptom until somebody attaches a second one.
 
 	`Display.settingsKey(for:)` is the key `disabledDisplays`, `rotationModes`, `rotationIntervals` and
 	`browsingDisplays` already use, so a display unplugged and plugged back in comes back to its own
@@ -78,12 +76,12 @@ final class WebsitesController {
 	Whether `website` is up on any screen.
 
 	The question the display-less lists ask — the Websites window and the Shortcuts entity — neither of
-	which is about one screen. It used to be asked of `website.effectiveDisplay`, the display the
-	website was pinned to, and that was the right question only while a website belonged to a screen.
+	which is about one screen. It used to be asked of the display the website was pinned to, and that
+	was the right question only while a website belonged to a screen.
 	A screen picks a list now: the display showing a website is whichever one selected the playlist
-	holding it, which has nothing to do with the website's own `display` field. Asked the old way, a
-	list drew its tick against the wrong row for every website whose playlist is shown anywhere but the
-	main display — systematically, and on the normal configuration rather than an edge of it.
+	holding it, which has nothing to do with the screen that website was once pinned to. Asked the old
+	way, a list drew its tick against the wrong row for every website whose playlist is shown anywhere
+	but the main display — systematically, and on the normal configuration rather than an edge of it.
 
 	It can also be true on more than one row at once, and that is not a defect either: two displays
 	showing one playlist are two screens each with their own cursor, and both of those websites are up.
@@ -101,55 +99,6 @@ final class WebsitesController {
 	}
 
 	/**
-	Give what a display that has just gone away was showing to the screen its website lands on.
-
-	The eviction rule, stated as a write. A website pinned to a departed display moves to the main one
-	when the user has asked for that, so two wallpapers now claim one desktop, and the arriving one
-	takes it — `showingIndex` argues for that at length. It used to have to be a tie-break, because the
-	two claims were two `Bool`s on two websites and neither could be given up without giving up the
-	other. They are two dictionary entries now, so the answer can simply be written into the entry of
-	the screen the website landed on.
-
-	**Nothing is forgotten here.** The departed display keeps its own entry, for the same reason
-	`rebuildScenes` keeps `disabledDisplays`, `rotationModes` and `rotationIntervals` for it: the user
-	picked that wallpaper for that screen. Unplug a monitor at night and plug it in in the morning and
-	it has to come back showing what it was showing, exactly as it comes back switched off or set to
-	rotate hourly. Browsing Mode is the one that cannot survive its display, and it is the odd one
-	because it means "somebody is typing on this screen right now", which stops being true when the
-	screen is gone. Which website is up does not stop being true, it stops being visible.
-
-	`departed` is the displays whose scenes were just torn down, and it has to be, rather than "every
-	stored key with no scene". The second reading fires again on every rebuild — every edit to the
-	website list, every wake, every display change — for as long as that display stays unplugged, so it
-	would put the evicted website back on the landing screen each time the user rotated away from it.
-	It also writes on every one of those passes, and the write republishes into the rebuild that made
-	it. Taken from the tear-down, this happens once, at the moment the cable comes out, which is what
-	"the arriving wallpaper takes the screen" means.
-	*/
-	func handOverCurrentWebsites(from departed: [Display?]) {
-		let cursors = Defaults[.currentWebsites]
-		var updated = cursors
-
-		for display in departed {
-			guard
-				let id = cursors[Display.settingsKey(for: display)],
-				let website = all[id: id],
-				website.isShowable
-			else {
-				continue
-			}
-
-			updated[Display.settingsKey(for: website.effectiveDisplay)] = id
-		}
-
-		guard updated != cursors else {
-			return
-		}
-
-		Defaults[.currentWebsites] = updated
-	}
-
-	/**
 	The normalized addresses of the websites that still have no title.
 
 	`recordObservedTitle` runs on every `document.title` a live page writes, and reading `all` there is
@@ -160,67 +109,35 @@ final class WebsitesController {
 
 	Kept here rather than worked out per call because it is derived from the list, and the list already
 	has one place where every route to it meets: the publisher below. Nothing else may write this, and
-	nothing else needs to — `Defaults.publisher` sees the mirror, which is written from every change to the
-	playlists whatever made it.
+	nothing else needs to — `Defaults.publisher(.playlists)` fires on every change to the playlists
+	whatever made it.
 
 	Subscribed with `ObservationOptions.initial`, which is `Defaults.publisher`'s default, so this is
 	filled from the stored list before `init` returns rather than at the first edit.
 	*/
 	private var addressesAwaitingTitle = Set<URL>()
 
-	/**
-	Keep `websites` holding exactly what the playlists hold, in their order.
-
-	The key is a mirror rather than a store now, with one writer — this — and no reader that knows it.
-	That is what makes moving the store cost one function instead of a sweep: `Events` decides from it
-	which scenes a change reached, `DisplayPanelModel` builds a column from it, `Intents` answers
-	Shortcuts out of it, `ScrollRestoration` and `CropSelection` look a website up in it, and every one
-	of them goes on working unedited and unaware. Those readers move to the playlists as their own
-	changes reach them, and the day the last one has, this function and the key both go.
-
-	It also keeps the promise the key's own comment already makes: both keys hold the same websites, so
-	somebody who runs this build and goes back to the one before it finds their list where they left
-	it.
-
-	Written only when it differs, because the write republishes — `Events` treats every change to this
-	key as a possible reason to rebuild a page — and a mirror that reposts an identical list on every
-	playlist edit would make each one cost two.
-	*/
-	private static func mirrorWebsites(of playlists: [Playlist]) {
-		let websites = playlists.flatMap(\.websites)
-
-		guard Defaults[.websites] != websites else {
-			return
-		}
-
-		Defaults[.websites] = websites
-	}
-
 	private init() {
 		setUpEvents()
 	}
 
 	private func setUpEvents() {
-		Defaults.publisher(.playlists, options: [])
-			.sink { change in
-				Self.mirrorWebsites(of: change.newValue)
-			}
-			.store(in: &cancellables)
-
-		Defaults.publisher(.websites)
+		Defaults.publisher(.playlists)
 			.sink { [weak self] change in
 				guard let self else {
 					return
 				}
 
+				let websites = change.newValue.flatMap(\.websites)
+
 				addressesAwaitingTitle = Set(
-					change.newValue.lazy
+					websites.lazy
 						.filter(\.title.isEmpty)
 						.map { $0.url.normalized() }
 				)
 
 				// We only reset the iterators if a website was added/removed.
-				if change.newValue.map(\.id) != change.oldValue.map(\.id) {
+				if websites.map(\.id) != change.oldValue.flatMap(\.websites).map(\.id) {
 					randomIterators = [:]
 				}
 			}
@@ -230,17 +147,17 @@ final class WebsitesController {
 	/**
 	Make a website the current one on `display`.
 
-	**The display is named by the caller rather than read off the website.** It used to be
-	`website.effectiveDisplay`, and that worked for exactly as long as a website belonged to one screen.
-	A display shows a playlist now and a playlist is offered to whichever displays its binding allows —
-	the default one to all of them — so the same website is reachable from two columns, and asking the
-	website which screen it is on answers with the screen it was pinned to before any of this. Picking a
-	site in the second column would have moved the *first* column's wallpaper, and every rotation tick on
-	a display showing the default playlist would have written the main display's entry: that display
-	never advancing, and another one changing under nobody's hand. Every caller here knows the display
-	it is acting for; the two that genuinely do not — a Shortcuts action and the list in the Websites
-	window — say so by passing `effectiveDisplay` themselves, where it is a stated fallback rather than
-	a hidden one.
+	**The display is named by the caller rather than read off the website.** It used to be read off the
+	website, and that worked for exactly as long as a website belonged to one screen. A display shows a
+	playlist now and a playlist is offered to whichever displays its binding allows — the default one to
+	all of them — so the same website is reachable from two columns, and asking the website which screen
+	it is on answered with the screen it was pinned to before any of this. Picking a site in the second
+	column would have moved the *first* column's wallpaper, and every rotation tick on a display showing
+	the default playlist would have written the main display's entry: that display never advancing, and
+	another one changing under nobody's hand. Every caller here knows the display it is acting for; the
+	three that genuinely do not — a Shortcuts action, the list in the Websites window and adding a
+	website from anywhere — pass `Display.main` themselves, where it is a stated fallback rather than a
+	hidden one.
 
 	Only the websites sharing that display lose the mark. Clearing it across the whole list is what
 	stopped rotation working on more than one screen: each tick of one display's rotation wiped the
@@ -272,9 +189,9 @@ final class WebsitesController {
 		}
 
 		// One assignment, and it can only reach one display's answer. What it replaced rewrote the
-		// whole website list to move one mark, which is why the mark could travel: the sweep grouped by
-		// `effectiveDisplay`, so it was free to clear a flag belonging to a screen nobody had asked
-		// about. Nothing here can touch another key.
+		// whole website list to move one mark, which is why the mark could travel: the sweep grouped the
+		// list by the display each website was pinned to, so it was free to clear a flag belonging to a
+		// screen nobody had asked about. Nothing here can touch another key.
 		//
 		// A website that has since been removed leaves a name nothing answers to, which `scheduled`
 		// already reads as "this display has not started" and answers with the top of its list — the
@@ -321,12 +238,12 @@ final class WebsitesController {
 		// The order here is important.
 		Defaults[.playlists] = playlists
 
-		// Marked, not shown. A new website has to hold its display's mark or that display has none,
-		// but putting something in the list is not a request to look at it — a display the user
-		// switched off stays off, and the gallery installing several at once does not flick a screen
-		// on per website. The screens that do mean "show this now" say so with their own
-		// `makeCurrent` afterwards.
-		makeCurrent(website, on: website.effectiveDisplay, switchingDisplayOn: false)
+		// Marked, not shown, and on the display with the menu bar because that is the only display a
+		// caller with no screen in hand can mean. Putting something in the list is not a request to
+		// look at it — a display the user switched off stays off, and the gallery installing several at
+		// once does not flick a screen on per website. The screens that do mean "show this now" say so
+		// with their own `makeCurrent` afterwards.
+		makeCurrent(website, on: Display.main, switchingDisplayOn: false)
 	}
 
 	/**
@@ -338,7 +255,6 @@ final class WebsitesController {
 	func add(_ websiteURL: URL, title: String? = nil, to playlist: Playlist.ID? = nil) -> Website {
 		var website = Website(
 			id: UUID(),
-			isCurrent: true,
 			url: websiteURL,
 			usePrintStyles: false
 		)
@@ -502,7 +418,7 @@ extension WebsitesController {
 			return
 		}
 
-		makeCurrent(first, on: first.effectiveDisplay)
+		makeCurrent(first, on: Display.main)
 	}
 }
 
@@ -522,10 +438,9 @@ extension WebsitesController {
 	stating it again rather than pointing at it, because the consequence here is worse. Deleting what
 	that installs undoes it. What this writes is everything the user has.
 
-	**Nothing here writes `websites`.** It is read and left as it was, so somebody who runs this build
-	and goes back to the previous one still has their list, and so anything that looks wrong about the
-	playlists can be checked against what they were made from. That key goes when its last reader does,
-	which is not this change.
+	**Nothing here writes `websites`.** It is read and left as it was, which is now the only thing that
+	ever happens to it: this is the key's last reader, and what it reads is the only copy of a list
+	nothing else in the app can reach any more.
 
 	The grouping itself is `playlistMigration`, over in a file the package target compiles, so the case
 	this cannot be run against — two displays, a list built by hand — is the case `swift test` covers.
@@ -540,10 +455,10 @@ extension WebsitesController {
 
 		// The stored key, not `all` — which reads the playlists this is about to write, and so would
 		// hand back an empty list and migrate nothing.
-		let websites = Defaults[.websites]
+		let stored = Defaults[.websites]
 
-		Defaults[.playlists] = playlistMigration(displays: websites.map(\.display)).map { group in
-			let members = group.websites.map { websites[$0] }
+		Defaults[.playlists] = playlistMigration(displays: stored.map(\.display)).map { group in
+			let members = group.websites.map { stored[$0].website }
 
 			guard let display = group.screen else {
 				return Playlist(
@@ -566,5 +481,40 @@ extension WebsitesController {
 				boundDisplay: DisplayBinding(id: display.id, nameWhenBound: name)
 			)
 		}
+	}
+}
+
+/**
+A website as the builds before playlists wrote it: the website itself, and the display it was pinned to.
+
+`Website` has no display of its own any more — a website belongs to a playlist and a display picks a
+playlist — and the pinning is exactly what `migrateToPlaylistsIfNeeded` above turns into playlists. So
+it has to be read out of the stored payload rather than off the model, and this is the shape that
+payload has. Nothing else reads it and nothing writes it at all.
+
+`Website(from:)` is handed the same decoder rather than a nested container because the stored payload
+is one flat object per website: the display sat beside the website's own fields, not inside them.
+`encode(to:)` puts it back the same way. Nothing calls it — the key is read-only — and it is written
+out anyway, because a `Codable` whose two halves disagree about the shape is a trap laid for whoever
+does call it.
+*/
+struct PinnedWebsite: Hashable, Codable, Defaults.Serializable {
+	var website: Website
+	var display: Display?
+
+	private enum CodingKeys: String, CodingKey {
+		case display
+	}
+
+	init(from decoder: any Decoder) throws {
+		website = try Website(from: decoder)
+		display = try decoder.container(keyedBy: CodingKeys.self).decodeIfPresent(Display.self, forKey: .display)
+	}
+
+	func encode(to encoder: any Encoder) throws {
+		try website.encode(to: encoder)
+
+		var container = encoder.container(keyedBy: CodingKeys.self)
+		try container.encodeIfPresent(display, forKey: .display)
 	}
 }

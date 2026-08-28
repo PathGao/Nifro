@@ -14,8 +14,8 @@ moved past the first website in its list.
 The answer now lives in a dictionary with one entry per display — `Defaults[.currentWebsites]`, read
 through `WebsitesController.currentWebsiteID(on:)` — so the two functions that kept the flags unique
 are gone with the flags. What is left here is the arithmetic *around* the answer, which is where the
-two-display case can still be got wrong: where the next website is, and which of two claims on one
-desktop wins.
+two-display case can still be got wrong: where the next website is, and what a display that has never
+been started shows.
 
 Kept here as plain functions over plain values so the two-display case can be checked by `swift test`,
 without a second display, a stored list or a window server. That is the whole reason this is a file
@@ -46,33 +46,20 @@ func nextRotationIndex(count: Int, after current: Int?) -> Int? {
 /**
 Which of a display's websites is the one actually on screen.
 
-A display shows one page, and until now the answer was "the first marked one in list order", which is
-fine while every mark belongs to the display it is on. Unplugging a screen breaks that: a website
-pinned to the departed display moves to the main one and arrives still carrying the mark it held over
-there, so the main display has two, and list order — the order the websites happen to have been added
-in — decided which of them the user ended up looking at.
+The marked one, and the top of the list when nothing is marked. Not marked is the ordinary state of a
+display nobody has picked for yet, and it is also what a display whose website has since been deleted
+reads as, so answering it with "nothing" would leave a screen blank on a fresh install and after every
+deletion. The top of the list is where `nextRotationIndex` counts from too, so a display that has lost
+its mark starts again rather than stopping.
 
-`isEvicted[i]` is whether website `i` is only on this display because its own was unplugged. Those
-come first, which is the whole rule: the arriving wallpaper takes the screen.
-
-Only one mark can reach here now, because there is one entry per display for a mark to live in, so the
-ordering settles the case where the display has no mark at all, which is a screen that has never been
-started. `handOverCurrentWebsites` settles the other case, by writing the arrival into the entry of the
-screen it lands on rather than leaving two claims for this to choose between. It can do that because
-the two claims are two entries and the arrival's own entry stays where it is; with one flag per
-website there was nowhere to write the answer that did not also destroy the departed display's mark,
-which is why this had to be a tie-break at all.
+It used to take a second array as well. A website was pinned to a display, and unplugging that display
+moved it to the main one still carrying its own mark — so one desktop had two claims on it and list
+order, which is the order the websites happened to be added in, decided which of them the user saw.
+A website belongs to a playlist now and a display picks a playlist, so nothing is ever pushed onto a
+screen it was not chosen for and there is no second claim to break a tie between.
 
 `nil` when there is nothing to show, which is a display with no websites on it.
 */
-func showingIndex(isCurrent: [Bool], isEvicted: [Bool]) -> Int? {
-	guard isCurrent.count == isEvicted.count else {
-		return isCurrent.firstIndex(of: true) ?? (isCurrent.isEmpty ? nil : 0)
-	}
-
-	let order = isEvicted.indices.filter { isEvicted[$0] } + isEvicted.indices.filter { !isEvicted[$0] }
-
-	// No mark at all is a display that has never been started, and the top of its list is where
-	// `advance` counts from too.
-	return order.first { isCurrent[$0] } ?? order.first
+func showingIndex(isCurrent: [Bool]) -> Int? {
+	isCurrent.firstIndex(of: true) ?? (isCurrent.isEmpty ? nil : 0)
 }

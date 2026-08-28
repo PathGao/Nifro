@@ -27,11 +27,20 @@ enum Constants {
 }
 
 extension Defaults.Keys {
-	static let websites = Key<[Website]>("websites", default: [])
+	// The website list as it was before playlists, read exactly once and never written. It is the only
+	// input `migrateToPlaylistsIfNeeded` has, which is why it is typed as `PinnedWebsite` rather than
+	// `Website`: the display each website was pinned to is what the migration groups by, and `Website`
+	// does not carry one any more.
+	//
+	// Left on disk rather than removed. Nothing in this build touches the stored value, so a list
+	// carried across by the migration is still there in its old shape — which is the only copy of it
+	// there will ever be, and the thing to look at if the playlists come out wrong. Nothing puts edits
+	// made here back into it, so an older build opened after this one shows the list as it stood when
+	// the migration ran.
+	static let websites = Key<[PinnedWebsite]>("websites", default: [])
 
-	// The lists a display picks between. Written by `migrateToPlaylistsIfNeeded` from the key above,
-	// which is left where it is: until the last reader of `websites` is gone, both keys hold the same
-	// websites and the older build still opens the user's list.
+	// The lists a display picks between, and the whole of where a website is stored. Built once by
+	// `migrateToPlaylistsIfNeeded` out of the key above.
 	static let playlists = Key<[Playlist]>("playlists", default: [])
 
 	// Whether the list above has been built from `websites` yet. A flag of its own, and not "there are
@@ -56,8 +65,8 @@ extension Defaults.Keys {
 	//
 	// Nothing forgets an entry, which puts this with `rotationModes` and the two beside it rather than
 	// with `browsingDisplays`: the user picked that wallpaper for that screen, so a monitor unplugged at
-	// night comes back in the morning showing it. What an unplug does do is
-	// `WebsitesController.handOverCurrentWebsites(from:)`.
+	// night comes back in the morning showing it. An unplug does nothing else at all — a display that
+	// is gone has no scene, so there is nothing on that screen to move anywhere.
 	static let currentWebsites = Key<[String: Website.ID]>("currentWebsites", default: [:])
 
 	// Which playlist each display is pointed at, keyed by `Display.settingsKey(for:)` like every other
@@ -86,12 +95,6 @@ extension Defaults.Keys {
 	static let opacity = Key<Double>("opacity", default: 1)
 	static let reloadInterval = Key<Double?>("reloadInterval")
 	static let deactivateOnBattery = Key<Bool>("deactivateOnBattery", default: false)
-
-	// Defaults to what the app already did, so nobody's wallpaper changes on upgrade. There is no
-	// convention to follow here: macOS's own wallpaper stays with its display and goes away with it,
-	// AppKit moves a window off a departed screen rather than losing it, and this wallpaper is a
-	// window.
-	static let keepWallpaperWhenDisplayUnplugged = Key<Bool>("keepWallpaperWhenDisplayUnplugged", default: true)
 	static let bringBrowsingModeToFront = Key<Bool>("bringBrowsingModeToFront", default: false)
 	static let openExternalLinksInBrowser = Key<Bool>("openExternalLinksInBrowser", default: false)
 

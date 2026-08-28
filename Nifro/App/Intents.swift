@@ -149,7 +149,7 @@ struct SetCurrentWebsiteIntent: AppIntent {
 		// A website that is no longer in the list is not an error worth raising here: Shortcuts holds
 		// entities from whenever the action was configured, and the list is the user's to edit.
 		if let website = website.toNative {
-			WebsitesController.shared.makeCurrent(website, on: website.effectiveDisplay)
+			WebsitesController.shared.makeCurrent(website, on: Display.main)
 		}
 
 		return .result()

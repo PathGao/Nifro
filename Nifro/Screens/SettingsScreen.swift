@@ -69,9 +69,6 @@ private struct BehaviorSettings: View {
 	var body: some View {
 		Form {
 			Section {
-				KeepWallpaperWhenDisplayUnpluggedSetting()
-			}
-			Section {
 				OpacitySetting()
 				DimWhenUnfocusedSetting()
 				BringBrowsingModeToFrontSetting()
@@ -361,15 +358,6 @@ private struct DimWhenUnfocusedSetting: View {
 			) {
 				Text("Dimmed to")
 			}
-		}
-	}
-}
-
-private struct KeepWallpaperWhenDisplayUnpluggedSetting: View {
-	var body: some View {
-		Defaults.Toggle(key: .keepWallpaperWhenDisplayUnplugged) {
-			Text("Move to the main display when unplugged")
-				.explained(String(localized: "Off, it goes away with its display and returns when you plug it back in; on, it moves to the main display and takes over there until its own returns."))
 		}
 	}
 }

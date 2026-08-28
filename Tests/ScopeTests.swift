@@ -421,6 +421,13 @@ struct ScopeTests {
 	that looks obviously right and takes the good half with it: a monitor switched off, pinned, or set
 	to rotate hourly before it was unplugged has to come back that way. Forgetting one for good is
 	Restore Defaults, which is a thing the user asks for.
+
+	`currentWebsites` and `currentPlaylists` are in that list for the same reason and are the case it
+	was drawn for: which wallpaper is up on a screen, and which list it is drawn from, are choices the
+	user made about that screen. Unplug the monitor at night and it has to come back in the morning
+	showing what it was showing. Which website is up does not stop being true when the cable comes out,
+	it stops being visible — and there is nothing else for an unplug to do, because a display with no
+	scene has no wallpaper to move anywhere.
 	*/
 	@Test("Unplugging clears Browsing Mode and leaves the preferences alone")
 	func onlyTheStateIsPruned() throws {
@@ -431,10 +438,10 @@ struct ScopeTests {
 			"Nothing clears Browsing Mode for a display whose scene is torn down, so an unplugged display keeps it for good."
 		)
 
-		for preference in ["disabledDisplays", "rotationModes", "rotationIntervals"] {
+		for preference in ["disabledDisplays", "rotationModes", "rotationIntervals", "currentWebsites", "currentPlaylists"] {
 			#expect(
 				!rebuild.contains(preference),
-				"`rebuildScenes` touches `\(preference)`. A display switched off or pinned before it went away has to come back that way."
+				"`rebuildScenes` touches `\(preference)`. A display switched off, pinned, or showing a website it was given before it went away has to come back that way."
 			)
 		}
 	}
@@ -451,15 +458,33 @@ struct ScopeTests {
 	good. "Show on" wrote the list directly and carried a website's mark to a screen that already had
 	one, so the display the person had just named did not change and the list drew two ticks.
 
-	The answer is `Defaults[.currentWebsites]` now, one entry per display, so neither is expressible.
-	The field is still stored — a website encoded without it will not decode on the build before this
-	one — and the whole of what makes that safe is that nothing asks it anything.
+	The answer is `Defaults[.currentWebsites]` now, one entry per display, so neither is expressible —
+	and the field itself is gone, which is what the first assertion below says. A payload that still
+	carries the key decodes exactly as before, because a decoder ignores what it is not looking for.
 
-	Reads only. An assignment is not a second home: the two that remain keep the stored field decodable,
-	and the Shortcuts entity has a property of its own by the same name that it fills from the app.
+	`display` is asserted with it, and it is the same claim one step out: a website belonged to a
+	screen, so "which website is up" looked like a fact about the website. Neither field can come back
+	without this going red.
+
+	Then reads, because a field can be reintroduced under any name. An assignment is not a second home:
+	the Shortcuts entity has a property of its own called `isCurrent` that it fills from the app.
 	*/
 	@Test("Nothing asks a website whether it is the current one")
 	func nothingReadsTheFlagOnTheWebsite() throws {
+		let website = try Self.source(named: "Website.swift")
+
+		for field in ["isCurrent", "display"] {
+			#expect(
+				!website.contains("var \(field)"),
+				"""
+				`Website` carries `\(field)` again. A website does not belong to a screen and does not \
+				know whether it is on one: both of those are one entry per display in `Defaults`, and a \
+				slot on the website is a slot with room for one answer to a question that has one per \
+				display.
+				"""
+			)
+		}
+
 		let read = try Regex("\\.isCurrent(?!\\s*=[^=])")
 
 		for (name, text) in try Self.sources() {
@@ -534,48 +559,6 @@ struct ScopeTests {
 				"`\(declaration)` no longer keys on the display, so what it reads or writes is not a per-display answer."
 			)
 		}
-	}
-
-	/**
-	A display that goes away keeps what it was showing, and is told when something lands on it.
-
-	The other side of the line `onlyTheStateIsPruned` draws above, and the case that line was drawn
-	for. Which website is up on a screen is the user's choice about that screen, exactly as switched
-	off, pinned and "every thirty minutes" are: unplug the monitor at night, plug it in in the morning,
-	and it has to come back showing what it was showing. Browsing Mode is the only per-display entry
-	that cannot survive its display, because it means "somebody is typing on this screen right now" and
-	that stops being true when the screen is gone. Which website is up does not stop being true, it
-	stops being visible — and forgetting it costs the user a wallpaper they chose, which is the shape of
-	thing Restore Defaults exists to be asked for.
-
-	So the one function that is handed the departed displays must not remove anything, and `filter`,
-	`removeValue` and an assignment of `nil` are the three ways it could. What it is for is the other
-	half of an unplug: a website that moves to the main display takes that screen, and this is where it
-	says so.
-	*/
-	@Test("A display that goes away keeps what it was showing")
-	func aDepartedDisplayKeepsItsWebsite() throws {
-		let body = try Self.body(
-			of: "func handOverCurrentWebsites(",
-			in: Self.source(named: "WebsitesController.swift")
-		)
-
-		for removal in ["filter", "removeValue", "= nil"] {
-			#expect(
-				!body.contains(removal),
-				"""
-				`handOverCurrentWebsites` drops an entry (`\(removal)`). A display's wallpaper is a \
-				choice the user made about that display and has to survive the cable, like the three \
-				settings `rebuildScenes` keeps for it.
-				"""
-			)
-		}
-
-		#expect(
-			try Self.body(of: "func rebuildScenes()", in: Self.source(named: "AppState.swift"))
-				.contains("handOverCurrentWebsites"),
-			"Nothing tells a screen that a website has landed on it, so unplugging a display leaves its wallpaper nowhere."
-		)
 	}
 
 	/**

@@ -74,14 +74,13 @@ private final class AppDelegate: NSObject, NSApplicationDelegate {
 		// weeks, so a check that runs once per launch is a check that mostly does not run.
 		Task {
 			while !Task.isCancelled {
-				// Both keys, not just the first, and one set for both sweeps. A store is filed under
-				// `website.id` and so is everything a page remembers, and both sweeps delete what no
-				// website claims — deleting a store signs the user out of that site with nothing able to
-				// put it back. The two keys hold the same websites today, so the union changes nothing
-				// today; it is here because the moment they diverge is the moment these lines start
-				// deleting what somebody still has.
-				let websiteIDs = Set(Defaults[.websites].map(\.id))
-					.union(Defaults[.playlists].flatMap { $0.websites.map(\.id) })
+				// The playlists, which are the whole of the list now. A store is filed under `website.id`
+				// and so is everything a page remembers, and both sweeps delete what no website claims —
+				// deleting a store signs the user out of that site with nothing able to put it back. This
+				// used to be a union with the `websites` key while both were live; that key is read only
+				// by the migration now, and keeping it in the union would preserve stores for websites
+				// the user has since deleted, for good.
+				let websiteIDs = Set(Defaults[.playlists].flatMap { $0.websites.map(\.id) })
 
 				await DiskBudget.removeOrphanedStores(keeping: websiteIDs)
 

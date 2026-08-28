@@ -520,20 +520,13 @@ final class AppState: ObservableObject {
 		// where it is asked.
 		Defaults[.browsingDisplays].formIntersection(scenes.map { Display.settingsKey(for: $0.display) })
 
-		// Which website each display is showing is on the other side of that line, with the three
-		// preferences and not with Browsing Mode, and it is the case the line was drawn for: the user
-		// picked that wallpaper for that screen, so a monitor unplugged at night has to come back in the
-		// morning showing it. Nothing below forgets an entry.
+		// Which website each display is showing, and which playlist it is pointed at, are on the other
+		// side of that line, with the three preferences and not with Browsing Mode — and they are the
+		// case the line was drawn for: the user picked that wallpaper for that screen, so a monitor
+		// unplugged at night has to come back in the morning showing it. Nothing here forgets either
+		// entry, and nothing has to move one anywhere: a display that is gone has no scene, so there is
+		// no wallpaper on it to be pushed onto a screen the user did not choose it for.
 		//
-		// What does happen is the other half of an unplug. A website pinned to a display that is gone
-		// moves to the main one when the user has asked for that, and the screen it lands on is told so
-		// — once, from the scenes just torn down rather than from "every key with no scene", which would
-		// say it again on every rebuild for as long as the cable stayed out.
-		//
-		// Before the loop below, not after, because that loop is where each scene is handed the website
-		// this has just decided it should be showing.
-		WebsitesController.shared.handOverCurrentWebsites(from: departed.map(\.display))
-
 		// A failed load is state in the same sense, and is pruned for the same reason rather than kept
 		// for the opposite one: it describes a page that was on its way to a display that is gone. It
 		// is in memory rather than in `Defaults`, so this is the only place it could be dropped.

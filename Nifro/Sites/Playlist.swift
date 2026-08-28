@@ -3,17 +3,16 @@ import Foundation
 /**
 A named list of websites, and which display may offer it.
 
-The inversion this type exists for. A website carries the display it belongs to, so the screen shows
-whatever names it. Which displays get a wallpaper at all no longer follows from those fields —
-`rebuildScenes` builds one scene per attached display — but *what* a display may show still does:
-`eligible(for:)` filters the whole list by `effectiveDisplay`, so a display no website names has a
-scene with nothing in it. Here the screen picks a list instead, and the list is a thing the user can
-name, reorder and duplicate.
+The inversion this type exists for. A website used to carry the display it belonged to, so the screen
+showed whatever named it: which displays got a wallpaper at all was derived from those fields, and so
+was what each of them could show — a display no website named had no scene, and once it had one it had
+nothing to put in it. The screen picks a list here instead, and the list is a thing the user can name,
+reorder and duplicate.
 
-Nothing reads this yet, and it is filled ahead of its readers on purpose. What fills it runs once
-against a list the user built by hand, and there is no undoing a migration that ran wrong. Landing the
-model and the migration on their own is what makes it possible to look at what was written before
-anything depends on it.
+Nothing about a display is stored on this side of the inversion except `boundDisplay` below, which
+filters a picker and is not consulted while a wallpaper is up. Which website each display is showing,
+which list it is pointed at, whether it is switched off and how often it rotates are all keyed by
+display in `Defaults`, because every one of them describes the screen rather than the content.
 */
 struct Playlist: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable {
 	// `let`, for the reason `Website.id` gives at more length: an id is what other things file

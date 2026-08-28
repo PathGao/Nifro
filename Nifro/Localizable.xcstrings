@@ -669,16 +669,6 @@
         }
       }
     },
-    "Each website can live on its own screen; “Main Display” is whichever one has the menu bar, so it moves when you rearrange displays or dock your laptop.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "每个网站可以待在自己的屏幕上；「主显示器」指当前显示菜单栏的那一块，重排显示器或接扩展坞时会跟着换。"
-          }
-        }
-      }
-    },
     "Edit": {
       "localizations": {
         "zh-Hans": {
@@ -1249,16 +1239,6 @@
         }
       }
     },
-    "Move to the main display when unplugged": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "拔掉后移到主显示器"
-          }
-        }
-      }
-    },
     "Muted": {
       "localizations": {
         "zh-Hans": {
@@ -1425,16 +1405,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "没有匹配的网站"
-          }
-        }
-      }
-    },
-    "Off, it goes away with its display and returns when you plug it back in; on, it moves to the main display and takes over there until its own returns.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "关闭时它随显示器一起消失，插回去就回来；开启时它移到主显示器顶替那里的网页，直到自己的显示器接回来。"
           }
         }
       }
@@ -2075,16 +2045,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "显示整页"
-          }
-        }
-      }
-    },
-    "Show on": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "显示在"
           }
         }
       }

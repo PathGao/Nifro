@@ -27,8 +27,8 @@ extension WebsitesController {
 	/**
 	The websites the playlist on `display` allows to be showing right now, in list order.
 
-	The filter used to be `effectiveDisplay == display` over the whole website list, which is the
-	direction the playlists inverted: a display could only offer what already named it, so a second
+	The filter used to be "the websites pinned to this display" over the whole website list, which is
+	the direction the playlists inverted: a display could only offer what already named it, so a second
 	monitor's chooser had exactly one item in it and its rotation arrows had nothing to step to.
 	*/
 	private func eligible(for display: Display?, at date: Date = .now) -> [Website] {
@@ -40,17 +40,17 @@ extension WebsitesController {
 
 	Split out because the panel asks it too, and that is the whole of I2: "can this display rotate" and
 	"rotate to what" have to be one expression. They were two — the arrows lit on the count of the
-	display's websites and stepped through this, narrowed by the schedule and by `isShowable` — so a
-	display with one website it could show and one it could not lit both arrows and did nothing when
-	either was pressed. Deriving the first from the second is what closes that, and it only works if
-	there is one of these to derive from.
+	display's websites and stepped through this, which narrowed it by the schedule — so a display with
+	one website it could show and one it could not lit both arrows and did nothing when either was
+	pressed. Deriving the first from the second is what closes that, and it only works if there is one
+	of these to derive from.
 
 	Handed the playlist rather than the display, because the panel resolves it once per refresh and
 	builds a column per display off the same list; going back through `Defaults[.playlists]` here would
 	decode every website in every playlist again, once per display, twelve times a second.
 	*/
 	func eligible(in playlist: Playlist?, at date: Date = .now) -> [Website] {
-		let members = (playlist?.websites ?? []).filter(\.isShowable)
+		let members = playlist?.websites ?? []
 		let scheduled = members.filter { $0.isScheduled(at: date) }
 
 		// Never let a schedule empty a display.
@@ -91,11 +91,8 @@ extension WebsitesController {
 		// used to be a promise a sweep made about a flag on every website, and the promise was broken
 		// by anything that wrote the list without going through the sweep — "Show on" was a `Binding`
 		// straight into it, so moving a website carried its mark to a screen that already had one.
-		return showingIndex(
-			isCurrent: candidates.map { $0.id == current },
-			isEvicted: candidates.map(\.isEvicted)
-		)
-		.map { candidates[$0] }
+		return showingIndex(isCurrent: candidates.map { $0.id == current })
+			.map { candidates[$0] }
 	}
 
 	/**

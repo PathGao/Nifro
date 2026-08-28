@@ -26,8 +26,7 @@ extension Website {
 			// from when it is not the website's own.
 			"External links: \(opensExternalLinksInBrowser ? "browser" : "in Nifro")\(externalLinks == .followSettings ? " (from Settings)" : "")",
 			"Invert colours: \(invertColors2.title)",
-			"Print styles: \(usePrintStyles ? "yes" : "no")",
-			"Display: \(display?.localizedName ?? "default")"
+			"Print styles: \(usePrintStyles ? "yes" : "no")"
 		]
 
 		if let startHour, let endHour {
