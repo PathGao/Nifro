@@ -116,6 +116,20 @@ extension WallpaperScene {
 		replacement.isHidden = false
 		webViewController.adopt(replacement)
 
+		// The page being adopted has finished loading — that is what `loadAndWait` above waited for —
+		// but nothing has said so. `pageDidSettle` is the usual route and it refuses this one on
+		// purpose: it guards on the web view being the live one, and a replacement finishes while it
+		// is still the pending one, seconds before this line makes it live. Nothing navigates
+		// afterwards, so it never fires again.
+		//
+		// A swap got away with that for as long as `hasRevealedPage` was already true from the page
+		// being replaced. It is false exactly when the previous load had not settled yet — and then the
+		// swap inherits it: `isLoading` stays true, so the chooser keeps pulsing, and `revealPage` is
+		// also the only thing that unhides `window.contentView`, so the page that just arrived is not
+		// on screen either. Both symptoms are one missing call, and both clear themselves eventually,
+		// when the backstop `load` scheduled for the *previous* page fires up to thirty seconds later.
+		revealPage()
+
 		// The observer was watching the web view that just went away.
 		observeAddressChanges()
 
