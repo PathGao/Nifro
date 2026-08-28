@@ -232,6 +232,22 @@ display gets a scene and its stored playlist selection with it. What the default
 `Website.shouldBeOnScreen` and `Display.withFallbackToMain` exist only to serve the "on" half and go
 with it.
 
+### D8 — a display with no selection shows the default playlist
+
+PR4 surfaced the gap: once every attached display gets a scene, a display the user has never picked
+for has to show *something*, and `firstLaunchPlacements` — the mechanism that used to answer this by
+pinning the Nth site to the Nth screen — is deleted by the same PR. Between the two, a second monitor
+on a fresh install draws "No Website" and waits to be told.
+
+So an empty entry in `[displayKey: Playlist.ID]` means the default playlist, and the picker shows it
+selected rather than showing nothing. That is what makes D6 load-bearing rather than merely tidy: the
+default playlist is the one every display falls back to, which is the second reason it cannot be
+bound to one of them.
+
+It also replaces what first-run curation was for. The old rule put a different site on each screen;
+this puts the same list on each screen and lets each display walk it independently, which is what the
+per-display cursor already does.
+
 ## 8. Open
 
 **A duplicate is logged out.** Data stores are keyed by `website.id`
