@@ -578,7 +578,18 @@ final class AppState: ObservableObject {
 		// set to rotate hourly before it was unplugged has to come back that way, which is exactly what
 		// keeping its key buys. Forgetting one for good is a thing to ask for, and Restore Defaults is
 		// where it is asked.
-		Defaults[.browsingDisplays].formIntersection(scenes.map { Display.settingsKey(for: $0.display) })
+		//
+		// Written only when it takes something away. `Defaults` observes with plain KVO and filters
+		// nothing, so storing back an identical set still publishes, and `SSWebView` subscribes to this
+		// key once per web view with a sink that evaluates JavaScript in the web content process. A
+		// rebuild runs on every rotation tick, every edit and every wake, so the unconditional write was
+		// a cross-process call per display to say what the page already knew. Intersecting only ever
+		// removes, which is why "already a subset" is the whole test.
+		let live = Set(scenes.map { Display.settingsKey(for: $0.display) })
+
+		if !Defaults[.browsingDisplays].isSubset(of: live) {
+			Defaults[.browsingDisplays].formIntersection(live)
+		}
 
 		// Which website each display is showing, and which playlist it is pointed at, are on the other
 		// side of that line, with the three preferences and not with Browsing Mode — and they are the
