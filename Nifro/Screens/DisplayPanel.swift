@@ -320,9 +320,12 @@ private struct DisplayColumn: View {
 	error itself off the pointer: this is 260 points wide and a `WKWebView`'s own account of a failure
 	is a sentence and a URL, which would take four lines and push the picture off the panel.
 
-	`onTint` rather than red. It is the colour this panel already uses for something happening — the
-	chooser pulses in it while a page is on its way — and a failure to load is the end of that same
-	story rather than a new vocabulary for the column to carry.
+	`.secondary` rather than red, and rather than the accent. The argument written here before was that
+	`PanelMetrics.onTint` was already this panel's colour for something happening, so a failure was the
+	end of that story rather than a new word — but #73 gave the panel's drawing back to the system and
+	that constant went with it, along with the pulse the argument rested on. What is left is the same
+	conclusion by a shorter route: a caption under a title is `.secondary` here and on line 167 and 459,
+	and a line that says a page did not load does not need a colour to be read as bad news.
 
 	Outside the dimming and outside the `disabled`, like the chooser below it: a load in flight makes
 	the controls inert and this is not a control. It clears itself, because `load` writes the failure
@@ -333,7 +336,7 @@ private struct DisplayColumn: View {
 		if let failure = column.failure {
 			Text("This page did not load")
 				.font(.caption)
-				.foregroundStyle(PanelMetrics.onTint)
+				.foregroundStyle(.secondary)
 				.lineLimit(1)
 				.frame(maxWidth: PanelMetrics.columnWidth)
 				.help(failure)
