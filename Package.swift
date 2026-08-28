@@ -8,11 +8,16 @@
 // disk budget, the update check and the decoding of the site catalogue. It reads the same source files the app
 // compiles, so there is one implementation and not a copy.
 //
-// Which is the whole point of the `Sites` pair below. `sites/index.json` is published and fetched at
+// Which is the whole point of the `Sites` files below. `sites/index.json` is published and fetched at
 // runtime, and it had never once decoded, because nothing in the repository read it through the type
 // that reads it in the app. A test can only catch that by running the app's own `SiteCatalog.Entry`
 // against the committed file, so `SiteCatalog` is kept free of `Website`, `Defaults` and SwiftUI in
 // order to be listed here.
+//
+// `PlaylistMigration` is listed for a different reason. It runs once, against a website list the user
+// built by hand, on a build that has no way back, and a grouping that drops an entry drops a website
+// with no error, no half-state and nothing to restore from. Keeping it free of `Website` and
+// `Defaults` is what lets the two-display case be run here without a second display.
 
 import PackageDescription
 
@@ -23,7 +28,7 @@ let package = Package(
 		.target(
 			name: "NifroLogic",
 			path: "Nifro",
-			sources: ["Sites/SiteCatalog.swift", "Sites/SiteCatalog.generated.swift", "Support/DiskBudget.swift", "Support/Geometry.swift", "Support/UpdateCheck.swift", "Support/Rotation.swift", "Support/RotationInterval.swift", "Support/Schedule.swift", "Support/URLCommand.swift", "Support/VideoEmbed.swift"]
+			sources: ["Sites/SiteCatalog.swift", "Sites/SiteCatalog.generated.swift", "Sites/PlaylistMigration.swift", "Support/DiskBudget.swift", "Support/Geometry.swift", "Support/UpdateCheck.swift", "Support/Rotation.swift", "Support/RotationInterval.swift", "Support/Schedule.swift", "Support/URLCommand.swift", "Support/VideoEmbed.swift"]
 		),
 		.testTarget(
 			name: "NifroTests",

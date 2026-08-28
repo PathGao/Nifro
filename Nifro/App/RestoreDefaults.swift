@@ -119,5 +119,11 @@ enum RestoreDefaults {
 		// Restoring through the same path as launching means there is one path, not a second one that
 		// has to be kept in step with it.
 		WebsitesController.shared.installFeaturedWebsitesIfNeeded()
+
+		// And its migration, because the wipe took the flag that says it has run along with everything
+		// else. Left to the next launch, a restored app would sit with the websites back and no
+		// playlists made from them — which is not a state anything else in the app can produce, and so
+		// is exactly the kind nobody would think to look for.
+		WebsitesController.shared.migrateToPlaylistsIfNeeded()
 	}
 }

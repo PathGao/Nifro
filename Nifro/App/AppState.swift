@@ -417,6 +417,10 @@ final class AppState: ObservableObject {
 	private func didLaunch() {
 		_ = statusItemButton
 		WebsitesController.shared.installFeaturedWebsitesIfNeeded()
+		// After the line above, not before it: on a first launch that line is what puts anything in
+		// the list at all, and a migration that ran first would file the shipped websites under
+		// nothing.
+		WebsitesController.shared.migrateToPlaylistsIfNeeded()
 		rebuildScenes()
 		setUpEvents()
 		showWelcomeScreenIfNeeded()

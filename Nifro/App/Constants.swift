@@ -28,6 +28,19 @@ enum Constants {
 
 extension Defaults.Keys {
 	static let websites = Key<[Website]>("websites", default: [])
+
+	// The lists a display picks between. Written by `migrateToPlaylistsIfNeeded` from the key above,
+	// which is left where it is: until the last reader of `websites` is gone, both keys hold the same
+	// websites and the older build still opens the user's list.
+	static let playlists = Key<[Playlist]>("playlists", default: [])
+
+	// Whether the list above has been built from `websites` yet. A flag of its own, and not "there are
+	// no playlists": an empty list is a state the user can reach and stay in, so reading it as "not
+	// done yet" would rebuild their playlists out of a website list they stopped editing long ago,
+	// every launch, for as long as they left it that way. Same shape and same reason as
+	// `hasInstalledFeaturedWebsites` below, and a sharper reason — deleting what that added undoes it,
+	// and what this adds is everything.
+	static let hasMigratedWebsitesToPlaylists = Key<Bool>("hasMigratedWebsitesToPlaylists", default: false)
 	// Which displays are interactive, not whether any is. Browsing Mode was one flag for the whole app,
 	// so entering it on the monitor also raised the laptop's wallpaper over its desktop icons — and its
 	// button lit in every column at once. `DesktopWindow.isInteractive` was always per window; only this

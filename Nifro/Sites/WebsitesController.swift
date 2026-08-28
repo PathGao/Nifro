@@ -390,3 +390,64 @@ extension WebsitesController {
 		}
 	}
 }
+
+extension WebsitesController {
+	/**
+	Turn the stored website list into playlists, once.
+
+	Websites with a display of their own become a playlist bound to that display; everything else
+	becomes the default playlist. Per-display settings — `rotationModes`, `rotationIntervals`,
+	`disabledDisplays` — are keyed by display and stay exactly where they are, because they describe
+	the screen and not what is on it.
+
+	**Guarded on a flag of its own, not on the playlist list being empty.** No playlists is a state the
+	user can reach and stay in, and a migration that read that as "not done yet" would rebuild their
+	playlists out of a website list they stopped editing long ago, every launch, for as long as they
+	left it that way. `installFeaturedWebsitesIfNeeded` above makes the same guard for the same reason;
+	stating it again rather than pointing at it, because the consequence here is worse. Deleting what
+	that installs undoes it. What this writes is everything the user has.
+
+	**Nothing here writes `websites`.** It is read and left as it was, so somebody who runs this build
+	and goes back to the previous one still has their list, and so anything that looks wrong about the
+	playlists can be checked against what they were made from. That key goes when its last reader does,
+	which is not this change.
+
+	The grouping itself is `playlistMigration`, over in a file the package target compiles, so the case
+	this cannot be run against — two displays, a list built by hand — is the case `swift test` covers.
+	Everything left here is naming and lookup, both of which need the app.
+	*/
+	func migrateToPlaylistsIfNeeded() {
+		guard !Defaults[.hasMigratedWebsitesToPlaylists] else {
+			return
+		}
+
+		Defaults[.hasMigratedWebsitesToPlaylists] = true
+
+		let websites = all
+
+		Defaults[.playlists] = playlistMigration(displays: websites.map(\.display)).map { group in
+			let members = group.websites.map { websites[$0] }
+
+			guard let display = group.screen else {
+				return Playlist(
+					name: String(localized: "Default"),
+					websites: members,
+					isDefault: true
+				)
+			}
+
+			// Asked once, here, and stored — which is the only moment it can be asked at all. A display
+			// that is not attached right now answers `<Unknown name>`, and that is genuinely all this
+			// app has ever known about it: what is stored against a website is a `Display`, and a
+			// `Display` is a UUID. Resolving it later would not know more, it would only be wrong in
+			// front of the user.
+			let name = display.localizedName
+
+			return Playlist(
+				name: name,
+				websites: members,
+				boundDisplay: DisplayBinding(id: display.id, nameWhenBound: name)
+			)
+		}
+	}
+}
