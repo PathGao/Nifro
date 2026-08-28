@@ -531,7 +531,7 @@ private struct ContentRulesSetting: View {
 			}
 		} label: {
 			Text("Content blocking rules")
-				.explained(String(localized: "Paste the address of a raw WebKit content-blocking `.json` file — the content-blocker projects publish them — and Nifro applies it to every website; empty means no rules."))
+				.explained(String(localized: "Paste the address of a raw WebKit content-blocking `.json` file — the content-blocker projects publish them — and Nifro applies it to every website; ad blocking is the usual use."))
 		}
 		// Sends its current value on subscribe, so opening Settings shows what the refresh at launch
 		// made of the address rather than waiting for the next one.
@@ -615,14 +615,17 @@ private struct ReloadIntervalSetting: View {
 	// TODO: Improve VoiceOver accessibility for this control.
 	var body: some View {
 		LabeledContent {
-			if reloadInterval != nil {
-				IntervalField(seconds: $reloadInterval.withDefaultValue(Self.defaultReloadInterval))
-			}
+			// One row, switch last, like every other switch on this tab. Two views straight in a
+			// `LabeledContent` stack vertically, which put the switch on a line of its own under the field.
+			HStack {
+				if reloadInterval != nil {
+					IntervalField(seconds: $reloadInterval.withDefaultValue(Self.defaultReloadInterval))
+				}
 
-			Toggle("Page reload interval", isOn: $reloadInterval.isNotNil(trueSetValue: Self.defaultReloadInterval))
-				.labelsHidden()
-				.controlSize(.mini)
-				.toggleStyle(.switch)
+				Toggle("Page reload interval", isOn: $reloadInterval.isNotNil(trueSetValue: Self.defaultReloadInterval))
+					.labelsHidden()
+					.toggleStyle(.switch)
+			}
 		} label: {
 			Text("Page reload interval")
 				.explained(String(localized: "For websites that do not set their own; one that does, in its own settings, ignores this."))

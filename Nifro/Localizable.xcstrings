@@ -1559,12 +1559,12 @@
         }
       }
     },
-    "Paste the address of a raw WebKit content-blocking `.json` file — the content-blocker projects publish them — and Nifro applies it to every website; empty means no rules.": {
+    "Paste the address of a raw WebKit content-blocking `.json` file — the content-blocker projects publish them — and Nifro applies it to every website; ad blocking is the usual use.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "粘贴一个 WebKit 内容拦截 `.json` 原始文件的地址（内容拦截项目都有发布），Nifro 会把它应用到所有网站；留空表示不用任何规则。"
+            "value": "粘贴一个 WebKit 内容拦截 `.json` 原始文件的地址（内容拦截项目都有发布），Nifro 会把它应用到所有网站；常用于广告拦截等。"
           }
         }
       }
