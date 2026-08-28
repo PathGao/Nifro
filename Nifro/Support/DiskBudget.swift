@@ -41,6 +41,10 @@ enum DiskBudget {
 	free and the rest of the container is a rounding error next to it. Naming them also keeps the walk
 	honest in an unsandboxed debug build, where the container root is the real home directory and
 	measuring it means walking the whole disk.
+
+	The app's own thumbnail cache is part of that rest, and is deliberately not listed here.
+	`removeOrphanedFiles` below says why: a root this sweep cannot spend is a number that only makes
+	the sweep fire.
 	*/
 	private static let sweptRoots = [
 		URL.homeDirectory.appending(path: "Library/Caches/WebKit"),
@@ -131,6 +135,46 @@ enum DiskBudget {
 	static func removeAllStores() async {
 		for identifier in await WKWebsiteDataStore.allDataStoreIdentifiers {
 			try? await WKWebsiteDataStore.remove(forIdentifier: identifier)
+		}
+	}
+
+	/**
+	Deletes the files in a cache directory that no live name claims.
+
+	The other half of `removeOrphanedStores`, for the one cache this app writes itself instead of
+	letting WebKit write it. `websiteThumbnailCache` is a flat directory holding one file per website
+	preview, named for the website's *address* — and the address is the one thing about a website that
+	changes under the user's hand. Editing it, or accepting a redirect, leaves the old file behind
+	under a name nothing will ever ask for again; so does deleting the website. `removeOrphanedStores`
+	can reach none of it: it keeps by `id`, and what it walks is WebKit's stores.
+
+	**The names arrive already in the form the directory uses**, rather than the keys they were made
+	from, because the mapping from a key to a file name belongs to the cache that writes the files and
+	must not have a second copy here. A second copy that drifted would not fail loudly. It would
+	recognise nothing, read every file as an orphan, and empty the cache on the next sweep.
+
+	**Not a root, and not measured against `limit`.** `enforce`'s only lever is
+	`WKWebsiteDataStore.removeData`, which cannot touch a directory this app wrote, so a root added
+	there is a number the guard reads and the sweep has no way to spend: over budget on thumbnails
+	alone, every website's page cache would be dropped every six hours and the total would never come
+	down. What bounds this directory is this sweep. After it there is at most one file per website in
+	the list, which is exactly the set the list is about to draw — a rounding error next to the WebKit
+	roots, for the same reason the rest of the container is one.
+
+	An empty keep-set collects nothing rather than everything, for the reason `orphans` spells out.
+	What is lost here is a refetch rather than a login, but the reading is exactly as untrustworthy,
+	and there is no reason for the sweeps running off one list to disagree about what an empty list
+	means.
+	*/
+	static func removeOrphanedFiles(in directory: URL, keeping fileNames: Set<String>) {
+		guard !fileNames.isEmpty else {
+			return
+		}
+
+		let contents = (try? FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)) ?? []
+
+		for file in contents where !fileNames.contains(file.lastPathComponent) {
+			try? FileManager.default.removeItem(at: file)
 		}
 	}
 

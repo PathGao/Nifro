@@ -80,7 +80,8 @@ private final class AppDelegate: NSObject, NSApplicationDelegate {
 				// used to be a union with the `websites` key while both were live; that key is read only
 				// by the migration now, and keeping it in the union would preserve stores for websites
 				// the user has since deleted, for good.
-				let websiteIDs = Set(Defaults[.playlists].flatMap { $0.websites.map(\.id) })
+				let websites = Defaults[.playlists].flatMap(\.websites)
+				let websiteIDs = Set(websites.map(\.id))
 
 				await DiskBudget.removeOrphanedStores(keeping: websiteIDs)
 
@@ -88,6 +89,23 @@ private final class AppDelegate: NSObject, NSApplicationDelegate {
 				// website is gone — and it is what clears out the records of every build that keyed them
 				// by address.
 				AppState.shared.forgetOrphanedPageRecords(keeping: websiteIDs)
+
+				// A third sweep over the same list, keyed differently because the thumbnail cache is:
+				// its files are named for a website's address, so it also has to collect the file left
+				// behind by an address that was *edited*, which is not an event the two sweeps above
+				// can see at all. Nothing else ever removed one — the button that clears every
+				// thumbnail also signs the user out of every site, so it is not cleanup anybody
+				// reaches for, and a thumbnail nothing can ask for again sat in the container until
+				// the app was uninstalled.
+				//
+				// Here rather than at the places a website changes. Deleting is one route, editing the
+				// address is a second, and accepting a redirect is a third with no button on it at
+				// all; all three end in this one list, which is why the other two sweeps read it here
+				// too. A hook per route is three places to remember and a fourth route away from being
+				// wrong again.
+				WebsitesController.shared.thumbnailCache.removeImages(
+					notMatching: Set(websites.map(\.thumbnailCacheKey))
+				)
 
 				await DiskBudget.enforce()
 				try? await Task.sleep(for: .seconds(6 * 60 * 60))

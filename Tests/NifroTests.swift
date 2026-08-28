@@ -708,6 +708,74 @@ struct DiskBudgetTests {
 		#expect(DiskBudget.orphans(among: [UUID(), UUID()], keeping: []).isEmpty)
 	}
 
+	// The three tests below run the thumbnail sweep against real files, because `DiskBudget` compiles
+	// into the SwiftPM target and the sweep is pure Foundation — and the only thing worth knowing
+	// about a function that deletes files is which files it deleted.
+	//
+	// The names are arbitrary strings on purpose. What the app passes is the SHA-256 of a website's
+	// address, and applying that mapping belongs to `SimpleImageCache`, which is the only thing that
+	// knows it. The sweep is told which names are live and nothing else.
+
+	/**
+	A throwaway directory holding one file per name.
+	*/
+	private static func directoryWithFiles(_ names: [String]) throws -> URL {
+		let directory = URL.temporaryDirectory.appending(path: "DiskBudgetTests-\(UUID().uuidString)")
+		try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+
+		for name in names {
+			try Data("thumbnail".utf8).write(to: directory.appending(path: name))
+		}
+
+		return directory
+	}
+
+	@Test("A thumbnail no website claims is deleted, and a live one is left alone")
+	func collectsThumbnailsNoWebsiteClaims() throws {
+		// The two ways a file is orphaned: the website was deleted, or its address was edited and the
+		// file is still named for the old one. Both look identical from here, which is the point of
+		// sweeping by what is live rather than by what happened.
+		let directory = try Self.directoryWithFiles(["live", "deletedWebsite", "oldAddress"])
+
+		defer {
+			try? FileManager.default.removeItem(at: directory)
+		}
+
+		DiskBudget.removeOrphanedFiles(in: directory, keeping: ["live"])
+
+		#expect(FileManager.default.fileExists(atPath: directory.appending(path: "live").path))
+		#expect(!FileManager.default.fileExists(atPath: directory.appending(path: "deletedWebsite").path))
+		#expect(!FileManager.default.fileExists(atPath: directory.appending(path: "oldAddress").path))
+	}
+
+	@Test("An empty website list leaves the thumbnails alone, rather than deleting all of them")
+	func emptyListIsNotAMandateToEmptyTheThumbnailCache() throws {
+		// The same distrust `orphans` above states, and for consistency rather than for the same
+		// stakes: a thumbnail costs a refetch, not a login. Two sweeps reading one list should not
+		// disagree about what an empty reading of it means.
+		let directory = try Self.directoryWithFiles(["one", "two"])
+
+		defer {
+			try? FileManager.default.removeItem(at: directory)
+		}
+
+		DiskBudget.removeOrphanedFiles(in: directory, keeping: [])
+
+		#expect(FileManager.default.fileExists(atPath: directory.appending(path: "one").path))
+		#expect(FileManager.default.fileExists(atPath: directory.appending(path: "two").path))
+	}
+
+	@Test("A cache directory that was never created is not an error")
+	func missingDirectoryIsNotAnError() {
+		// `removeAllImages` deletes the directory itself and it is recreated lazily on the next write,
+		// so the sweep can arrive at a path that does not exist. It has to be a no-op rather than a
+		// crash: it runs on a background queue with nothing above it to catch anything.
+		DiskBudget.removeOrphanedFiles(
+			in: URL.temporaryDirectory.appending(path: "DiskBudgetTests-\(UUID().uuidString)"),
+			keeping: ["live"]
+		)
+	}
+
 	@Test("The budget is small enough to be worth enforcing")
 	func budgetIsBelowWhatOrdinaryUseReached() {
 		// 151 MB was measured on a container nobody had asked to fill. A limit above that would never fire.
