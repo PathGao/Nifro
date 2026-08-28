@@ -6,8 +6,8 @@ import Testing
 The guardrail on "a page cannot be zoomed until it is gone".
 
 The context menu's Zoom Out subtracted a fixed 0.2 from a level with no floor, and the result is not
-a mistake that stays on screen long enough to be undone: it is written to `zoomLevel_<address>` and
-applied to that page on every later load, across restarts. Five presses reached 0 and the wallpaper
+a mistake that stays on screen long enough to be undone: it is written to `zoomLevel_<website id>`
+and applied to that website on every later load, across restarts. Five presses reached 0 and the wallpaper
 went blank; the sixth stored a negative level. Getting back out meant knowing that Actual Size exists
 in a menu that cannot be opened until the wallpaper has been raised.
 

@@ -47,8 +47,14 @@ final class WebViewController: NSViewController {
 		// Its own store, so deleting the website deletes what the website wrote. Read here for the same
 		// reason everything else below is: this web view belongs to one website for its whole life, and
 		// a new one is built when the website changes.
-		if let id = scene?.website?.id {
-			configuration.websiteDataStore = DiskBudget.store(for: id)
+		//
+		// Read once and kept on the view, because the scroll position, the remembered fragment and the
+		// zoom level are keyed on this same `id` — the store and the records have to name the same
+		// website or two entries on one address end up sharing one of the two.
+		let websiteID = scene?.website?.id
+
+		if let websiteID {
+			configuration.websiteDataStore = DiskBudget.store(for: websiteID)
 		}
 
 		// A wallpaper has nobody to click play. The macOS default happens to allow this, but the
@@ -76,6 +82,7 @@ final class WebViewController: NSViewController {
 
 		let webView = SSWebView(frame: .zero, configuration: configuration)
 		webView.scene = scene
+		webView.websiteID = websiteID
 
 		webView.publisher(for: \.title)
 			.sink { [weak webView] title in

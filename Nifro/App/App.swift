@@ -74,16 +74,22 @@ private final class AppDelegate: NSObject, NSApplicationDelegate {
 		// weeks, so a check that runs once per launch is a check that mostly does not run.
 		Task {
 			while !Task.isCancelled {
-				// Both lists, not just the first. A store is filed under `website.id`, this sweep
-				// deletes every store no website claims, and deleting one signs the user out of that
-				// site with nothing able to put it back. The two keys hold the same websites today, so
-				// the union changes nothing today — it is here now because the moment they diverge is
-				// the moment this line starts deleting logins, and that moment is a different change
-				// landing in a different week.
-				await DiskBudget.removeOrphanedStores(
-					keeping: Set(Defaults[.websites].map(\.id))
-						.union(Defaults[.playlists].flatMap { $0.websites.map(\.id) })
-				)
+				// Both keys, not just the first, and one set for both sweeps. A store is filed under
+				// `website.id` and so is everything a page remembers, and both sweeps delete what no
+				// website claims — deleting a store signs the user out of that site with nothing able to
+				// put it back. The two keys hold the same websites today, so the union changes nothing
+				// today; it is here because the moment they diverge is the moment these lines start
+				// deleting what somebody still has.
+				let websiteIDs = Set(Defaults[.websites].map(\.id))
+					.union(Defaults[.playlists].flatMap { $0.websites.map(\.id) })
+
+				await DiskBudget.removeOrphanedStores(keeping: websiteIDs)
+
+				// The same set, because a page record whose website is gone is exactly a store whose
+				// website is gone — and it is what clears out the records of every build that keyed them
+				// by address.
+				AppState.shared.forgetOrphanedPageRecords(keeping: websiteIDs)
+
 				await DiskBudget.enforce()
 				try? await Task.sleep(for: .seconds(6 * 60 * 60))
 			}
