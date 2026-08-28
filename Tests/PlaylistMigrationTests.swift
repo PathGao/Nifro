@@ -28,110 +28,6 @@ struct PlaylistMigrationTests {
 		.deletingLastPathComponent()
 		.deletingLastPathComponent()
 
-	/**
-	Every website ends up in exactly one playlist.
-
-	The assertion the whole file is for, and the one whose failure is invisible. It is stated over the
-	indices rather than over a particular list because "which website" is not what can go wrong here —
-	dropping one is, and a dropped one is only detectable by counting what came out against what went
-	in.
-
-	The lists below are the shapes a stored list actually comes in: nothing pinned, everything pinned,
-	a mixture, one display used twice, and the same again with the pinned entries first so that the
-	default group is not simply the one that started.
-	*/
-	@Test("No website is lost, duplicated or invented, whatever the list looked like")
-	func everyWebsiteLandsInExactlyOnePlaylist() {
-		let lists: [[Int?]] = [
-			[],
-			[nil],
-			[nil, nil, nil],
-			[1, 2],
-			[nil, 1, nil, 2, 1],
-			[1, 1, nil],
-			[2, 2, 2],
-			[nil, 3, 3, nil, 1, 2, 1]
-		]
-
-		for list in lists {
-			let landed = playlistMigration(displays: list).flatMap(\.websites)
-
-			#expect(
-				landed.sorted() == Array(list.indices),
-				"A list of \(list.count) came back as \(landed.sorted()), so a website was lost, duplicated or invented."
-			)
-		}
-	}
-
-	/**
-	There is always a default playlist, and it is the first one.
-
-	Unconditional, which is the part worth running: the tempting version builds it from the websites
-	that have no display, and then a user who pinned every website they own gets a set of playlists
-	that are all bound to something. Every display they later add has an empty picker — nothing to
-	select, nothing on the screen — and the panel has no way out of it.
-	*/
-	@Test("A default playlist exists even when every website was pinned")
-	func theDefaultGroupIsAlwaysFirstAndAlwaysThere() {
-		for list in [[], [1, 2, 3], [nil, 1], [nil]] as [[Int?]] {
-			let groups = playlistMigration(displays: list)
-
-			#expect(groups.first?.screen == nil, "The first group is not the unbound one, so nothing makes the default playlist.")
-			#expect(groups.count >= 1)
-		}
-
-		#expect(playlistMigration(displays: [] as [Int?]).count == 1, "An empty list should still produce the default playlist and nothing else.")
-		#expect(playlistMigration(displays: [1, 2] as [Int?]).first?.websites.isEmpty == true)
-	}
-
-	/**
-	A website with no display of its own goes in the default playlist, and one with a display does not.
-
-	The rule the migration is described by, checked directly rather than inferred from the counts
-	above.
-	*/
-	@Test("Pinned websites leave the default playlist and unpinned ones stay in it")
-	func pinningDecidesTheGroup() {
-		let groups = playlistMigration(displays: [nil, 1, nil, 2, 1])
-
-		#expect(groups.first?.websites == [0, 2])
-		#expect(groups.count == 3)
-		#expect(groups[1].screen == 1)
-		#expect(groups[1].websites == [1, 4])
-		#expect(groups[2].screen == 2)
-		#expect(groups[2].websites == [3])
-	}
-
-	/**
-	The order the user put their websites in is the order they come out in.
-
-	Both orders: the websites inside a playlist, and the playlists themselves, which follow the order
-	the list first mentions each display. Nobody asked the user about either, so changing either is
-	changing their list without being asked.
-	*/
-	@Test("Websites and playlists keep the order the stored list had")
-	func orderIsPreserved() {
-		let groups = playlistMigration(displays: [3, nil, 1, 3, 1, nil, 2])
-
-		#expect(groups.map(\.screen) == [nil, 3, 1, 2], "The displays are not in the order the list first names them.")
-		#expect(groups.map(\.websites) == [[1, 5], [0, 3], [2, 4], [6]], "A group has its websites in an order the stored list did not have.")
-	}
-
-	/**
-	One display named twice is one playlist, not two.
-
-	`Display` is a UUID wrapped in a struct, so equality is the display and nothing else. Grouping on
-	something that compared identity instead — the `NSScreen`, say, which is a different object each
-	time the screens are reconfigured — would give the user a playlist per website.
-	*/
-	@Test("The same display twice makes one playlist")
-	func equalDisplaysShareAPlaylist() {
-		let groups = playlistMigration(displays: [1, 1, 1] as [Int?])
-
-		#expect(groups.count == 2)
-		#expect(groups[1].websites == [0, 1, 2])
-	}
-
 	// MARK: - What can only be said about the source
 
 	private static func source(_ path: String) throws -> String {
@@ -216,6 +112,40 @@ struct PlaylistMigrationTests {
 			try Self.source("Nifro/App/Constants.swift").contains("Key<Bool>(\"hasMigratedWebsitesToPlaylists\""),
 			"The flag's stored name changed, which means every user who has already migrated migrates again."
 		)
+	}
+
+	/**
+	Every stored website becomes a member, and nothing between the read and the write can drop one.
+
+	This used to be a runnable test over a pure grouping function, and it was the assertion that file
+	was for. The grouping is gone — everything lands in one playlist now — and with it went the seam
+	that made the property testable by running it. Checked here anyway, and against the source, because
+	the property did not go away with the function: this runs once, against the only copy of a list the
+	user built by hand, and an entry it drops is dropped for good.
+
+	Stated as an absence, which is what a shape test is the right tool for. The names below are every
+	way Swift has to return fewer elements than it was given; a `map` cannot lose one, and a `map` is
+	what the migration is.
+	*/
+	@Test("The migration cannot drop a website on its way into the playlist")
+	func migrationKeepsEveryStoredWebsite() throws {
+		let body = try Self.body(
+			of: "func migrateToPlaylistsIfNeeded()",
+			in: Self.source("Nifro/Sites/WebsitesController.swift")
+		)
+
+		for losing in ["filter", "compactMap", "dropFirst", "dropLast", "prefix", "suffix", "first", "removeAll"] {
+			#expect(
+				!body.contains(".\(losing)"),
+				"""
+				The migration calls `.\(losing)` between reading the stored list and writing the \
+				playlists. Every stored website has to become a member: this is the only copy of a list \
+				the user built themselves, and it runs once.
+				"""
+			)
+		}
+
+		#expect(body.contains("stored.map("), "The migration no longer maps the stored list, so what it writes is not derived from all of it.")
 	}
 
 	/**

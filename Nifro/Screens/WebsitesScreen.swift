@@ -225,7 +225,7 @@ private struct PlaylistRow: View {
 							.tag(UUID?.some($0.id))
 					}
 				} label: {
-					Text("Show on Display")
+					Text("Bind to Display")
 				}
 				// The one playlist every display falls back to, so restricting it to one display leaves
 				// every other screen with an empty picker — nothing to select, nothing on the screen, and

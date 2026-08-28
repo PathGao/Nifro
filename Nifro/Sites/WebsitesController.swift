@@ -442,9 +442,13 @@ extension WebsitesController {
 	ever happens to it: this is the key's last reader, and what it reads is the only copy of a list
 	nothing else in the app can reach any more.
 
-	The grouping itself is `playlistMigration`, over in a file the package target compiles, so the case
-	this cannot be run against — two displays, a list built by hand — is the case `swift test` covers.
-	Everything left here is naming and lookup, both of which need the app.
+	**Everything lands in one playlist, including what was pinned.** Grouping the pinned websites into a
+	playlist per display was the first shape of this, and it was wrong for the case it was built for:
+	a display that was pinned to got a playlist of one, which is the state the whole refactor exists to
+	end — a second screen whose chooser has a single entry. What the user has after this is one list of
+	everything, which every display offers and each walks on its own. What they lose is the record of
+	which screen a website used to be pinned to, and that record described a rule this build no longer
+	has.
 	*/
 	func migrateToPlaylistsIfNeeded() {
 		guard !Defaults[.hasMigratedWebsitesToPlaylists] else {
@@ -457,30 +461,16 @@ extension WebsitesController {
 		// hand back an empty list and migrate nothing.
 		let stored = Defaults[.websites]
 
-		Defaults[.playlists] = playlistMigration(displays: stored.map(\.display)).map { group in
-			let members = group.websites.map { stored[$0].website }
-
-			guard let display = group.screen else {
-				return Playlist(
-					name: Playlist.defaultName,
-					websites: members,
-					isDefault: true
-				)
-			}
-
-			// Asked once, here, and stored — which is the only moment it can be asked at all. A display
-			// that is not attached right now answers `<Unknown name>`, and that is genuinely all this
-			// app has ever known about it: what is stored against a website is a `Display`, and a
-			// `Display` is a UUID. Resolving it later would not know more, it would only be wrong in
-			// front of the user.
-			let name = display.localizedName
-
-			return Playlist(
-				name: name,
-				websites: members,
-				boundDisplay: DisplayBinding(id: display.id, nameWhenBound: name)
+		// `map`, not `filter` or `compactMap`. Every stored entry becomes a member: this runs once,
+		// against the only copy of a list the user built themselves, and an entry dropped here is
+		// dropped for good.
+		Defaults[.playlists] = [
+			Playlist(
+				name: Playlist.defaultName,
+				websites: stored.map(\.website),
+				isDefault: true
 			)
-		}
+		]
 	}
 }
 

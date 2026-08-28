@@ -421,7 +421,12 @@ private struct DisplayColumn: View {
 	least it — but disabled when it is, rather than drawing a menu that opens onto nothing.
 	*/
 	private var playlistChooser: some View {
-		chooser(title: column.playlistName, isEnabled: !column.playlistChoices.isEmpty, isLoading: false) {
+		chooser(
+			title: column.playlistName,
+			width: PanelMetrics.chooserWidth,
+			isEnabled: !column.playlistChoices.isEmpty,
+			isLoading: false
+		) {
 			ForEach(column.playlistChoices) { choice in
 				Button(choice.name) {
 					model.selectPlaylist(choice.id, on: column.display)
@@ -439,6 +444,7 @@ private struct DisplayColumn: View {
 	private var picker: some View {
 		chooser(
 			title: column.websiteName ?? String(localized: "No Website"),
+			width: PanelMetrics.websiteChooserWidth,
 			isEnabled: !column.choices.isEmpty,
 			isLoading: column.isLoading
 		) {
@@ -464,6 +470,7 @@ private struct DisplayColumn: View {
 	*/
 	private func chooser(
 		title: String,
+		width: Double,
 		isEnabled: Bool,
 		isLoading: Bool,
 		@ViewBuilder items: () -> some View
@@ -495,7 +502,7 @@ private struct DisplayColumn: View {
 		// label, so the width has to be forced from outside the label — and the background has to come
 		// after it, or it paints the pill at the label's size and the frame merely centres that.
 		.frame(
-			width: PanelMetrics.chooserWidth - PanelMetrics.horizontalPadding * 2,
+			width: width - PanelMetrics.horizontalPadding * 2,
 			height: PanelMetrics.height
 		)
 		.padding(.horizontal, PanelMetrics.horizontalPadding)

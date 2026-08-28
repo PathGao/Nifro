@@ -106,7 +106,7 @@ extension Playlist {
 	remake it — and a list called "Default" in one and something else in the other is two default
 	playlists.
 	*/
-	static var defaultName: String { String(localized: "Default") }
+	static var defaultName: String { String(localized: "Default Playlist") }
 
 	/**
 	Bind this playlist to a display, or to none.

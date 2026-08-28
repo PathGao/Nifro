@@ -259,6 +259,16 @@
         }
       }
     },
+    "Bind to Display": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "与显示器绑定"
+          }
+        }
+      }
+    },
     "Blocking": {
       "localizations": {
         "zh-Hans": {
@@ -539,12 +549,12 @@
         }
       }
     },
-    "Default": {
+    "Default Playlist": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "默认"
+            "value": "默认播放列表"
           }
         }
       }
@@ -2045,16 +2055,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "显示整页"
-          }
-        }
-      }
-    },
-    "Show on Display": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "显示在显示器"
           }
         }
       }
