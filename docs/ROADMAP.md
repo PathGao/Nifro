@@ -441,7 +441,7 @@ them again.
 
 ### Looks dead, is not
 
-`NSItemProvider: @unchecked Sendable` (**deleting it fails the build** with a data-race error; a conformance-only extension has no member for an indexer to see referenced) · every `AppIntent` in `Intents.swift` and `WebsiteAppEntity`'s `@Property`s (discovered from bundle metadata — 14 of periphery's 15 raw findings) · `Shortcut.allNames` (three live call sites and a test; its doc comment is stale, the code is not) · `NSStatusBarButton.setShowingActivity` (a test asserts on it) · the downloads entitlement · `SecurityScopedBookmarks.swift` · `Display.serialize`/`deserialize` (`Defaults.Bridge` requirements, called by the package) · `Constants.playlistInterval` (a deliberate, dated migration shim) · `ActionTrampoline`, `CallbackMenuItem`, `addCallbackItem` (`SSWebView` builds the context menu from them).
+`NSItemProvider: @unchecked Sendable` (**deleting it fails the build** with a data-race error; a conformance-only extension has no member for an indexer to see referenced) · every `AppIntent` in `Intents.swift` and `WebsiteAppEntity`'s `@Property`s (discovered from bundle metadata — 14 of periphery's 15 raw findings) · `Shortcut.allNames` (three live call sites and a test) · `NSStatusBarButton.setShowingActivity` (a test asserts on it) · the downloads entitlement · `SecurityScopedBookmarks.swift` · `Display.serialize`/`deserialize` (`Defaults.Bridge` requirements, called by the package) · `Constants.playlistInterval` (a deliberate, dated migration shim) · `ActionTrampoline`, `CallbackMenuItem`, `addCallbackItem` (`SSWebView` builds the context menu from them).
 
 ### Two negative results
 

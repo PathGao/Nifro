@@ -392,7 +392,7 @@ U1 已发布，然后在面板重构里丢了它的展示面，又在 #53 里拿
 
 ### 看着像死的，其实不是
 
-`NSItemProvider: @unchecked Sendable`（**删掉编译失败**，data-race 错误；只有 conformance 的扩展没有成员供索引器看见引用）· `Intents.swift` 里全部 `AppIntent` 和 `WebsiteAppEntity` 的 `@Property`（从 bundle 元数据发现——periphery 15 条原始发现里的 14 条）· `Shortcut.allNames`（三个活调用点加一条测试；它的文档注释过时了，代码没有）· `NSStatusBarButton.setShowingActivity`（一条测试断言它）· 下载 entitlement · `SecurityScopedBookmarks.swift` · `Display.serialize`/`deserialize`（`Defaults.Bridge` 的协议要求，由包调用）· `Constants.playlistInterval`（有意的、有日期的迁移垫片）· `ActionTrampoline`、`CallbackMenuItem`、`addCallbackItem`（`SSWebView` 用它们建右键菜单）。
+`NSItemProvider: @unchecked Sendable`（**删掉编译失败**，data-race 错误；只有 conformance 的扩展没有成员供索引器看见引用）· `Intents.swift` 里全部 `AppIntent` 和 `WebsiteAppEntity` 的 `@Property`（从 bundle 元数据发现——periphery 15 条原始发现里的 14 条）· `Shortcut.allNames`（三个活调用点加一条测试）· `NSStatusBarButton.setShowingActivity`（一条测试断言它）· 下载 entitlement · `SecurityScopedBookmarks.swift` · `Display.serialize`/`deserialize`（`Defaults.Bridge` 的协议要求，由包调用）· `Constants.playlistInterval`（有意的、有日期的迁移垫片）· `ActionTrampoline`、`CallbackMenuItem`、`addCallbackItem`（`SSWebView` 用它们建右键菜单）。
 
 ### 两个否定结果
 

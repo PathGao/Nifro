@@ -113,9 +113,17 @@ enum RestoreDefaults {
 		}
 
 		// The migration and then the install, in the order `didLaunch` uses and for the reason argued
-		// there. Both are behind one call now because Advanced has a button that wants the same state
-		// without the wipe above it: two callers of one entry point rather than two orderings that have
-		// to be kept in step.
+		// there rather than restated here. Behind one call because Advanced has a button that wants the
+		// same state without the wipe above it, and that is the whole of what the call bought: this file
+		// and that button are two callers of one entry point instead of two more copies of the order.
+		//
+		// It did not make the order live in one place, and cannot. `installDefaultPlaylist` opens by
+		// forcing `hasInstalledFeaturedWebsites` back to false, which is right after a wipe and right
+		// under a button somebody pressed on purpose, and on the launch path would reinstall the shipped
+		// websites every single run — including the ones the user has since deleted. So `didLaunch`
+		// still writes the pair out itself, and there are two orderings in the app that have to agree.
+		// Extracting the pair on its own, leaving the flag reset in `installDefaultPlaylist`, is what
+		// would make it one.
 		//
 		// Nothing else has to be driven from here. Writing the website list is what the rest of the app
 		// already watches, so the scenes are rebuilt and every preference that has a publisher took its
