@@ -48,12 +48,6 @@ struct DisplayPanel: View {
 		// here grey, the accent included, while the panel stayed open in front of the user. The drawn
 		// buttons this replaced never noticed, because a hardcoded orange does not.
 		.environment(\.controlActiveState, .key)
-		.task {
-			// The controller puts the columns up before the panel is shown and starts the refreshes
-			// straight after, so this changes nothing in the app. It is here for a preview, where there
-			// is no controller at all and nothing else would ever ask.
-			await model.refresh()
-		}
 	}
 }
 

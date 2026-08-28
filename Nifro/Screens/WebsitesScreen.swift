@@ -319,8 +319,8 @@ private struct PlaylistWebsites: View {
 	Searching turns dragging off. The order is the rotation order, and dragging a row while some of
 	its neighbours are hidden would move it somewhere other than where it appears to land.
 	*/
-	private var matches: [Binding<Website>] {
-		let query = searchText.trimmed.lowercased()
+	private func matches(for query: String) -> [Binding<Website>] {
+		let query = query.lowercased()
 
 		return $playlist.websites.filter {
 			query.isEmpty
@@ -330,8 +330,12 @@ private struct PlaylistWebsites: View {
 	}
 
 	var body: some View {
+		let query = searchText.trimmed
+
 		Form {
-			if !searchText.trimmed.isEmpty {
+			if !query.isEmpty {
+				let matches = self.matches(for: query)
+
 				List(matches, id: \.wrappedValue.id) { website in
 					RowView(website: website, selection: $editedWebsite)
 				}
@@ -441,6 +445,8 @@ private struct RowView: View {
 	}
 
 	var body: some View {
+		let isShowing = self.isShowing
+
 		HStack {
 			// The same label the playlist rows carry, for the same gesture and hidden from
 			// accessibility for the same reason. It is in front of the icon rather than behind it so

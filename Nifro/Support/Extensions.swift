@@ -679,8 +679,6 @@ extension Error {
 	}
 }
 
-// MARK: - Font
-
 // MARK: - InfoPopoverButton
 extension InfoPopoverButton<Text> {
 	init(_ text: some StringProtocol, maxWidth: Double = 240) {
@@ -1145,7 +1143,6 @@ extension Sequence where Element: Equatable {
 		filter { $0 != element }
 	}
 }
-// MARK: - SimpleImageCacheKeyable
 
 // MARK: - String
 extension String {
@@ -1222,8 +1219,6 @@ extension StringProtocol {
 extension StringProtocol {
 	var nilIfEmptyOrWhitespace: Self? { isEmptyOrWhitespace ? nil : self }
 }
-
-// MARK: - Timer
 
 // MARK: - URL
 extension URL {
@@ -2334,8 +2329,6 @@ extension WKWebView {
 		error.isCancelled || error.isWebViewPluginHandledLoad
 	}
 }
-
-// MARK: - WebsiteIconFetcher
 
 // MARK: - WindowAccessor
 private struct WindowAccessor: NSViewRepresentable {
