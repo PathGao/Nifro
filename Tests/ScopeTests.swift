@@ -333,11 +333,172 @@ struct ScopeTests {
 	}
 
 	/**
+	The identifier the first-run explanation of Browsing Mode is stored under.
+
+	Keyed on rather than on the Swift name around it because this one cannot be renamed by a
+	refactoring: `SSApp.runOnce` writes it into `UserDefaults`, so changing the spelling shows the
+	alert a second time to every install that has already seen it. A rule keyed on the function name
+	instead would go red on a rename that changed nothing, which is the difference between a useful
+	red and noise.
+	*/
+	private static let explanationKey = "activatedBrowsingMode"
+
+	/**
+	What the app calls the one place that explanation lives, read out of the app rather than written
+	down here.
+
+	The tests below check that each route reaches it, and a route reaching it has to name it — so the
+	name would otherwise be spelled four times in this file and go red the day somebody renames the
+	function without touching what it does. Found instead by looking for the identifier above and
+	taking the declaration it sits inside, so a rename renames both sides at once.
+	*/
+	private static func explainer() throws -> String {
+		let all = try sources()
+		let copies = all.reduce(0) { $0 + $1.text.ranges(of: explanationKey).count }
+
+		guard
+			copies == 1,
+			let text = all.first(where: { $0.text.contains(explanationKey) })?.text
+		else {
+			Issue.record(
+				"""
+				`\(explanationKey)` is written \(copies) times. The explanation of Browsing Mode \
+				has one home and every route calls it: a second copy is the defect this area has already \
+				been through, where four entry points each carried their own and one of them was missed.
+				"""
+			)
+			return ""
+		}
+
+		guard
+			let at = text.range(of: explanationKey),
+			let declaration = text[..<at.lowerBound].range(of: "func ", options: .backwards)
+		else {
+			Issue.record("`\(explanationKey)` is not inside a function any more, so these tests are reading nothing.")
+			return ""
+		}
+
+		return String(text[declaration.upperBound...].prefix { $0.isLetter || $0.isNumber || $0 == "_" })
+	}
+
+	/**
+	Every way of switching Browsing Mode on says what Browsing Mode is.
+
+	This is the second time. The explanation began on the menu item, so the shortcut, the URL and the
+	Shortcuts action all switched Browsing Mode on and said nothing — and `Action` was built to hold
+	the body once so that could not happen. Then the panel replaced the menu, called `setBrowsingMode`
+	itself, and the same defect came back through the surface that is now the most discoverable way
+	in. Nothing went red either time, which is the whole reason this test exists rather than a
+	convention: the explanation is not a courtesy but the only sentence the app has about the page
+	being behind the user's windows, so a route without it hands somebody an interactive wallpaper
+	they cannot see and cannot account for.
+
+	Written as an allowlist of sites permitted to write the switch on their own, so a new surface
+	fails until somebody argues for it here. `setBrowsingMode(false` is not a route in — it is every
+	way *out*, and the way out has nothing to explain.
+
+	The hold is the argued exception and the reason its exception is written down: its `begin()` runs
+	with the key still down, and an `NSAlert` is app-modal, so raising one there puts a run loop of
+	its own between the hold and both of its exits. It explains at `end()` instead, which is asserted
+	below in both directions.
+	*/
+	@Test("Every route into Browsing Mode explains it the first time")
+	func everyRouteThatSwitchesBrowsingModeOnExplainsIt() throws {
+		let allowed = [
+			// The verb every other route goes through. It explains, which is asserted below.
+			"AppState.swift": ["func toggleBrowsingMode(on display: Display?)"],
+			// The hold, which explains at the other end.
+			"BrowsingModeShortcut.swift": ["private func begin()"]
+		]
+
+		let switchesOn = try Regex("setBrowsingMode\\(\\s*(?!false)")
+
+		for (name, text) in try Self.sources() {
+			// Declaring the switch is not throwing it. Struck by name, the way the tests above strike
+			// the readers they are counting.
+			var remaining = text.replacing("func setBrowsingMode", with: "")
+
+			for declaration in allowed[name] ?? [] {
+				remaining = remaining.replacing(try Self.body(of: declaration, in: text), with: "")
+			}
+
+			for match in remaining.matches(of: switchesOn) {
+				Issue.record(
+					"""
+					\(name) switches Browsing Mode on by writing the switch. Call the app's own toggle, \
+					which explains what Browsing Mode is the first time it comes on — or add this site \
+					to the allowlist in `ScopeTests` with the reason it may hand over a page it does not \
+					account for. Around: \(Self.context(around: match.range, in: remaining))
+					"""
+				)
+			}
+		}
+
+		let explainer = try Self.explainer()
+
+		guard !explainer.isEmpty else {
+			return
+		}
+
+		#expect(
+			try Self.body(of: "func toggleBrowsingMode(on display: Display?)", in: Self.source(named: "AppState.swift"))
+				.contains(explainer),
+			"The toggle every surface shares no longer explains Browsing Mode, so none of them do."
+		)
+
+		let shortcut = try Self.source(named: "BrowsingModeShortcut.swift")
+
+		#expect(
+			try Self.body(of: "private func end()", in: shortcut).contains(explainer),
+			"Letting go of the hold no longer explains Browsing Mode, and the hold is the one route that cannot explain it at the other end."
+		)
+
+		#expect(
+			try !Self.body(of: "private func begin()", in: shortcut).contains(explainer),
+			"""
+			The hold explains Browsing Mode while the key is still down. An `NSAlert` is app-modal and \
+			runs a run loop of its own, and the hold leaves only through the Carbon key-up or the local \
+			`.flagsChanged` monitor — either one lost to that session strands the wallpaper in front of \
+			the desktop with the hotkey refusing to put it back.
+			"""
+		)
+	}
+
+	/**
+	And the switch itself is written in one file.
+
+	The allowlist above reads the name of the setter, so a route reaching around it into the stored
+	set would satisfy it by saying nothing. `browsingDisplays` is the key that set is saved under, so
+	this is the same rule asked of the store rather than of the verb — the shape `theCursorHasOneWriter`
+	uses for what a display is showing, and for the same reason: storage that only one file writes is
+	the thing that makes one answer enough.
+
+	Only the insert. Every file may already be seen clearing the set — the empty-website-list rule in
+	`Events` does — and taking Browsing Mode away is not a route in.
+	*/
+	@Test("Only the app switches Browsing Mode on for a display")
+	func onlyAppStatePutsADisplayIntoBrowsingMode() throws {
+		let insert = try Regex("browsingDisplays\\]\\s*\\.insert")
+
+		for (name, text) in try Self.sources() where name != "AppState.swift" {
+			for match in text.matches(of: insert) {
+				Issue.record(
+					"""
+					\(name) puts a display into Browsing Mode by writing `browsingDisplays` directly, \
+					which walks past the first-time explanation of what Browsing Mode is. \
+					Around: \(Self.context(around: match.range, in: text))
+					"""
+				)
+			}
+		}
+	}
+
+	/**
 	A tap goes through the action, not straight at the switch.
 
-	`Action.toggleBrowsingMode` carries the first-run explanation of what Browsing Mode is, and it is
-	the same body the panel button and `nifro://` run. The hold reaches past it on purpose — it is not
-	a toggle and says so — but the tap *is* that toggle, and calling `setBrowsingMode` from here would
+	`Action.toggleBrowsingMode` runs the toggle every surface shares, and that toggle carries the
+	first-run explanation of what Browsing Mode is. The hold reaches past it on purpose — it is not a
+	toggle and says so — but the tap *is* that toggle, and calling `setBrowsingMode` from here would
 	quietly fork it into a second copy that drifts.
 	*/
 	@Test("Tapping the key runs the same toggle as everything else")

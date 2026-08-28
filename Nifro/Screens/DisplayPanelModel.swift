@@ -298,8 +298,15 @@ final class DisplayPanelModel: ObservableObject {
 	}
 
 
+	/**
+	Hand the display's page over, or take it back.
+
+	Through the app's own verb and not through `setBrowsingMode` beside it, which is the same flip
+	minus the first-time explanation of what Browsing Mode is. This button is the most discoverable
+	way into it and was the one route that said nothing.
+	*/
 	func toggleBrowsingMode(on display: Display?) {
-		AppState.shared.setBrowsingMode(!AppState.shared.isBrowsingMode(on: display), on: display)
+		AppState.shared.toggleBrowsingMode(on: display)
 	}
 
 	/**
