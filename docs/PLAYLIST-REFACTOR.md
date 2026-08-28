@@ -199,6 +199,17 @@ PR7   Delete Website.display, WebsiteDisplaySetting,
 PR1 and PR2 are the first two links of a chain; PR5 and PR6 can be opened in parallel once their
 dependencies land.
 
+**Two corrections, from building it rather than planning it.**
+
+PR2 is not independently landable, and the word "independent" above was wrong about it. `periphery
+scan --strict` runs in CI, and a model whose fields are written by the migration and read by nothing
+is five findings. The readers arrive in PR5 and PR6. Silencing it in `.periphery.yml` is the move
+that file exists to refuse — "the readers arrive later" is a justification with nothing about it that
+expires. So PR2 lands with the PRs that give it readers, and PR1 and PR2.5 land on their own.
+
+PR3 and PR4 are not parallel either. They share six files, `WebsitesController.swift` and
+`Website.swift` among them. PR5 and PR6 still are.
+
 ## 7. Decided here, because the design forced the question
 
 ### D6 — the default playlist cannot be bound
