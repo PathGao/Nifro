@@ -959,16 +959,6 @@
         }
       }
     },
-    "Hold to use the page": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "按住以操作网页"
-          }
-        }
-      }
-    },
     "How often a page goes stale is a property of the page; off follows the interval in Settings.": {
       "localizations": {
         "zh-Hans": {
@@ -2359,12 +2349,12 @@
         }
       }
     },
-    "Toggle browsing mode": {
+    "Browsing mode (hold to use, tap to toggle)": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "切换浏览模式"
+            "value": "浏览模式（按住操作，短按切换）"
           }
         }
       }

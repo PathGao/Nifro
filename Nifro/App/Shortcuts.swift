@@ -17,8 +17,10 @@ the menu then has nothing to show beside the command, and nobody discovers the s
 */
 enum Shortcut: String, CaseIterable {
 	case toggleEnabled
-	case toggleBrowsingMode
-	case holdToInteract
+	// Its stored key is still `toggleBrowsingMode`, from when toggling was all it did. Renaming the
+	// case would rename the `KeyboardShortcuts.Name` behind it and silently drop every binding anyone
+	// has recorded.
+	case browsingMode = "toggleBrowsingMode"
 	case toggleSound
 	case chooseRegion
 	case reload
@@ -33,13 +35,8 @@ enum Shortcut: String, CaseIterable {
 		switch self {
 		case .toggleEnabled:
 			.w
-		case .toggleBrowsingMode:
+		case .browsingMode:
 			.b
-		// F, not H, which is what it was. Control-Option-Command-H is the one key in this table macOS
-		// has an opinion about: Command-H hides an app, and the modified forms are close enough to it
-		// that holding the wallpaper open reads as reaching for Hide. F has nothing behind it.
-		case .holdToInteract:
-			.f
 		case .toggleSound:
 			.s
 		case .chooseRegion:
@@ -62,10 +59,8 @@ enum Shortcut: String, CaseIterable {
 		switch self {
 		case .toggleEnabled:
 			String(localized: "Toggle enabled state")
-		case .toggleBrowsingMode:
-			String(localized: "Toggle browsing mode")
-		case .holdToInteract:
-			String(localized: "Hold to use the page")
+		case .browsingMode:
+			String(localized: "Browsing mode (hold to use, tap to toggle)")
 		case .toggleSound:
 			String(localized: "Toggle sound")
 		case .chooseRegion:
@@ -88,18 +83,17 @@ enum Shortcut: String, CaseIterable {
 	/**
 	The action it runs, or `nil` when the shortcut is not a press-and-release at all.
 
-	`holdToInteract` is the one exception: it acts on the key going down and again on it coming up, so
-	`HoldToInteract` installs it rather than driving it from here. It still belongs in the table — it
-	needs a default and a row in Settings like every other one.
+	`browsingMode` is the one exception: how long the key is held is the whole difference between its
+	two behaviours, so it acts on the key going down and again on it coming up, and
+	`BrowsingModeShortcut` installs it rather than driving it from here. It still belongs in the table
+	— it needs a default and a row in Settings like every other one.
 	*/
 	var action: Action? {
 		switch self {
-		case .holdToInteract:
+		case .browsingMode:
 			nil
 		case .toggleEnabled:
 			.toggleEnabled
-		case .toggleBrowsingMode:
-			.toggleBrowsingMode
 		case .toggleSound:
 			.toggleSound
 		case .chooseRegion:

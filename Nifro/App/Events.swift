@@ -212,7 +212,7 @@ extension AppState {
 			}
 			.store(in: &cancellables)
 
-		holdToInteract.install()
+		browsingModeShortcut.install()
 
 		Shortcut.install()
 	}
