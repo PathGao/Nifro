@@ -242,9 +242,18 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	*/
 	var thumbnailCacheKey: String { url.isFileURL ? url.tildePath : url.absoluteString }
 
+	/**
+	Show this website on the display it was pinned to.
+
+	The flat list in the Websites window is the one caller with no display in hand, because it is not
+	about a screen — so the website's own answer stands in, written out here rather than hidden inside
+	`makeCurrent`, which every other caller now tells which display it means. A website reachable from
+	two columns has no such answer, which is what this fallback cannot see and the picker in the panel
+	can.
+	*/
 	@MainActor
 	func makeCurrent() {
-		WebsitesController.shared.makeCurrent(self)
+		WebsitesController.shared.makeCurrent(self, on: effectiveDisplay)
 	}
 
 	@MainActor

@@ -1259,6 +1259,16 @@
         }
       }
     },
+    "No Playlist": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无播放列表"
+          }
+        }
+      }
+    },
     "No Website": {
       "localizations": {
         "zh-Hans": {

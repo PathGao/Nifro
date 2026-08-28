@@ -25,14 +25,36 @@ extension Website {
 
 extension WebsitesController {
 	/**
-	The websites on `display` that are allowed to be showing right now, in list order.
+	The websites the playlist on `display` allows to be showing right now, in list order.
+
+	The filter used to be `effectiveDisplay == display` over the whole website list, which is the
+	direction the playlists inverted: a display could only offer what already named it, so a second
+	monitor's chooser had exactly one item in it and its rotation arrows had nothing to step to.
 	*/
 	private func eligible(for display: Display?, at date: Date = .now) -> [Website] {
-		let onDisplay = showable.filter { $0.effectiveDisplay == display }
-		let scheduled = onDisplay.filter { $0.isScheduled(at: date) }
+		eligible(in: playlist(for: display, in: Defaults[.playlists]), at: date)
+	}
+
+	/**
+	The same question asked of a playlist already in hand.
+
+	Split out because the panel asks it too, and that is the whole of I2: "can this display rotate" and
+	"rotate to what" have to be one expression. They were two — the arrows lit on the count of the
+	display's websites and stepped through this, narrowed by the schedule and by `isShowable` — so a
+	display with one website it could show and one it could not lit both arrows and did nothing when
+	either was pressed. Deriving the first from the second is what closes that, and it only works if
+	there is one of these to derive from.
+
+	Handed the playlist rather than the display, because the panel resolves it once per refresh and
+	builds a column per display off the same list; going back through `Defaults[.playlists]` here would
+	decode every website in every playlist again, once per display, twelve times a second.
+	*/
+	func eligible(in playlist: Playlist?, at date: Date = .now) -> [Website] {
+		let members = (playlist?.websites ?? []).filter(\.isShowable)
+		let scheduled = members.filter { $0.isScheduled(at: date) }
 
 		// Never let a schedule empty a display.
-		return scheduled.isEmpty ? onDisplay : scheduled
+		return scheduled.isEmpty ? members : scheduled
 	}
 
 	/**
@@ -53,7 +75,7 @@ extension WebsitesController {
 		}
 
 		let next = candidates[nextIndex]
-		makeCurrent(next)
+		makeCurrent(next, on: display)
 
 		return next
 	}
@@ -89,7 +111,7 @@ extension WebsitesController {
 			return
 		}
 
-		makeCurrent(next)
+		makeCurrent(next, on: display)
 	}
 
 	func makePreviousCurrent(on display: Display?) {
@@ -97,7 +119,7 @@ extension WebsitesController {
 			return
 		}
 
-		makeCurrent(previous)
+		makeCurrent(previous, on: display)
 	}
 
 	func makeRandomCurrent(on display: Display?) {
@@ -116,7 +138,7 @@ extension WebsitesController {
 			return
 		}
 
-		makeCurrent(website)
+		makeCurrent(website, on: display)
 	}
 }
 
@@ -303,6 +325,6 @@ extension WallpaperScene {
 			return
 		}
 
-		controller.makeCurrent(next)
+		controller.makeCurrent(next, on: display)
 	}
 }

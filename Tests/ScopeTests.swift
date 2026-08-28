@@ -614,6 +614,60 @@ struct ScopeTests {
 	}
 
 	/**
+	Whether a display can rotate is the question it rotates by.
+
+	I2, and the last of this suite's shape: one question with two derivations. `canRotate` lit the
+	panel's arrows off the count of the websites naming that display, and pressing one stepped through
+	`eligible(for:)` — that set narrowed by the schedule and by whether a website can be shown at all. A
+	display with two websites and one of them unshowable therefore lit both arrows and did nothing when
+	either was pressed, which is K24. Nothing was wrong with either expression. What was wrong is that
+	there were two, so every narrowing added to one of them is a new way for the arrows to lie.
+
+	Asserted as "the value names `eligible`" rather than as a copy of the expression, so the day a third
+	narrowing joins it this test is testing the new answer without anybody editing this file — the same
+	shape `SwitchedOffTests` uses for `isSwitchedOff`.
+
+	**The ceiling.** This reads the line `canRotate:` is written on, so a derivation spread over several
+	lines with `eligible` on none of them would pass. That is a thing somebody would have to do on
+	purpose; what it catches is the thing that happens by accident, which is a count of a list that is
+	already in the function.
+	*/
+	@Test("Whether a display can rotate is the question it rotates by")
+	func canRotateIsDerivedFromEligible() throws {
+		let column = try Self.body(
+			of: "private func column(for scene: WallpaperScene",
+			in: Self.source(named: "DisplayPanelModel.swift")
+		)
+
+		guard let assignment = column.range(of: "canRotate:") else {
+			Issue.record("`column(for:)` no longer fills `canRotate` in, so this test is reading nothing.")
+			return
+		}
+
+		let value = column[assignment.upperBound...].prefix { $0 != "\n" }
+
+		#expect(
+			value.contains("eligible("),
+			"""
+			`canRotate` is worked out without asking `eligible`, which is what the arrows it lights step \
+			through. Two derivations of one question is how an arrow comes to be lit and inert. \
+			Around: \(value.trimmingCharacters(in: .whitespaces))
+			"""
+		)
+
+		// And the expression it names has to be the one the arrows actually use, or the two have parted
+		// again with this test still passing.
+		let rotation = try Self.source(named: "RotationBehaviour.swift")
+
+		for verb in ["func makeNextCurrent(", "func makePreviousCurrent("] {
+			#expect(
+				try Self.body(of: verb, in: rotation).contains("eligible("),
+				"`\(verb)` steps through something other than `eligible`, so the arrows and what they do are two answers again."
+			)
+		}
+	}
+
+	/**
 	Sixty characters either side of a match, so a failure says where to look without printing the file.
 	*/
 	private static func context(around range: Range<String.Index>, in text: String) -> String {

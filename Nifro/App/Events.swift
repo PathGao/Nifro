@@ -132,9 +132,18 @@ extension AppState {
 		//
 		// `applyWebsiteChanges` and deliberately not the live-settings shortcut beside it: which website
 		// a display shows is never something the page already up can absorb, it is a different page.
-		Defaults.publisher(.currentWebsites, options: [])
+		//
+		// The playlist alongside it, because "which website" is now worked out from "which list": the
+		// picker in the panel writes a key of its own and never touches the cursor, so on its own it
+		// changed which websites the display was choosing between and left the one on screen where it
+		// was. Two keys and one sink, like the four inputs to opacity below — a second sink calling the
+		// same function is a second place to forget it.
+		Publishers.MergeMany(
+			Defaults.publisher(.currentWebsites, options: []).map { _ in }.eraseToAnyPublisher(),
+			Defaults.publisher(.currentPlaylists, options: []).map { _ in }.eraseToAnyPublisher()
+		)
 			.receive(on: DispatchQueue.main)
-			.sink { [self] _ in
+			.sink { [self] in
 				applyWebsiteChanges()
 			}
 			.store(in: &cancellables)

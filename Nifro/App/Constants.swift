@@ -59,6 +59,22 @@ extension Defaults.Keys {
 	// night comes back in the morning showing it. What an unplug does do is
 	// `WebsitesController.handOverCurrentWebsites(from:)`.
 	static let currentWebsites = Key<[String: Website.ID]>("currentWebsites", default: [:])
+
+	// Which playlist each display is pointed at, keyed by `Display.settingsKey(for:)` like every other
+	// per-display fact. Written in one place — the picker in the panel — and read in one place,
+	// `WebsitesController.playlist(for:in:)`, which is where the rule below lives.
+	//
+	// **An absent entry is the default playlist, not "nothing".** Every attached display gets a scene
+	// now, so a display the user has never picked for still has to show something, and the mechanism
+	// that used to answer that — the Nth shipped website pinned to the Nth screen — was deleted by the
+	// same change that built the scenes from the displays. Without the fallback a second monitor on a
+	// fresh install draws "No Website" and waits to be told. It is also why the default playlist
+	// refuses a binding: it is the one every picker offers and every display falls back to.
+	//
+	// Nothing forgets an entry, which puts this with `currentWebsites` above rather than with
+	// `browsingDisplays`: the list a user chose for a screen is a choice about that screen, so a
+	// monitor unplugged at night comes back in the morning showing it.
+	static let currentPlaylists = Key<[String: Playlist.ID]>("currentPlaylists", default: [:])
 	// Which displays are interactive, not whether any is. Browsing Mode was one flag for the whole app,
 	// so entering it on the monitor also raised the laptop's wallpaper over its desktop icons — and its
 	// button lit in every column at once. `DesktopWindow.isInteractive` was always per window; only this

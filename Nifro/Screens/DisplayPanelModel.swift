@@ -22,12 +22,33 @@ final class DisplayPanelModel: ObservableObject {
 		let snapshot: NSImage?
 
 		/**
-		The websites this display owns.
+		The websites this display can be pointed at: the members of the playlist it is showing.
+
+		It was the websites whose own `display` was this one, which is K17 — a display could only offer
+		what already named it, so the second monitor's chooser had one item in it and the first launch
+		had to pin a different site to each screen to make even that true.
 
 		Carried on the column rather than looked up by the view, so a column is a finished description
 		of one display and the view has nothing left to ask.
 		*/
 		let choices: [Website]
+
+		/**
+		The playlists this display may be pointed at, and the name of the one it is pointed at now.
+
+		Every unbound playlist plus the ones bound to this display. That is the whole of what a binding
+		does — it filters this list and nothing else, so two playlists bound to one display do not
+		conflict and neither is preferred; both are offered here and the user picks. A playlist bound to
+		a display that is not attached is in no picker at all, because a picker exists only for a
+		display that has a column.
+
+		The name rather than the id, because the control is a `Menu` drawing its own label and there is
+		nothing here to tick. A display with no stored selection is showing the default playlist, so this
+		reads "Default" rather than reading empty — the picker says what the screen is doing, and what it
+		is doing is the fallback.
+		*/
+		let playlistChoices: [Playlist]
+		let playlistName: String
 
 		/**
 		Everything this display's controls need to draw themselves.
@@ -117,8 +138,8 @@ final class DisplayPanelModel: ObservableObject {
 		// the end, after its awaits.
 		openings += 1
 
-		let websites = WebsitesController.shared.all
-		columns = AppState.shared.scenes.map { column(for: $0, snapshot: nil, websites: websites) }
+		let playlists = Defaults[.playlists]
+		columns = AppState.shared.scenes.map { column(for: $0, snapshot: nil, playlists: playlists) }
 	}
 
 	/**
@@ -131,15 +152,16 @@ final class DisplayPanelModel: ObservableObject {
 		let opening = openings
 		var built: [Column] = []
 
-		// Read once for the whole pass rather than once per column. `all` is `Defaults[.websites]`,
-		// which decodes the entire list on every read, and every column then resolves
-		// `effectiveDisplay` for every website in it — so this ran at the panel's refresh rate,
-		// multiplied by the number of displays. The columns are published together as one array
-		// anyway, so one read is also the only way they can agree with each other.
-		let websites = WebsitesController.shared.all
+		// Read once for the whole pass rather than once per column. `Defaults[.playlists]` decodes every
+		// website in every list on every read, and a column needs the whole set twice over — the list it
+		// offers, and the one it is showing — so read inside `column(for:)` this would run at the panel's
+		// refresh rate, multiplied by the number of displays. The websites this used to read are in
+		// there now, so it is one read where it was one read. The columns are published together as one
+		// array anyway, so a single read is also the only way they can agree with each other.
+		let playlists = Defaults[.playlists]
 
 		for scene in AppState.shared.scenes {
-			built.append(column(for: scene, snapshot: await scene.snapshot(), websites: websites))
+			built.append(column(for: scene, snapshot: await scene.snapshot(), playlists: playlists))
 		}
 
 		// The panel was closed and opened again while these were being taken, so they are pictures of
@@ -156,13 +178,12 @@ final class DisplayPanelModel: ObservableObject {
 	One display, described.
 
 	The two things a column costs are both passed in. The snapshot because it has to be photographed:
-	the panel is opened with `nil` and the refreshes fill it in. The website list because reading it
-	decodes every website, and one pass builds a column per display off the same list.
+	the panel is opened with `nil` and the refreshes fill it in. The playlists because reading them
+	decodes every website in every list, and one pass builds a column per display off the same read.
 	*/
-	private func column(for scene: WallpaperScene, snapshot: NSImage?, websites: [Website]) -> Column {
-		// `effectiveDisplay` asks CoreGraphics for a display's identity and walks `NSScreen.screens`,
-		// so the answer costs something and every website in the list is asked. Once per column.
-		let onDisplay = websites.filter { $0.effectiveDisplay == scene.display }
+	private func column(for scene: WallpaperScene, snapshot: NSImage?, playlists: [Playlist]) -> Column {
+		let controller = WebsitesController.shared
+		let playlist = controller.playlist(for: scene.display, in: playlists)
 
 		return Column(
 			display: scene.display,
@@ -170,7 +191,12 @@ final class DisplayPanelModel: ObservableObject {
 			websiteID: scene.website?.id,
 			websiteName: scene.website?.menuTitle.nilIfEmpty,
 			snapshot: snapshot,
-			choices: onDisplay,
+			choices: playlist?.websites ?? [],
+			// `boundDisplay == nil` is every display and is the default a playlist is made with, so this
+			// is "everything nobody has claimed, plus what this screen was given". The default playlist
+			// refuses a binding outright, which is what keeps this from ever being empty.
+			playlistChoices: playlists.filter { $0.boundDisplay == nil || $0.boundDisplay?.id == scene.display?.id },
+			playlistName: playlist?.name ?? String(localized: "No Playlist"),
 			// `isSwitchedOff`, not the per-display switch under it. The column was the last reader
 			// asking one of the two switches on its own, so with the app disabled — on battery, on a
 			// locked screen, from the Disable shortcut — every wallpaper was gone and every column still
@@ -180,9 +206,12 @@ final class DisplayPanelModel: ObservableObject {
 			isMuted: !scene.shouldPlaySound,
 			rotationMode: scene.rotationMode,
 			rotationIntervalMinutes: scene.rotationIntervalMinutes,
-			// One website has nothing to rotate to, and a control that does nothing should say so
-			// rather than shrug when pressed.
-			canRotate: onDisplay.count > 1,
+			// The set the arrows actually step through, and not a second count of what is on the display.
+			// It was `onDisplay.count > 1` — every website naming this screen — while stepping went
+			// through `eligible`, which narrows that by the schedule and by whether a website can be
+			// shown at all. So a display with two websites and one of them unshowable lit both arrows
+			// and did nothing when either was pressed, which is K24. One expression, asked twice.
+			canRotate: controller.eligible(in: playlist).count > 1,
 			isLoading: scene.isLoading
 		)
 	}
@@ -207,7 +236,7 @@ final class DisplayPanelModel: ObservableObject {
 		}
 
 		onClose?()
-		WebsitesController.shared.makeCurrent(website)
+		WebsitesController.shared.makeCurrent(website, on: display)
 		AppState.shared.beginCropSelection(on: scene)
 	}
 
@@ -332,16 +361,33 @@ final class DisplayPanelModel: ObservableObject {
 	}
 
 	/**
-	Show the website with `websiteID`.
+	Show `website` on `display`.
 
-	No display argument: a website belongs to one display already, and `makeCurrent` marks it per
-	display, so passing one in would be a second opinion about something the website settles.
+	Both arguments, where there used to be neither. The display, because a website no longer settles
+	which screen it is on: the same site is in the chooser of every display showing a playlist that
+	contains it, and asking the website would have moved whichever screen it was pinned to instead of
+	the one the user was pointing at. The website itself rather than its id, because the chooser is
+	drawn from a playlist's own members and a playlist holds bodies — duplicating one makes copies with
+	ids of their own, so looking the id up in the website list would find nothing.
 	*/
-	func show(_ websiteID: Website.ID) {
-		guard let website = WebsitesController.shared.all[id: websiteID] else {
-			return
-		}
+	func selectWebsite(_ website: Website, on display: Display?) {
+		WebsitesController.shared.makeCurrent(website, on: display)
+	}
 
-		WebsitesController.shared.makeCurrent(website)
+	/**
+	Point `display` at a playlist.
+
+	The one write of `currentPlaylists`, for the reason `makeCurrent` is the one write of the cursor: a
+	per-display fact with two writers is the shape every entry in `ScopeTests` was found in. The mark
+	saying which website is up is deliberately left alone — it names a website the new playlist may not
+	contain, which `scheduled(for:)` already reads as "this display has not started" and answers with
+	the top of the list.
+	*/
+	func selectPlaylist(_ id: Playlist.ID, on display: Display?) {
+		Defaults[.currentPlaylists][Display.settingsKey(for: display)] = id
+
+		Task {
+			await refresh()
+		}
 	}
 }

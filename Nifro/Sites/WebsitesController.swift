@@ -48,6 +48,31 @@ final class WebsitesController {
 	}
 
 	/**
+	Which playlist `display` is showing, out of `playlists`.
+
+	Both readings of "no entry" end in the default playlist, and they are different readings. A display
+	the user has never picked for has no entry at all, which is the ordinary case on a fresh install and
+	on every monitor plugged in afterwards. A display whose stored playlist has since been deleted has
+	an entry that names nothing, and answering that with an empty picker would leave the screen blank
+	with no way back from the panel. The default playlist is the one thing every picker offers — it
+	refuses a binding so that this can be true — so it is the answer to both.
+
+	`playlists` is handed in rather than read here because the panel already has it: `Defaults[.playlists]`
+	decodes every website in every list, and this is asked once per display on a popover that refreshes
+	twelve times a second. `eligible(for:)` next door does read it, and is the only place that does.
+	*/
+	func playlist(for display: Display?, in playlists: [Playlist]) -> Playlist? {
+		guard
+			let id = Defaults[.currentPlaylists][Display.settingsKey(for: display)],
+			let chosen = playlists[id: id]
+		else {
+			return playlists.first(where: \.isDefault)
+		}
+
+		return chosen
+	}
+
+	/**
 	Whether `website` is the one on screen where it lives.
 
 	The question the flat lists ask — the Websites window and the Shortcuts entity — neither of which
@@ -159,7 +184,19 @@ final class WebsitesController {
 	}
 
 	/**
-	Make a website the current one on its own display.
+	Make a website the current one on `display`.
+
+	**The display is named by the caller rather than read off the website.** It used to be
+	`website.effectiveDisplay`, and that worked for exactly as long as a website belonged to one screen.
+	A display shows a playlist now and a playlist is offered to whichever displays its binding allows —
+	the default one to all of them — so the same website is reachable from two columns, and asking the
+	website which screen it is on answers with the screen it was pinned to before any of this. Picking a
+	site in the second column would have moved the *first* column's wallpaper, and every rotation tick on
+	a display showing the default playlist would have written the main display's entry: that display
+	never advancing, and another one changing under nobody's hand. Every caller here knows the display
+	it is acting for; the two that genuinely do not — a Shortcuts action and the list in the Websites
+	window — say so by passing `effectiveDisplay` themselves, where it is a stated fallback rather than
+	a hidden one.
 
 	Only the websites sharing that display lose the mark. Clearing it across the whole list is what
 	stopped rotation working on more than one screen: each tick of one display's rotation wiped the
@@ -179,9 +216,7 @@ final class WebsitesController {
 	look at something. Adding a website has to leave *some* website marked on its display, and that is
 	not a reason to light up a screen the user switched off.
 	*/
-	func makeCurrent(_ website: Website, switchingDisplayOn: Bool = true) {
-		let display = website.effectiveDisplay
-
+	func makeCurrent(_ website: Website, on display: Display?, switchingDisplayOn: Bool = true) {
 		// Before the mark moves rather than after, which is the order the panel already used: the
 		// change reaches the scenes through a publisher on the next turn of the run loop, so a display
 		// switched on here is already on by the time the page it should be showing is worked out.
@@ -226,7 +261,7 @@ final class WebsitesController {
 		// switched off stays off, and the gallery installing several at once does not flick a screen
 		// on per website. The screens that do mean "show this now" say so with their own
 		// `makeCurrent` afterwards.
-		makeCurrent(website, switchingDisplayOn: false)
+		makeCurrent(website, on: website.effectiveDisplay, switchingDisplayOn: false)
 
 		return allBinding[id: website.id]!
 	}
@@ -262,15 +297,6 @@ final class WebsitesController {
 	func remove(_ website: Website) {
 		all = all.removingAll(website)
 	}
-
-	/**
-	The websites that should be on screen right now, before any question of which display.
-
-	Both of the places that route by display start here, so a wallpaper the user has said should go
-	away with its unplugged display goes away once rather than in two places that could disagree.
-	*/
-	@MainActor
-	var showable: [Website] { all.filter(\.isShowable) }
 
 	/**
 	Record a title observed in the live web view, if we do not already have one.
@@ -400,7 +426,7 @@ extension WebsitesController {
 			return
 		}
 
-		makeCurrent(first)
+		makeCurrent(first, on: first.effectiveDisplay)
 	}
 }
 
