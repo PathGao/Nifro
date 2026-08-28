@@ -1,7 +1,6 @@
 {
   "sourceLanguage": "en",
   "strings": {
-    "": {},
     "${shouldToggle} Nifro": {
       "localizations": {
         "zh-Hans": {
@@ -22,7 +21,6 @@
         }
       }
     },
-    "%@": {},
     "%@ copy": {
       "localizations": {
         "zh-Hans": {
