@@ -1,3 +1,4 @@
+@preconcurrency import WebKit
 import SwiftUI
 import LaunchAtLogin
 import KeyboardShortcuts
@@ -248,9 +249,116 @@ private struct AdvancedSettings: View {
 				Defaults.Toggle(String(localized: "Deactivate while on battery"), key: .deactivateOnBattery)
 			}
 			Section {} // Padding
+
+			// Its own section, and not beside `RestoreDefaultsSetting` below. Both are destructive and
+			// they undo different amounts: this signs every website out and keeps the list, that puts
+			// the whole app back to the state it shipped in. Somebody who came for one and pressed the
+			// other has no way back from either, so the spacer between them is the point of both
+			// sections existing.
+			Section {
+				ClearWebsiteDataButton()
+			}
+
+			Section {} // Padding
 			Section {
 				RestoreDefaultsSetting()
 			}
+		}
+	}
+}
+
+/**
+Throwing away what every website has stored, in the pane the other irreversible thing lives in.
+
+It moved here from the Advanced settings tab, which is where a switch belongs and this is not one: it
+is an action, it acts on the list this window shows, and it was the only thing in that tab that did
+anything the moment it was touched.
+
+Bottom left, while "Add Website" is in the toolbar at the top right — the two farthest points in the
+window. They are a constructive verb and its destructive opposite, and a slip between neighbouring
+controls is the only mistake this pair can make.
+
+A stock `Button`, like the ones in About and in the site gallery's footer, and not `PanelWideButton`.
+The panel's controls are hand-made because they float over the desktop with nothing around them to
+explain what they are; this is an ordinary window with a toolbar and a grouped form, so it takes the
+ordinary controls those windows use.
+
+Clearing takes a moment and used to say nothing about it. The button disabled itself the instant it was
+pressed and stayed that way, with no sign of work happening, no sign of it finishing, and no way to tell
+whether anything had gone. It is a button whose whole purpose is an effect you cannot see, so it has to
+report one: it says how much it freed, which is the only answer to "did that do anything" that does not
+require taking the app's word for it.
+*/
+private struct ClearWebsiteDataButton: View {
+	private enum Progress: Equatable {
+		case ready
+		case clearing
+		case cleared(bytes: Int64)
+	}
+
+	@State private var progress = Progress.ready
+	@State private var isConfirming = false
+
+	var body: some View {
+		HStack(spacing: 8) {
+			// Not `role: .destructive`. Red would make it the one coloured control in a window of plain
+			// ones, and what keeps a slip from reaching it is the distance from "Add Website", not the
+			// colour. Full size too: it was small because it used to sit in a section footer, among
+			// footnote text, and there is no footnote text here.
+			Button("Clear all website data") {
+				isConfirming = true
+			}
+			.disabled(progress == .clearing)
+
+			switch progress {
+			case .ready:
+				EmptyView()
+			case .clearing:
+				ProgressView()
+					.controlSize(.small)
+			case .cleared(let bytes):
+				// Zero is a real answer and a common one — pressing it twice frees nothing the second
+				// time — so it says "nothing left to clear" rather than "0 bytes freed", which reads
+				// like a failure.
+				Text(bytes > 0 ? String(localized: "Freed \(bytes.formatted(.byteCount(style: .file)))") : String(localized: "Nothing left to clear"))
+					.foregroundStyle(.secondary)
+			}
+		}
+		.help("Clears cookies, local storage, caches, thumbnails and each page's remembered position and zoom; your websites and their settings are kept.")
+		// The cookies are why. Everything else this throws away comes back on the next load, but a
+		// cookie is a login, and signing out of every website at once is not something to discover
+		// afterwards from a number of megabytes. It asks here rather than relying on the distance from
+		// "Add Website": that distance stops a slip, and this is for the press that was aimed.
+		//
+		// Named in the button rather than "OK", and `role: .destructive` here where the button itself
+		// declines it — a dialog is where a colour means something, since there is nothing else in it
+		// to be the odd coloured control.
+		.confirmationDialog(
+			String(localized: "Clear all website data?"),
+			isPresented: $isConfirming
+		) {
+			Button(String(localized: "Clear Data"), role: .destructive) {
+				clear()
+			}
+
+			Button(String(localized: "Cancel"), role: .cancel) {}
+		} message: {
+			Text("Every website you are signed in to will be signed out, and your websites and their settings are kept.")
+		}
+	}
+
+	private func clear() {
+		progress = .clearing
+
+		Task {
+			let before = await DiskBudget.storedBytes(of: [.homeDirectory])
+
+			WebsitesController.shared.thumbnailCache.removeAllImages()
+			AppState.shared.forgetWherePagesWere()
+			await WKWebsiteDataStore.clearAllWebsiteData()
+
+			let after = await DiskBudget.storedBytes(of: [.homeDirectory])
+			progress = .cleared(bytes: max(0, before - after))
 		}
 	}
 }
