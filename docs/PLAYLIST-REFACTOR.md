@@ -192,30 +192,43 @@ PR6   Management page: list, drag, ⋮ menu, bind, duplicate   needs PR2.5
       Can run beside PR5.
 
 PR7   Delete Website.display, WebsiteDisplaySetting,
-      keepWallpaperWhenDisplayUnplugged                      last
+      keepWallpaperWhenDisplayUnplugged, Website.shouldBeOnScreen
+      and Display.withFallbackToMain                         last
 ```
 
 PR1 and PR2 are the first two links of a chain; PR5 and PR6 can be opened in parallel once their
 dependencies land.
 
-## 7. Open
+## 7. Decided here, because the design forced the question
 
-**Empty picker.** If every playlist is bound to one display, another display's picker has nothing in
-it and that screen shows nothing. The cheap guard is to refuse a binding on the default playlist, so
-every picker has at least one entry. Not decided.
+### D6 — the default playlist cannot be bound
 
-**`keepWallpaperWhenDisplayUnplugged` has no owner after this.** Its meaning today — the wallpaper
-follows its website's pinned display, or goes away with it — depends on a website being pinned.
-Bindings only filter a picker, so nothing corresponds. Deleting it is the honest move; keeping it
-would mean inventing a new behaviour ("the unplugged display's playlist temporarily takes over the
-main one"), which is a feature and not part of this.
+If every playlist were bound to some display, another display's picker would be empty and that screen
+would show nothing — a state the user can reach by ordinary use and cannot get out of from the panel.
+Refusing a binding on the default playlist keeps at least one entry in every picker, which is the
+cheapest guard available and needs no runtime check anywhere else. The ⋮ menu disables the display
+option for that one playlist.
+
+### D7 — `keepWallpaperWhenDisplayUnplugged` is deleted, and its default behaviour becomes the only
+behaviour
+
+The setting exists because a website is pinned to a display: off, the wallpaper goes away with that
+display and comes back when it is plugged in; on, it moves to the main display and takes over there.
+Nothing is pinned after this, so the "on" half has nothing to describe — and the "off" half stops
+needing code at all. An unplugged display has no scene, so nothing shows; plug it back in and the
+display gets a scene and its stored playlist selection with it. What the default did, the model does.
+
+`Website.shouldBeOnScreen` and `Display.withFallbackToMain` exist only to serve the "on" half and go
+with it.
+
+## 8. Open
 
 **A duplicate is logged out.** Data stores are keyed by `website.id`
 (`WKWebsiteDataStore(forIdentifier:)`), so a deep copy gets a new, empty store. For the stated use
 case that costs nothing, but it is what "duplicate" means here: the configuration is copied, the
 session is not. Worth a sentence in the confirmation rather than a mechanism.
 
-## 8. Migration
+## 9. Migration
 
 There is no upgrade mechanism at all — E23 says so, and says the shape of one is still free to
 choose because nobody is upgrading from anything yet. This is the change that needs it.
