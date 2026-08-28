@@ -303,7 +303,7 @@ final class AppState: ObservableObject {
 	Here rather than in `setEnabledStatus`, because this is where all four inputs meet and a fifth
 	will not have to remember.
 	*/
-	var isEnabled = true {
+	private(set) var isEnabled = true {
 		didSet {
 			guard isEnabled != oldValue else {
 				return

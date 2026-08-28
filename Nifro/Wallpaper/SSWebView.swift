@@ -25,7 +25,7 @@ final class SSWebView: WKWebView {
 
 	private var cancellables = Set<AnyCancellable>()
 
-	private var excludedMenuItems: Set<MenuItemIdentifier> = [
+	private static let excludedMenuItems: Set<MenuItemIdentifier> = [
 		.downloadImage,
 		.downloadLinkedFile,
 		.downloadMedia,
@@ -81,7 +81,7 @@ final class SSWebView: WKWebView {
 				return false
 			}
 
-			return excludedMenuItems.contains(identifier)
+			return Self.excludedMenuItems.contains(identifier)
 		}
 
 		menu.addSeparator()

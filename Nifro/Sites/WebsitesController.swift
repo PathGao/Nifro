@@ -307,10 +307,10 @@ final class WebsitesController {
 	*/
 	func recordObservedTitle(_ title: String, for url: URL?) {
 		guard
-			let url,
-			addressesAwaitingTitle.contains(url.normalized()),
+			let address = url?.normalized(),
+			addressesAwaitingTitle.contains(address),
 			let title = title.trimmed.nilIfEmpty,
-			let website = all.first(where: { $0.url.normalized() == url.normalized() }),
+			let website = all.first(where: { $0.url.normalized() == address }),
 			website.title.isEmpty
 		else {
 			return

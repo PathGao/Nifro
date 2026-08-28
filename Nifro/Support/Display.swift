@@ -43,11 +43,6 @@ extension NSScreen {
 	}
 
 	/**
-	Whether the screen shows a status bar that takes up space.
-	*/
-	var hasStatusBar: Bool { statusBarThickness > 0 }
-
-	/**
 	The thickness of the status bar on the screen, or `0` when it does not take up space.
 	*/
 	var statusBarThickness: Double {
@@ -59,12 +54,7 @@ extension NSScreen {
 	*/
 	var frameWithoutStatusBar: CGRect {
 		var frame = frame
-
-		// Account for the status bar if the window is on the main screen and the status bar is permanently visible, or if on a secondary screen and secondary screens are set to show the status bar.
-		if hasStatusBar {
-			frame.size.height -= statusBarThickness
-		}
-
+		frame.size.height -= statusBarThickness
 		return frame
 	}
 }

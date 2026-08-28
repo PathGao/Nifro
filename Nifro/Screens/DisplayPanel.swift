@@ -156,7 +156,7 @@ private struct DisplayColumn: View {
 
 			VStack(spacing: 9) {
 				VStack(spacing: 9) {
-					MarqueeText(text: column.websiteName ?? String(localized: "No Website"), isActive: isHovering)
+					MarqueeText(text: websiteLabel, isActive: isHovering)
 						.font(.subheadline)
 						.foregroundStyle(.secondary)
 						.frame(width: PanelMetrics.columnWidth, height: 16)
@@ -222,6 +222,29 @@ private struct DisplayColumn: View {
 	}
 
 	/**
+	The website's name, or the two words that stand in for it.
+
+	One property for the marquee above the picture and the chooser below it, because the two are
+	naming the same thing on the same card — a column with two spellings of "there is nothing here"
+	is a column disagreeing with itself.
+	*/
+	private var websiteLabel: String {
+		column.websiteName ?? String(localized: "No Website")
+	}
+
+	/**
+	Whether there is a page here for a control to act on.
+
+	Named rather than written out at both of its call sites, for `inertOpacity`'s reason above: Crop
+	and Browsing Mode both reach into the wallpaper's web view, so both ask the one question — the
+	display is showing and it has a website — and two copies of it are two chances for half of the row
+	to answer differently.
+	*/
+	private var hasPage: Bool {
+		column.isShowing && column.websiteID != nil
+	}
+
+	/**
 	Previous, the rotation mode, next, and how often it does it.
 
 	The mode is one control that cycles rather than three that are mutually exclusive: it has three
@@ -242,7 +265,6 @@ private struct DisplayColumn: View {
 	they never see. The row's height is pinned, so the column and the popover around it keep their size
 	when the field does appear.
 	*/
-	@ViewBuilder
 	private var rotationControls: some View {
 		HStack(spacing: PanelMetrics.controlSpacing) {
 			PanelButton(
@@ -285,12 +307,11 @@ private struct DisplayColumn: View {
 	/**
 	The two verbs no symbol says plainly, and Browsing Mode lights up while it is on.
 	*/
-	@ViewBuilder
 	private var modeButtons: some View {
 		HStack(spacing: 9) {
 			PanelWideButton(
 				title: String(localized: "Crop"),
-				isEnabled: column.isShowing && column.websiteID != nil
+				isEnabled: hasPage
 			) {
 				model.chooseRegion(on: column.display)
 			}
@@ -298,7 +319,7 @@ private struct DisplayColumn: View {
 			PanelWideButton(
 				title: String(localized: "Browsing Mode"),
 				isOn: browsingDisplays.contains(Display.settingsKey(for: column.display)),
-				isEnabled: column.isShowing && column.websiteID != nil
+				isEnabled: hasPage
 			) {
 				model.toggleBrowsingMode(on: column.display)
 			}
@@ -318,8 +339,11 @@ private struct DisplayColumn: View {
 	`PanelMetrics.onTint` was already this panel's colour for something happening, so a failure was the
 	end of that story rather than a new word — but #73 gave the panel's drawing back to the system and
 	that constant went with it, along with the pulse the argument rested on. What is left is the same
-	conclusion by a shorter route: a caption under a title is `.secondary` here and on line 167 and 459,
-	and a line that says a page did not load does not need a colour to be read as bad news.
+	conclusion by a shorter route: a caption under a title is `.secondary` here, on the marquee and in
+	`reading`, and a line that says a page did not load does not need a colour to be read as bad news.
+	Named rather than numbered because the two line numbers written here had already drifted off the
+	lines they meant before anyone noticed, which is what a reference into a file that keeps changing
+	is worth.
 
 	Outside the dimming and outside the `disabled`, like the chooser below it: a load in flight makes
 	the controls inert and this is not a control. It clears itself, because `load` writes the failure
@@ -378,7 +402,6 @@ private struct DisplayColumn: View {
 	load behind it was refused; without a reading of its own, fixing that would have replaced a wrong
 	picture with a rectangle that says nothing.
 	*/
-	@ViewBuilder
 	private var preview: some View {
 		// A fixed shape whatever the display is. A column that took the screen's own aspect would make
 		// a portrait monitor tall enough to push everything else off the panel.
@@ -492,7 +515,7 @@ private struct DisplayColumn: View {
 	*/
 	private var picker: some View {
 		chooser(
-			title: column.websiteName ?? String(localized: "No Website"),
+			title: websiteLabel,
 			width: PanelMetrics.websiteChooserWidth,
 			isEnabled: !column.choices.isEmpty,
 			isLoading: column.isLoading
