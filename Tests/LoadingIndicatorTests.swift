@@ -136,17 +136,27 @@ struct LoadingIndicatorTests {
 	}
 
 	/**
-	The two pulses run on different clocks — SwiftUI's and CoreAnimation's — so they cannot be in
-	phase and nothing here pretends otherwise. What they can share is the rate, and a rate they share
-	by both reading one constant cannot be half-changed.
+	Two indicators, and only one of them is the app's to pace.
+
+	The menu bar icon has no stock equivalent — nothing system-drawn breathes inside a status item — so
+	it keeps its CoreAnimation pulse and keeps reading the one constant that sets its rate.
+
+	The panel's was a second hand-rolled pulse: a tinted pill behind the website chooser, animated on
+	that same constant so the two would read as one thing happening rather than two. It is a stock
+	`ProgressView` now, which paces itself. What that gives up is the shared cadence, so this asserts
+	the panel paces nothing by hand rather than that it paces it the same way — and the constant, which
+	one caller could otherwise quietly outlive, stays guarded by the half that still reads it.
 	*/
-	@Test("Both pulses breathe at the same rate")
+	@Test("The menu bar paces its own pulse, and the panel paces nothing")
 	func oneCadence() throws {
 		let menuBar = try Self.stripComments(Self.source("Nifro/Support/MenuSupport.swift"))
 		let panel = try Self.stripComments(Self.source("Nifro/Screens/DisplayPanel.swift"))
 
 		#expect(menuBar.contains("pulse.duration = WallpaperScene.loadingPulseDuration"))
-		#expect(panel.contains(".easeInOut(duration: WallpaperScene.loadingPulseDuration)"))
+
+		#expect(panel.contains("ProgressView()"))
+		#expect(!panel.contains("phaseAnimator"))
+		#expect(!panel.contains("loadingPulseDuration"))
 	}
 
 	/**

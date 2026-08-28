@@ -131,15 +131,16 @@ final class WallpaperScene {
 	/**
 	How long one stroke of the "a page is on its way" pulse takes.
 
-	Two animations show it — the panel chooser's pill in `DisplayPanel`, and the menu bar icon in
-	`NSStatusBarButton.setShowingActivity` — and they are SwiftUI and CoreAnimation respectively, so
-	they run off different clocks and will not be in phase. What can be made to agree is the rate, and
-	that is the whole of what makes them read as one thing happening rather than two: both breathe
-	once every `2 * loadingPulseDuration`, both ease in and out.
+	One animation shows it: the menu bar icon, in `NSStatusBarButton.setShowingActivity`. It breathes
+	once every `2 * loadingPulseDuration`, easing in and out.
 
-	Here rather than in either of them, because either one owning it makes the other read a number out
-	of a file it has no business in. This is the state both of them are drawing, and `previewWidth`
-	below is already a drawing number kept here for the same reason.
+	It was two. The panel drew a pill behind its website chooser and animated it on this same constant,
+	so the two would read as one thing happening rather than two; the panel shows a stock `ProgressView`
+	now, which paces itself. A status item is the one surface with nothing system-drawn to reach for, so
+	this is what is left.
+
+	Here rather than in the menu bar's own file because it is a fact about the state being drawn, not
+	about the status item — `previewWidth` below is a drawing number kept here for the same reason.
 	*/
 	static let loadingPulseDuration = 0.7
 

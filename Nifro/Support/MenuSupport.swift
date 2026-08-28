@@ -154,7 +154,9 @@ extension NSStatusBarButton {
 	closed almost all the time. Switching website from a keyboard shortcut, from rotation, from the
 	Websites window or from a Shortcuts intent left nothing on screen saying anything at all, for the
 	several seconds the desktop deliberately does not change. So both say it, and they say it at the
-	same cadence — `WallpaperScene.loadingPulseDuration`, which the panel's chooser animates on too.
+	own cadence — `WallpaperScene.loadingPulseDuration`. Nothing else reads it: the panel shows a stock
+	`ProgressView` beside its website chooser while a page is on its way, and a status item is the one
+	surface with nothing system-drawn to reach for.
 	They are CoreAnimation and SwiftUI and cannot share a clock, so they will not be in phase; matching
 	the duration and the easing is what makes them read as one thing happening rather than two.
 

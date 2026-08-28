@@ -1,37 +1,37 @@
 import SwiftUI
 
 /**
-The panel's own buttons.
+The panel's own controls.
 
-Made rather than reached for because the stock ones do not say enough. A wallpaper control acts on
-something the user is not looking at — the page is behind their windows — so the button has to be the
-whole of the feedback: it dips when pressed, so a press that reached a page nobody can see still
-registered somewhere, and it stays lit while the thing it turns on is on.
+These were all drawn by hand: a `.plain` `Button` with its own fill, its own hover wash, its own press
+dip, its own corner radius and the app icon's orange for the lit state. The argument was that a
+wallpaper control acts on something the user is not looking at — the page is behind their windows — so
+the button has to be the whole of the feedback.
+
+That is still true, and stock styles already do all of it. They dip when pressed, they stay lit while
+what they turn on is on, and they light in the accent colour the user picked for their Mac. They also
+bring focus rings, Full Keyboard Access, Increase Contrast, Reduce Transparency and the right
+VoiceOver traits, none of which the drawn ones had. So the buttons and the interval field are stock
+now, and the metrics that described their size, radius, font and colour are gone with the drawing.
+
+What is given up is the orange, which said *this is running* where the accent says *this is
+selected*. The panel says it the way the rest of macOS says it now, and which control is lit still
+carries the fact.
 
 SF Symbols throughout: they carry the meanings already, they follow the user's own text size, and they
 are the vocabulary the rest of the system uses for exactly these verbs.
 */
 enum PanelMetrics {
 	/**
-	The chrome the wide controls share: the website chooser, Crop, Browsing Mode and Quit.
+	The gap between two stock controls in a row.
 
-	One definition, because "make Quit match the chooser" is a request that comes back every time one
-	of them is adjusted on its own.
-
-	`controlRadius` is the exception that reaches wider than this group: every control the panel draws
-	uses it, 22-point squares and 28-point pills alike. It was two numbers — 5 written four times and
-	6 written once — which is what stopped the question being asked at all. There is no system answer
-	to borrow here: AppKit and SwiftUI expose no standard control radius, and `ConcentricRectangle`
-	answers a different question (what an inner radius should be inside a known outer one) and needs
-	macOS 26, above this app's floor.
+	The rows used to set 10 by hand, around buttons that drew themselves edge to edge. The stock styles
+	bring their own padding, so the gap that reads right between them is smaller. It is the only thing
+	left here that is about a control rather than about the column: their size, radius, font and
+	colours are the system's answers now, and a name for a value the app no longer chooses is a name
+	that can drift out of step with what is drawn.
 	*/
-	// swiftlint:disable:next hardcoded_font_size - This is the definition the rule redirects to.
-	static let font = Font.system(size: 13)
-	static let height = 28.0
-	static let horizontalPadding = 15.0
-	static let controlRadius = 5.0
-	// swiftlint:disable:next hardcoded_font_size - This is the definition the rule redirects to.
-	static let symbolFont = Font.system(size: 11, weight: .semibold)
+	static let controlSpacing = 4.0
 
 	/**
 	The column: its width, the card behind it, and the picture inside it.
@@ -45,114 +45,86 @@ enum PanelMetrics {
 	static let pictureRadius = 8.0
 
 	/**
-	The width of the website chooser, and of Quit, which is asked to match it.
+	How wide the playlist chooser may get, and how wide Quit is asked to match.
 
-	Three quarters of the picture above it — derived rather than written as 195, because it was prose
-	before and prose does not change when the column does.
+	A ceiling rather than a width. A stock pull-down sizes itself to its label, which is what these two
+	do now, so a short name gets a short control and only a long one is stopped here — and stopping it
+	is what keeps the widest title inside the column instead of pushing the column out. Three quarters
+	of the picture above it, derived rather than written as 195, because it was prose before and prose
+	does not change when the column does.
 	*/
 	static let chooserWidth = columnWidth * 0.75
 
 	/**
-	The website chooser, which is wider than the playlist chooser above it.
+	The website chooser's ceiling, higher than the playlist chooser's above it.
 
-	Halfway between that control and the picture over both of them, so the column reads as three widths
-	narrowing to a point rather than two identical pills under a wider rectangle. It is the name that
-	wants the room: a playlist is something the user named and kept short, and a website's title is
-	whatever the page calls itself.
+	It is the name that wants the room: a playlist is something the user named and kept short, and a
+	website's title is whatever the page calls itself. Halfway between that control and the picture over
+	both of them, so the widest a title can get still reads as narrower than the picture.
 	*/
 	static let websiteChooserWidth = columnWidth * 0.875
-
-	/**
-	The colour a control wears while what it turns on is on.
-
-	Sampled from the app's own icon rather than taken from the system accent: the accent is whatever
-	the user picked for their Mac, and a wallpaper app lighting one of its buttons in it says "this is
-	selected" rather than "this is running". The icon's orange says the second.
-	*/
-	// swiftlint:disable:next hardcoded_ui_colour - This is the definition the rule redirects to.
-	static let onTint = Color(red: 234 / 255, green: 115 / 255, blue: 63 / 255)
-
-	/**
-	The wash laid over the panel's own vibrancy.
-
-	A popover is glass, and glass over a wallpaper is glass over whatever that page happens to be
-	showing this second — a bright frame of a video puts the column labels on top of it. A thin coat
-	of the window colour keeps the material and takes some of the page back out of it.
-
-	`windowBackgroundColor` rather than a literal: it is already the colour that follows the
-	appearance, so one value is a pale wash in light mode and a dark one in dark mode.
-	*/
-	static let glassWash = Color(nsColor: .windowBackgroundColor).opacity(0.35)
-
-	/**
-	What goes on top of `onTint`.
-
-	Named because the tint was and this was not, so three call sites each decided separately that lit
-	means white — which is a property of the tint, not of the control.
-	*/
-	// swiftlint:disable:next hardcoded_ui_colour - This is the definition the rule redirects to.
-	static let onForeground = AnyShapeStyle(.white)
-
-	/**
-	What the pointer being over something looks like.
-
-	One answer, because there were three: the buttons used `.quaternary`, the column used a fixed
-	pale wash at fifteen percent that was invisible over a light popover, and the column's border used
-	the accent. The resting fills are deliberately not named alongside it — `.quinary` and `.clear`
-	never disagreed with each other, and a name that prevents nothing is a name to maintain.
-	*/
-	static let hoverFill = AnyShapeStyle(.quaternary)
 }
 
+/**
+One symbol, in the stock bordered style at the large control size.
+
+Large, like everything else in the panel. The whole panel was a size smaller than the settings windows
+and read as harder to hit; one size for the panel means a row of icon buttons, a text field and a
+pull-down all stand the same height, which is what a row of controls does in a system window.
+
+Bordered rather than `accessoryBar`, which is the quieter style a popover would otherwise reach for.
+Two reasons, both measured against a rendering of each rather than argued: an accessory bar draws no
+bezel until the pointer is over it, and what is behind this panel is a web page the user chose, so a
+control that is invisible at rest is invisible over whatever that page happens to be showing. And its
+lit state is a grey wash unless `tint` is set by hand, where `bordered` fills with the user's accent
+colour on its own — which is the whole of what "lit" has to say here.
+*/
 struct PanelButton: View {
 	let symbol: String
 	let label: String
-	var isOn = false
+
+	/**
+	Whether this control is lit, or `nil` for one that has no lit state at all.
+
+	The third state is the point, and it is not cosmetic: a control with a lit state is a `Toggle`, so
+	VoiceOver reads it as a switch and says which way it is set, and one without is a `Button`,
+	announced as an action. Defaulting to `false` instead is what would have had the app claim its five
+	footer icons could be switched off.
+	*/
+	// swiftlint:disable:next discouraged_optional_boolean
+	var isOn: Bool?
+
 	var isEnabled = true
 	let action: () -> Void
 
-	@State private var isPressed = false
-	@State private var isHovering = false
-
 	var body: some View {
-		Button(action: action) {
-			Image(systemName: symbol)
-				.font(PanelMetrics.font.weight(.medium))
-				.frame(width: 26, height: 22)
-				.foregroundStyle(foreground)
-				.background(background, in: RoundedRectangle(cornerRadius: PanelMetrics.controlRadius))
-				.contentShape(RoundedRectangle(cornerRadius: PanelMetrics.controlRadius))
+		Group {
+			if let isOn {
+				Toggle(isOn: .init(get: { isOn }, set: { _ in action() })) {
+					icon
+				}
+				.toggleStyle(.button)
+			} else {
+				Button(action: action) {
+					icon
+				}
+			}
 		}
-		.buttonStyle(.plain)
+		.buttonStyle(.bordered)
+		.controlSize(.large)
 		.disabled(!isEnabled)
-		.opacity(isEnabled ? 1 : 0.35)
-		.scaleEffect(isPressed ? 0.9 : 1)
-		.animation(.easeOut(duration: 0.12), value: isPressed)
-		.onHover { isHovering = $0 }
-		// `onLongPressGesture` with no delay is the way to read "finger is down" from a SwiftUI button;
-		// the button's own style gives nothing back once it is `.plain`.
-		.onLongPressGesture(minimumDuration: 0) {
-			// Nothing on completion: the press itself is the whole point, and the button's own action
-			// already fires.
-		} onPressingChanged: {
-			isPressed = $0
-		}
 		.help(label)
 		.accessibilityLabel(label)
 	}
 
-	private var foreground: some ShapeStyle {
-		isOn ? PanelMetrics.onForeground : AnyShapeStyle(.primary)
-	}
+	/**
+	A fixed slot for the symbol, so a row of these keeps its spacing whatever glyphs are in it.
 
-	private var background: some ShapeStyle {
-		if isOn {
-			AnyShapeStyle(PanelMetrics.onTint)
-		} else if isHovering {
-			PanelMetrics.hoverFill
-		} else {
-			AnyShapeStyle(.clear)
-		}
+	The symbol's box, not the button's: the style puts its own padding around it.
+	*/
+	private var icon: some View {
+		Image(systemName: symbol)
+			.frame(width: 18, height: 16)
 	}
 }
 
@@ -168,37 +140,39 @@ Minutes and only minutes, so no unit picker — unlike `IntervalField`, which re
 reach from seconds to a day. Rotation below a minute is not offered, and above a day is not a
 rotation, so the two ends the picker exists to reach are both outside the range.
 
-Exactly as tall as `PanelButton`, because it shares a row with three of them and a field half a point
-taller would make the whole column grow the moment the mode left `pinned`.
+`roundedBorder` at the same control size as the buttons beside it. A plain field with a drawn box
+behind it was the app answering a question `NSTextField` already answers, and answering it without a
+focus ring.
 */
 struct PanelIntervalField: View {
 	@Binding var minutes: Double
 
 	var body: some View {
-		HStack(spacing: 4) {
+		HStack(spacing: PanelMetrics.controlSpacing) {
 			TextField(
 				"",
 				value: $minutes,
 				format: .number.grouping(.never).precision(.fractionLength(0))
 			)
-				.textFieldStyle(.plain)
+				.textFieldStyle(.roundedBorder)
 				.multilineTextAlignment(.center)
-				.font(PanelMetrics.font)
-				.frame(width: 34, height: 22)
-				.background(.quinary, in: RoundedRectangle(cornerRadius: PanelMetrics.controlRadius))
+				.frame(width: 52)
 				.help(String(localized: "Minutes between websites"))
 				.accessibilityLabel(String(localized: "Minutes between websites"))
 
 			Text("min")
-				.font(PanelMetrics.font)
 				.foregroundStyle(.secondary)
 		}
-		.frame(height: 22)
+		.controlSize(.large)
 	}
 }
 
 /**
-A button whose label is a word rather than a symbol, for the two verbs no symbol says plainly.
+A button whose label is a word rather than a symbol, for the verbs no symbol says plainly.
+
+Bordered at the large size, like everything else in the panel, so the pair under the picture stands as
+tall as the choosers above them. The one with a lit state is a `Toggle`, for the reason
+`PanelButton.isOn` gives.
 */
 struct PanelWideButton: View {
 	let title: String
@@ -208,56 +182,42 @@ struct PanelWideButton: View {
 	*/
 	var symbol: String?
 
-	var isOn = false
+	// swiftlint:disable:next discouraged_optional_boolean
+	var isOn: Bool?
+
 	var isEnabled = true
 	let action: () -> Void
 
-	@State private var isPressed = false
-	@State private var isHovering = false
-
 	var body: some View {
-		Button(action: action) {
-			HStack(spacing: 6) {
-				if let symbol {
-					Image(systemName: symbol)
-						.font(PanelMetrics.symbolFont)
+		Group {
+			if let isOn {
+				Toggle(isOn: .init(get: { isOn }, set: { _ in action() })) {
+					label
 				}
-
-				Text(title)
-					.font(PanelMetrics.font)
-					.lineLimit(1)
-					// Centred when the button is given a width, and hugging when it is not.
-					.frame(maxWidth: .infinity)
-					.fixedSize(horizontal: false, vertical: true)
+				.toggleStyle(.button)
+			} else {
+				Button(action: action) {
+					label
+				}
 			}
-				.padding(.horizontal, PanelMetrics.horizontalPadding)
-				.frame(height: PanelMetrics.height)
-				.foregroundStyle(isOn ? PanelMetrics.onForeground : AnyShapeStyle(.primary))
-				.background(background, in: RoundedRectangle(cornerRadius: PanelMetrics.controlRadius))
-				.contentShape(RoundedRectangle(cornerRadius: PanelMetrics.controlRadius))
 		}
-		.buttonStyle(.plain)
+		.buttonStyle(.bordered)
+		.controlSize(.large)
 		.disabled(!isEnabled)
-		.opacity(isEnabled ? 1 : 0.35)
-		.scaleEffect(isPressed ? 0.96 : 1)
-		.animation(.easeOut(duration: 0.12), value: isPressed)
-		.onHover { isHovering = $0 }
-		.onLongPressGesture(minimumDuration: 0) {
-			// Nothing on completion: the press itself is the whole point, and the button's own action
-			// already fires.
-		} onPressingChanged: {
-			isPressed = $0
-		}
 	}
 
-	private var background: some ShapeStyle {
-		if isOn {
-			AnyShapeStyle(PanelMetrics.onTint)
-		} else if isHovering {
-			PanelMetrics.hoverFill
-		} else {
-			AnyShapeStyle(.quinary)
+	private var label: some View {
+		HStack(spacing: 5) {
+			if let symbol {
+				Image(systemName: symbol)
+			}
+
+			Text(title)
+				.lineLimit(1)
 		}
+			// Centred when the button is given a width, and hugging when it is not.
+			.frame(maxWidth: .infinity)
+			.fixedSize(horizontal: false, vertical: true)
 	}
 }
 

@@ -37,11 +37,17 @@ struct DisplayPanel: View {
 		// behind this one is the wallpaper, and a wallpaper is whatever the user pointed it at — a busy
 		// page reads straight through the panel's own labels.
 		//
-		// A thin wash of the window colour over the vibrancy, rather than an opaque background: still
-		// glass, still taking its colour from what is behind it, just less of it. The window colour
-		// because it is the one that already follows the appearance, so this is a pale wash in light
-		// mode and a dark one in dark mode without a second definition.
-		.background(PanelMetrics.glassWash)
+		// `regularMaterial` rather than a wash the app mixes itself out of `windowBackgroundColor` at
+		// thirty-five percent: it is the material the system uses for exactly this — a panel over
+		// content it does not control — so it follows the appearance, thins under Reduce Transparency,
+		// and is the surface Control Center and Notification Center already sit on.
+		.background(.regularMaterial)
+		// A popover is the window the user is looking at, whatever AppKit thinks. There is one occasion
+		// it is not the key window: Browsing Mode hands the wallpaper's own window the keyboard, and it
+		// does that from a button inside this panel — so pressing that button turned every stock control
+		// here grey, the accent included, while the panel stayed open in front of the user. The drawn
+		// buttons this replaced never noticed, because a hardcoded orange does not.
+		.environment(\.controlActiveState, .key)
 		.task {
 			// The controller puts the columns up before the panel is shown and starts the refreshes
 			// straight after, so this changes nothing in the app. It is here for a preview, where there
@@ -89,7 +95,7 @@ private struct PanelFooter: View {
 	}
 
 	var body: some View {
-		HStack(spacing: 10) {
+		HStack(spacing: PanelMetrics.controlSpacing) {
 			PanelButton(symbol: "plus", label: String(localized: "Add Website…")) {
 				model.run { Constants.openWebsitesWindow(); NotificationCenter.default.post(name: .showAddWebsiteDialog, object: nil) }
 			}
@@ -189,17 +195,17 @@ private struct DisplayColumn: View {
 		.padding(9)
 		.background {
 			RoundedRectangle(cornerRadius: PanelMetrics.cardRadius, style: .continuous)
-				.fill(isHovering ? PanelMetrics.hoverFill : AnyShapeStyle(.clear))
+				.fill(isHovering ? AnyShapeStyle(.quaternary) : AnyShapeStyle(.clear))
 		}
 		.overlay {
 			// The same treatment the Dock preview uses for the card under the pointer: a two-point
 			// accent border and a barely-there fill. Borrowed rather than invented, because a person
 			// who has seen one of these should not have to learn the other.
 			//
-			// The fill is the same `hoverFill` the buttons inside the card use. It was a fixed white
-			// wash before, which is what the Dock's fill looks like in the dark appearance only — over
-			// a light popover it was all but invisible, so hovering a column showed a border and no
-			// card at all for anyone not in dark mode.
+			// The fill is `.quaternary`, the semantic style the drawn buttons inside the card used to
+			// name. It was a fixed white wash before, which is what the Dock's fill looks like in the
+			// dark appearance only — over a light popover it was all but invisible, so hovering a
+			// column showed a border and no card at all for anyone not in dark mode.
 			RoundedRectangle(cornerRadius: PanelMetrics.cardRadius, style: .continuous)
 				.strokeBorder(isHovering ? Color.accentColor : Color.clear, lineWidth: 2)
 		}
@@ -207,7 +213,6 @@ private struct DisplayColumn: View {
 		.onHover {
 			isHovering = $0
 		}
-		.animation(.spring(response: 0.2, dampingFraction: 0.82), value: isHovering)
 	}
 
 	/**
@@ -238,12 +243,12 @@ private struct DisplayColumn: View {
 	Nothing is held for it in `pinned`: the row keeps the width of its three buttons, so the resting
 	state of every column is the row that shipped, and a placeholder would have moved those three
 	buttons off-centre for the majority of users who never leave `pinned` to make room for a control
-	they never see. The row's height is pinned to the buttons' own 22 points, so the column and the
-	popover around it keep their size when the field does appear.
+	they never see. The row's height is pinned, so the column and the popover around it keep their size
+	when the field does appear.
 	*/
 	@ViewBuilder
 	private var rotationControls: some View {
-		HStack(spacing: 10) {
+		HStack(spacing: PanelMetrics.controlSpacing) {
 			PanelButton(
 				symbol: "chevron.left",
 				label: String(localized: "Previous website"),
@@ -278,7 +283,7 @@ private struct DisplayColumn: View {
 				model.step(.next, on: column.display)
 			}
 		}
-		.frame(height: 22)
+		.frame(height: 32)
 	}
 
 	/**
@@ -388,20 +393,19 @@ private struct DisplayColumn: View {
 				PanelButton(
 					symbol: column.isShowing ? "power" : "power.circle",
 					label: column.isShowing ? String(localized: "Showing") : String(localized: "Switched off"),
-					// Lit while the wallpaper is up, like every other lit control in the panel.
-					// It used to be the inverse — orange while the display was switched *off* — which
-					// made this the one caller reading `onTint` as "this button is engaged" instead of
-					// as "the thing it turns on is on". Five controls now answer that question the same
-					// way, which is the reading `onTint` documents.
+					// Lit while the wallpaper is up, like every other lit control in the panel. It used
+					// to be the inverse — lit while the display was switched *off* — which made this the
+					// one control reading its lit state as "this button is engaged" instead of as "the
+					// thing it turns on is on". Five controls now answer that question the same way.
 					isOn: column.isShowing
 				) {
 					model.toggleShowing(on: column.display)
 				}
 			}
-			.padding(4)
+			.padding(2)
 			// Not `pictureRadius`, and not derived from it: the pill floats six points inside the
-			// picture, so a concentric radius would be 2, and 7 is what the two 22-point buttons
-			// inside it want. It is the only rounded thing in the app with that argument, so it has
+			// picture, so a concentric radius would be 2, and 7 is what the two buttons inside it
+			// want. It is the only rounded thing in the app with that argument, so it has
 			// no name — a token with one user is a number with a longer spelling.
 			// swiftlint:disable:next hardcoded_corner_radius
 			.background(.thinMaterial, in: RoundedRectangle(cornerRadius: 7))
@@ -459,9 +463,16 @@ private struct DisplayColumn: View {
 	/**
 	One of the column's two choosers.
 
-	A `Menu` rather than a `Picker` because the label has to be ours: a picker draws the chosen value
-	itself, truncated, and the name is the one thing in the column that needs room. Fixed width, so
-	two columns do not end up different sizes because one website has a longer title.
+	A stock pull-down, which sizes itself to the name in it. A `Menu` rather than a `Picker` because the
+	label still has to be ours — a picker draws the chosen value itself and cannot slide it — but
+	nothing forces a width any more. It was forced before, and a `Menu` will not take one: measured, it
+	sizes its bezel to its label's text and treats every `frame` as a ceiling rather than a size, so the
+	choice was a drawn pill or a control that hugs its name. It hugs. Two columns showing names of
+	different lengths now show controls of different widths, which is what a pull-down does everywhere
+	else on the Mac.
+
+	The ceiling still matters, and is the one thing the frame is for: without it the widest page titles
+	push past the column they are in.
 
 	Written once for both, because they are the same control twice and the second one arriving is
 	exactly when a copy would have been made — the chevron's fixed slot, the marquee, and the order the
@@ -478,76 +489,44 @@ private struct DisplayColumn: View {
 		Menu {
 			items()
 		} label: {
-			HStack(spacing: 0) {
-				// Pinned to the left edge and given a fixed slot, so the name is centred in what is left
-				// rather than the pair of them drifting together as the name changes length.
-				Image(systemName: "chevron.up.chevron.down")
-					.font(PanelMetrics.symbolFont)
-					.foregroundStyle(.secondary)
-					.frame(width: 16, alignment: .leading)
-
-				MarqueeText(text: title, isActive: isHovering)
-					.font(PanelMetrics.font)
-					.frame(maxWidth: .infinity)
-					// The chevron's slot, given back, so the name is centred on the control and not on the
-					// space beside it.
-					.padding(.trailing, 16)
-			}
-			.frame(maxWidth: .infinity)
-			.frame(height: PanelMetrics.height)
+			// An explicit height, because `MarqueeText` is a `GeometryReader` and has no height of its
+			// own to offer the label. No chevron of ours beside it: a stock pull-down draws one itself,
+			// at the trailing edge, where every other pull-down on the Mac has it.
+			MarqueeText(text: title, isActive: isHovering)
+				.frame(height: 16)
 		}
-		.menuStyle(.borderlessButton)
-		.menuIndicator(.hidden)
-		// Width, then padding, then background, in that order. `borderlessButton` sizes a menu to its
-		// label, so the width has to be forced from outside the label — and the background has to come
-		// after it, or it paints the pill at the label's size and the frame merely centres that.
-		.frame(
-			width: width - PanelMetrics.horizontalPadding * 2,
-			height: PanelMetrics.height
-		)
-		.padding(.horizontal, PanelMetrics.horizontalPadding)
-		.background { chooserBackground(isLoading: isLoading) }
+		.controlSize(.large)
+		.frame(maxWidth: width)
 		.disabled(!isEnabled)
+		.overlay(alignment: .leading) { loadingIndicator(isLoading) }
 	}
 
 	/**
-	A chooser's pill, breathing while this display's page is on its way.
+	A stock spinner in the margin beside the website chooser, while this display's page is on its way.
 
-	The chooser rather than a spinner somewhere else in the column, because this is the control the
-	website was picked with: a page takes seconds to arrive and nothing on the desktop changes while it
-	does — swap loading holds the old one up on purpose — so the answer belongs on the thing that was
-	just pressed.
+	Beside that control rather than somewhere else in the column, because it is the control the website
+	was picked with: a page takes seconds to arrive and nothing on the desktop changes while it does —
+	swap loading holds the old one up on purpose — so the answer belongs on the thing that was just
+	pressed. An overlay rather than a stack, so the chooser does not step sideways while it is there,
+	and outside the control rather than inside because the control is only as wide as its name and a
+	short name leaves nothing to put it in. Twenty-two points out, which is inside the column's own
+	padding even when a title has grown the chooser to its ceiling.
 
-	Orange rather than the system accent, for the reason `PanelMetrics.onTint` exists: the accent is
-	whatever the user chose for their Mac and would read as "selected".
+	It replaced a pill breathing behind the whole control in the app's own orange, at
+	`WallpaperScene.loadingPulseDuration`, so that it and the menu bar icon would read as one thing
+	happening rather than two. That rate is no longer shared: a `ProgressView` is the system's answer to
+	"this is in progress" and paces itself. The menu bar keeps the pulse, because a status item is the
+	one surface in the app with nothing system-drawn to reach for.
 
-	Beside the menu bar icon rather than instead of it, and at the same cadence — both read
-	`WallpaperScene.loadingPulseDuration`, both ease in and out. This one is SwiftUI and that one is
-	CoreAnimation, so the two are never in phase and no amount of machinery here would make them be;
-	what stops them reading as two separate things is that they breathe at the same rate.
-
-	The animation lives on a view that only exists while the load does, so there is no flag to reset
-	and nothing to stop. That also keeps it clear of the panel rebuilding every column twelve times a
-	second: what changes on a rebuild is the column's *values*, and the view's identity — which is what
-	the animation is attached to — is the display's, which does not.
-
-	Only the website chooser ever asks for the pulse. The playlist above it changes what a display may
-	show and not what it is fetching, so a load is not its answer to give.
+	Only the website chooser ever asks for it. The playlist above changes what a display may show and
+	not what it is fetching, so a load is not its answer to give.
 	*/
 	@ViewBuilder
-	private func chooserBackground(isLoading: Bool) -> some View {
-		let pill = RoundedRectangle(cornerRadius: PanelMetrics.controlRadius)
-
+	private func loadingIndicator(_ isLoading: Bool) -> some View {
 		if isLoading {
-			pill
-				.fill(PanelMetrics.onTint)
-				.phaseAnimator([0.25, 0.9]) { fill, opacity in
-					fill.opacity(opacity)
-				} animation: { _ in
-					.easeInOut(duration: WallpaperScene.loadingPulseDuration)
-				}
-		} else {
-			pill.fill(.quinary)
+			ProgressView()
+				.controlSize(.small)
+				.offset(x: -22)
 		}
 	}
 }
