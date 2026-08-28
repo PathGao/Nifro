@@ -6,7 +6,7 @@ final class AppState: ObservableObject {
 
 	var cancellables = Set<AnyCancellable>()
 
-	let holdToInteract = HoldToInteract()
+	let browsingModeShortcut = BrowsingModeShortcut()
 	let powerSourceWatcher = PowerSourceWatcher()
 
 	let displayPanel = DisplayPanelController()

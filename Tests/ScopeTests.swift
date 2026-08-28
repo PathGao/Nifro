@@ -200,7 +200,7 @@ struct ScopeTests {
 			("WallpaperScene.swift", "func resetTimer()", "pause every display's auto-reload"),
 			("RotationBehaviour.swift", "func resetRotationTimer()", "pause every display's rotation and schedule"),
 			("DimWhenUnfocused.swift", "func targetOpacity(on display: Display?) -> Double", "raise every display to full opacity"),
-			("HoldToInteract.swift", "private func begin()", "refuse the hold because another display is browsing")
+			("BrowsingModeShortcut.swift", "private func begin()", "refuse the hold because another display is browsing")
 		]
 
 		for (file, declaration, what) in sites {
@@ -296,7 +296,7 @@ struct ScopeTests {
 	*/
 	@Test("The hold remembers what it started")
 	func lettingGoActsOnWhatBeganIt() throws {
-		let source = try Self.source(named: "HoldToInteract.swift")
+		let source = try Self.source(named: "BrowsingModeShortcut.swift")
 		let end = try Self.body(of: "private func end()", in: source)
 
 		#expect(
@@ -307,6 +307,49 @@ struct ScopeTests {
 		#expect(
 			end.contains("holdingScene"),
 			"`end()` no longer acts on the scene the hold started on."
+		)
+	}
+
+	/**
+	The hold refuses to begin after the press it belongs to is already over.
+
+	One key now carries both behaviours, so the hold starts on a timer half a second after the key goes
+	down rather than on the key itself — and a hotkey's key-up never arrives when the modifiers are
+	released first. Without this check the timer lands on a press nobody is making any more and turns
+	Browsing Mode on with nothing left to turn it off: no key-up coming, and the modifier watch is
+	installed too late to see a release that already happened.
+	*/
+	@Test("A hold whose keys are already up does not begin")
+	func holdChecksTheKeysAreStillDown() throws {
+		let begin = try Self.body(
+			of: "private func begin()",
+			in: Self.source(named: "BrowsingModeShortcut.swift")
+		)
+
+		#expect(
+			begin.contains("NSEvent.modifierFlags.contains(requiredModifiers)"),
+			"`begin()` no longer checks the shortcut is still held, so a lost key-up strands Browsing Mode on."
+		)
+	}
+
+	/**
+	A tap goes through the action, not straight at the switch.
+
+	`Action.toggleBrowsingMode` carries the first-run explanation of what Browsing Mode is, and it is
+	the same body the panel button and `nifro://` run. The hold reaches past it on purpose — it is not
+	a toggle and says so — but the tap *is* that toggle, and calling `setBrowsingMode` from here would
+	quietly fork it into a second copy that drifts.
+	*/
+	@Test("Tapping the key runs the same toggle as everything else")
+	func tapRunsTheSharedToggle() throws {
+		let keyUp = try Self.body(
+			of: "private func keyUp()",
+			in: Self.source(named: "BrowsingModeShortcut.swift")
+		)
+
+		#expect(
+			keyUp.contains("Action.toggleBrowsingMode.run"),
+			"A tap no longer runs the shared toggle, so it has its own copy of what Browsing Mode means."
 		)
 	}
 

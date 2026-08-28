@@ -100,10 +100,13 @@ struct RestoreDefaultsTests {
 		#expect(code.contains("KeyboardShortcuts.reset(Shortcut.allNames)"), "Shortcuts are no longer reset through the CaseIterable table")
 
 		let cases = try Self.stripComments(Self.source("Nifro/App/Shortcuts.swift"))
-			.matches(of: Regex("^\\tcase (\\w+)$", as: AnyRegexOutput.self).anchorsMatchLineEndings())
+			// The optional tail is an explicit raw value. `browsingMode` carries one — its stored key is
+			// the older `toggleBrowsingMode` — and without this the parser silently skipped it, which is
+			// the shortcut this test would then let Restore name one at a time.
+			.matches(of: Regex("^\\tcase (\\w+)(?: = \"\\w+\")?$", as: AnyRegexOutput.self).anchorsMatchLineEndings())
 			.map { String($0[1].substring ?? "") }
 
-		#expect(cases.count >= 9, "Only found \(cases.count) shortcuts in Shortcuts.swift; the parser has probably stopped matching")
+		#expect(cases.count >= 8, "Only found \(cases.count) shortcuts in Shortcuts.swift; the parser has probably stopped matching")
 
 		for name in cases {
 			#expect(!code.contains(".\(name)"), "Restore names the “\(name)” shortcut instead of resetting the whole table")
