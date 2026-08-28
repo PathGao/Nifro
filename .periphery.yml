@@ -30,10 +30,15 @@ targets:
 # back on.
 retain_objc_accessible: false
 
-# `retain_public` was on with nothing to retain. This is an app target and has no public API: the four
-# `public` declarations in `Nifro/` are all witnesses to public protocol requirements
-# (`Identifiable.id`, `ExpressibleByStringLiteral.init`) and are retained by the conformance, not by
-# this. It hid a category of finding against a case that does not arise.
+# `retain_public` was on with nothing to retain. This is an app target and has no public API: the three
+# `public` declarations in `Nifro/` are all witnesses to public protocol requirements (`Identifiable.id`
+# twice, `ExpressibleByStringLiteral.init`) and are retained by the conformance, not by this. It hid a
+# category of finding against a case that does not arise.
+#
+# There were four, and the fourth is why the count is written out. `Error.isCancelled` was `public`
+# witnessing nothing — `Error` has no such requirement — on a helper no test target can even see, and it
+# read as one of the three for as long as nobody counted. It is `internal` now. The sentence above is an
+# argument only while its number is checked against the code.
 retain_public: false
 
 report_exclude:

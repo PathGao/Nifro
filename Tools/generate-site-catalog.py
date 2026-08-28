@@ -74,7 +74,7 @@ def main() -> int:
             "reloadInterval": data.get("reloadInterval"),
             "zoom": data.get("zoom"),
             "css": data.get("css"),
-            "javaScript": data.get("js") or data.get("javaScript"),
+            "javaScript": data.get("js"),
             "requiresLogin": bool(data.get("requiresLogin")),
             "playsSound": plays_sound,
             # The rank, not a flag. One field answers both "does this ship" and "where in the
@@ -91,7 +91,7 @@ def main() -> int:
             f"\t\t\treloadInterval: {data.get('reloadInterval') or 'nil'},\n"
             f"\t\t\tzoom: {swift_zoom(data.get('zoom'))},\n"
             f"\t\t\tcss: {swift_optional_string(data.get('css'))},\n"
-            f"\t\t\tjavaScript: {swift_optional_string(data.get('js') or data.get('javaScript'))},\n"
+            f"\t\t\tjavaScript: {swift_optional_string(data.get('js'))},\n"
             f"\t\t\trequiresLogin: {'true' if data.get('requiresLogin') else 'false'},\n"
             f"\t\t\tplaysSound: {'true' if plays_sound else 'false'},\n"
             f"\t\t\tfeaturedRank: {data.get('featured') if data.get('featured') else 'nil'}\n"

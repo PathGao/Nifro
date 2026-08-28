@@ -254,7 +254,7 @@ custom_rules:
   # header of the type whose last member was removed — which is the jump bar the file header says the
   # MARKs are there for.
   #
-  # Only the multi-line form. A conformance-only `extension NSToolbarItem: ControlActionClosureProtocol {}`
+  # Only the multi-line form. A conformance-only `extension NSImage: @retroactive @unchecked Sendable {}`
   # declares the conformance and is content; it is written on one line and is not matched.
   empty_extension:
     regex: 'extension [^{\n]*\{\n[ \t]*\}'
