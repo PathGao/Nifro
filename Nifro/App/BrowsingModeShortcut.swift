@@ -100,8 +100,8 @@ final class BrowsingModeShortcut {
 		pendingHold = nil
 
 		// The whole press was shorter than the threshold, so it was a tap. Through `Action` rather than
-		// straight to `setBrowsingMode` because the toggle carries a first-time explanation with it, and
-		// this is the same toggle the panel button and `nifro://` run.
+		// straight to `setBrowsingMode` because the shared verb underneath it carries the first-time
+		// explanation, and this is the same toggle the panel button and `nifro://` run.
 		Action.toggleBrowsingMode.run(from: .pointer)
 	}
 
@@ -140,6 +140,19 @@ final class BrowsingModeShortcut {
 
 		isHolding = false
 		stopWatchingModifiers()
+
+		// Here rather than in `begin()`, which is where every other route says it — and the difference
+		// is the key. An `NSAlert` is app-modal: it runs a run loop of its own until somebody clicks it,
+		// and the hold has exactly two ways out, the Carbon key-up and the local `.flagsChanged`
+		// monitor above. A modal session filtering or delaying either one leaves `end()` unreachable
+		// with the wallpaper raised over the desktop icons, taking the clicks meant for them, and the
+		// hotkey refusing to help because it sees the display already browsing. That is the state this
+		// whole class is built to make unreachable, so the explanation waits until the hold is over
+		// rather than being raised in the middle of it.
+		//
+		// Above the guard below, because a hold whose display was unplugged is still a hold somebody
+		// made and still the first time they saw Browsing Mode.
+		AppState.shared.explainBrowsingModeOnce()
 
 		// Optional and not substituted for: the scene went away with its display, which took its
 		// Browsing Mode with it, so there is nothing to put back and no other display that should be

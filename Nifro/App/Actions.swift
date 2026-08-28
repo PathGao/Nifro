@@ -1,5 +1,3 @@
-import AppKit
-
 /**
 Everything the app can be told to do, in one table.
 
@@ -10,6 +8,12 @@ explains itself the first time it is switched on, and that explanation lived in 
 turning it on by shortcut, by URL, or from Shortcuts silently skipped it — which is the one route
 where the explanation matters most, since the point of it is that the page may be hidden behind your
 windows.
+
+That explanation is no longer in here either, and for the same reason one step out: the panel
+replaced the menu and switches Browsing Mode on without running an `Action`, so a table of four
+entry points was the wrong place to keep a rule that now has five. It lives on the verb the entry
+points share — `AppState.toggleBrowsingMode(on:)` — and `ScopeTests` fails when a sixth arrives
+without it.
 
 **Each one acts on one scene, and it is the scene `run` resolves — never the whole list.** Which scene
 that is depends on where the request came from; see `Source`. Two cases used to resolve a scene and
@@ -79,19 +83,7 @@ enum Action: String, CaseIterable {
 		case .toggleEnabled:
 			AppState.shared.isManuallyDisabled.toggle()
 		case .toggleBrowsingMode:
-			AppState.shared.setBrowsingMode(
-				!AppState.shared.isBrowsingMode(on: scene.display),
-				on: scene.display
-			)
-
-			SSApp.runOnce(identifier: "activatedBrowsingMode") {
-				DispatchQueue.main.async {
-					NSAlert.showModal(
-						title: String(localized: "Lets you temporarily interact with the website, to log in or scroll to a particular place."),
-						message: String(localized: "If you cannot see the website, hide some windows to reveal the desktop.")
-					)
-				}
-			}
+			AppState.shared.toggleBrowsingMode(on: scene.display)
 		case .toggleSound:
 			guard let website = scene.website else {
 				return

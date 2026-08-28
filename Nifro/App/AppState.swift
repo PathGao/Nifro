@@ -177,6 +177,64 @@ final class AppState: ObservableObject {
 	}
 
 	/**
+	Flip Browsing Mode for one display, and say what it is the first time it comes on.
+
+	The flip is two lines and was written out twice — once in the `Action` table, once in the panel's
+	column — and only one of the two copies carried the explanation. That is the whole defect: the
+	explanation was moved into `Action` precisely because it had been stranded on the menu item, the
+	panel then replaced the menu without going through `Action`, and the most discoverable way into
+	Browsing Mode became the one that never says what Browsing Mode is. A verb rather than a
+	convention, so the next surface cannot be given the switch without the sentence that comes with it.
+
+	The hold is the one route that does not pass through here, and it says why in its own file: it
+	turns Browsing Mode on and off around a key that is still down, and neither half is a toggle.
+	*/
+	func toggleBrowsingMode(on display: Display?) {
+		let isOn = !isBrowsingMode(on: display)
+		setBrowsingMode(isOn, on: display)
+
+		// On the way in only. `Action` ran the explanation after the flip whichever way it went, which
+		// was harmless while this was the only way in and is not any more: the panel can switch Browsing
+		// Mode on without spending the once-ever run, so the first flip that reaches this line can be an
+		// *off* — and the first thing the app ever said about Browsing Mode was then a description of
+		// the thing it had just taken away.
+		if isOn {
+			explainBrowsingModeOnce()
+		}
+	}
+
+	/**
+	Say what Browsing Mode is, once per install.
+
+	It reads as a courtesy and is not one. The page being handed over is a wallpaper, so it is behind
+	whatever the user is looking at: somebody who switches this on and sees nothing happen has no way
+	to learn that nothing is broken, and the sentence about hiding windows is the only place the app
+	says so. That is why every route has to reach it — the panel's button, a tap of the shortcut, the
+	end of a hold, `nifro://` and the Shortcuts action — and why the routes with nobody at the machine
+	matter most.
+
+	`SSApp.runOnce` is a flag in `UserDefaults`, so the once is once for the install rather than once
+	per caller. Every route may ask; the first to arrive is the only one that speaks. That is what
+	makes a bare call at each entry point safe and why there is no bookkeeping here.
+
+	Off the current run loop turn, deliberately. Two of the callers are inside event handling — the
+	Carbon key-up and the local `.flagsChanged` monitor, which has to return its event — and an
+	`NSAlert` is app-modal, running a run loop of its own until it is dismissed. Raising one from
+	inside a handler that still has work after it is how the hold gets stranded in front of the
+	desktop with nothing left to put it back.
+	*/
+	func explainBrowsingModeOnce() {
+		SSApp.runOnce(identifier: "activatedBrowsingMode") {
+			DispatchQueue.main.async {
+				NSAlert.showModal(
+					title: String(localized: "Lets you temporarily interact with the website, to log in or scroll to a particular place."),
+					message: String(localized: "If you cannot see the website, hide some windows to reveal the desktop.")
+				)
+			}
+		}
+	}
+
+	/**
 	Put every window at the level, the opacity and the timers its display's setting asks for.
 
 	Both timers, which is the half that was missing. Only the reload timer was re-armed here, so
