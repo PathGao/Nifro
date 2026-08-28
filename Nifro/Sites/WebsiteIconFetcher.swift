@@ -276,27 +276,40 @@ final class WebsiteIconFetcher: NSObject {
 	private func fetch(for url: URL) async throws -> NSImage? {
 		self.url = url
 
-		var request = URLRequest(url: url)
-		request.cachePolicy = .reloadIgnoringLocalCacheData
-
-		try await loadAndWait(request)
-
 		// TODO: Use `??` for all of these when `??` supports await.
 
+		// First, where it used to be fourth. It fetches the page for itself, so asking it after the web
+		// view meant that the ordinary site — the one it answers for, which is most of them — paid for
+		// a whole navigation with JavaScript, and then that navigation's only reader was thrown away
+		// unread.
 		if let image = try? await getFromLPMetadataProvider(url: url) {
 			return image
 		}
 
-		if let image = try? await getFromManifest() {
-			return image
-		}
+		// Only now the page, and only for the three below: each one runs `querySelector` against the
+		// loaded document and there is nowhere else for them to get one. A load that failed leaves them
+		// nothing to read, so they are skipped rather than asked three times for the same nil.
+		//
+		// The failure is where the behaviour differs from before. This load was the first thing the
+		// function did, so a page that could not be loaded threw out of `fetch` while
+		// `LPMetadataProvider`, which never needed the page, had not been asked anything and
+		// `getFavicon` never got its turn — those sites showed the grey square. Both of them run now.
+		// The difference is only ever an icon where there was none.
+		var request = URLRequest(url: url)
+		request.cachePolicy = .reloadIgnoringLocalCacheData
 
-		if let image = try? await getFromMetaItemPropImage() {
-			return image
-		}
+		if (try? await loadAndWait(request)) != nil {
+			if let image = try? await getFromManifest() {
+				return image
+			}
 
-		if let image = try? await getFromLinkIcon() {
-			return image
+			if let image = try? await getFromMetaItemPropImage() {
+				return image
+			}
+
+			if let image = try? await getFromLinkIcon() {
+				return image
+			}
 		}
 
 		if let image = try? await getFavicon() {
