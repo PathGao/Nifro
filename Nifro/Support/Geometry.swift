@@ -275,7 +275,7 @@ How far the page is allowed to be zoomed by the page's own context menu.
 
 Not `Zoom` above. That frames a region and is this app's own idea; this is WebKit's `pageZoom`, the
 browser control, and the reason it needs an end at all is that the chosen level is written to
-`zoomLevel_<address>` and put back on every later load of that page. An unbounded step reaches 0 in
+`zoomLevel_<website id>` and put back on every later load of that website. An unbounded step reaches 0 in
 five presses of Zoom Out and negative on the sixth — a page that is not merely small but absent, on
 every launch from then on, escapable only by finding Actual Size in a menu that needs the wallpaper
 raised before it can be opened at all.

@@ -74,7 +74,15 @@ private final class AppDelegate: NSObject, NSApplicationDelegate {
 		// weeks, so a check that runs once per launch is a check that mostly does not run.
 		Task {
 			while !Task.isCancelled {
-				await DiskBudget.removeOrphanedStores(keeping: Set(Defaults[.websites].map(\.id)))
+				let websiteIDs = Set(Defaults[.websites].map(\.id))
+
+				await DiskBudget.removeOrphanedStores(keeping: websiteIDs)
+
+				// The same list, because a page record whose website is gone is exactly a store whose
+				// website is gone — and it is what clears out the records of every build that keyed
+				// them by address.
+				AppState.shared.forgetOrphanedPageRecords(keeping: websiteIDs)
+
 				await DiskBudget.enforce()
 				try? await Task.sleep(for: .seconds(6 * 60 * 60))
 			}

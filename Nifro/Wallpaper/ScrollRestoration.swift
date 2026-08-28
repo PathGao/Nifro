@@ -35,6 +35,42 @@ extension AppState {
 			UserDefaults.standard.removeObject(forKey: key)
 		}
 	}
+
+	/**
+	Drop the records of pages that belong to no website in the list.
+
+	Two things land here and it is one sweep on purpose, because they are the same thing. Deleting a
+	website used to leave its scroll position, its fragment and its zoom in `UserDefaults` for as long
+	as the app stayed installed: only the clear-everything button above ever removed a record, and it
+	removes all of them. And every record written before the keys moved off the page's address is
+	claimed by no website `id` at all, so it reads here as an orphan too — which is what keeps the one
+	dropped generation of positions from sitting in the defaults forever.
+
+	It runs beside `DiskBudget.removeOrphanedStores`, on the same list and by the same argument: a
+	record whose website is gone is exactly a store whose website is gone, and the app is the only
+	thing that knows which websites exist.
+
+	An empty list collects nothing rather than everything, for the reason `DiskBudget.orphans` spells
+	out — the one reading that must not be trusted is the one saying every website has been deleted.
+	*/
+	func forgetOrphanedPageRecords(keeping websiteIDs: Set<Website.ID>) {
+		guard !websiteIDs.isEmpty else {
+			return
+		}
+
+		let live = Set(websiteIDs.map(\.uuidString))
+
+		for key in UserDefaults.standard.dictionaryRepresentation().keys {
+			guard
+				let kind = PerPageDefaults.allCases.first(where: { key.hasPrefix($0.rawValue) }),
+				!live.contains(String(key.dropFirst(kind.rawValue.count)))
+			else {
+				continue
+			}
+
+			UserDefaults.standard.removeObject(forKey: key)
+		}
+	}
 }
 
 /**
@@ -52,13 +88,23 @@ enum PerPageDefaults: String, CaseIterable {
 	case zoomLevel = "zoomLevel_"
 
 	/**
-	The `UserDefaults` key this kind of record uses for `url`.
+	The `UserDefaults` key this kind of record uses for one website entry.
 
-	- Parameter removeQuery: Whether `?panel=2` is a different page. A property of what is being
-	remembered rather than of the address, so each kind answers it for itself.
+	The entry's `id`, not its address, because the address is not what these records have to agree
+	with. Each entry's page runs in `WKWebsiteDataStore(forIdentifier:)` on that `id`, so two entries
+	carrying the same URL already have separate storage — and under an address-shaped key they shared
+	one scroll position and one zoom, each overwriting the other's. That takes two entries on one URL,
+	which is what a sync group mints per follower display and what duplicating a list mints per copy.
+	An `id` also survives editing the entry's address, which is what editing an entry means.
+
+	The question the old key had to ask of each kind — whether `?panel=2` is a different page — cannot
+	be asked of an `id` and no longer needs to be. It only ever decided which addresses collapsed onto
+	one record; an entry is one record, whatever its page's address does. The cost is the other half
+	of that: a page reached by clicking a link in Browsing Mode now shares the entry's record rather
+	than getting its own, so the last page scrolled is the one restored.
 	*/
-	func key(for url: URL, removeQuery: Bool) -> String {
-		"\(rawValue)\(url.perPageDefaultsKeySuffix(removeQuery: removeQuery))"
+	func key(for websiteID: Website.ID) -> String {
+		"\(rawValue)\(websiteID.uuidString)"
 	}
 }
 
@@ -67,18 +113,21 @@ extension WallpaperScene {
 	// page, and an empty array would have to stand in for that as well as for a position, which the
 	// restore path already has to tell apart from [0, 0].
 	// swiftlint:disable:next discouraged_optional_collection
-	private func scrollPositionKey(for url: URL) -> Defaults.Key<[Double]?> {
-		.init(PerPageDefaults.scrollPosition.key(for: url, removeQuery: false))
+	private func scrollPositionKey(for websiteID: Website.ID) -> Defaults.Key<[Double]?> {
+		.init(PerPageDefaults.scrollPosition.key(for: websiteID))
 	}
 
 	// MARK: - The address after the #
 
 	/**
-	Keyed on the address with the fragment taken off, which is the page, so the fragment is what is
-	being remembered about it.
+	Keyed on the entry, and the fragment is what is being remembered about it.
+
+	Nothing is lost by the key no longer carrying the address: both sides of this record already
+	refuse a stored address that differs from the website's in anything but the fragment, so editing
+	an entry's address makes its old fragment unusable rather than misapplied.
 	*/
-	private func lastAddressKey(for url: URL) -> Defaults.Key<String?> {
-		.init(PerPageDefaults.lastAddress.key(for: url, removeQuery: false))
+	private func lastAddressKey(for websiteID: Website.ID) -> Defaults.Key<String?> {
+		.init(PerPageDefaults.lastAddress.key(for: websiteID))
 	}
 
 	/**
@@ -104,7 +153,7 @@ extension WallpaperScene {
 			return
 		}
 
-		Defaults[lastAddressKey(for: onScreen.url)] = current.absoluteString
+		Defaults[lastAddressKey(for: onScreen.id)] = current.absoluteString
 	}
 
 	/**
@@ -114,7 +163,7 @@ extension WallpaperScene {
 		guard
 			let website,
 			Defaults[.restoreScrollPosition],
-			let stored = Defaults[lastAddressKey(for: website.url)],
+			let stored = Defaults[lastAddressKey(for: website.id)],
 			let remembered = URL(string: stored),
 			remembered.normalized(removeFragment: true) == website.url.normalized(removeFragment: true)
 		else {
@@ -130,12 +179,12 @@ extension WallpaperScene {
 	func captureScrollPosition() {
 		guard
 			Defaults[.restoreScrollPosition],
-			let url = webViewController.webView.url
+			let websiteID = webViewController.webView.websiteID
 		else {
 			return
 		}
 
-		let key = scrollPositionKey(for: url)
+		let key = scrollPositionKey(for: websiteID)
 
 		webViewController.webView.evaluateJavaScript(
 			"[window.scrollX, window.scrollY]",
@@ -169,6 +218,13 @@ extension WallpaperScene {
 	one place to be added, and both arrival paths get it for free.
 	*/
 	func restorePageState(in webView: WKWebView) {
+		// One cast for both halves. Each of them needs the web view's own website, and that is the
+		// question the whole re-key turns on: what the page remembers is filed under the same `id` the
+		// store it loaded from is filed under.
+		guard let webView = webView as? SSWebView else {
+			return
+		}
+
 		restoreScrollPosition(in: webView)
 		restoreZoomLevel(in: webView)
 	}
@@ -176,11 +232,7 @@ extension WallpaperScene {
 	/**
 	Put back the zoom level chosen from the page's own context menu.
 	*/
-	private func restoreZoomLevel(in webView: WKWebView) {
-		guard let webView = webView as? SSWebView else {
-			return
-		}
-
+	private func restoreZoomLevel(in webView: SSWebView) {
 		// Reading the wrapper gives the persisted level, or the live one when nothing was persisted.
 		// Writing it applies `pageZoom`. Skipping 1 keeps an untouched page from being written back.
 		let zoomLevel = webView.zoomLevelWrapper
@@ -193,11 +245,11 @@ extension WallpaperScene {
 	/**
 	Scroll a freshly loaded page back to where it was.
 	*/
-	private func restoreScrollPosition(in webView: WKWebView) {
+	private func restoreScrollPosition(in webView: SSWebView) {
 		guard
 			Defaults[.restoreScrollPosition],
-			let url = webView.url,
-			let position = Defaults[scrollPositionKey(for: url)],
+			let websiteID = webView.websiteID,
+			let position = Defaults[scrollPositionKey(for: websiteID)],
 			position.count == 2,
 			position != [0, 0]
 		else {
@@ -227,27 +279,5 @@ extension WallpaperScene {
 			in: .defaultClient,
 			completionHandler: nil
 		)
-	}
-}
-
-extension URL {
-	/**
-	Which page a per-page value in `UserDefaults` belongs to.
-
-	The address itself would not do. The scheme and a leading `www.` are dropped so one page cannot end
-	up with four records, and the fragment always goes because it moves within a page rather than to
-	another one. Base64 because the result is pasted into a defaults key, and an address is free to
-	contain whatever the prefix and the key syntax use.
-
-	`removeQuery` has no default on purpose: whether `?panel=2` is a different page is a property of
-	what is being remembered, not of the address, and only the caller knows which of its records it
-	wants merged.
-	*/
-	func perPageDefaultsKeySuffix(removeQuery: Bool) -> String {
-		normalized(removeFragment: true, removeQuery: removeQuery)
-			.absoluteString
-			.removingSchemeAndWWWFromURL
-			.toData
-			.base64EncodedString()
 	}
 }
