@@ -424,6 +424,68 @@ extension WebsitesController {
 
 extension WebsitesController {
 	/**
+	Throw the whole list away: every playlist, every website, and every key that named one.
+
+	The four writes are one function because they are one fact. `playlists` is the whole of where a
+	website is stored; `currentWebsites` and `currentPlaylists` are per-display keys whose values are a
+	website and a playlist out of it, and `redirectedAddresses` is filed under `website.id`. Emptying
+	the first and leaving any of the other three is a display pointed at a website that does not exist,
+	a display pointed at a list that does not exist, or a redirect nothing can ever apply — and none of
+	the three has a symptom until somebody plugs in a second monitor or wonders why an address they
+	fixed came back. Written here, in one place, so that the answer is the same for all four rather
+	than three call sites that each remembered a different subset.
+
+	**Not a sweep over what is left.** The two housekeeping passes in `App.swift` refuse an empty
+	website list on purpose, and they are right to: "every website is gone" read off a list is far
+	likelier to be a bad read than the truth, and what those passes delete cannot be put back. Here it
+	is not a reading. It is what the user asked for.
+
+	Nothing is done about the `websites` key. It is the pre-playlist list, read once by the migration
+	and by nothing else in this build, and it is the only copy of what the user had before the
+	conversion — keeping it is what `Constants.swift` argues for, and clearing today's list is not a
+	reason to burn the record of the old one. It cannot come back on its own: the migration reads its
+	own flag, and this leaves that flag set.
+	*/
+	func removeEverything() {
+		Defaults[.playlists] = []
+		Defaults[.currentWebsites] = [:]
+		Defaults[.currentPlaylists] = [:]
+		Defaults[.redirectedAddresses] = [:]
+	}
+
+	/**
+	Build the state a fresh install has: the default playlist, holding the websites Nifro ships with.
+
+	One path with two callers — restoring the whole app, and the button in Advanced that wants only
+	this half of it. These two lines were the end of `RestoreDefaults.perform`, and a second control
+	wanting the same state would have meant a second way to build it, with nothing making the two agree
+	about the order they run in.
+
+	**Only the install flag is forced.** `migrateToPlaylistsIfNeeded` keeps the position
+	`RestoreDefaults` argued for and is left to its own guard, and that is the whole of what makes this
+	safe to press from a settings pane. After a restore the flag went with the domain, so the migration
+	runs against nothing and writes the empty default list the install then fills. Pressed from
+	Advanced the flag is set, so the migration does nothing — which is what has to happen, because it
+	assigns `playlists` outright and would take every list the user has made with it.
+
+	**An existing default playlist is filled, not replaced and not doubled.** `add` puts each website
+	into the default playlist it finds and makes one only when there is none, so "there is already one"
+	and "there is not" are answered by the same code and neither of them can produce a second. What it
+	costs is that pressing this with the shipped websites already in the list leaves a second copy of
+	each — visible in the Websites window and undone by deleting them. The two alternatives were worse
+	in a way that is not undoable at all: replacing a list somebody spent an evening arranging, or a
+	button that silently does nothing and gives them no way to tell it apart from a button that broke.
+	*/
+	func installDefaultPlaylist() {
+		Defaults[.hasInstalledFeaturedWebsites] = false
+
+		migrateToPlaylistsIfNeeded()
+		installFeaturedWebsitesIfNeeded()
+	}
+}
+
+extension WebsitesController {
+	/**
 	Turn the stored website list into playlists, once.
 
 	Websites with a display of their own become a playlist bound to that display; everything else

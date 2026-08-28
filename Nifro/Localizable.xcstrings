@@ -129,6 +129,16 @@
         }
       }
     },
+    "Add Playlist": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加播放列表"
+          }
+        }
+      }
+    },
     "Add Website": {
       "localizations": {
         "zh-Hans": {
@@ -145,6 +155,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "添加网站…"
+          }
+        }
+      }
+    },
+    "Add the Default Playlist": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "添加默认播放列表"
+          }
+        }
+      }
+    },
+    "Add the default playlist?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "要添加默认播放列表吗？"
           }
         }
       }
@@ -175,6 +205,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "已添加的网站"
+          }
+        }
+      }
+    },
+    "Added to your playlists": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "已添加到你的播放列表"
           }
         }
       }
@@ -399,6 +439,16 @@
         }
       }
     },
+    "Clear All Website Data": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "清除所有网站数据"
+          }
+        }
+      }
+    },
     "Clear Data": {
       "localizations": {
         "zh-Hans": {
@@ -409,32 +459,12 @@
         }
       }
     },
-    "Clear all website data": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "清除所有网站数据"
-          }
-        }
-      }
-    },
     "Clear all website data?": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "要清除所有网站数据吗？"
-          }
-        }
-      }
-    },
-    "Clears cookies, local storage, caches, thumbnails and each page's remembered position and zoom; your websites and their settings are kept.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "清除 Cookie、本地存储、缓存、缩略图，以及每个页面记住的位置和缩放；你的网站和它们的设置会保留。"
           }
         }
       }
@@ -575,6 +605,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "删除「%@」？"
+          }
+        }
+      }
+    },
+    "Deletes every playlist and every website, along with their cookies, caches, thumbnails and each page's remembered position and zoom.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除每个播放列表和每个网站，连同它们的 Cookie、缓存、缩略图，以及每个页面记住的位置和缩放。"
           }
         }
       }
@@ -729,22 +769,22 @@
         }
       }
     },
+    "Every playlist and every website goes, along with the custom CSS, JavaScript, regions and schedules written for them. You will be signed out of every site, and there is no undo.\n\nAdd the Default Playlist puts the websites Nifro comes with back.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "每个播放列表和每个网站都会消失，为它们写的自定义 CSS、JavaScript、缩放区域和排期也一样。你会从每个网站退出登录，而且无法撤销。\n\n「添加默认播放列表」会把 Nifro 自带的网站放回来。"
+          }
+        }
+      }
+    },
     "Every website in it goes with it, along with the custom CSS, JavaScript, regions and schedules written for them; you will be signed out of each of those sites, and there is no undo.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "里面的每个网站都会一起消失，为它们写的自定义 CSS、JavaScript、缩放区域和排期也一样；你会从这些网站逐一退出登录，而且无法撤销。"
-          }
-        }
-      }
-    },
-    "Every website you are signed in to will be signed out, and your websites and their settings are kept.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "所有已登录的网站都会被登出，你的网站和它们的设置会保留。"
           }
         }
       }
@@ -2219,6 +2259,16 @@
         }
       }
     },
+    "The built-in default playlist cannot be bound to a display, so duplicate it first and bind the copy.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "内置的默认播放列表不能绑定到显示器，所以先复制一份，再绑定这个副本。"
+          }
+        }
+      }
+    },
     "The copy gets its own websites, so a region, a stylesheet or a reload interval changed in one list leaves the other alone. It does not copy logins: every site the original is signed in to, the copy is signed out of.": {
       "localizations": {
         "zh-Hans": {
@@ -2255,6 +2305,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "壁纸会自己回来。"
+          }
+        }
+      }
+    },
+    "The websites Nifro comes with go into your default playlist, and a default playlist is made if you do not have one.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nifro 自带的网站会进入你的默认播放列表；如果你没有默认播放列表，会新建一个。"
           }
         }
       }

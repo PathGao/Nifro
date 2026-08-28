@@ -112,16 +112,14 @@ enum RestoreDefaults {
 			UserDefaults.standard.set(chosenLanguage, forKey: preservedKey)
 		}
 
-		// The migration first, because the wipe took the flag that says it has run and because adding a
-		// website means adding it to a playlist — `didLaunch` orders these two the same way and argues
-		// for it at length.
-		WebsitesController.shared.migrateToPlaylistsIfNeeded()
-
-		// The entry point first launch uses, now that the flag guarding it went with everything else.
-		// Nothing else has to be driven from here: writing the website list is what the rest of the app
+		// The migration and then the install, in the order `didLaunch` uses and for the reason argued
+		// there. Both are behind one call now because Advanced has a button that wants the same state
+		// without the wipe above it: two callers of one entry point rather than two orderings that have
+		// to be kept in step.
+		//
+		// Nothing else has to be driven from here. Writing the website list is what the rest of the app
 		// already watches, so the scenes are rebuilt and every preference that has a publisher took its
-		// default on the way past. Restoring through the same path as launching means there is one
-		// path, not a second one that has to be kept in step with it.
-		WebsitesController.shared.installFeaturedWebsitesIfNeeded()
+		// default on the way past.
+		WebsitesController.shared.installDefaultPlaylist()
 	}
 }
