@@ -73,6 +73,41 @@ final class DisplayPanelModel: ObservableObject {
 		*/
 		let isLoading: Bool
 
+		/**
+		Why the app is showing nothing anywhere, in the app's own words, or `nil` when it is showing
+		something.
+
+		`isShowing` above is both switches at once, which is what the power button under the picture
+		needs and not what the picture can say with it. Every display's is false while the app is off,
+		so every column read "Switched off" — the power button's own phrase, on screens nobody had
+		switched off — and pressing that button then recorded the display as off for real, so turning
+		the app back on brought back a screen the user had never chosen to lose. Unplugging a laptop
+		with "Deactivate while on battery" set is the case with nothing at all to press: every wallpaper
+		goes, and until this the panel's whole account of it was four columns each blaming their own
+		screen.
+
+		A sentence rather than the reason, because the column is the only thing that will ever draw it
+		and `AppState.DisabledReason` is not the panel's vocabulary. There is no control here to undo
+		either state — the app has no "turn me back on" button anywhere, which is its own gap — so this
+		is a reading and not a label on something.
+		*/
+		let disabledReading: String?
+
+		/**
+		That this display's page did not load, if it did not.
+
+		Recorded per display since the app-wide slot was split, and read by nothing in this folder
+		until now: a wallpaper URL that starts answering with an error reported itself in the tooltip of
+		a menu bar icon nobody is pointing at, and nowhere else. The column named the website and drew
+		the last picture that worked, both of them true and neither of them the answer to why the page
+		on the desktop has stopped changing.
+
+		Its own field rather than a fifth thing the picture area says, because a failed load does not
+		have to take the picture away: swap loading keeps the page that worked up on purpose, so the
+		honest column is that picture with a line above it saying the new one never arrived.
+		*/
+		let failure: String?
+
 		// `nil` display means the main display — the one with the menu bar, not a display named in any
 		// setting — and there is only ever one of those, so the display's own id is the identity when it
 		// has one and a fixed stand-in when it does not.
@@ -212,8 +247,31 @@ final class DisplayPanelModel: ObservableObject {
 			// shown at all. So a display with two websites and one of them unshowable lit both arrows
 			// and did nothing when either was pressed, which is K24. One expression, asked twice.
 			canRotate: controller.eligible(in: playlist).count > 1,
-			isLoading: scene.isLoading
+			isLoading: scene.isLoading,
+			disabledReading: Self.disabledReading,
+			// Read here rather than in the view, with everything else the column says. The panel is the
+			// second reader of this store and the first one a user ever sees.
+			failure: AppState.shared.webViewError(on: scene.display)?.localizedDescription
 		)
+	}
+
+	/**
+	What the panel says when the app itself is off.
+
+	One sentence each, and the second one is the reason this is not simply "off": the battery rule
+	takes every wallpaper away without anybody having asked for it in that moment, and a column that
+	will not name it leaves the user looking for a fault in their website. Neither sentence names a
+	control, because there is none to name.
+	*/
+	private static var disabledReading: String? {
+		switch AppState.shared.disabledReason {
+		case .switchedOff:
+			String(localized: "Nifro is off")
+		case .onBattery:
+			String(localized: "Off while this Mac is on battery")
+		case nil:
+			nil
+		}
 	}
 
 
@@ -264,12 +322,12 @@ final class DisplayPanelModel: ObservableObject {
 	a flag.
 	*/
 	func step(_ direction: Step, on display: Display?) {
-		// Stepping a display that is switched off is how you wake it, and something does appear on it —
-		// so the switch has to agree. It used to light up with a website while still reading as off.
-		if AppState.shared.scenes.first(where: { $0.display == display })?.isDisabledForDisplay == true {
-			AppState.shared.setDisplayEnabled(true, on: display)
-		}
-
+		// No waking here. Stepping a display that is switched off is how you wake it and this used to
+		// say so itself, one line above the same answer inherited from `makeCurrent` — which is how the
+		// column came to have two opinions about what pointing a display at a website means: this
+		// button woke the display and the chooser beside it, going through `makeCurrent` alone, was
+		// believed not to. Both go through `makeCurrent`, so both wake it, and there is one place left
+		// to change when a third switch means off.
 		switch direction {
 		case .previous:
 			WebsitesController.shared.makePreviousCurrent(on: display)
@@ -369,6 +427,11 @@ final class DisplayPanelModel: ObservableObject {
 	the one the user was pointing at. The website itself rather than its id, because the chooser is
 	drawn from a playlist's own members and a playlist holds bodies — duplicating one makes copies with
 	ids of their own, so looking the id up in the website list would find nothing.
+
+	A switched-off display is woken by this, and nothing here says so: `makeCurrent` is where a request
+	to see something answers that, and the arrows above this chooser reach it by the same door. Two
+	sibling controls in one column had two answers about what picking a website means for as long as
+	either of them wrote its own.
 	*/
 	func selectWebsite(_ website: Website, on display: Display?) {
 		WebsitesController.shared.makeCurrent(website, on: display)
@@ -382,9 +445,17 @@ final class DisplayPanelModel: ObservableObject {
 	saying which website is up is deliberately left alone — it names a website the new playlist may not
 	contain, which `scheduled(for:)` already reads as "this display has not started" and answers with
 	the top of the list.
+
+	The waking is not left alone, and it is the one thing this has to say for itself rather than
+	inherit. Every other way of pointing a display at something goes through `makeCurrent`, which asks
+	`wakeDisplay` — this is the one that writes a different key, so it is the one place the answer had
+	to be repeated. Without it, picking a list for a dark screen changed the label above the picture
+	and left the screen dark, which is the same report the website chooser produced before its own
+	route was fixed.
 	*/
 	func selectPlaylist(_ id: Playlist.ID, on display: Display?) {
 		Defaults[.currentPlaylists][Display.settingsKey(for: display)] = id
+		AppState.shared.wakeDisplay(display)
 
 		Task {
 			await refresh()

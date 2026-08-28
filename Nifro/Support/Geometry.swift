@@ -139,20 +139,24 @@ struct Zoom: Codable, Hashable, Sendable {
 	}
 
 	/**
-	The strip of the page that ends up along the top of the display, in the coordinates of the view
-	the page is drawn in.
+	All of the page that ends up on the display, in the coordinates of the view the page is drawn in.
 
 	`PageView` magnifies the page and then slides it so the top-left corner of the region lands in the
 	top-left corner of the window. So a point `(px, py)` on the page sits at `(px * scale, py * scale)`
-	in the view, and the strip on show at the top of the display starts at the region's own origin,
-	magnified.
+	in the view, and what is on show starts at the region's own origin, magnified.
 
-	The width and the height are not scaled. They are already measured in the magnified points the
-	view's coordinates are in, so scaling them again is the mistake this exists to make impossible to
-	make twice: the menu bar band worked this out on its own, got the top strip of the whole page
-	instead, and tinted the menu bar with a part of the page that is usually not even on screen.
+	The size is not scaled. The magnification is chosen to make the region fill the page area exactly,
+	so the rectangle on show is one page area across and one page area down — already measured in the
+	magnified points the view's coordinates are in. Scaling it again is the mistake this exists to make
+	impossible to make twice: the menu bar band worked its own version of this out and got the top of
+	the whole page instead, and tinted the menu bar with a part of the page that is usually not even on
+	screen.
+
+	Everything that photographs the wallpaper's web view needs this rectangle, because the view's own
+	bounds are the whole magnified page and the part of it on screen is a window into that. The band
+	takes a strip off the top of it; the panel's thumbnail takes all of it.
 	*/
-	func topStrip(inPageOfSize pageSize: CGSize, height: Double) -> CGRect {
+	func onScreenRegion(inPageOfSize pageSize: CGSize) -> CGRect {
 		let region = region(inPageOfSize: pageSize)
 		let scale = magnification(inPageOfSize: pageSize)
 
@@ -160,7 +164,7 @@ struct Zoom: Codable, Hashable, Sendable {
 			x: region.minX * scale,
 			y: region.minY * scale,
 			width: pageSize.width,
-			height: height
+			height: pageSize.height
 		)
 	}
 

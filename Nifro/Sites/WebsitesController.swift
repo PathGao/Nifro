@@ -169,9 +169,15 @@ final class WebsitesController {
 	said so and did it themselves, and the keyboard shortcut, the `nifro://` commands and the Shortcuts
 	action reached the same verb by another door and skipped it. The mark then moved under a dark
 	screen: nothing was fetched, nothing appeared, so it got pressed again, and the display came back
-	later on a website nobody had chosen. Answered here because here is where all of those meet —
-	Next, Previous and Random are three verbs with three entry points each and all nine end in this
-	method, so the answer is inherited rather than repeated nine times and forgotten in six of them.
+	later on a website nobody had chosen. Asked here because here is where all of those meet — Next,
+	Previous and Random are three verbs with three entry points each and all nine end in this method,
+	so the answer is inherited rather than repeated nine times and forgotten in six of them.
+
+	Asked rather than answered: `AppState.wakeDisplay` is what a request to see something means, and
+	this is one of its two callers. The other is pointing a display at a playlist, which is the same
+	request one grain coarser and does not come through here — it writes a different key — so the
+	waking cannot live in this method without that one having to remember it separately, which is
+	exactly what it did not do.
 
 	- Parameter switchingDisplayOn: `false` where the mark is bookkeeping rather than a request to
 	look at something. Adding a website has to leave *some* website marked on its display, and that is
@@ -181,11 +187,8 @@ final class WebsitesController {
 		// Before the mark moves rather than after, which is the order the panel already used: the
 		// change reaches the scenes through a publisher on the next turn of the run loop, so a display
 		// switched on here is already on by the time the page it should be showing is worked out.
-		if
-			switchingDisplayOn,
-			AppState.shared.scenes.first(where: { $0.display == display })?.isDisabledForDisplay == true
-		{
-			AppState.shared.setDisplayEnabled(true, on: display)
+		if switchingDisplayOn {
+			AppState.shared.wakeDisplay(display)
 		}
 
 		// One assignment, and it can only reach one display's answer. What it replaced rewrote the
