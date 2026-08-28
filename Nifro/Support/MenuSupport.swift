@@ -107,13 +107,13 @@ private final class ActionTrampoline {
 }
 
 // Only ever used as an address for `objc_setAssociatedObject`; the value itself is never read.
-nonisolated(unsafe) private var controlActionClosureProtocolAssociatedObjectKey: UInt8 = 0
+nonisolated(unsafe) private var onActionAssociatedObjectKey: UInt8 = 0
 
-extension ControlActionClosureProtocol {
+extension NSControl {
 	var onAction: ((NSEvent) -> Void)? {
 		get {
 			guard
-				let trampoline = objc_getAssociatedObject(self, &controlActionClosureProtocolAssociatedObjectKey) as? ActionTrampoline
+				let trampoline = objc_getAssociatedObject(self, &onActionAssociatedObjectKey) as? ActionTrampoline
 			else {
 				return nil
 			}
@@ -122,14 +122,14 @@ extension ControlActionClosureProtocol {
 		}
 		set {
 			guard let newValue else {
-				objc_setAssociatedObject(self, &controlActionClosureProtocolAssociatedObjectKey, nil, .OBJC_ASSOCIATION_RETAIN)
+				objc_setAssociatedObject(self, &onActionAssociatedObjectKey, nil, .OBJC_ASSOCIATION_RETAIN)
 				return
 			}
 
 			let trampoline = ActionTrampoline(action: newValue)
 			target = trampoline
 			action = #selector(ActionTrampoline.handleAction)
-			objc_setAssociatedObject(self, &controlActionClosureProtocolAssociatedObjectKey, trampoline, .OBJC_ASSOCIATION_RETAIN)
+			objc_setAssociatedObject(self, &onActionAssociatedObjectKey, trampoline, .OBJC_ASSOCIATION_RETAIN)
 		}
 	}
 }

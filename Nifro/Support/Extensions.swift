@@ -836,9 +836,6 @@ extension NSAlert {
 	}
 }
 
-// MARK: - NSControl
-extension NSControl: ControlActionClosureProtocol {}
-
 // MARK: - NSError
 extension NSError {
 	/**
@@ -2390,11 +2387,6 @@ Relevant: https://www.djackson.org/why-we-do-not-use-urlcomponents/
 */
 private func escapeQueryComponent(_ query: String) -> String {
 	query.addingPercentEncoding(withAllowedCharacters: .urlUnreservedRFC3986)!
-}
-@MainActor
-protocol ControlActionClosureProtocol: NSObjectProtocol {
-	var target: AnyObject? { get set }
-	var action: Selector? { get set }
 }
 /**
 Default handlers for the UI for WKUIDelegate.
