@@ -12,6 +12,17 @@ final class SSWebView: WKWebView {
 	*/
 	weak var scene: WallpaperScene?
 
+	/**
+	The website entry this web view was built for.
+
+	Held here rather than read off `scene?.website` at the moment it is wanted, because that is where
+	the scene is *heading*: during a swap it is already the incoming website while this view still has
+	the outgoing page. Set once, next to the data store, and for the same value — what the page
+	remembers has to be filed under the same `id` as the store the page loaded from, or two entries on
+	one address share their scroll and zoom while having separate storage.
+	*/
+	var websiteID: Website.ID?
+
 	private var cancellables = Set<AnyCancellable>()
 
 	private var excludedMenuItems: Set<MenuItemIdentifier> = [
@@ -123,13 +134,11 @@ final class SSWebView: WKWebView {
 
 extension SSWebView {
 	private var zoomLevelDefaultsKey: Defaults.Key<Double?>? {
-		guard let url else {
+		guard let websiteID else {
 			return nil
 		}
 
-		// The query goes, unlike the scroll position and the remembered address: how far in a page is
-		// zoomed is a property of the page, and `?tab=2` is the same page at the same size.
-		return .init(PerPageDefaults.zoomLevel.key(for: url, removeQuery: true))
+		return .init(PerPageDefaults.zoomLevel.key(for: websiteID))
 	}
 
 	private var zoomLevelDefaultsValue: Double? {
