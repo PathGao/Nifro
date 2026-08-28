@@ -230,11 +230,11 @@ struct CurrentMarkTests {
 
 		// Next, Previous and Random are three verbs and three entry points each. What makes one answer
 		// enough is that all nine end here.
-		let playlist = try Self.source(named: "Playlist.swift")
+		let rotation = try Self.source(named: "RotationBehaviour.swift")
 
 		for verb in ["func makeNextCurrent(", "func makePreviousCurrent(", "func makeRandomCurrent("] {
 			#expect(
-				try Self.body(of: verb, in: playlist).contains("makeCurrent("),
+				try Self.body(of: verb, in: rotation).contains("makeCurrent("),
 				"`\(verb)` sets the mark some other way, so it no longer inherits the answer in `makeCurrent`."
 			)
 		}

@@ -144,7 +144,7 @@ rotate, Crop, Browsing Mode — and nothing that would apply to a screen you wer
   <img src="assets/panel-two-displays.jpg" alt="The display panel with one column per screen" width="900">
 </p>
 
-**A playlist with hours.** Rotate through the websites on a display, and let a website say when it
+**Rotation with hours.** Rotate through the websites on a display, and let a website say when it
 is allowed to be up. A schedule never leaves a display empty.
 
 **Hold a key to use the page.** Press and hold to click, scroll and zoom; let go and it is a

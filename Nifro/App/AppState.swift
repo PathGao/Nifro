@@ -82,7 +82,7 @@ final class AppState: ObservableObject {
 	that does nothing and says nothing is worse than one that acts somewhere reasonable.
 
 	It returns a *scene*, and callers pass `scene.display` on. Passing `Display.underMouse` straight
-	into the playlist would be a different value from the one the scenes are keyed by — and
+	into the rotation would be a different value from the one the scenes are keyed by — and
 	`randomIterators` is keyed by exactly that, so a display would get two shuffle sequences and the
 	"no repeats until the list is done" promise would quietly stop holding.
 	*/
@@ -141,7 +141,7 @@ final class AppState: ObservableObject {
 	its auto-reload, and pushed the external's window to full opacity while it stayed at desktop level.
 	`isBrowsingMode(on:)` below is the question those readers meant.
 
-	The doc that used to be here argued the pause was deliberate — "a playlist tick on the other screen
+	The doc that used to be here argued the pause was deliberate — "a rotation tick on the other screen
 	still steals focus". It does not. Nothing on the rotation path activates the app or takes key: a
 	tick makes another website current, the scene loads it out of sight through swap loading, and the
 	only `forceActivate` in this file is the one below, which runs when Browsing Mode is *entered*.
@@ -203,12 +203,12 @@ final class AppState: ObservableObject {
 			scene.window.isInteractive = isBrowsingMode(on: scene.display)
 			scene.applyOpacity()
 
-			// `resetPlaylistTimer` zeroes the minute count, so running it on a display nothing happened
+			// `resetRotationTimer` zeroes the minute count, so running it on a display nothing happened
 			// to puts that display back to the start of its rotation interval — the same defect the
 			// rebuild had, reached through a different door. Measured: entering Browsing Mode on the
 			// built-in pushed the external's rotation from t+61 out to t+111.
 			//
-			// `playlistTimer` is the record of which side the timers were last armed for, so nothing has
+			// `rotationTimer` is the record of which side the timers were last armed for, so nothing has
 			// to be remembered to compare against: it is non-`nil` exactly when this display is running
 			// and not being browsed. The reload timer follows the same guard, so one of them can speak
 			// for the pair — and it is the one that cannot be legitimately absent, where a website with
@@ -216,12 +216,12 @@ final class AppState: ObservableObject {
 			//
 			// A display switched off answers "not browsing, no timer", so it takes a reset it does not
 			// need. Both resets refuse it on `isSwitchedOff` and leave it exactly as it was.
-			guard isBrowsingMode(on: scene.display) == (scene.playlistTimer != nil) else {
+			guard isBrowsingMode(on: scene.display) == (scene.rotationTimer != nil) else {
 				continue
 			}
 
 			scene.resetTimer()
-			scene.resetPlaylistTimer()
+			scene.resetRotationTimer()
 		}
 
 		// Making the window key is not enough when the app is an accessory. The window comes forward, but keystrokes still go to whatever was active before, so nobody can type into the page.
@@ -281,7 +281,7 @@ final class AppState: ObservableObject {
 
 				scene.loadWebsite()
 				scene.resetTimer()
-				scene.resetPlaylistTimer()
+				scene.resetRotationTimer()
 			}
 		}
 	}
@@ -497,7 +497,7 @@ final class AppState: ObservableObject {
 		for scene in scenes {
 			// `scheduled` rather than a plain lookup: rebuilding happens on display changes and on any
 			// edit to the list, and a lookup that ignores the hours would put a website back on screen
-			// after its window closed, until the next playlist tick noticed.
+			// after its window closed, until the next rotation tick noticed.
 			scene.website = WebsitesController.shared.scheduled(for: scene.display)
 			scene.installContentView()
 			scene.window.isInteractive = isBrowsingMode(on: scene.display)
@@ -517,7 +517,7 @@ final class AppState: ObservableObject {
 			// decide which pages to reload, asked here so a display whose page is untouched keeps its
 			// clock as well as its page. A rebuild runs on every edit to the website list, on every
 			// display change and on every wake, and it used to restart both timers on every scene it
-			// kept. `resetPlaylistTimer` also zeroes the minute count, so the restart was not a
+			// kept. `resetRotationTimer` also zeroes the minute count, so the restart was not a
 			// rounding error: it put the display back at the start of its interval.
 			//
 			// Measured on two displays, external on loop at one minute and reloading every twenty
@@ -531,7 +531,7 @@ final class AppState: ObservableObject {
 			}
 
 			scene.resetTimer()
-			scene.resetPlaylistTimer()
+			scene.resetRotationTimer()
 		}
 	}
 
@@ -572,7 +572,7 @@ final class AppState: ObservableObject {
 			scene.resume()
 			scene.loadWebsite()
 			scene.resetTimer()
-			scene.resetPlaylistTimer()
+			scene.resetRotationTimer()
 		} else {
 			scene.suspend()
 		}
@@ -592,7 +592,7 @@ final class AppState: ObservableObject {
 	*/
 	func applyWebsiteChanges() {
 		// Only the scenes the change actually reached. Every edit republishes the whole list, and with
-		// one scene per display that meant one screen's playlist tick throwing away and re-fetching the
+		// one scene per display that meant one screen's rotation tick throwing away and re-fetching the
 		// page on every other screen — pages nothing about the edit had touched.
 		//
 		// Taken before the rebuild, because the rebuild is what moves each scene's `website` on to what
