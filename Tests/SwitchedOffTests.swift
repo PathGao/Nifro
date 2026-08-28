@@ -143,6 +143,7 @@ struct SwitchedOffTests {
 			("WallpaperScene.swift", "func resetTimer()", "arm the reload timer"),
 			("WallpaperScene.swift", "func snapshot() async -> NSImage?", "hand the panel a picture"),
 			("SwapLoading.swift", "func loadBySwapping(_ url: URL?)", "fetch a replacement page"),
+			("SwapLoading.swift", "func reloadInPlace(_ url: URL?) -> Bool", "refetch the page it already has"),
 			("RotationBehaviour.swift", "func resetRotationTimer()", "arm the rotation timer"),
 			("MenuBarBand.swift", "func installMenuBarBandIfNeeded()", "paint the menu bar band")
 		]

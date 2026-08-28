@@ -12,7 +12,7 @@ Loading in place has three failure modes, all of them the same mechanism:
 
 Loading into a second web view fixes all three at once. The current page stays up, untouched, until the replacement has finished. A failure then changes nothing on screen. The old page stays, and the error goes to the menu bar tooltip instead of the desktop.
 
-Scoped to replacing a page. The first load of the session still goes straight into the window, because there is nothing to protect yet and no reason to put the one path that has to work behind new machinery.
+Scoped to replacing a page with a different one. Two loads are not that and do not come through here. The first load of the session goes straight into the window, because there is nothing to protect yet and no reason to put the one path that has to work behind new machinery. And a reload of the page already on screen goes back into the web view it is already in — `reloadInPlace` below argues that one, because a swap there pays the whole cost of the mechanism for a page it is replacing with itself.
 */
 extension WallpaperScene {
 	/**
@@ -29,6 +29,76 @@ extension WallpaperScene {
 		case .live:
 			webViewController.webView.url != nil
 		}
+	}
+
+	/**
+	Reload the page that is already on screen, in the web view it is already in. Answers whether it did.
+
+	A swap builds a whole web view to load into: a `WKWebViewConfiguration`, every user script the
+	website carries, the content-blocking rule list, and a `WKWebsiteDataStore(forIdentifier:)` — a new
+	WebContent process and a new network session, with the previous pair dropped once the new page
+	arrives. That is the price of the isolation above, and it is worth paying to *change* the page.
+	A timed reload does not change the page. It asks for the same address, in the same website, into a
+	view configured identically to the one already showing it, and then throws that view away. Two
+	displays on a fifteen-minute interval spend about 192 process launches a day doing it.
+
+	So the fast path, and the four conditions are what make it the timed reload and nothing else:
+
+	- `pendingWebView == nil`, so a swap already in flight is not raced by a reload of the page it is
+	about to replace. The swap path cancels its predecessor; this one has nothing to cancel with.
+	- `loadedWebsite == website`, the whole struct as `isUpToDate` compares it. The website's CSS,
+	JavaScript and zoom are compiled into the web view when the web view is made, so a page loaded from
+	an older version of this website has to be built again rather than fetched again — which is exactly
+	what `applyWebsiteChanges` reloads for.
+	- `webViewController.webView.url == url`, so a page that redirected somewhere else, or that was
+	clicked away from in Browsing Mode, is put back rather than reloaded where it drifted to. A file
+	URL and an embedded video also fail this on their own: one loads `index.html` inside the folder and
+	the other a host page around the address, so neither web view is ever showing the URL it was given.
+	- `hasSomethingOnScreen`, the same question the swap asks, so a display drawn from stills is not
+	told to reload a live page it does not have.
+
+	`reloadFromOrigin` rather than `reload`, because `loadWallpaper` sends the request with
+	`.reloadIgnoringLocalCacheData` and this path has to be as fresh as the one it replaces. Plain
+	`reload` revalidates the document and takes its subresources from the cache, which on a dashboard
+	is where the numbers are. `reloadFromOrigin` revalidates end to end, document and subresources
+	both, so nothing stale survives it — with conditionals where the server offers them, so some of it
+	comes back as a 304 rather than as bytes. Freshness unchanged, and a little less of the network.
+
+	**What it gives up:** the failure isolation this file exists for, on this path only. A swap that
+	fails leaves the last good page up and puts the error in the menu bar tooltip; here WebKit is
+	reloading the live view, and if the new document commits and then fails, what commits is what shows.
+	Most of the isolation survives anyway, because the case the header names — the Mac waking before the
+	network does — fails provisionally, and a provisional failure never commits: `WKWebView` has no
+	error page of its own, so the document already up stays up and the error still reaches the tooltip
+	through `didFailProvisionalNavigation`. Deliberate, and narrow: the paths with something real to
+	lose — waking, a website edited, the Reload command, the first load — all still swap, because none
+	of them passes `inPlace`.
+	*/
+	func reloadInPlace(_ url: URL?) -> Bool {
+		guard
+			!isSwitchedOff,
+			let url,
+			hasSomethingOnScreen,
+			pendingWebView == nil,
+			loadedWebsite == website,
+			webViewController.webView.url == url
+		else {
+			return false
+		}
+
+		// Optimistically, exactly as `load` clears it at the top: a reload that fails reports through
+		// the navigation delegate and stores its error again, and leaving the last failure in the
+		// tooltip through every successful reload after it is the alternative.
+		AppState.shared.setWebViewError(nil, on: display)
+
+		// Everything `adopt` does by hand for a replacement is already wired for the live view.
+		// `didFinish` reveals the page, re-samples the menu bar band, records the title, applies the
+		// mute setting and restores the scroll position and zoom — all of it keyed on the web view the
+		// delegate reports for, which on this path is the one that was already live. The repeating
+		// timer needs no rearming either; it is the thing that fired.
+		webViewController.webView.reloadFromOrigin()
+
+		return true
 	}
 
 	/**
