@@ -23,6 +23,16 @@
       }
     },
     "%@": {},
+    "%@ copy": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ 副本"
+          }
+        }
+      }
+    },
     "%@× at %lld%%, %lld%%": {
       "localizations": {
         "en": {
@@ -559,6 +569,16 @@
         }
       }
     },
+    "Delete…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "删除…"
+          }
+        }
+      }
+    },
     "Dim while another app is in front": {
       "localizations": {
         "zh-Hans": {
@@ -619,6 +639,36 @@
         }
       }
     },
+    "Duplicate": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制"
+          }
+        }
+      }
+    },
+    "Duplicate %@?": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制「%@」？"
+          }
+        }
+      }
+    },
+    "Duplicate…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "复制…"
+          }
+        }
+      }
+    },
     "Each website can live on its own screen; “Main Display” is whichever one has the menu bar, so it moves when you rearrange displays or dock your laptop.": {
       "localizations": {
         "zh-Hans": {
@@ -675,6 +725,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "出错：%@"
+          }
+        }
+      }
+    },
+    "Every website in it goes with it, along with the custom CSS, JavaScript, regions and schedules written for them; you will be signed out of each of those sites, and there is no undo.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "里面的每个网站都会一起消失，为它们写的自定义 CSS、JavaScript、缩放区域和排期也一样；你会从这些网站逐一退出登录，而且无法撤销。"
           }
         }
       }
@@ -1209,6 +1269,16 @@
         }
       }
     },
+    "Name": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "名称"
+          }
+        }
+      }
+    },
     "Never": {
       "localizations": {
         "zh-Hans": {
@@ -1259,6 +1329,16 @@
         }
       }
     },
+    "No Playlists": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "没有播放列表"
+          }
+        }
+      }
+    },
     "No Website": {
       "localizations": {
         "zh-Hans": {
@@ -1285,6 +1365,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "没有网络连接"
+          }
+        }
+      }
+    },
+    "None": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "无"
           }
         }
       }
@@ -1479,6 +1569,26 @@
         }
       }
     },
+    "Playlist Actions": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "播放列表操作"
+          }
+        }
+      }
+    },
+    "Playlists": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "播放列表"
+          }
+        }
+      }
+    },
     "Plays sound": {
       "localizations": {
         "zh-Hans": {
@@ -1655,6 +1765,36 @@
           "stringUnit": {
             "state": "translated",
             "value": "从 Nifro 中移除指定的网站。"
+          }
+        }
+      }
+    },
+    "Rename": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重命名"
+          }
+        }
+      }
+    },
+    "Rename Playlist": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重命名播放列表"
+          }
+        }
+      }
+    },
+    "Rename…": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重命名…"
           }
         }
       }
@@ -1939,6 +2079,16 @@
         }
       }
     },
+    "Show on Display": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "显示在显示器"
+          }
+        }
+      }
+    },
     "Showing": {
       "localizations": {
         "zh-Hans": {
@@ -2095,6 +2245,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "播放器单独的地址，视频直接铺满壁纸，没有周围的导航、推荐和评论。"
+          }
+        }
+      }
+    },
+    "The copy gets its own websites, so a region, a stylesheet or a reload interval changed in one list leaves the other alone. It does not copy logins: every site the original is signed in to, the copy is signed out of.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "副本会拿到属于它自己的网站，所以在一个列表里改缩放区域、样式表或刷新间隔，不会影响另一个。它不会复制登录状态：原列表已登录的每个网站，副本都是未登录的。"
           }
         }
       }
@@ -2445,6 +2605,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld 个站点 · 已与 GitHub 同步"
+          }
+        }
+      }
+    },
+    "^[%lld website](inflect: true)": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld 个网站"
           }
         }
       }

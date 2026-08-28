@@ -28,7 +28,7 @@ struct AddWebsiteIntent: AppIntent {
 	@MainActor
 	func perform() async throws -> some IntentResult & ReturnsValue<WebsiteAppEntity> {
 		ensureRunning()
-		let website = WebsitesController.shared.add(url, title: title?.nilIfEmptyOrWhitespace).wrappedValue
+		let website = WebsitesController.shared.add(url, title: title?.nilIfEmptyOrWhitespace)
 		return .result(value: .init(website))
 	}
 }

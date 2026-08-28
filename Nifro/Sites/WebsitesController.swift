@@ -19,16 +19,18 @@ final class WebsitesController {
 	@MainActor let thumbnailCache = SimpleImageCache<String>(diskCacheName: "websiteThumbnailCache")
 
 	/**
-	All websites.
-	*/
-	var all: [Website] {
-		get { Defaults[.websites] }
-		set {
-			Defaults[.websites] = newValue
-		}
-	}
+	All websites, in the order the playlists hold them.
 
-	private let allBinding = Defaults.bindingCollection(for: .websites)
+	Read from `playlists` and not from `websites`, which is a mirror of this now — see `mirrorWebsites`
+	below for what that key still is and who still reads it. Reading the mirror instead would be one
+	turn of the run loop behind at the worst moment: a screen that has just added, deleted or reordered
+	a website asks this in the same pass, and would be told the list as it was.
+
+	No setter. There was one, and every caller of it was writing a whole list back to say one thing —
+	change this website, drop that one, put this at the end — which is a shape that cannot say *which
+	playlist* any of it happened in. The four verbs below say it instead.
+	*/
+	var all: [Website] { Defaults[.playlists].flatMap(\.websites) }
 
 	/**
 	Which website `display` is showing, and the only two ways to ask.
@@ -48,21 +50,29 @@ final class WebsitesController {
 	}
 
 	/**
-	Whether `website` is the one on screen where it lives.
+	Whether `website` is up on any screen.
 
-	The question the flat lists ask — the Websites window and the Shortcuts entity — neither of which
-	has a display in hand, because neither is about one screen. Asked of the website's own display
-	rather than of the whole dictionary, and that is not the same question: "Show on" moves a website
-	to another screen without going near the cursor, so the display it left goes on naming it until
-	something else is chosen there. Answered by any entry at all, the list would draw a tick against a
-	website nothing is showing — which is the visible half of the defect this key was made to remove,
-	put back in a different place.
+	The question the display-less lists ask — the Websites window and the Shortcuts entity — neither of
+	which is about one screen. It used to be asked of `website.effectiveDisplay`, the display the
+	website was pinned to, and that was the right question only while a website belonged to a screen.
+	A screen picks a list now: the display showing a website is whichever one selected the playlist
+	holding it, which has nothing to do with the website's own `display` field. Asked the old way, a
+	list drew its tick against the wrong row for every website whose playlist is shown anywhere but the
+	main display — systematically, and on the normal configuration rather than an edge of it.
 
-	The stale entry itself is left alone. It names a website that display no longer has, which
-	`scheduled` already reads as "this display has not started" and answers with the top of its list.
+	It can also be true on more than one row at once, and that is not a defect either: two displays
+	showing one playlist are two screens each with their own cursor, and both of those websites are up.
+
+	**What it gives up**, so that it is a trade and not an oversight. A cursor entry outlives its
+	display — deliberately, so a monitor unplugged at night comes back in the morning showing what it
+	was showing — and `scheduled` reads an entry naming a website that is gone as "this display has not
+	started". So an entry left by an unplugged display can put a tick on a row nothing is currently
+	drawing. That is one stale row against every row being wrong, and the direction of the error is the
+	safe one: it over-reports what is showing rather than under-reporting it, and "Set as Current"
+	beside it is not disabled by anything the user would want.
 	*/
 	func isShowing(_ website: Website) -> Bool {
-		currentWebsiteID(on: website.effectiveDisplay) == website.id
+		Defaults[.currentWebsites].values.contains(website.id)
 	}
 
 	/**
@@ -125,19 +135,53 @@ final class WebsitesController {
 
 	Kept here rather than worked out per call because it is derived from the list, and the list already
 	has one place where every route to it meets: the publisher below. Nothing else may write this, and
-	nothing else needs to — `Defaults.publisher` sees writes through `all`, through `allBinding` and
-	through any settings screen that reaches the key directly.
+	nothing else needs to — `Defaults.publisher` sees the mirror, which is written from every change to the
+	playlists whatever made it.
 
 	Subscribed with `ObservationOptions.initial`, which is `Defaults.publisher`'s default, so this is
 	filled from the stored list before `init` returns rather than at the first edit.
 	*/
 	private var addressesAwaitingTitle = Set<URL>()
 
+	/**
+	Keep `websites` holding exactly what the playlists hold, in their order.
+
+	The key is a mirror rather than a store now, with one writer — this — and no reader that knows it.
+	That is what makes moving the store cost one function instead of a sweep: `Events` decides from it
+	which scenes a change reached, `DisplayPanelModel` builds a column from it, `Intents` answers
+	Shortcuts out of it, `ScrollRestoration` and `CropSelection` look a website up in it, and every one
+	of them goes on working unedited and unaware. Those readers move to the playlists as their own
+	changes reach them, and the day the last one has, this function and the key both go.
+
+	It also keeps the promise the key's own comment already makes: both keys hold the same websites, so
+	somebody who runs this build and goes back to the one before it finds their list where they left
+	it.
+
+	Written only when it differs, because the write republishes — `Events` treats every change to this
+	key as a possible reason to rebuild a page — and a mirror that reposts an identical list on every
+	playlist edit would make each one cost two.
+	*/
+	private static func mirrorWebsites(of playlists: [Playlist]) {
+		let websites = playlists.flatMap(\.websites)
+
+		guard Defaults[.websites] != websites else {
+			return
+		}
+
+		Defaults[.websites] = websites
+	}
+
 	private init() {
 		setUpEvents()
 	}
 
 	private func setUpEvents() {
+		Defaults.publisher(.playlists, options: [])
+			.sink { change in
+				Self.mirrorWebsites(of: change.newValue)
+			}
+			.store(in: &cancellables)
+
 		Defaults.publisher(.websites)
 			.sink { [weak self] change in
 				guard let self else {
@@ -210,16 +254,37 @@ final class WebsitesController {
 	seven chances to write back a list built from a stale read.
 	*/
 	func update(_ id: Website.ID, _ change: (inout Website) -> Void) {
-		all = all.modifying(elementWithID: id, update: change)
+		Defaults[.playlists] = Defaults[.playlists].map {
+			var playlist = $0
+			playlist.websites = playlist.websites.modifying(elementWithID: id, update: change)
+			return playlist
+		}
 	}
 
 	/**
-	Add a website.
+	Add a website to a playlist, or to the default one.
+
+	`playlist` is what the management page passes: a website added while looking at a list belongs to
+	that list, and every other route in — the gallery, a `nifro://` command, the Shortcuts action, the
+	share extension — has no list in hand and means the one every display falls back to.
+
+	The fallback also covers the case the playlists are missing entirely, which is not reachable
+	through the app but is reachable by editing the stored preferences, and the cost of being wrong
+	about it is a website added to nothing at all.
 	*/
-	@discardableResult
-	func add(_ website: Website) -> Binding<Website> {
+	func add(_ website: Website, to playlist: Playlist.ID? = nil) {
+		var playlists = Defaults[.playlists]
+		let index = playlist.flatMap { id in playlists.firstIndex { $0.id == id } }
+			?? playlists.firstIndex(where: \.isDefault)
+
+		if let index {
+			playlists[index].websites.append(website)
+		} else {
+			playlists.append(Playlist(name: Playlist.defaultName, websites: [website], isDefault: true))
+		}
+
 		// The order here is important.
-		all.append(website)
+		Defaults[.playlists] = playlists
 
 		// Marked, not shown. A new website has to hold its display's mark or that display has none,
 		// but putting something in the list is not a request to look at it — a display the user
@@ -227,8 +292,6 @@ final class WebsitesController {
 		// on per website. The screens that do mean "show this now" say so with their own
 		// `makeCurrent` afterwards.
 		makeCurrent(website, switchingDisplayOn: false)
-
-		return allBinding[id: website.id]!
 	}
 
 	/**
@@ -237,30 +300,39 @@ final class WebsitesController {
 	Optionally, specify a title. If no title is given or if the title is empty, a title will be automatically fetched from the website.
 	*/
 	@discardableResult
-	func add(_ websiteURL: URL, title: String? = nil) -> Binding<Website> {
-		let websiteBinding = add(
-			Website(
-				id: UUID(),
-				isCurrent: true,
-				url: websiteURL,
-				usePrintStyles: false
-			)
+	func add(_ websiteURL: URL, title: String? = nil, to playlist: Playlist.ID? = nil) -> Website {
+		var website = Website(
+			id: UUID(),
+			isCurrent: true,
+			url: websiteURL,
+			usePrintStyles: false
 		)
 
+		// Set before the website is stored rather than written back through a binding afterwards. A
+		// binding into the list was what this used to hand back, and a binding is a second way to write
+		// a website — one that names no playlist, so it could only ever have written the mirror.
 		if let title = title?.nilIfEmptyOrWhitespace {
-			websiteBinding.wrappedValue.title = title
-		} else {
-			fetchTitleIfNeeded(for: websiteBinding)
+			website.title = title
 		}
 
-		return websiteBinding
+		add(website, to: playlist)
+
+		if website.title.isEmpty {
+			fetchTitleIfNeeded(for: website.id, at: website.url)
+		}
+
+		return website
 	}
 
 	/**
 	Remove a website.
 	*/
 	func remove(_ website: Website) {
-		all = all.removingAll(website)
+		Defaults[.playlists] = Defaults[.playlists].map {
+			var playlist = $0
+			playlist.websites = playlist.websites.removingAll(website)
+			return playlist
+		}
 	}
 
 	/**
@@ -292,35 +364,37 @@ final class WebsitesController {
 			let url,
 			addressesAwaitingTitle.contains(url.normalized()),
 			let title = title.trimmed.nilIfEmpty,
-			let index = all.firstIndex(where: { $0.url.normalized() == url.normalized() }),
-			all[index].title.isEmpty
+			let website = all.first(where: { $0.url.normalized() == url.normalized() }),
+			website.title.isEmpty
 		else {
 			return
 		}
 
-		all[index].title = title
+		update(website.id) {
+			$0.title = title
+		}
 	}
 
 	/**
 	Fetch the title for a website in the background if the existing title is empty.
 	*/
-	private func fetchTitleIfNeeded(for website: Binding<Website>) {
-		guard website.wrappedValue.title.isEmpty else {
-			return
-		}
-
+	private func fetchTitleIfNeeded(for id: Website.ID, at url: URL) {
 		Task {
 			let metadataProvider = LPMetadataProvider()
 			metadataProvider.shouldFetchSubresources = false
 
 			guard
-				let metadata = try? await metadataProvider.startFetchingMetadata(for: website.wrappedValue.url),
+				let metadata = try? await metadataProvider.startFetchingMetadata(for: url),
 				let title = metadata.title
 			else {
 				return
 			}
 
-			website.wrappedValue.title = title
+			// By id, because this comes back seconds later: the website may have been moved to another
+			// playlist, or deleted, in between. A binding held across that wait would write it back.
+			update(id) {
+				$0.title = title
+			}
 		}
 	}
 }
@@ -341,23 +415,25 @@ extension SiteCatalog.Entry {
 	*/
 	@MainActor
 	@discardableResult
-	func add() -> Website.ID? {
+	func add(to playlist: Playlist.ID? = nil) -> Website.ID? {
 		guard let parsedURL = URL(string: url) else {
 			return nil
 		}
 
-		let binding = WebsitesController.shared.add(parsedURL, title: name)
+		let website = WebsitesController.shared.add(parsedURL, title: name, to: playlist)
 
-		binding.wrappedValue.css = css ?? ""
-		binding.wrappedValue.javaScript = javaScript ?? ""
-		binding.wrappedValue.zoom = zoom
-		// Everything the entry carries is a starting point. From here on the website is the user's:
-		// the Sound item in the menu writes to this same field, and nothing puts the entry's answer
-		// back. Whatever the menu shows a tick against is what the page is actually doing.
-		binding.wrappedValue.audio = playsSound ? .unmuted : .muted
-		binding.wrappedValue.reloadInterval = reloadInterval
+		WebsitesController.shared.update(website.id) {
+			$0.css = css ?? ""
+			$0.javaScript = javaScript ?? ""
+			$0.zoom = zoom
+			// Everything the entry carries is a starting point. From here on the website is the user's:
+			// the Sound item in the menu writes to this same field, and nothing puts the entry's answer
+			// back. Whatever the menu shows a tick against is what the page is actually doing.
+			$0.audio = playsSound ? .unmuted : .muted
+			$0.reloadInterval = reloadInterval
+		}
 
-		return binding.wrappedValue.id
+		return website.id
 	}
 }
 
@@ -436,14 +512,16 @@ extension WebsitesController {
 
 		Defaults[.hasMigratedWebsitesToPlaylists] = true
 
-		let websites = all
+		// The stored key, not `all` — which reads the playlists this is about to write, and so would
+		// hand back an empty list and migrate nothing.
+		let websites = Defaults[.websites]
 
 		Defaults[.playlists] = playlistMigration(displays: websites.map(\.display)).map { group in
 			let members = group.websites.map { websites[$0] }
 
 			guard let display = group.screen else {
 				return Playlist(
-					name: String(localized: "Default"),
+					name: Playlist.defaultName,
 					websites: members,
 					isDefault: true
 				)

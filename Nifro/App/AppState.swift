@@ -416,11 +416,14 @@ final class AppState: ObservableObject {
 
 	private func didLaunch() {
 		_ = statusItemButton
-		WebsitesController.shared.installFeaturedWebsitesIfNeeded()
-		// After the line above, not before it: on a first launch that line is what puts anything in
-		// the list at all, and a migration that ran first would file the shipped websites under
-		// nothing.
+		// Before the line below, not after it. Adding a website means adding it to a playlist, so the
+		// order that used to be right is now the wrong way round: on a first launch, the shipped
+		// websites would be filed under a default playlist made on the spot, and the migration would
+		// then run against the mirror those writes had produced and replace that playlist with another
+		// one holding the same eight sites. The list a display picks would have changed identity
+		// between two lines of the same launch.
 		WebsitesController.shared.migrateToPlaylistsIfNeeded()
+		WebsitesController.shared.installFeaturedWebsitesIfNeeded()
 		rebuildScenes()
 		setUpEvents()
 		showWelcomeScreenIfNeeded()
