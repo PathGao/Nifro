@@ -231,7 +231,28 @@ extension WallpaperScene {
 		revealPage()
 
 		restorePageState(in: replacement)
-		refreshMenuBarBandColor()
+
+		// Framing only, and the condition reads backwards on purpose: the call is kept for the one
+		// case where it is the *only* sample. Everywhere else `installContentView` above has already
+		// taken one — it assigns `content`, and `applyContent` under that observer installs the band,
+		// which samples — so this line bought a second `takeSnapshot` into the web content process
+		// and a second `areaAverage` render for the same colour, on every website switch, every
+		// rotation tick, every wake and every website edit.
+		//
+		// While framing, `installContentView` refuses and never writes `content`, so that first
+		// sample does not happen; and the page being framed was put up long before, so the reveal
+		// above returns at its own guard rather than sampling. Delete this and a framed display keeps
+		// the colour it took off the page before this one.
+		//
+		// The earlier sample is the better one to keep, not merely the cheaper one. `restorePageState`
+		// on the line above dispatches the scroll restoration as JavaScript and does not wait for it,
+		// so anything sampled after it sees a page that may or may not have moved yet, depending on
+		// which message the web content process answers first. The plain load path settles the same
+		// question the same way: `didFinish` puts the page up, and samples, before it restores.
+		if window.isFramingRegion {
+			refreshMenuBarBandColor()
+		}
+
 		resetTimer()
 	}
 }
