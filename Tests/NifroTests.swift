@@ -941,47 +941,4 @@ struct ShippedWebsitesTests {
 		#expect(featured.allSatisfy { !$0.playsSound })
 		#expect(!featured.isEmpty)
 	}
-
-	@Test("One display shows the first shipped website")
-	func onePlacement() {
-		let placements = firstLaunchPlacements(displayCount: 1, websiteCount: 8)
-
-		#expect(placements.map(\.website) == [0])
-		#expect(placements.map(\.display) == [nil])
-	}
-
-	/**
-	The case the user asked for, and the one that was broken: the second screen started empty because
-	every installed website was on the main display.
-	*/
-	@Test("Two displays show the first and the second")
-	func twoPlacements() {
-		let placements = firstLaunchPlacements(displayCount: 2, websiteCount: 8)
-
-		#expect(placements.map(\.website) == [0, 1])
-
-		// The first is left following the main display rather than pinned to a display of its own, so
-		// it moves with the menu bar; the second has to be pinned, or nothing names that screen and it
-		// gets no wallpaper.
-		#expect(placements.map(\.display) == [nil, 1])
-	}
-
-	@Test("The rule keeps going past two displays")
-	func threePlacements() {
-		let placements = firstLaunchPlacements(displayCount: 3, websiteCount: 8)
-
-		#expect(placements.map(\.website) == [0, 1, 2])
-		#expect(placements.map(\.display) == [nil, 1, 2])
-	}
-
-	/**
-	Both ends of the count. There is always one wallpaper — `displaysInUse` falls back to the main
-	display — so a moment with no display attached still places the first website rather than none.
-	*/
-	@Test("More displays than websites, and no displays at all")
-	func lopsidedPlacements() {
-		#expect(firstLaunchPlacements(displayCount: 9, websiteCount: 8).count == 8)
-		#expect(firstLaunchPlacements(displayCount: 0, websiteCount: 8).map(\.display) == [nil])
-		#expect(firstLaunchPlacements(displayCount: 2, websiteCount: 0).isEmpty)
-	}
 }

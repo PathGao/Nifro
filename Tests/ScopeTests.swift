@@ -370,6 +370,47 @@ struct ScopeTests {
 	}
 
 	/**
+	Which displays get a wallpaper is asked of the displays, not of the website list.
+
+	The same wrong scope as the rest of this suite, in its largest form. `displaysInUse` was the
+	distinct `effectiveDisplay` over the websites, and `rebuildScenes` built one scene per entry, so a
+	list-wide fact — "some website names this screen" — decided whether a screen existed at all. A
+	second display plugged in after the first launch was named by nothing and stayed black, and there
+	was no column for it in the panel to fix it from, because the panel draws one column per scene. The
+	shipped websites were pinned one per display to paper over exactly this, which is why that pinning
+	went with it.
+
+	Both halves are asserted, because each fails on its own. Building from the displays without the
+	fallback leaves no wallpaper at all in the moments `Display.all` is empty — reconfiguration, every
+	screen asleep — and those are the moments a display change puts this on the stack.
+	*/
+	@Test("Every attached display gets a scene, and there is always one")
+	func scenesAreBuiltFromTheDisplays() throws {
+		let rebuild = try Self.body(of: "func rebuildScenes()", in: Self.source(named: "AppState.swift"))
+		let controller = try Self.source(named: "WebsitesController.swift")
+
+		#expect(
+			rebuild.contains("Display.all"),
+			"`rebuildScenes` no longer starts from the attached displays. A display no website names gets no scene, and there is nothing on that screen to say so."
+		)
+
+		#expect(
+			!rebuild.contains("WebsitesController.shared.displays"),
+			"`rebuildScenes` asks the website list which displays exist again. That is the direction this refactor inverted."
+		)
+
+		#expect(
+			!controller.contains("displaysInUse"),
+			"`WebsitesController` derives a display list from the websites again. Which screens exist is not a fact about the list."
+		)
+
+		#expect(
+			rebuild.contains("[nil]"),
+			"Nothing keeps one scene when `Display.all` is empty, so a reconfiguration or a sleeping screen leaves no wallpaper at all."
+		)
+	}
+
+	/**
 	A display that goes away takes its Browsing Mode and nothing else.
 
 	The one per-display entry that is a state rather than a preference, and the only one with teeth: it

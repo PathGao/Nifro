@@ -4,10 +4,10 @@ import Foundation
 A named list of websites, and which display may offer it.
 
 The inversion this type exists for. A website carries the display it belongs to, so the screen shows
-whatever names it — and `displaysInUse`, which decides whether a display gets a wallpaper at all, is
-derived from those fields. That is why a display nothing names gets no wallpaper, and why the shipped
-websites have to be pinned one per screen on first launch: not as curation, but so the second screen
-is named by something. Here the screen picks a list instead, and the list is a thing the user can
+whatever names it. Which displays get a wallpaper at all no longer follows from those fields —
+`rebuildScenes` builds one scene per attached display — but *what* a display may show still does:
+`eligible(for:)` filters the whole list by `effectiveDisplay`, so a display no website names has a
+scene with nothing in it. Here the screen picks a list instead, and the list is a thing the user can
 name, reorder and duplicate.
 
 Nothing reads this yet, and it is filled ahead of its readers on purpose. What fills it runs once

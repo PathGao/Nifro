@@ -273,25 +273,6 @@ final class WebsitesController {
 	var showable: [Website] { all.filter(\.isShowable) }
 
 	/**
-	Every display that has at least one website assigned to it.
-
-	Falls back to the main display — the one with the menu bar — so there is always exactly one scene
-	to show, even before anything is configured.
-	*/
-	var displaysInUse: [Display?] {
-		var seen: [Display?] = []
-
-		for website in showable {
-			let display = website.effectiveDisplay
-			if !seen.contains(where: { $0 == display }) {
-				seen.append(display)
-			}
-		}
-
-		return seen.isEmpty ? [.main] : seen
-	}
-
-	/**
 	Record a title observed in the live web view, if we do not already have one.
 
 	`LPMetadataProvider` fetches the raw HTML with subresources turned off and gives up after a few seconds. It comes back empty for anything that sets its title from JavaScript or loads slowly, which covers a lot of the sites people use as wallpapers. The web view has already run the page, so its title is more accurate and costs nothing.
@@ -405,29 +386,21 @@ extension WebsitesController {
 		// on the list being empty, so somebody upgrading into this may already have websites of their
 		// own — and `all.first` was then one of theirs.
 		let installed = SiteCatalog.featured.compactMap { $0.add() }
-		let displays = Display.all
+
+		// Nothing is assigned to a display. It used to be: the Nth of these went to the Nth attached
+		// display, because a scene existed only for a display some website named, so the second screen
+		// was blank unless something was pinned to it. Scenes come from `Display.all` now, so every
+		// attached display has one whether or not a website names it, and the pinning would be a
+		// decision made on the user's behalf — one they then have to find and undo before they can use
+		// these eight as the single list they look like.
 
 		// Adding makes each one current in turn, so without this the wallpaper would be whichever was
-		// added last. A second display would have been left with nothing at all: every website was on
-		// the main display, so there was only ever one scene to be current in.
-		for placement in firstLaunchPlacements(displayCount: displays.count, websiteCount: installed.count) {
-			let id = installed[placement.website]
-
-			// Pinned, which is what puts a second scene on the second screen: `displaysInUse` is read
-			// off the websites, so a display nothing names has no wallpaper. The first display is left
-			// unpinned on purpose — see `firstLaunchPlacements`.
-			if let index = placement.display {
-				update(id) {
-					$0.display = displays[index]
-				}
-			}
-
-			guard let website = all[id: id] else {
-				continue
-			}
-
-			makeCurrent(website)
+		// added last rather than the first of a list that is ordered on purpose.
+		guard let first = installed.first.flatMap({ all[id: $0] }) else {
+			return
 		}
+
+		makeCurrent(first)
 	}
 }
 
