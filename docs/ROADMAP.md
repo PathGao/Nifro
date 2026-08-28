@@ -60,7 +60,7 @@ different path and always worked, which is why it read as fine. There is no auto
 have caught this — see the trap in section 10.
 
 ```
-Open      W1 W3-W6 W8 W9 wiring   K1 K6 K8 K20 K30 K38 K39 bugs   L1-L4  V1 V2 V4 V5  S1 S2 S4  D4 D6  E21-E23 E25  U2 U3
+Open      W1 W3-W6 W8 W9 wiring   K1 K6 K8 K20 K30 K38 K39 bugs   L1-L4  V1 V2 V4 V5  S1 S2 S4  D4 D6  E21 E23 E25  U2 U3
 Parked    K7 HDR (your call), the P series (needs a measurement first)
 Blocked   nothing
 ```
@@ -220,8 +220,23 @@ of them is downstream of rebuilding that, and the rows say which part each needs
 playlist refactor removed the last trace of one: two displays showing the same website now show two
 independent pages, deliberately, and duplicating a playlist mints fresh ids precisely so they stay
 independent. Anything that wants two screens frame-locked again is a new feature with a new design,
-not a row waiting to be picked up. `docs/shelved/MULTI-DISPLAY-SYNC.md` is still the list of defects it
-was pulled for, and still the first thing to read.
+not a row waiting to be picked up.
+
+**A design for it now exists, and it is not the one that was shelved.** `docs/shelved/MULTI-DISPLAY-SYNC.md`
+§ 4a, written 2026-08-28: one page renders and the second display draws a capture of it, so there is no
+second decoder and nothing to hold to a clock. What blocked it was permission, and that turned out not
+to exist — **`SCShareableContent.currentProcess` reaches this process's own windows with no Screen
+Recording grant**, measured against `current` throwing `-3801` in the same run, on a sandboxed probe
+carrying this app's own entitlements, capturing a `.desktop`-level window whose content is a live
+`WKWebView`. Apple ships that API with an empty documentation page, which is why it was not findable
+by reading.
+
+**Still a route rather than a plan**, and § 4a says why: it collapses per-display regions, scales the
+leader's layout onto a screen it was not laid out for, leaves the follower a picture with no Browsing
+Mode, and needs colour management the two capture paths do not agree on. **And the continuous
+`SCStream` it would be built on was not measured at all** — only one-shot screenshots were. That is
+where a rebuild starts, not where it ends. § 4 is still the list of defects the old feature was pulled
+for, and § 5 the questions any rebuild answers.
 
 **The prerequisite V1 and V2 share** is a per-page reporter, and there is not one to tune. The panel's
 own loop is 80 ms and is not the constraint; freshness is capped by how often a page can be asked,
@@ -293,7 +308,6 @@ dead `??`. That is a healthier backlog than the two rounds before it, and it mea
 | | Item | Status |
 |---|---|---|
 | **E21** | `nifro://` is registered to stale copies of the app | **Test URL commands with `open -a <path> "nifro:reload"`, never plain `open "nifro:reload"`.** LaunchServices holds the scheme against every build ever made on this machine, `~/.Trash` and derived data included. Nothing in the repo causes it and nothing in the repo can fix it. The plain form once drove a three-week-old build for an afternoon |
-| **E22** | Move localization onto Vorssaint's mechanism | **New, and a rework rather than a bug.** Nifro today: `Localizable.xcstrings`, 244 keys, 2 languages (English is the untranslated source), an `AppleLanguages` write and a **mandatory relaunch**, with a CI script gating completeness. Vorssaint: strings are Swift — a `struct Strings` of 892 fields with one `static let` per language across 13 languages, so a missing field is a compile error and there is no CI gate; `L10n: ObservableObject` publishes the choice and views re-render **with no relaunch**. The delta for Nifro is five steps, and step 3 is the whole cost: (1) replace the catalogue with `struct Strings` + one value per language; (2) add `L10n` with a `systemDefault` mapping and literal `displayName`s; (3) **rewrite 244 literals across ~30 files as `l10n.s.field`**, and make the AppKit surfaces — `DisplayPanel`, `PanelControls`, `Actions` — rebuild on change instead of relying on `AppleLanguages`; (4) delete the relaunch dialog; (5) delete the CI gate, the compiler replaces it. **What it gives up:** `AppleLanguages` localizes third-party package strings for free (`LaunchAtLogin.Toggle`); the Swift-struct scheme does not reach them. Keep a small gate for those |
 | **E23** | Carrying a user's settings across an upgrade | **New.** There is no mechanism for it. What exists is three unrelated things that each cover one case: `rotationInterval(stored:legacySeconds:)` reads an old key when the new one is absent, `@DecodableDefault` fills in a field added to `Website`, and `SS_hasLaunched` is a one-shot flag for the welcome screen. Nothing records which version last ran, and there is no place a one-time upgrade step could be hung. It has not bitten anybody yet because nobody is upgrading from anything — which is also why the shape of it is still free to choose. Changing a shipped default is the case that shows the gap most clearly, and section 12 is not where this belongs: it is worth doing, before the first release makes every choice permanent. **#64 set a precedent worth copying rather than a mechanism:** `hasMigratedWebsitesToPlaylists` is a one-shot flag of its own rather than "there are no playlists", because an empty list is a state the user can reach and stay in — and the old `websites` key is left on disk untouched, so the pre-playlist list is still there to look at if the migration came out wrong. That is the right shape for one migration and still not a mechanism: nothing records which version last ran, and a second migration would need a second flag |
 | **E25** | Five lint rules that have never run | **The same shape as the periphery configuration #58 fixed.** `.swiftlint.yml` declares five `analyzer_rules` — `capture_variable`, `typesafe_array_init`, `unneeded_synthesized_initializer`, `unused_declaration`, `unused_import`. Analyzer rules only execute under `swiftlint analyze`, which needs a compiler log; the Xcode build phase and `ci.yml` both run `swiftlint lint`. **So all five have been inert since they were written.** `unused_import` would have named both imports deleted by hand in #58. Wiring it up costs an `xcodebuild ... \| tee`, a `--compiler-log-path` run and a second lint job's worth of CI minutes, against five rules of unmeasured value — but a rule that cannot fire reads as though it has already checked. Either run them or delete the block; declaring them and not running them is the worst of the three |
 
@@ -380,6 +394,7 @@ the panel footer when there is something newer. Neither half is a U item.
 | **X9** | Put the user's own Chrome window on the desktop layer | Refused. **No public API sets another process's window level** — SkyLight against a connection we do not own is yabai's route and needs part of SIP off. The buildable variant gives up the icon layer and moves the wallpaper's lifetime into an app we do not control: Cmd-Q ends it, an auto-update restarts it, and the entitlement list goes to full Accessibility with the sandbox off. Screencasting instead is worse — DRM video arrives black, frames are JPEG, and `--remote-debugging-port` hands the whole browser identity to any process on localhost. The motive, inherited logins, is already answered: WKWebView's store is persistent, so one sign-in through Browsing Mode holds |
 | **X10** | Go opaque when the content fills the screen | The saving cannot be measured, and it needs a switch that turns the screen black on a page with a transparent background |
 | **X11** | A configurable reload strategy | Nobody asked for it. A setting in search of a complaint |
+| **X12** | Move localization onto Vorssaint's mechanism (was E22) | **Turned down on a criterion nobody had written down: the relaunch is acceptable.** The case was two things — a missing translation becomes a compile error, and changing language stops needing a relaunch — and with the second one no longer worth having, the first is all that is left. The CI gate already does it, and does more: a compile error only sees a key that is in the struct and short a language, while the gate also catches a literal added to the source and never extracted, which no compiler can reach. So the gate does not go away, it gets smaller. Against that: `^[%lld site](inflect: true)` is Foundation choosing the word form, used by three strings today, and in a Swift struct it becomes a hand-written plural rule per language; the `.xcstrings` toolchain goes — the catalogue editor, the `new`/`translated` states, `.xcloc` export, automatic extraction; and one mechanism becomes three, because `AppleLanguages` has to stay for `KeyboardShortcuts`, which ships nine `.lproj` of its own, and `.lproj` has to stay for `InfoPlist.strings`, which the system reads and no app code can touch. **Vorssaint keeps both of those too** — its `Resources/*.lproj` hold `InfoPlist.strings`, and its `Strings` struct has to carry `menuCut`/`menuPaste`/`menuHide` because an accessory app builds its own main menu and does not get the system's words for free. One thing from its implementation is worth *not* copying: it hard-codes each language's `displayName`, where `AppLanguage.displayName` here asks the system, which cannot go stale |
 
 ---
 
@@ -481,5 +496,6 @@ feature, not reopening a bug.
 - **K31** Per-page records are keyed by `Website.ID`. **It cost a behaviour change nobody predicted:** a page reached by clicking a link in Browsing Mode now shares the entry's record instead of getting its own, so the last page scrolled is the one restored.
 - **K32** Nothing in the UI points at a menu that no longer exists. The four catalogue strings that still say "menu" mean the menu bar *icon*, which does.
 - **K37** Per-display settings — five dictionaries, not the four this row listed — are kept for a display that is unplugged, on purpose, so a monitor comes back in the morning showing what it showed last night. Forgetting one for good is Restore Defaults, which the code says outright. Not a leak, and asked and answered rather than open.
+- **E22** Moved to section 12 as X12 — turned down, not deferred. The criterion that settles it is that the relaunch is acceptable, which is the sentence whose absence made it look worth doing.
 - **K23 (as written)** Picking a website on a switched-off display has never left it dark: `makeCurrent` wakes it. The entry confirmed the shape of the symptom without reading the callee, and stood for weeks. The real gap was `selectPlaylist`, which is a different control.
 - **K36** The load-error store is keyed by display and pruned with the scenes, so one display's reload cannot erase another's failure. Seeing it at all was K26, closed with it.
