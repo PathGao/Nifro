@@ -220,8 +220,23 @@ of them is downstream of rebuilding that, and the rows say which part each needs
 playlist refactor removed the last trace of one: two displays showing the same website now show two
 independent pages, deliberately, and duplicating a playlist mints fresh ids precisely so they stay
 independent. Anything that wants two screens frame-locked again is a new feature with a new design,
-not a row waiting to be picked up. `docs/shelved/MULTI-DISPLAY-SYNC.md` is still the list of defects it
-was pulled for, and still the first thing to read.
+not a row waiting to be picked up.
+
+**A design for it now exists, and it is not the one that was shelved.** `docs/shelved/MULTI-DISPLAY-SYNC.md`
+§ 4a, written 2026-08-28: one page renders and the second display draws a capture of it, so there is no
+second decoder and nothing to hold to a clock. What blocked it was permission, and that turned out not
+to exist — **`SCShareableContent.currentProcess` reaches this process's own windows with no Screen
+Recording grant**, measured against `current` throwing `-3801` in the same run, on a sandboxed probe
+carrying this app's own entitlements, capturing a `.desktop`-level window whose content is a live
+`WKWebView`. Apple ships that API with an empty documentation page, which is why it was not findable
+by reading.
+
+**Still a route rather than a plan**, and § 4a says why: it collapses per-display regions, scales the
+leader's layout onto a screen it was not laid out for, leaves the follower a picture with no Browsing
+Mode, and needs colour management the two capture paths do not agree on. **And the continuous
+`SCStream` it would be built on was not measured at all** — only one-shot screenshots were. That is
+where a rebuild starts, not where it ends. § 4 is still the list of defects the old feature was pulled
+for, and § 5 the questions any rebuild answers.
 
 **The prerequisite V1 and V2 share** is a per-page reporter, and there is not one to tune. The panel's
 own loop is 80 ms and is not the constraint; freshness is capped by how often a page can be asked,

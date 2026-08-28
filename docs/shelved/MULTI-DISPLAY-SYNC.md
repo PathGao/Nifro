@@ -20,6 +20,13 @@ else from the repository. It is markdown rather than an unbuilt `.swift` file fo
 Removed on the maintainer's decision after three audits on real two-display hardware found the
 defects in § 4. It is on the roadmap to be reclaimed. Read § 4 and § 5 before rebuilding it.
 
+**And read § 4a first, which is newer than the rest of this file.** A route was measured on
+2026-08-28 that does not rebuild any of § 3: one page renders and the second display shows a capture
+of it, so there is no second decoder to keep in step and § 3.5 is not needed at all. It answers § 5.3
+and § 5.1 outright and makes § 5.2's failure loud instead of silent. It is a route, not a plan — what
+it costs is listed there, and the continuous stream it would actually be built on is the one thing
+that was not measured.
+
 ---
 
 ## 1. What a person could do
@@ -535,6 +542,91 @@ through the live scene list (§ 3.7). Nothing announced this. All four consequen
 The stored map, meanwhile, was untouched and still said the group existed. Re-attaching the display
 brought the whole arrangement back, which is the one part that worked as intended and is also what
 made the failure so hard to see.
+
+---
+
+## 4a. A route that removes the problem rather than solving it — measured 2026-08-28
+
+**One page renders; the other display shows its picture.** Not two pages held to one clock — one
+decoder, one clock, one page, and a second display drawing frames captured from the first. There is
+nothing to synchronise, so none of § 3.5 is needed: no epoch, no per-page script, no `playbackRate`,
+no `engage`/`release`/`seek`/`nudge`, and no exposure to WebKit bug 208142, which is what made every
+correction cost a visible hitch.
+
+It is worth saying why this was not obvious. § 3.5 records that *reading the leader and correcting the
+follower* was built, measured for a fortnight, and never got below a second of error — and a capture
+is the extreme form of reading the leader. The difference is that it is not read in order to correct
+anything. Nothing is corrected because nothing is second.
+
+### What was blocking it, and what the measurement says
+
+Capturing a window on macOS means ScreenCaptureKit, and the obvious objections were all about
+permission and about this app's shape. Each was tested rather than reasoned about, with a sandboxed
+probe signed with **this app's own entitlement set** — `app-sandbox`, `network.client`,
+`files.user-selected.read-only`, `files.downloads.read-write` — and a window built the way
+`DesktopWindow` builds one: borderless, `.desktop` level, `canJoinAllSpaces`.
+
+| The objection | What was measured |
+|---|---|
+| A sandboxed app cannot use ScreenCaptureKit | It can. Apple's own ScreenCaptureKit sample ships sandboxed with two of those four entitlements and no capture entitlement; none exists to ask for |
+| It needs the Screen Recording grant, and macOS 15 nags about programmatic use | **`SCShareableContent.currentProcess` needs no grant.** In one run, with `CGPreflightScreenCaptureAccess()` false, `current` threw `-3801` (TCC refused) and `currentProcess` returned this process's windows |
+| Screen Recording is a permission this app should not ask for | It does not have to. The nag in question fires on `current`; `currentProcess` is a different call |
+| A window at desktop level, under everything, is not capturable | It is. `currentProcess` returned it and `SCContentFilter(desktopIndependentWindow:)` captured it |
+| A web page is drawn by another process, so a window capture will come back empty | It does not. Controlled against `WKWebView.takeSnapshot` in the same run: in-process `r0 g224 b0`, ScreenCaptureKit `r116 g223 b83` — the same colour, and both the page |
+
+`SCShareableContent.currentProcess` is macOS 14.4+ and **Apple ships it with an empty documentation
+page** — no abstract, no discussion, no mention of permission. That is why none of this was findable
+by reading. DockDoor, the usual reference for window capture on this platform, cannot answer any of it
+either: it is not sandboxed, it only ever captures *other* applications' windows, and every
+`SCShareableContent` call it makes passes `excludingDesktopWindows: true`.
+
+### What this answers of § 5, and what it does not
+
+**§ 5.3 — displays, and more definitely than that section imagined.** It offers a follower that holds
+"a *reference* to the leader's website, resolved at the moment of drawing". A captured follower holds
+less than that: it has no website, no reference and nothing to resolve. It has a picture.
+
+**§ 5.1 — "it is impossible", by the route that section calls the only one needing no guard.** There
+is nothing to edit because there is no entry, so K16 has no surface to happen on and K-step has no
+current website to step. Neither needs a rule anybody has to remember.
+
+**§ 5.2 — still open, and now loud instead of silent.** A leader that is unplugged or asleep produces
+no frames. What the follower shows then is a decision this does not make for you, but it can no longer
+be got wrong quietly: K-leader's whole character was a map that said the group existed while every
+reader disagreed, and a stream that has stopped is not deniable.
+
+**§ 5.4 — `syncEpochs` is not needed at all.** No epoch exists. If `syncGroups` returns it can keep
+its old `[String: String]` shape and inherit arrangements from before the removal.
+
+### What it costs, none of it discovered by writing the code
+
+- **Layout.** The leader's page is laid out for the leader's screen. The follower shows it scaled, so
+  two displays of different proportions mean letterboxing or cropping. The epoch design kept native
+  layout on both screens and aligned only the video; this does the opposite. For a video wallpaper
+  that is nothing. For a dashboard of text it is a downgrade.
+- **Per-display regions collapse.** ScreenCaptureKit captures a *window*, and under a region the
+  window is already what `PageView` clipped. So the follower inherits the leader's region and cannot
+  frame its own. Keeping that would need the leader's window unclipped and each display cropping the
+  captured frame itself — a different architecture, not a setting.
+- **The follower is a picture.** No Browsing Mode, no clicks, no scroll position, no zoom of its own.
+- **Colour.** The two captures above are the same colour in different spaces — `takeSnapshot` returns
+  sRGB, ScreenCaptureKit returns P3. Mirrored onto a second screen without colour management, the copy
+  will not match the original side by side.
+
+### Not measured, and it is the part a rebuild starts with
+
+Everything above used `SCScreenshotManager`, one frame at a time. **Mirroring needs a continuous
+`SCStream`, and that was not tested at all** — neither whether `currentProcess` grants a *stream*
+without the grant as it grants a screenshot, nor what a stream costs running for as long as a wallpaper
+runs. DockDoor's streams are opened on hover and torn down on dismissal, with a whole settings surface
+for how quickly to stop them, and it still has an open report of WindowServer crashing inside
+`WS::Capture::create_iosurface_for_window_list` on a machine with four external displays and 27 hours
+of uptime. A wallpaper's duty cycle is not that duty cycle. Measure it before designing around it.
+
+This does not reopen X7 in the roadmap. That refuses camera and screen capture as an *input* — a feed
+from elsewhere drawn onto the wallpaper — and the argument for it, that a process rendering arbitrary
+URLs around the clock should hold as few permissions as possible, is untouched by a capture that needs
+no permission and reads only this app's own window.
 
 ---
 
