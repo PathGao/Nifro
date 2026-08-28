@@ -3,7 +3,8 @@
 [简体中文](ROADMAP.zh-Hans.md)
 
 > Source of truth for scope. The README is the community-facing write-up; this is the working document.
-> Re-checked 2026-08-28 against `4032ff2`, which is v0.1.3 plus #56 to #65. Items that shipped are gone,
+> Re-checked 2026-08-28 against `4032ff2` — v0.1.3 plus #56 to #65 — and then against #66 to #69 on top
+> of it, read in the merged tree rather than off five descriptions. Items that shipped are gone,
 > not struck through — the one-line residue that stops a question being re-litigated lives in section 14.
 > **Eleven rows had been left struck through in breach of that rule** — ten in section 9 and one in
 > section 8 — so the section named "known and not yet fixed" was a third things that were fixed. They
@@ -17,8 +18,13 @@
 > `Display.all` and falls back to `[nil]` only when nothing is attached, so what it builds scenes from
 > cannot hold `nil` and a real display at once. E24 shipped.
 >
-> **Re-confirmed open by reading the code, not carried forward on trust:** K12, K20, K21, K23, K26, K30,
-> K33, K38, K39, W1–W6, W8, W9, E25, and R6. **K37 was closed the other way:** it claimed there is no way
+> **Closed by #66 to #69**, which were written against this pass and merged after it: K12, K21, K23, K26,
+> K33 and W2. Five of the six were the same shape — the panel and the scene keeping separate answers to
+> what a display is showing — and were fixed as one change rather than five, because the last five
+> entries of that shape were fixed one at a time and each left the others behind.
+>
+> **Re-confirmed open by reading the code, not carried forward on trust:** K20, K30, K38, K39, W1, W3–W6,
+> W8, W9, E25, and R6. **K37 was closed the other way:** it claimed there is no way
 > at all to forget a display that was sold, and the code says the opposite in as many words — forgetting
 > one for good is what Restore Defaults is for, and `browsingDisplays` is pruned per entry on every
 > display change rather than only emptied wholesale. The row had also missed `currentPlaylists`, a fifth
@@ -54,7 +60,7 @@ different path and always worked, which is why it read as fine. There is no auto
 have caught this — see the trap in section 10.
 
 ```
-Open      W1-W6 W8 W9 wiring   K1 K6 K8 K12 K20 K21 K23 K26 K30 K33 K38 K39 bugs   L1-L4  V1 V2 V4 V5  S1 S2 S4  D4 D6  E21-E23 E25  U2 U3
+Open      W1 W3-W6 W8 W9 wiring   K1 K6 K8 K20 K30 K38 K39 bugs   L1-L4  V1 V2 V4 V5  S1 S2 S4  D4 D6  E21-E23 E25  U2 U3
 Parked    K7 HDR (your call), the P series (needs a measurement first)
 Blocked   nothing
 ```
@@ -229,13 +235,12 @@ budget and a hard stop, not "until the user lets go".
 ## 8. What the panel refactor has not wired up yet (the W series)
 
 Capabilities the menu had that the panel does not. None of these are broken code; they are things with
-no entry point. Baseline for every row: `git show 54cac6a~1:Nifro/App/Menus.swift`. All eight below were
-re-read at `4032ff2` and all eight still hold.
+no entry point. Baseline for every row: `git show 54cac6a~1:Nifro/App/Menus.swift`. W2 is closed —
+#66 gave the panel the sentence and #69 gave the settings row its ⓘ. The seven below still hold.
 
 | | Gone | Reachable today |
 |---|---|---|
 | **W1** | App-wide Enable / Disable | Global hotkey and the Shortcuts intent only, still. **The one thing that made this dangerous is fixed** — with K22 closed, a panel with the app off no longer reads as on and no longer switches displays off when pressed. So this is now a missing control rather than a trap: switch the app off by hotkey with the panel open, and there is nothing on screen that turns it back on |
-| **W2** | "Deactivated while on battery", said out loud | Nothing in `Screens/` reads `isEnabled` or `isManuallyDisabled`. The wallpaper vanishes and the panel says nothing. **Worse since #53:** the string that used to explain it was an orphan of the deleted menu and went with the rest, so no text anywhere names this behaviour now — on the one row in its settings section without an ⓘ |
 | **W3** | Reload | Hotkey and `nifro://reload` only |
 | **W4** | Random — jump to one now | The panel's `.random` rotation mode only affects the timer tick |
 | **W5** | "Update Website to Current" | **Does not exist anywhere.** `AppState.swift:32-33` asserts it "moved into the website's own settings"; it did not. That comment is false, and this was the manual half of M2 |
@@ -256,30 +261,30 @@ feature rather than an entry point.
 | **K6** | The help text is right in places and thin in others | Counted this time: **30 sites** — 23 `.explained(…)` and 7 `.help(…)` — across three surfaces totalling 2838 lines. The earlier "seven" was wrong by four times. Worth one pass that reads them as a set, but it is a 30-string job, not a small one |
 | **K7** | Nothing anywhere handles HDR | **Parked, your call.** Confirmed by sweep: no API, entitlement or plist key touches it; the only matches are a colour-space option in the menu-bar sampler and the letters "HDR" inside one site's name. Needs a real HDR source and a measurement of what reaches the display before anything is worth designing |
 | **K8** | A Bilibili entry has a generic icon where a YouTube entry has the video's own cover | YouTube's cover is derivable from the video id; Bilibili's is behind `api.bilibili.com` (`data.pic`). Affects the Websites list row icon only — `previewImageURL` has one caller. It would be the first time the app calls a site's API rather than loading a page |
-| **K12** | Rebuilding a scene's content view during a crop pins that window above everything, for good | **Re-pointed: the second display is not needed and never was.** The overlay is a subview of `window.contentView`, and nothing guards `applyContent` against an active crop — so any rebuild detaches the overlay, which is the only thing that can call `onFinish`. The window keeps `.floating` and full opacity, and `beginCropSelection` refuses forever. **Re-checked after the framing work in `a332dae` and `53f110b`, which did not reach it:** `installContentView` now passes `nil` while `isFramingRegion`, and `applyOpacity` now leaves a framing window alone, but `content`'s `didSet` fires on assignment rather than on change — so the re-assignment still reaches `applyContent`, which still writes `window.contentView`, which still takes the overlay with it. "Interactive" has dropped off the symptom list: `rebuildScenes` reassigns `isInteractive` from Browsing Mode on the way past. `DisplayPanelModel.chooseRegion` calls `makeCurrent` immediately before `beginCropSelection`, and that write arrives on the *next* runloop turn — after the overlay is installed. For a website that already has a region, the case this feature exists for, the detach is certain |
 | **K20** | The panel takes snapshots twelve times a second, and keeps going when nobody can see it | **Your item.** Closing the panel does stop it — every dismissal route reaches `popoverDidClose`. Two things are wrong anyway. The loop sleeps **80 ms**, so it is 12.5 passes a second and one snapshot per display per pass, while the comment beside it says "a few a second" and the snapshot's own comment says "roughly once a second". And the stop condition is *closed*, not *visible*: a transient popover only self-closes on outside interaction, so it survives screen lock, display sleep, a Space switch and Mission Control, spinning the SwiftUI tree at 12.5 Hz the whole time. The comment on `startLiveRefresh` still claims nothing runs while nobody is looking. Fix is a slower cadence plus an occlusion or lock check, and while there, a `Task.isCancelled` between scenes so a close mid-pass does not publish one more frame |
-| **K21** | The panel preview shows the whole magnified page, not the framed region | `snapshot()` passes no `rect`, so it captures the web view's full bounds — and under a region `PageView` sets that frame to the magnified whole page and clips it. So the column shows the entire page shrunk to 260 points while the display shows one slice of it. `refreshMenuBarBandColor` already demonstrates the fix: set `configuration.rect` to the region intersected with `webView.bounds` |
-| **K23** | Picking a playlist on a switched-off display leaves the screen black | **Re-pointed 2026-08-28, and the entry it replaces was false.** It said `show()` was "a bare `makeCurrent` with no such guard" — but `makeCurrent(_:on:switchingDisplayOn:)` defaults that argument to `true` and wakes the display itself, so picking a *website* has woken the screen for as long as that parameter has existed. The entry was written before it and never re-read against the callee, which is this document's own named failure mode. What is real is one level over: `selectPlaylist` writes `currentPlaylists` directly and reaches no `makeCurrent` at all, so pointing a switched-off display at a playlist changes the title and leaves the screen dark |
-| **K26** | A page that fails to load reports nowhere anyone will look | The error sets the status item's tooltip and otherwise returns unless Browsing Mode is on. The panel never reads it, so a wallpaper URL that starts returning 500 shows as "No Website" with no reason given. The deleted menu put the error at the very top. **Re-pointed:** the store it would read is now per display and pruned with the scenes, so what is left is a column that can say so rather than a fact nobody kept |
 | **K30** | The thumbnail cache is unswept and unbudgeted | `DiskBudget` sweeps the two WebKit roots on a 100 MB budget every six hours. `websiteThumbnailCache` is in neither root: one file per key under `~/Library/Caches/Nifro/`, no count cap, no size cap, no age sweep, and the only removal is the "Clear all website data" button. The key is the URL, so editing an address or deleting a website orphans its file permanently — `removeOrphanedStores` keeps by website *ID* and reaches only the WebKit stores, so nothing collects a thumbnail, ever. Bounded by distinct URLs ever in the list, so not runaway — but invisible to the budget that exists. Two lines: add the directory to `sweptRoots`, or reuse the orphan sweep against the thumbnail keys. **The on-disk format is a separate question and closes none of this.** A cheaper encoding makes each file smaller and a directory with no cap is still uncapped; it does not shrink what is already there either, because `IconView.fetchIcons` returns on a cache hit and a hit is served from disk, so a file written once is never rewritten and a change of format leaves the old files beside the new ones indefinitely |
-| **K33** | The menu-bar band samples a strip up to a scale factor away from where the page was laid out | The window is deliberately `pageFrame.height + 1` while `pageLayoutSize` is `pageFrame.height`. `PageView` derives from live `bounds`; `topStripOfWallpaper` derives from `pageLayoutSize`. Same class of off-by-a-point disagreement K2 was, on the one surface with no test |
 | **K38** | Every timed reload starts a new WebContent process | A timed reload goes `reload()` → `loadBySwapping` → `createWebView()`, which builds a fresh `WKWebViewConfiguration`, every user script, **and a new `WKWebsiteDataStore(forIdentifier:)`** — a new renderer and a new network session each time, with the previous one thrown away. The request also carries `.reloadIgnoringLocalCacheData`, so every subresource is fetched cold. A 15-minute entry on two displays is roughly **192 process launches a day**. The fix is to call `reloadFromOrigin()` in place when the replacement URL equals the loaded one, which is the timed-reload path and not the switch-website path. **What it gives up, on that path only:** swap loading's failure isolation — a reload that fails because the Mac woke before the network did would show an error page instead of silently keeping the last good one. Measure before doing it: `powermetrics --samplers tasks` filtered to `com.apple.WebKit.WebContent`, two displays at a 15-minute interval for an hour, against a build using `reloadFromOrigin()`, plus `pgrep -c WebContent` either side of a reload |
 | **K39** | The Settings-wide reload interval does nothing for almost every website | `Website.effectiveReloadInterval` is `reloadInterval ?? Defaults[.reloadInterval]`, and the compiler says the right side is never used. Both operands are `Double?`, so the optional overload should apply — but `Defaults[.reloadInterval]` goes through the package's generic subscript, and that drives resolution to `T ?? T` with `T == Double?`, where the left side is non-optional and the default is dead. **Measured, not read:** with the right side replaced by a plain `Double?` literal the warning goes away; against the subscript it does not. So a website with no interval of its own answers `nil`, `resetTimer()` returns at its `let reloadInterval =` guard, and no timer is armed. **It is not quite "reaches nothing":** turning on a website's own "Reload on its own schedule" seeds that website's interval from the Settings value, so the number is the default a new override starts at. As the app-wide interval it is drawn, saved, and armed on nothing. Fix is an `if let` rather than a `??`, which is also what stops the next `Defaults` default being swallowed the same way |
 
 
-**One shape behind six of these, and it is now down to one.** K22, K26, K27, K29, K34 and K36 were
+**One shape was behind six entries, and all six are closed.** K22, K26, K27, K29, K34 and K36 were
 filed as six unrelated reports and were one: a fact true of *one display*, kept in a slot with room for
 one answer. That is why fixing them one at a time kept leaving siblings behind, and why two of them had
-outlived their own fix without anybody noticing. Five are closed. **K26 is the last, and it is a
-different half of the problem** — the store is per display and pruned with the scenes now; what is
-missing is a surface that reads it. When the next one of this shape arrives, look for the slot rather
-than the symptom. The guardrails are `ScopeTests` and `SwitchedOffTests`.
+outlived their own fix without anybody noticing. **All six are closed now** — K26 was the last and it
+was a different half of the problem, a store that was already per display with nothing reading it, so
+#66 gave it a reader rather than fixing the store. When the next one of this shape arrives, look for the
+slot rather than the symptom. The guardrails are `ScopeTests` and `SwitchedOffTests`, and `SwitchedOffTests`
+now asserts an order as well as a set: the app's own state is read before the display's.
 
-**A second shape, visible only now that the first is cleared.** K21 and K23 are both the panel
-disagreeing with the wallpaper about what a display is showing — one in the picture it draws, one in
-what pressing a control does — and K12 and K26 are the panel and the wallpaper disagreeing about state
-the wallpaper owns. Four of the ten open entries are the panel's reading of a scene rather than a scene.
-That is where the next pass is worth spending, and `DisplayPanelModel` is the one file all four touch.
+**The second shape is cleared too, and it went the way the first one should have.** K21, K23, K26 and
+the panel half of W2 were the panel's reading of a scene disagreeing with the scene, and K12 was the
+same disagreement one layer down, in who owns the window's content slot. They were fixed as two changes
+rather than five — #66 for the four that share `DisplayPanelModel`, #67 for the one that does not.
+
+**What is left is not a shape.** The seven open entries in the table above have nothing in common: a rewritten
+address, thirty help strings, an icon, a poll cadence, an unswept cache, a process per reload, and a
+dead `??`. That is a healthier backlog than the two rounds before it, and it means the next defect of a
+*new* shape has nowhere to hide behind a cluster.
 
 ---
 
@@ -450,6 +455,14 @@ One line each, kept only where the line stops a question being asked again.
 - **R5** `Extensions.swift` was split; four non-extension types moved out. Nothing in it was dead, and `periphery` disproved the reading-based claim that said otherwise.
 - **N5** `RenderingMode` is gone: two cases computed from one `Bool`.
 
+**Closed by #66 to #69.**
+
+- **K12** Framing ends when the overlay leaves the window, whoever took it out. The route the entry described could not detach anything — while framing the page is `.live(zoom: nil)`, which is the bare web view, so reassigning the slot puts the same object back. The live routes were `releaseWebView` and `tearDown`, which every screen lock, battery transition, Disable and per-display power button reaches. **Do not re-add a guard for the next writer of that slot**; the mode ends on leaving the window, which is every route including unwritten ones.
+- **K21 / K26 / W2 (panel half)** A column says what its own display is doing: the framed region in the picture, the load error under it, and the app's own state — off, or on battery — read before the display's. With the app off, every column used to draw "Switched off", the phrase belonging to its own power button, blaming a screen nobody had switched off.
+- **K23** `selectPlaylist` was the gap. Waking is `AppState.wakeDisplay`, with two callers instead of three sites each asking for themselves.
+- **K33** `pageLayoutSize` is read off the window that imposes it. The drift had a law — `scale - 1` points, 19 at the maximum against a 33-point menu bar — and it is pinned in `MenuBarBandSamplingTests` because no package test can reach `NSWindow` to hold the property itself.
+- **W2 (settings half)** The battery row has an ⓘ. It was the only row in its section without one.
+
 **Closed 2026-08-28, with #56–#65.** The first five were dissolved by the playlist refactor rather than
 fixed — there is no state left for them to describe, so raising any of them again means proposing a new
 feature, not reopening a bug.
@@ -469,4 +482,4 @@ feature, not reopening a bug.
 - **K32** Nothing in the UI points at a menu that no longer exists. The four catalogue strings that still say "menu" mean the menu bar *icon*, which does.
 - **K37** Per-display settings — five dictionaries, not the four this row listed — are kept for a display that is unplugged, on purpose, so a monitor comes back in the morning showing what it showed last night. Forgetting one for good is Restore Defaults, which the code says outright. Not a leak, and asked and answered rather than open.
 - **K23 (as written)** Picking a website on a switched-off display has never left it dark: `makeCurrent` wakes it. The entry confirmed the shape of the symptom without reading the callee, and stood for weeks. The real gap was `selectPlaylist`, which is a different control.
-- **K36** The load-error store is keyed by display and pruned with the scenes, so one display's reload cannot erase another's failure. Seeing it at all is still K26.
+- **K36** The load-error store is keyed by display and pruned with the scenes, so one display's reload cannot erase another's failure. Seeing it at all was K26, closed with it.
