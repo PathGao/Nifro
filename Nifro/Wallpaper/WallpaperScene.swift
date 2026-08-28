@@ -393,7 +393,19 @@ final class WallpaperScene {
 		load(addressToLoad)
 	}
 
-	func reload() {
+	/**
+	Load this website's page again.
+
+	- Parameter inPlace: Whether this reload may reuse the web view the page is already in instead of
+	fetching into a second one. A request rather than a promise: `reloadInPlace` refuses whenever what
+	is on screen is not the page being asked for, and this falls back to swapping.
+
+	Off unless asked for, because most callers are not asking for the same page. An edited website, a
+	recompiled content-blocking list and a page that has navigated somewhere else all need the web
+	view built again — its user scripts, its rule list and its data store are all fixed when it is
+	created — and a caller that means that gets it by saying nothing.
+	*/
+	func reload(inPlace: Bool = false) {
 		captureScrollPosition()
 
 		// Before the page goes, not two seconds after it last moved. Switching website reloads, and
@@ -403,7 +415,13 @@ final class WallpaperScene {
 		// The address the user specified rather than whatever is loaded now — that may be a redirect
 		// resolving differently each time — but moved to where the page last was, when the page says
 		// so in its fragment.
-		loadBySwapping(addressToLoad)
+		let address = addressToLoad
+
+		if inPlace, reloadInPlace(address) {
+			return
+		}
+
+		loadBySwapping(address)
 	}
 
 	func load(_ url: URL?) {
@@ -527,9 +545,12 @@ final class WallpaperScene {
 			return
 		}
 
+		// `inPlace`, and this is the only caller that asks for it. A tick wants the page that is already
+		// there fetched again, which is the one shape a swap buys nothing for and charges a WebContent
+		// process and a network session for — see `reloadInPlace`.
 		reloadTimer = Timer.scheduledTimer(withTimeInterval: reloadInterval, repeats: true) { [weak self] _ in
 			Task { @MainActor in
-				self?.reload()
+				self?.reload(inPlace: true)
 			}
 		}
 

@@ -73,9 +73,25 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	@DecodableDefault.Custom<ExternalLinks> var externalLinks
 
 	/**
-	How often this website actually reloads.
+	How often this website actually reloads: its own interval, or the app-wide one from Settings when
+	it names none.
+
+	`if let` and not `??`, and it has to stay that way. `Defaults[.reloadInterval]` is a `Double?`
+	reached through the package's generic subscript, and that drives `??` to the `T ?? T` overload with
+	`T == Double?` — a left side that is no longer optional, so the right side is dead code and the
+	compiler says so. Every website that named no interval of its own therefore answered `nil`,
+	`WallpaperScene.resetTimer` returned at its own `let`, and no timer was ever armed: the number in
+	Settings was drawn, saved, and reached nothing but the value a per-website override starts at.
+
+	`DefaultsFallbackTests` holds the same shape away from every optional key, not just this one.
 	*/
-	var effectiveReloadInterval: Double? { reloadInterval ?? Defaults[.reloadInterval] }
+	var effectiveReloadInterval: Double? {
+		if let reloadInterval {
+			reloadInterval
+		} else {
+			Defaults[.reloadInterval]
+		}
+	}
 
 	/**
 	Whether a link off this website actually opens in the browser.
