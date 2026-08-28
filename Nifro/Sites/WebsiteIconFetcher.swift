@@ -75,8 +75,92 @@ final class WebsiteIconFetcher: NSObject {
 		return webView
 	}()
 
+	/**
+	How long a page gets before its web view is taken away from it.
+
+	Nothing is waiting on this number. No icon is on screen while one is being fetched, so the ceiling
+	only has to sit past the point where a page that was going to finish already has — being generous
+	costs a row in a list nothing. Thirty seconds is what `WallpaperScene.loadTimeout` was measured at
+	for the same question, and this is double that, which is also `URLRequest`'s own default timeout:
+	every request the load is still waiting on has given up by the time it fires.
+
+	What it bounds is the leak. A live stream or a dashboard that polls forever — which is what this
+	app is for — loads its main frame and then never reaches `didFinish`, so without a ceiling its web
+	view, and the web content process behind it, stay alive until the app quits.
+	*/
+	private static let loadTimeout = Duration.seconds(60)
+
 	private var url: URL?
 	private var continuation: CheckedContinuation<Void, Error>?
+	private var hasEnded = false
+
+	/**
+	End the wait for the page, exactly once, whatever ended it.
+
+	Five things can: `didFinish`, the two failure callbacks, the task being cancelled and the ceiling.
+	A checked continuation traps the process if two of them get through or if none does, so this is
+	the only place in the file that resumes one, and dropping the continuation as it resumes is the
+	guard. No lock: every one of the five is on the main actor by the time it arrives here — the class
+	is `@MainActor` and so are the delegate callbacks, and the other two hop through `Task { @MainActor
+	in }` first — so the read and the nilling cannot interleave.
+
+	`hasEnded` is for the ordering the continuation alone cannot see. `withTaskCancellationHandler`
+	runs its handler even when the task was already cancelled on the way in, and then there is no
+	continuation stored yet to end. The flag is what the load finds when it goes to store one.
+	*/
+	private func end(_ result: Result<Void, Error>) {
+		hasEnded = true
+
+		guard let continuation else {
+			return
+		}
+
+		self.continuation = nil
+		continuation.resume(with: result)
+	}
+
+	/**
+	Load `request` and return once the page has finished, or throw if it fails, is cancelled or outlasts `loadTimeout`.
+	*/
+	@MainActor
+	private func loadAndWait(_ request: URLRequest) async throws {
+		// The ceiling has to end the load and not merely stop waiting for it — the same reason
+		// `SSWebView.loadAndWait` reaches for `stopLoading` — because a page that never finishes is
+		// still holding the web view, which is the thing being reclaimed. Cancelled on the way out, so
+		// a page that finishes in a second does not keep this instance alive for the other fifty-nine.
+		let ceiling = Task { @MainActor in
+			try await Task.sleep(for: Self.loadTimeout)
+			self.webView.stopLoading()
+			self.end(.failure(CocoaError(.userCancelled)))
+		}
+
+		defer {
+			ceiling.cancel()
+		}
+
+		try await withTaskCancellationHandler {
+			try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+				self.continuation = continuation
+
+				guard !hasEnded else {
+					end(.failure(CancellationError()))
+					return
+				}
+
+				webView.load(request)
+			}
+		} onCancel: {
+			// Any thread, and possibly before the operation above has run at all, so it hops to the
+			// actor that owns the continuation rather than touching it from here. `stopLoading` is the
+			// half that makes cancelling mean something: ending the wait only releases the caller —
+			// `.task(id:)` in `IconView` cancels on every row that scrolls away — while the page carries
+			// on loading in a web view nothing will ever look at again.
+			Task { @MainActor in
+				self.webView.stopLoading()
+				self.end(.failure(CancellationError()))
+			}
+		}
+	}
 
 	private func getImage(_ url: URL) async throws -> NSImage? {
 		let (data, _) = try await URLSession.shared.data(from: url)
@@ -195,10 +279,7 @@ final class WebsiteIconFetcher: NSObject {
 		var request = URLRequest(url: url)
 		request.cachePolicy = .reloadIgnoringLocalCacheData
 
-		try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
-			self.continuation = continuation
-			webView.load(request)
-		}
+		try await loadAndWait(request)
 
 		// TODO: Use `??` for all of these when `??` supports await.
 
@@ -231,18 +312,18 @@ extension WebsiteIconFetcher: WKNavigationDelegate {
 		navigationResponse.isForMainFrame ? .allow : .cancel
 	}
 
+	// All three go through `end`, which is where the argument for that is. These delegate methods can
+	// be called more than once for one load, and by then the wait may also have been ended by the
+	// ceiling or by cancellation.
 	func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-		continuation?.resume()
-		continuation = nil // These delegate methods can be called multiple times.
+		end(.success(()))
 	}
 
 	func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-		continuation?.resume(throwing: error)
-		continuation = nil
+		end(.failure(error))
 	}
 
 	func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-		continuation?.resume(throwing: error)
-		continuation = nil
+		end(.failure(error))
 	}
 }
