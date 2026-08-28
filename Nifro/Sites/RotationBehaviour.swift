@@ -47,7 +47,8 @@ extension WebsitesController {
 
 	Handed the playlist rather than the display, because the panel resolves it once per refresh and
 	builds a column per display off the same list; going back through `Defaults[.playlists]` here would
-	decode every website in every playlist again, once per display, twelve times a second.
+	decode every website in every playlist again, once per display, on every pass of
+	`DisplayPanelModel.startLiveRefresh`.
 	*/
 	func eligible(in playlist: Playlist?, at date: Date = .now) -> [Website] {
 		let members = playlist?.websites ?? []

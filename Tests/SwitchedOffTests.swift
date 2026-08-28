@@ -384,4 +384,72 @@ struct SwitchedOffTests {
 			"`applyRaisedState` orders a window back without asking whether it is on screen, which is how a display that is switched off gets its wallpaper put back."
 		)
 	}
+
+	/**
+	The panel's live refresh stops when nobody can see it, and it asks the app how it knows.
+
+	The same property this suite is built on, applied to the panel rather than to a display. The loop
+	behind the pictures stopped on *closed*, which every dismissal route does reach — but a transient
+	popover self-closes on outside interaction and on nothing else, so it survived the screen locking,
+	the displays sleeping, a Space switch and Mission Control, photographing every display the whole
+	time.
+
+	Two assertions because the fix has two halves and only one of them is new mechanism. AppKit already
+	answers "is any of this window on screen", which is what covers Spaces, Mission Control and the
+	displays sleeping, and the window is asked rather than mirrored. The lock is the half that must not
+	be new: `SSEvents.isScreenLocked` is the publisher that already suspends the wallpapers themselves
+	in `setUpEvents`, and a panel that subscribed to `.screenIsLocked` for itself would be a second
+	notion of a locked screen — the same defect as a second notion of "off", one object further out.
+
+	Read off the file rather than out of a function body, so renaming the private method that holds the
+	check does not quietly empty this test.
+	*/
+	@Test("The panel stops photographing when it cannot be seen")
+	func theLiveRefreshStopsWhenNobodyIsLooking() throws {
+		let controller = try Self.source(named: "DisplayPanelController.swift")
+
+		#expect(
+			controller.contains("occlusionState"),
+			"The panel never asks whether its window is on screen, so the refresh loop runs through a lock screen, a sleeping display, a Space switch and Mission Control."
+		)
+
+		#expect(
+			controller.contains("SSEvents.isScreenLocked"),
+			"The panel no longer reaches the app's lock signal, so it either misses a locked screen or has grown a second answer for one."
+		)
+
+		#expect(
+			!controller.contains("DistributedNotificationCenter"),
+			"The panel subscribes to the lock notifications itself. `SSEvents.isScreenLocked` is where the app already merges them, and two subscriptions are two things to keep agreeing."
+		)
+	}
+
+	/**
+	A pass over the displays gives up between them, not only between passes.
+
+	`startLiveRefresh` checks cancellation once per pass and every snapshot inside a pass is awaited, so
+	a panel closed while the loop was halfway down the displays finished the pass and published a set of
+	columns for a panel that had already gone — which the next opening then shows, the stale photograph
+	`prepareForOpening` exists to prevent.
+
+	Asserted as the position of the check rather than its presence: `startLiveRefresh` has one already,
+	and a test that only counted them would pass on the loop that was wrong.
+	*/
+	@Test("Closing mid-pass does not publish one more frame")
+	func aPassGivesUpBetweenDisplays() throws {
+		let body = try Self.body(of: "func refresh() async", in: Self.source(named: "DisplayPanelModel.swift"))
+
+		guard
+			let loop = body.range(of: "for scene in AppState.shared.scenes"),
+			let photograph = body.range(of: "snapshot()")
+		else {
+			Issue.record("`refresh` no longer walks the scenes photographing them, so this test is reading nothing.")
+			return
+		}
+
+		#expect(
+			body[loop.upperBound..<photograph.lowerBound].contains("Task.isCancelled"),
+			"`refresh` photographs the next display without asking whether the panel is still there, so closing it mid-pass publishes one more frame after the close."
+		)
+	}
 }

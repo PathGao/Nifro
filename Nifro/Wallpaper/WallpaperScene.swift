@@ -589,8 +589,8 @@ final class WallpaperScene {
 
 	`nil` also when the region and the view have not caught up with each other, which is what the empty
 	rectangle below means: a display change moves the size the page is laid out at before the view is
-	rebuilt for it, and the panel refreshes about twelve times a second, so it can ask in that gap. A
-	frame of nothing is the honest answer for one turn of that loop.
+	rebuilt for it, and the panel asks again on the cadence `DisplayPanelModel.startLiveRefresh` states,
+	so it can ask in that gap. A frame of nothing is the honest answer for one turn of that loop.
 	*/
 	func snapshot() async -> NSImage? {
 		guard
@@ -624,8 +624,8 @@ final class WallpaperScene {
 		}
 
 		// At the size it will be looked at, not at the size of the display. Full resolution cost about
-		// 600ms a frame on a 4K screen — a panel meant to look live updating roughly once a second —
-		// and every one of those pixels was thrown away by a 260-point thumbnail anyway. It scales
+		// 600ms a frame on a 4K screen, several times the whole interval `DisplayPanelModel.startLiveRefresh`
+		// gives a pass, and every one of those pixels was thrown away by a 260-point thumbnail anyway. It scales
 		// `rect` rather than the bounds, so the two settings agree by construction: WebKit keeps the
 		// rectangle's aspect ratio, and the rectangle is now the display's.
 		configuration.snapshotWidth = NSNumber(value: Self.previewWidth)

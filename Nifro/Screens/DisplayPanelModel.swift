@@ -130,10 +130,24 @@ final class DisplayPanelModel: ObservableObject {
 	Keep the pictures moving while the panel is up.
 
 	A single snapshot on open makes a wallpaper look like a screenshot of itself, which is the wrong
-	thing to show for a page whose whole point is that it moves. A snapshot costs a few tens of
-	milliseconds and this is a popover that closes the moment attention goes elsewhere, so it can
-	afford a few a second — and it stops the instant it closes, which is the part that matters. Nothing
-	here runs while nobody is looking.
+	thing to show for a page whose whole point is that it moves. What it costs to avoid that is a
+	snapshot per display per pass, each a few tens of milliseconds of the main actor, plus a rebuild of
+	the SwiftUI tree — so the rate is a trade against the panel's own responsiveness and not a frame
+	rate to push up.
+
+	**Six passes a second, which is the sleep below and the only place the number is written down.**
+	It was 80ms, twelve and a half passes a second, under a comment here saying "a few a second" and
+	another on `WallpaperScene.snapshot()` saying "roughly once a second" — three numbers, none of them
+	each other, and the two prose ones both wrong. Everywhere else that has to mention how often the
+	panel refreshes now points here rather than restating it, because a restated number is a number
+	that goes stale on the day this one is tuned.
+
+	Whether it runs at all is not decided here. `DisplayPanelController` owns both this call and
+	`stopLiveRefresh`, and what it answers them from is whether the panel can be *seen* — not merely
+	whether it is closed, which is what this comment used to claim was the same question. It is not:
+	a transient popover self-closes on outside interaction and on nothing else, so it sat through a
+	screen lock, the displays sleeping, a Space switch and Mission Control with this loop still
+	photographing every display.
 	*/
 	func startLiveRefresh() {
 		liveRefresh?.cancel()
@@ -144,7 +158,7 @@ final class DisplayPanelModel: ObservableObject {
 
 				// After the work rather than before it, so a slow refresh spaces itself out instead of
 				// queueing up behind the last one.
-				try? await Task.sleep(for: .milliseconds(80))
+				try? await Task.sleep(for: Duration.seconds(1) / 6)
 			}
 		}
 	}
@@ -196,6 +210,15 @@ final class DisplayPanelModel: ObservableObject {
 		let playlists = Defaults[.playlists]
 
 		for scene in AppState.shared.scenes {
+			// Between the displays and not only around the pass. Every snapshot is awaited, so a pass
+			// begun while the panel was up can still be halfway down the displays when it goes away —
+			// and the `while !Task.isCancelled` that started this loop is checked once per pass, not
+			// once per display. Without this the close published one more set of columns after it,
+			// photographed from a panel nobody was looking at any more.
+			guard !Task.isCancelled else {
+				return
+			}
+
 			built.append(column(for: scene, snapshot: await scene.snapshot(), playlists: playlists))
 		}
 

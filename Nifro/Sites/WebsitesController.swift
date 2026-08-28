@@ -59,7 +59,8 @@ final class WebsitesController {
 
 	`playlists` is handed in rather than read here because the panel already has it: `Defaults[.playlists]`
 	decodes every website in every list, and this is asked once per display on a popover that refreshes
-	twelve times a second. `eligible(for:)` next door does read it, and is the only place that does.
+	several times a second — `DisplayPanelModel.startLiveRefresh` is where how often is settled.
+	`eligible(for:)` next door does read it, and is the only place that does.
 	*/
 	func playlist(for display: Display?, in playlists: [Playlist]) -> Playlist? {
 		guard
