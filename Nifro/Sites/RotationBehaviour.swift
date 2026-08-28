@@ -73,7 +73,7 @@ extension WebsitesController {
 	Move `display` to the next, previous, or a random one of its own websites.
 
 	Next, Previous and Random live here rather than beside the rest of the list because they are the
-	same mechanism as the playlist: they move one display's rotation. Walking the whole list instead
+	same mechanism as the rotation timer: they move one display's rotation. Walking the whole list instead
 	would let a menu item on the screen in front of you change the wallpaper on the one behind you,
 	which is the version of this that shipped and is the reason they take a display at all.
 	*/
@@ -212,9 +212,9 @@ extension WallpaperScene {
 		loadedWebsite == WebsitesController.shared.scheduled(for: display)
 	}
 
-	func resetPlaylistTimer() {
-		playlistTimer?.invalidate()
-		playlistTimer = nil
+	func resetRotationTimer() {
+		rotationTimer?.invalidate()
+		rotationTimer = nil
 
 		// This display's own Browsing Mode, not the app's. Rotation pauses so that the page somebody is
 		// interacting with does not move under them, and that is a fact about the screen they are
@@ -238,25 +238,25 @@ extension WallpaperScene {
 		// a number that has nothing to do with it: a display told to rotate daily would also check its
 		// hours daily, which is a website stuck up for a day. That was already true of the machine-wide
 		// setting and only invisible because the field it came from was rarely moved off half an hour.
-		playlistMinutes = 0
+		rotationMinutes = 0
 
-		playlistTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
+		rotationTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
 			Task { @MainActor in
 				guard let self else {
 					return
 				}
 
-				self.playlistMinutes += 1
+				self.rotationMinutes += 1
 
 				// Rotation used to be inferred from "is an interval set", which made it one answer for the
 				// whole machine. Both halves are this display's own now: whether it rotates, and how often.
-				let rotates = self.rotationMode != .pinned && Double(self.playlistMinutes) >= self.rotationIntervalMinutes
+				let rotates = self.rotationMode != .pinned && Double(self.rotationMinutes) >= self.rotationIntervalMinutes
 
 				if rotates {
-					self.playlistMinutes = 0
+					self.rotationMinutes = 0
 				}
 
-				self.advancePlaylist(rotating: rotates)
+				self.advanceRotation(rotating: rotates)
 			}
 		}
 
@@ -269,7 +269,7 @@ extension WallpaperScene {
 		// measured in hours, per the argument above. And a repeating timer works its next fire date out
 		// from the original one rather than from when it actually fired, so slack cannot accumulate: a
 		// display told to rotate every thirty minutes still rotates on the thirtieth tick.
-		playlistTimer?.tolerance = 15
+		rotationTimer?.tolerance = 15
 	}
 
 	/**
@@ -277,7 +277,7 @@ extension WallpaperScene {
 
 	- Parameter rotating: `true` advances to the next website; `false` only corrects a website that has fallen out of its hours.
 	*/
-	private func advancePlaylist(rotating: Bool) {
+	private func advanceRotation(rotating: Bool) {
 		let controller = WebsitesController.shared
 
 		if rotating {

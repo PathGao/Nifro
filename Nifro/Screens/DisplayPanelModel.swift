@@ -264,7 +264,7 @@ final class DisplayPanelModel: ObservableObject {
 		}
 
 		scene.rotationMode = scene.rotationMode.next
-		scene.resetPlaylistTimer()
+		scene.resetRotationTimer()
 		objectWillChange.send()
 
 		Task {
@@ -279,7 +279,7 @@ final class DisplayPanelModel: ObservableObject {
 	this is a text field, so "0", "-3" and a number with nine digits in it are all one keystroke away,
 	and each of them means a display that never changes again.
 
-	No `resetPlaylistTimer` here — writing the key is what restarts the timers, through the publisher
+	No `resetRotationTimer` here — writing the key is what restarts the timers, through the publisher
 	in `Events`, which also catches the same number being changed from anywhere else.
 	*/
 	func setRotationInterval(_ minutes: Double, on display: Display?) {

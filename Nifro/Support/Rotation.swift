@@ -7,7 +7,7 @@ The app runs one wallpaper per display, and each of them rotates and schedules o
 is therefore a question per display, not one answer for the whole list — but it is stored as a flag on
 each website, which is a shape that lets a list-wide answer be written by accident. It was: making one
 website current cleared the flag on every other website, including the ones belonging to a different
-screen, so a two-display setup had one display's playlist wiping the other's mark on every tick. The
+screen, so a two-display setup had one display's rotation wiping the other's mark on every tick. The
 other display then read "nothing is current", started counting from the beginning, and never moved
 past the first website in its list.
 

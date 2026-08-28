@@ -5,7 +5,7 @@ import Combine
 /**
 One wallpaper. A window on one display, the web view inside it, and everything that decides what that web view is doing.
 
-All of this used to be singletons on `AppState`, one window and one web view and one current website, which blocked every feature that needs more than one of anything. A different page per display, the most-asked-for thing in the upstream tracker, could not be built at all. A playlist could not run two pages at once.
+All of this used to be singletons on `AppState`, one window and one web view and one current website, which blocked every feature that needs more than one of anything. A different page per display, the most-asked-for thing in the upstream tracker, could not be built at all. Rotation could not run two pages at once.
 
 So the unit is the scene, and the app owns a list of them. A single-display setup has exactly one and behaves as before.
 */
@@ -165,16 +165,16 @@ final class WallpaperScene {
 	}
 
 	private var reloadTimer: Timer?
-	var playlistTimer: Timer?
+	var rotationTimer: Timer?
 
 	/**
 	Minutes since this display last moved to another website.
 
-	The playlist timer ticks once a minute whatever the display's interval is, because the schedule has
-	to be looked at that often regardless — see `resetPlaylistTimer`. This is what turns those ticks
+	The rotation timer ticks once a minute whatever the display's interval is, because the schedule has
+	to be looked at that often regardless — see `resetRotationTimer`. This is what turns those ticks
 	back into the interval the user asked for.
 	*/
-	var playlistMinutes = 0
+	var rotationMinutes = 0
 
 	private var cancellables = Set<AnyCancellable>()
 
@@ -464,7 +464,7 @@ final class WallpaperScene {
 		reloadTimer?.invalidate()
 		reloadTimer = nil
 
-		// This display's own Browsing Mode, not the app's — the same argument `resetPlaylistTimer` makes
+		// This display's own Browsing Mode, not the app's — the same argument `resetRotationTimer` makes
 		// beside the same guard: a reload throws away a form somebody is filling in, and only the
 		// display they are filling it in on has one.
 		guard
@@ -481,7 +481,7 @@ final class WallpaperScene {
 			}
 		}
 
-		// A tenth of the interval, the same argument `resetPlaylistTimer` makes beside its own timer:
+		// A tenth of the interval, the same argument `resetRotationTimer` makes beside its own timer:
 		// zero tolerance means macOS may not coalesce this with anything, and this one also runs for
 		// the life of the app on every display. Proportional rather than a fixed number of seconds
 		// because this interval is the user's, from one second to whatever they typed, and a tenth is
@@ -587,8 +587,8 @@ final class WallpaperScene {
 	func suspend() {
 		reloadTimer?.invalidate()
 		reloadTimer = nil
-		playlistTimer?.invalidate()
-		playlistTimer = nil
+		rotationTimer?.invalidate()
+		rotationTimer = nil
 		pendingLoad?.cancel()
 
 		// Before the band: releasing installs an empty page, and installing content is one of the
@@ -603,7 +603,7 @@ final class WallpaperScene {
 
 	func tearDown() {
 		reloadTimer?.invalidate()
-		playlistTimer?.invalidate()
+		rotationTimer?.invalidate()
 		pendingLoad?.cancel()
 		window.orderOut(nil)
 		content = .empty

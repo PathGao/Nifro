@@ -123,7 +123,7 @@ struct ScopeTests {
 
 	Absolute, with no allowlist, because outside `AppState` there is always a scene in hand: a scene
 	knows its display, and a web view knows its scene. Every one of these was a real symptom —
-	`WallpaperScene.resetTimer`, `resetPlaylistTimer` and four dialog guards in `WebViewController`,
+	`WallpaperScene.resetTimer`, `resetRotationTimer` and four dialog guards in `WebViewController`,
 	each of them acting on one display using an answer about all of them.
 	*/
 	@Test("No display asks the app whether anybody is browsing")
@@ -198,7 +198,7 @@ struct ScopeTests {
 	func everySiteAsksAboutItsOwnDisplay() throws {
 		let sites = [
 			("WallpaperScene.swift", "func resetTimer()", "pause every display's auto-reload"),
-			("Playlist.swift", "func resetPlaylistTimer()", "pause every display's rotation and schedule"),
+			("RotationBehaviour.swift", "func resetRotationTimer()", "pause every display's rotation and schedule"),
 			("DimWhenUnfocused.swift", "func targetOpacity(on display: Display?) -> Double", "raise every display to full opacity"),
 			("HoldToInteract.swift", "private func begin()", "refuse the hold because another display is browsing")
 		]
@@ -274,7 +274,7 @@ struct ScopeTests {
 	func browsingModeSettlesBothTimers() throws {
 		let body = try Self.body(of: "func applyBrowsingMode()", in: Self.source(named: "AppState.swift"))
 
-		for timer in ["resetTimer()", "resetPlaylistTimer()"] {
+		for timer in ["resetTimer()", "resetRotationTimer()"] {
 			#expect(
 				body.contains(timer),
 				"""
@@ -343,7 +343,7 @@ struct ScopeTests {
 	A rebuild leaves the clocks of the displays nothing changed for alone.
 
 	`rebuildScenes` runs on every edit to the website list, every display change and every wake, and it
-	restarted both timers on every scene it kept — and `resetPlaylistTimer` zeroes the minute count, so
+	restarted both timers on every scene it kept — and `resetRotationTimer` zeroes the minute count, so
 	that is not a rounding error but a display put back to the start of its interval. Both callers ask
 	`isUpToDate`, which is the point: one test, so the timers cannot disagree with the pages.
 	*/
@@ -362,7 +362,7 @@ struct ScopeTests {
 
 		// The hammer itself, rather than the one caller that swung it. `AppState.resetTimer()` reset
 		// both timers on every scene, `Defaults.publisher(.websites)` called it on every edit, and a
-		// playlist tick is an edit — so one display rotating restarted the other display's clock.
+		// rotation tick is an edit — so one display rotating restarted the other display's clock.
 		#expect(
 			!state.contains("func resetTimer()"),
 			"`AppState` has an app-wide timer reset again. A scene's clock belongs to that scene."

@@ -118,7 +118,7 @@ final class WebsitesController {
 	Make a website the current one on its own display.
 
 	Only the websites sharing that display lose the mark. Clearing it across the whole list is what
-	stopped rotation working on more than one screen: each tick of one display's playlist wiped the
+	stopped rotation working on more than one screen: each tick of one display's rotation wiped the
 	other display's mark, so `advance` there found nothing current, started again from index 0, and
 	that screen sat on the first website in its list for good.
 

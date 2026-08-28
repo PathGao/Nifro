@@ -110,7 +110,7 @@ extension AppState {
 				}
 
 				// No timer reset here. There was one, and it restarted both timers on every scene on
-				// every edit to the list — which is every playlist tick, since a tick is an edit. So one
+				// every edit to the list — which is every rotation tick, since a tick is an edit. So one
 				// display rotating reset the other display's rotation clock, and a display told to
 				// rotate every thirty minutes beside one rotating every five never reached thirty.
 				// `applyWebsiteChanges` decides per scene whether the change reached it, and now settles
@@ -152,7 +152,7 @@ extension AppState {
 		Defaults.publisher(.rotationIntervals, options: [])
 			.sink { [self] _ in
 				for scene in scenes {
-					scene.resetPlaylistTimer()
+					scene.resetRotationTimer()
 				}
 			}
 			.store(in: &cancellables)

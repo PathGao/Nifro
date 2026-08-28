@@ -115,7 +115,7 @@ struct SwitchedOffTests {
 	*/
 	@Test("Off means both switches, in one expression")
 	func thePredicateNamesBothSwitches() throws {
-		let predicate = try Self.body(of: "var isSwitchedOff: Bool", in: Self.source(named: "Playlist.swift"))
+		let predicate = try Self.body(of: "var isSwitchedOff: Bool", in: Self.source(named: "RotationBehaviour.swift"))
 
 		#expect(
 			predicate.contains("isEnabled"),
@@ -143,7 +143,7 @@ struct SwitchedOffTests {
 			("WallpaperScene.swift", "func resetTimer()", "arm the reload timer"),
 			("WallpaperScene.swift", "func snapshot() async -> NSImage?", "hand the panel a picture"),
 			("SwapLoading.swift", "func loadBySwapping(_ url: URL?)", "fetch a replacement page"),
-			("Playlist.swift", "func resetPlaylistTimer()", "arm the playlist timer"),
+			("RotationBehaviour.swift", "func resetRotationTimer()", "arm the rotation timer"),
 			("MenuBarBand.swift", "func installMenuBarBandIfNeeded()", "paint the menu bar band")
 		]
 
@@ -215,7 +215,7 @@ struct SwitchedOffTests {
 	}
 
 	/**
-	Nothing outside `Playlist` reads the per-display switch except the three places argued for here.
+	Nothing outside `RotationBehaviour` reads the per-display switch except the three places argued for here.
 
 	The test above catches a `guard`, which is what refusing to do something looks like — and the panel
 	was not refusing anything. It was *drawing*: `isShowing: !scene.isDisabledForDisplay`, an argument
@@ -237,7 +237,7 @@ struct SwitchedOffTests {
 			"WebsitesController.swift": ["func makeCurrent(_ website: Website, switchingDisplayOn: Bool = true)"],
 			// The declaration and the predicate that reads it. `isSwitchedOff` is the whole point: it is
 			// the one place allowed to turn the two switches into one answer.
-			"Playlist.swift": ["var isDisabledForDisplay: Bool", "var isSwitchedOff: Bool"]
+			"RotationBehaviour.swift": ["var isDisabledForDisplay: Bool", "var isSwitchedOff: Bool"]
 		]
 
 		for (name, text) in try Self.sources() {
