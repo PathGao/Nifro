@@ -1,3 +1,4 @@
+import Defaults
 import SwiftUI
 
 /**
@@ -6,10 +7,31 @@ Browse the built-in catalogue and add a site with the settings that make it work
 struct SiteGalleryScreen: View {
 	@State private var search = ""
 	@State private var selectedTag: String?
-	@State private var added = Set<String>()
+	@Default(.playlists) private var playlists
 	@State private var entries = SiteCatalog.entries
 	@State private var isLiveList = false
 	@State private var isLoading = true
+
+	/**
+	The addresses already in the list, which is the whole of what "Added" means.
+
+	Asked of the stored websites rather than remembered in a `@State` set. That set was made empty
+	every time the window opened, so a site installed on an earlier visit came back offering "Add" —
+	and the second press installed a second copy, because `WebsitesController.add` appends and
+	nothing under it looks for a website that is already there.
+
+	By address, because that is the only thing an entry and a website have in common. An entry becomes
+	a website with a fresh `UUID` and no trace of where it came from, which is deliberate and argued
+	for where the shipped ones are installed: a built-in you cannot tell apart from your own is the
+	point. So this cannot ask "did this entry make that website", only "is that address in the list".
+
+	Which is also why an address the user has since edited reads as not installed, and the row offers
+	to add the original again. That is the honest answer: the website in the list is no longer the
+	page the entry describes, and the entry's settings are no longer on it.
+	*/
+	private var installedAddresses: Set<URL> {
+		Set(playlists.flatMap(\.websites).map(\.url))
+	}
 
 	private var matches: [SiteCatalog.Entry] {
 		entries.filter { entry in
@@ -29,6 +51,7 @@ struct SiteGalleryScreen: View {
 
 	var body: some View {
 		let matches = self.matches
+		let installed = installedAddresses
 
 		VStack(spacing: 0) {
 			header
@@ -43,7 +66,10 @@ struct SiteGalleryScreen: View {
 					ContentUnavailableView.search(text: search)
 				} else {
 					List(matches) { entry in
-						row(for: entry)
+						// Parsed the same way `add` parses it, so the two cannot disagree about what the
+						// entry's address is — and an entry that will not parse is one `add` refuses, so
+						// "not installed" is right for it too.
+						row(for: entry, isInstalled: URL(string: entry.url).map(installed.contains) ?? false)
 					}
 					.listStyle(.inset)
 				}
@@ -114,7 +140,7 @@ struct SiteGalleryScreen: View {
 		.padding()
 	}
 
-	private func row(for entry: SiteCatalog.Entry) -> some View {
+	private func row(for entry: SiteCatalog.Entry, isInstalled: Bool) -> some View {
 		HStack(alignment: .top, spacing: 12) {
 			VStack(alignment: .leading, spacing: 3) {
 				HStack(spacing: 6) {
@@ -139,11 +165,10 @@ struct SiteGalleryScreen: View {
 
 			Spacer(minLength: 8)
 
-			Button(added.contains(entry.id) ? "Added" : "Add") {
+			Button(isInstalled ? "Added" : "Add") {
 				entry.add()
-				added.insert(entry.id)
 			}
-			.disabled(added.contains(entry.id))
+			.disabled(isInstalled)
 		}
 		.padding(.vertical, 4)
 	}
