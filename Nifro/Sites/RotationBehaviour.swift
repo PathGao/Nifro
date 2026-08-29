@@ -78,7 +78,10 @@ extension WebsitesController {
 	permutation cannot make the two disagree.
 
 	In every mode but Random this is the playlist's own order and this function is the identity. In
-	Random it is the shuffled order, and this is the only place one is decided, renewed or thrown away.
+	Random it is the shuffled order, and this is the only place one is decided or renewed. It is not the
+	only place one is thrown away: `forgetOrder(on:)` below is, and the line between them is what the
+	invalidation here is *for* — a change to the websites is a state a read can compare against, and
+	entering Random is an act with no state to compare against at all.
 
 	**The invalidation is here, where the order is read, rather than on a publisher.** What it replaced
 	watched `playlists` and compared the flattened website ids, which could not see a playlist switch —
@@ -140,9 +143,11 @@ extension WebsitesController {
 	request for a website that is not the next one in the plan and therefore a request for another plan.
 
 	Stored for a display that is not in Random mode too, and not guarded against, because the Random
-	command is offered whatever the mode is. A looping display simply never reads it — until it is set
-	to Random, and then it picks up the order the command left, which is the answer that surprises
-	nobody: the shuffle it starts is the shuffle it was just given.
+	command is offered whatever the mode is. A looping display simply never reads it, and no longer
+	inherits it either: `forgetOrder(on:)` drops whatever is held when the display is set to Random, so
+	the order a looping display was given is one it never gets to walk. Nothing is lost with it — a
+	display that is not shuffled lists its playlist in the chooser, so an order made while it was
+	looping was never shown to anybody, and the fresh one starts at the same page the command put up.
 	*/
 	private func reshuffle(_ candidates: [Website], on display: Display?) -> [Website] {
 		let key = Display.settingsKey(for: display)
@@ -151,6 +156,29 @@ extension WebsitesController {
 		shuffledOrders[key] = .init(playlist: Defaults[.currentPlaylists][key], websites: ids)
 
 		return ids.compactMap { candidates[id: $0] }
+	}
+
+	/**
+	Throw this display's order away, so the next read decides a new one.
+
+	Entering Random is a request for a shuffle, and a shuffle it is already halfway through is not one.
+	Leaving the mode and coming back was the only gesture in the panel that read as "deal again" and did
+	not: the order is held against the display and the playlist, and the mode is in neither, so a pass
+	interrupted by two presses of the mode button resumed exactly where it had been left.
+
+	**Why this one is an event and the other four are not.** A website added, a website deleted, a
+	display pointed at another playlist and a website falling out of its hours all change *what this
+	display can show*, which is a set `ordered(_:on:)` can compare the held order against whenever it is
+	next read — see the argument there for why asking at the read covers the fourth, which moves no key
+	at all. Entering Random changes nothing about that set. It leaves no trace for a later read to find,
+	because the thing that happened is the press itself, and a press is either handled where it lands or
+	is not handled.
+
+	Which is also the whole of why this is a method here rather than the one line it is: `shuffledOrders`
+	is written in this file and nowhere else, and the next writer that wants it wants this comment first.
+	*/
+	func forgetOrder(on display: Display?) {
+		shuffledOrders[Display.settingsKey(for: display)] = nil
 	}
 
 	/**
@@ -341,10 +369,33 @@ extension WallpaperScene {
 
 	/**
 	How this display rotates.
+
+	**Arriving at Random deals a new order**, which is what the mode button now promises and did not.
+	The order lives against the display and the playlist it was made from, so it outlived the mode
+	entirely: three presses of a three-way button came back to Random and carried on through the same
+	pass, and the only ways to a fresh one were the Random command and a relaunch.
+
+	On the arrival rather than on every write. The one writer today is the panel's cycle, which goes
+	through `RotationMode.next` and so never writes the mode a display is already in — the comparison
+	changes nothing that happens now, and is there because "arriving at Random" and "writing Random" are
+	the same sentence only while that stays true. A second writer setting these from a stored dictionary
+	would reshuffle a display nobody touched, and would be reading the property, not misusing it.
+
+	Leaving Random is not the moment: dropping it there reaches the same result one press earlier, and
+	says a display can lose a plan it is still walking.
 	*/
 	var rotationMode: RotationMode {
 		get { Defaults[.rotationModes][Display.settingsKey(for: display)] ?? .pinned }
-		set { Defaults[.rotationModes][Display.settingsKey(for: display)] = newValue }
+		set {
+			let key = Display.settingsKey(for: display)
+			let arriving = newValue == .random && Defaults[.rotationModes][key] != .random
+
+			Defaults[.rotationModes][key] = newValue
+
+			if arriving {
+				WebsitesController.shared.forgetOrder(on: display)
+			}
+		}
 	}
 
 	/**

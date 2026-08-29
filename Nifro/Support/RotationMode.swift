@@ -46,6 +46,10 @@ enum RotationMode: String, CaseIterable, Defaults.Serializable {
 
 	The order is not stored. A relaunch decides a new one around the page already up, so the wallpaper
 	carries on rather than starting over; `WebsitesController.shuffledOrders` is where it lives and why.
+
+	Arriving at this mode decides one too, so a control that cycles back round to Random deals again
+	rather than resuming a pass the user left. `WallpaperScene.rotationMode` is where that happens and
+	`WebsitesController.forgetOrder(on:)` is what it calls.
 	*/
 	case random
 
