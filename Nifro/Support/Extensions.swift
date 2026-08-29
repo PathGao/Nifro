@@ -111,33 +111,6 @@ extension Binding {
 		)
 	}
 }
-extension Binding {
-	/**
-	Convert a binding with an optional value to a binding with a boolean value representing whether the original binding value is not `nil`.
-
-	- Parameter trueSetValue: The value used when the binding value is set to `true`.
-
-	```
-	struct ContentView: View {
-		private static let defaultInterval = 60.0
-
-		private var hasInterval: Binding<Bool> {
-			$optionalInterval.isNotNil(trueSetValue: Self.defaultInterval)
-		}
-
-		var body: some View {}
-	}
-	```
-	*/
-	func isNotNil<T>(trueSetValue: T) -> Binding<Bool> where Value == T? {
-		.init(
-			get: { wrappedValue != nil },
-			set: {
-				wrappedValue = $0 ? trueSetValue : nil
-			}
-		)
-	}
-}
 // MARK: - CFUUID
 extension CFUUID {
 	var toUUID: UUID {

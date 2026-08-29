@@ -193,10 +193,34 @@ extension AppState {
 		// name no interval of their own, so a change to it can move any display's reload clock and says
 		// nothing about which. The same shape as `rotationIntervals` above, and for the same reason —
 		// and deliberately not the rotation clock, which this number has nothing to do with.
-		Defaults.publisher(.reloadInterval)
-			.sink { [self] _ in
+		//
+		// Two keys and one sink, like the four inputs to opacity below. The setting is a switch and a
+		// number now, and a scene's reload clock is armed from both — so a second sink would be a
+		// second place to forget, and forgetting either one leaves a display reloading on a schedule
+		// the user has just changed or switched off.
+		Publishers.MergeMany(
+			Defaults.publisher(.reloadInterval).map { _ in }.eraseToAnyPublisher(),
+			Defaults.publisher(.reloadOnInterval).map { _ in }.eraseToAnyPublisher()
+		)
+			.sink { [self] in
 				for scene in scenes {
 					scene.resetTimer()
+				}
+			}
+			.store(in: &cancellables)
+
+		// The band's cadence only, and every scene: the pair is app-wide, every display has a band of
+		// its own, and a timer already running keeps the old interval until something re-arms it. Same
+		// shape as the reload pair above and the same reason — and like that one, deliberately nothing
+		// else: changing how often the colour is taken is not a reason to take one now, and a sample on
+		// every keystroke is what the interval field would otherwise ask for.
+		Publishers.MergeMany(
+			Defaults.publisher(.menuBarColorInterval).map { _ in }.eraseToAnyPublisher(),
+			Defaults.publisher(.updateMenuBarColorOnInterval).map { _ in }.eraseToAnyPublisher()
+		)
+			.sink { [self] in
+				for scene in scenes {
+					scene.resetMenuBarBandTimer()
 				}
 			}
 			.store(in: &cancellables)

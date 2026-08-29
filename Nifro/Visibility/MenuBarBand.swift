@@ -124,6 +124,10 @@ extension WallpaperScene {
 		else {
 			menuBarBand?.close()
 			menuBarBand = nil
+
+			// After the band, not before it: the cadence is armed on there being a band, so it reads
+			// the line above rather than needing to be told what just happened.
+			resetMenuBarBandTimer()
 			return
 		}
 
@@ -135,6 +139,73 @@ extension WallpaperScene {
 
 		refreshMenuBarBandColor()
 		updateMenuBarBandVisibility()
+		resetMenuBarBandTimer()
+	}
+
+	/**
+	Arm the cadence the band re-reads the page's colour on, or take it down.
+
+	**What the loads below cannot cover.** Every other sample hangs off a page load, and the pages
+	this app exists for do not load: a webcam at dusk, a fluid simulation, a weather rotator, a
+	picture of the day. Not one of them navigates, so on those wallpapers the band kept the colour it
+	took at launch — for hours, in a strip sitting directly on top of the wallpaper it no longer
+	matched. The events were never wrong; there was simply no rate beside them.
+
+	Off unless somebody asks for it, which is the switch in Behavior and not this method: with it off
+	nothing here is armed, so a build nobody has touched behaves exactly as every build before it.
+
+	**Per scene, and armed from the three things that decide whether there is anything to sample.**
+	Each display has its own band, its own page and its own switch, so a timer for all of them would
+	have to ask which displays it was for on every tick. This asks once, when it is armed, and the
+	three answers it needs are exactly what changes underneath it: a band exists, the display is not
+	switched off, and the page has been revealed. The last is why `load` and `revealPage` both call
+	this — a load starting takes the cadence down and the reveal puts it back. Sampling a page that is
+	not up yet is what once put a colour on the menu bar before the wallpaper arrived, and it is what
+	`refreshMenuBarBandColor` refuses on for the same reason.
+
+	`menuBarBand` and `isSwitchedOff` are both asked though a switched-off display has no band. The
+	band is taken down by the guard above, which runs from content changes; `suspend` takes the timer
+	down itself, in the same list as the other two clocks. Neither is the other's proof, and the pair
+	costs one comparison.
+
+	**What it gives up is that a change is up to `menuBarColorInterval` seconds late**, which is the
+	whole of the trade. It could be driven instead by watching the page — a `MutationObserver`, a
+	repaint notification — and that is a script injected into every website and a message crossing the
+	process boundary on every frame a canvas draws, to save a photograph measured at 0.52ms. A clock
+	that cannot know it woke for nothing is the cheaper of the two, at this price.
+	*/
+	func resetMenuBarBandTimer() {
+		menuBarBandTimer?.invalidate()
+		menuBarBandTimer = nil
+
+		guard
+			menuBarBand != nil,
+			!isSwitchedOff,
+			hasRevealedPage,
+			// The switch in Settings, which ships off: the colour then moves when the website does and
+			// at no other time, which is this app as it was. The number beside it is not touched by that
+			// switch and is still whatever the user typed.
+			Defaults[.updateMenuBarColorOnInterval]
+		else {
+			return
+		}
+
+		let interval = Defaults[.menuBarColorInterval]
+
+		menuBarBandTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
+			Task { @MainActor in
+				self?.refreshMenuBarBandColor()
+			}
+		}
+
+		// A tenth of the interval, which is the argument `WallpaperScene.resetTimer` makes beside its
+		// own timer and holds here for the same two reasons: zero tolerance forbids macOS from firing
+		// this alongside anything else it was already waking for, and this one also runs for the life
+		// of the app on every display. Proportional rather than a fixed number of seconds because the
+		// interval is the user's, and nobody can see the menu bar catch up with the wallpaper a tenth
+		// of an interval late — the whole point of the setting is that they could not see it catch up
+		// hours late either.
+		menuBarBandTimer?.tolerance = interval / 10
 	}
 
 	/**
@@ -155,8 +226,19 @@ extension WallpaperScene {
 	/**
 	Sample the top strip of the wallpaper and paint the band with its average colour.
 
-	Re-sampled on every load rather than once, because the wallpaper changes and the menu bar has to
-	keep matching it.
+	**The sentence that used to be here read "the wallpaper changes" as "the website changes", and
+	that is the defect rather than a wording of it.** It argued that sampling on every load was
+	enough, which is true of a wallpaper that only changes when a page is fetched and false of every
+	page this app was built for: a webcam, a simulation, a picture of the day. Every caller of this
+	was a load event — the two loading paths, the reveal, and the install above — so a page that
+	changes without navigating had no caller at all, and the band wore a colour from whenever it last
+	loaded.
+
+	Those callers are still right, and none of them was removed. A load is a moment the page has
+	certainly changed, which is a reason to sample *now* and says nothing about how often the answer
+	goes stale on its own. What was missing beside them is a rate, and `resetMenuBarBandTimer` is it.
+	The one caller since added that is neither is `AppState.setBrowsingMode`, and it argues there for
+	being an event rather than a cadence.
 	*/
 	func refreshMenuBarBandColor() {
 		guard
