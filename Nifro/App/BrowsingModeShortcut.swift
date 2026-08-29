@@ -108,9 +108,10 @@ final class BrowsingModeShortcut {
 	private func begin() {
 		pendingHold = nil
 
-		let scene = AppState.shared.actingScene
-
 		guard
+			// Nothing under the pointer and no main display either — displays reconfiguring, every
+			// screen asleep. There is no scene to hold, and `primaryScene` no longer invents one.
+			let scene = AppState.shared.actingScene,
 			// The key-up for a hotkey never arrives when the modifiers go up first, so the press can
 			// already be over by the time the threshold lands. Entering the hold then would leave the
 			// wallpaper in front with nothing at all to put it back; the press is spent as a tap instead,

@@ -78,10 +78,26 @@ enum Action: String, CaseIterable {
 
 	@MainActor
 	func run(from source: Source = .automation) {
-		let scene = source == .pointer ? AppState.shared.actingScene : AppState.shared.primaryScene
+		// Disable is the whole app rather than one display, so it resolves no scene — and it is the one
+		// action that has to work when there is none, because switching everything back on is the way
+		// out of that state.
+		if self == .toggleEnabled {
+			AppState.shared.isManuallyDisabled.toggle()
+			return
+		}
+
+		// Every other action names a display. `primaryScene` used to build a scene sooner than answer
+		// nothing, so this could not be reached empty; it can now, and nothing happening is the honest
+		// outcome — the same answer `BrowsingModeShortcut.begin` gives when the pointer is nowhere.
+		guard let scene = source == .pointer ? AppState.shared.actingScene : AppState.shared.primaryScene else {
+			return
+		}
+
 		switch self {
 		case .toggleEnabled:
-			AppState.shared.isManuallyDisabled.toggle()
+			// Returned above. Listed because the switch is exhaustive, which is what makes a new case
+			// say which half of this it belongs to.
+			break
 		case .toggleBrowsingMode:
 			AppState.shared.toggleBrowsingMode(on: scene.display)
 		case .toggleSound:

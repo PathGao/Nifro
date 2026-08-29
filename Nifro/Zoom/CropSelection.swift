@@ -31,7 +31,7 @@ extension AppState {
 	func beginCropSelection(on scene: WallpaperScene? = nil) {
 		guard
 			!isSelectingCrop,
-			let scene = scene ?? Optional(actingScene),
+			let scene = scene ?? actingScene,
 			let website = scene.website,
 			scene.hasLoadedItsWebsite,
 			scene.screen != nil
