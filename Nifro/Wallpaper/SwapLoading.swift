@@ -150,6 +150,14 @@ extension WallpaperScene {
 				}
 			}
 
+			// A load started while this one was still waiting for its first hop has already cancelled
+			// us. Starting the fetch anyway spends a WebContent process and a page load on a
+			// replacement nothing will adopt. The `defer` above is the whole of the cleanup, exactly
+			// as it is for the two early returns below.
+			guard !Task.isCancelled else {
+				return
+			}
+
 			do {
 				try await replacement.loadAndWait(url, timeout: Self.loadTimeout)
 			} catch {
