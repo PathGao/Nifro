@@ -34,14 +34,21 @@ struct SiteGalleryScreen: View {
 			header
 			Divider()
 
-			if matches.isEmpty {
-				ContentUnavailableView.search(text: search)
-			} else {
-				List(matches) { entry in
-					row(for: entry)
+			// The height is stated on the branch rather than left to it. A `List` is greedy and the
+			// empty state is not, so without this the whole stack shrinks to the height of two lines
+			// of text and gets centred in the fixed frame — the header drops away from the top and the
+			// footer jumps up from the bottom, on the keystroke that stops the query matching.
+			Group {
+				if matches.isEmpty {
+					ContentUnavailableView.search(text: search)
+				} else {
+					List(matches) { entry in
+						row(for: entry)
+					}
+					.listStyle(.inset)
 				}
-				.listStyle(.inset)
 			}
+			.frame(maxWidth: .infinity, maxHeight: .infinity)
 
 			Divider()
 			footer
