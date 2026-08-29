@@ -47,12 +47,12 @@
         }
       }
     },
-    "A list of pages that work well as wallpapers, each with the settings that make it work; adding one takes a single file.": {
+    "A list of pages that work well as wallpapers, each with the settings that make it work.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "一份适合当壁纸的网页清单，每条都带着让它好用的设置；添加一条只需要一个文件。"
+            "value": "一份适合当壁纸的网页清单，每条都带着让它好用的设置。"
           }
         }
       }
@@ -2623,6 +2623,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld 个网站"
+          }
+        }
+      }
+    },
+    "by PathGao": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "作者 PathGao"
           }
         }
       }

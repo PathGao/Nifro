@@ -75,18 +75,6 @@ private struct BehaviorSettings: View {
 				BringBrowsingModeToFrontSetting()
 			}
 			Section {
-				IntervalSetting(
-					isOn: .reloadOnInterval,
-					seconds: .reloadInterval,
-					label: "Page reload interval",
-					help: String(localized: "For websites that do not set their own; one that does, in its own settings, ignores this."),
-					accessibilityLabel: "Reload interval"
-				)
-				Defaults.Toggle(key: .restoreScrollPosition) {
-					Text("Restore the page position after a reload")
-						.explained(String(localized: "A page that reloads on a timer starts over; this puts back where it was scrolled or moved to."))
-				}
-				Defaults.Toggle(String(localized: "Reload the page when the Mac wakes"), key: .reloadOnWake)
 				// macOS tints the menu bar from what is rendered under it, and the strip under it is
 				// Nifro's own band wearing the average colour of the top of the page — see `MenuBarBand`.
 				// That colour is taken when a page loads, which never happens on the wallpapers this app
@@ -100,6 +88,18 @@ private struct BehaviorSettings: View {
 					help: String(localized: "With this off, the colour only changes when the website does."),
 					accessibilityLabel: "Menu bar colour interval"
 				)
+				IntervalSetting(
+					isOn: .reloadOnInterval,
+					seconds: .reloadInterval,
+					label: "Page reload interval",
+					help: String(localized: "For websites that do not set their own; one that does, in its own settings, ignores this."),
+					accessibilityLabel: "Reload interval"
+				)
+				Defaults.Toggle(key: .restoreScrollPosition) {
+					Text("Restore the page position after a reload")
+						.explained(String(localized: "A page that reloads on a timer starts over; this puts back where it was scrolled or moved to."))
+				}
+				Defaults.Toggle(String(localized: "Reload the page when the Mac wakes"), key: .reloadOnWake)
 			}
 			Section {
 				OpenExternalLinksInBrowserSetting()
@@ -109,75 +109,18 @@ private struct BehaviorSettings: View {
 }
 
 /**
-Checking for a new version, and being able to stop it.
+Whether the app reaches the network on its own.
 
-An app that reaches the network on its own has to be an app that can be told not to, so the automatic
-check is a switch. The button beside it is what the switch leaves missing: somebody who turned the
-daily check off, or who has just heard a release is out, needs a way to ask now.
-
-It says what it found. A check whose only outcome is silence cannot be told apart from one that
-failed — the same reason the clear-data button reports how much it freed.
+An app that checks for a new version by itself has to be an app that can be told not to, so this is a
+switch. What the switch leaves missing — asking now, and being told the answer — is the row in
+`AboutSection` that carries the version number, since that is where somebody who wants to know what
+they are running already is.
 */
 private struct UpdateSetting: View {
-	private enum Progress: Equatable {
-		case ready
-		case checking
-		case upToDate
-		case available(version: String)
-		case failed
-	}
-
-	@State private var progress = Progress.ready
-
 	var body: some View {
 		Defaults.Toggle(key: .checksForUpdatesAutomatically) {
 			Text("Check for updates automatically")
 				.explained(String(localized: "Checks once a day in the background and puts a download button in the panel when there is something newer; nothing is ever downloaded or installed for you."))
-		}
-
-		LabeledContent {
-			HStack(spacing: 8) {
-				switch progress {
-				case .ready:
-					EmptyView()
-				case .checking:
-					ProgressView()
-						.controlSize(.small)
-				case .upToDate:
-					Text("Up to date")
-						.foregroundStyle(.secondary)
-				case .available(let version):
-					Button(String(localized: "Get \(version)…")) {
-						Constants.latestReleaseURL.open()
-					}
-				case .failed:
-					Text("Could not check")
-						.foregroundStyle(.secondary)
-				}
-
-				Button("Check Now") {
-					check()
-				}
-				.disabled(progress == .checking)
-			}
-		} label: {
-			Text("Version \(SSApp.versionWithBuild)")
-				.textSelection(.enabled)
-		}
-	}
-
-	private func check() {
-		progress = .checking
-
-		Task {
-			switch await AppState.shared.refreshLatestKnownVersion() {
-			case .unreachable:
-				progress = .failed
-			case .upToDate:
-				progress = .upToDate
-			case .newer(let version):
-				progress = .available(version: version)
-			}
 		}
 	}
 }
