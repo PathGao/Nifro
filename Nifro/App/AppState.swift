@@ -117,7 +117,7 @@ final class AppState: ObservableObject {
 	was reached. What is left here is the reason above it — a shortcut is pressed by somebody looking at
 	a screen, and the scene is the thing that knows which screen that is.
 	*/
-	var actingScene: WallpaperScene {
+	var actingScene: WallpaperScene? {
 		guard let pointer = Display.underMouse else {
 			return primaryScene
 		}
@@ -137,17 +137,24 @@ final class AppState: ObservableObject {
 	The main display's — the one with the menu bar. Not a display named in Settings: there is no such
 	setting. Automations reach this through `Action.Source.automation`; a keyboard shortcut goes to
 	`actingScene` instead, because a shortcut has a pointer behind it.
+
+	**Optional, because there are moments when the answer is nothing.** It was non-optional and ended
+	`return scenes[0]`, which traps on an empty list — so it called `rebuildScenes()` first, and the
+	getter every intent reads through was the thing that built the scenes. Reading was writing.
+
+	The answer was never wrong, which is why it stood: `Display.main` is itself optional, so the one
+	scene `rebuildScenes` keeps for the empty case carries `display == nil` and matches `nil == .main`
+	anyway. What the rebuild bought was the trap, not the answer.
+
+	`scenes[0]` went with it, and that half *was* a wrong answer. It was reached when there are scenes
+	and none of them is the main display's — the tens of milliseconds while displays reconfigure — and
+	it named whichever display happened to be first. An automation that means "the main display" is
+	better told there is not one than sent to an arbitrary screen: that is the coin toss
+	`Action.Source` exists to refuse, one layer down, and it is already the answer
+	`BrowsingModeShortcut` gives when the pointer is nowhere.
 	*/
-	var primaryScene: WallpaperScene {
-		if let match = scenes.first(where: { $0.display == .main }) {
-			return match
-		}
-
-		if scenes.isEmpty {
-			rebuildScenes()
-		}
-
-		return scenes[0]
+	var primaryScene: WallpaperScene? {
+		scenes.first { $0.display == .main }
 	}
 
 	/**
@@ -180,7 +187,7 @@ final class AppState: ObservableObject {
 	rather than the website just chosen. A script that sets a website and immediately asks gets the
 	old one back. That is what "current" means here, and it is a change a script can notice.
 	*/
-	var currentWebsite: Website? { primaryScene.loadedWebsite }
+	var currentWebsite: Website? { primaryScene?.loadedWebsite }
 
 	/**
 	Whether *any* display is in Browsing Mode.

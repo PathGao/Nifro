@@ -1367,8 +1367,51 @@ struct ScopeTests {
 		for (name, text) in try Self.sources() where name == "Intents.swift" {
 			#expect(
 				!text.contains("primaryScene"),
-				"An intent reaches past `currentWebsite` to the scene, so it answers from whichever layer that line happened to pick. `primaryScene` also rebuilds the scene list as a side effect, which an intent is not the place to trigger."
+				"An intent reaches past `currentWebsite` to the scene, so it answers from whichever layer that line happened to pick."
 			)
 		}
+	}
+
+	/**
+	Reading which display to act on stopped building one.
+
+	`primaryScene` was non-optional and ended `return scenes[0]`, which traps on an empty list — so it
+	called `rebuildScenes()` first, and the getter every intent, every `nifro://` URL and every
+	Shortcuts automation reads through was the thing that created the scenes. A property that names
+	something is not the place to make it.
+
+	The answer it gave was never wrong, so this pins a shape rather than a behaviour, and `Display.main`
+	is why: it is optional too, so the one scene `rebuildScenes` keeps for the empty case carries
+	`display == nil` and matches `nil == .main` anyway. The rebuild bought the trap and nothing else.
+
+	`scenes[0]` is pinned separately because that half *was* a wrong answer — reached when there are
+	scenes and none of them is the main display's, and it named whichever happened to be first. Both
+	halves have to stay gone, and they fail differently: one lies by acting, the other by answering.
+	*/
+	@Test("Resolving the display an action means does not create one")
+	func theActingDisplayIsFoundRatherThanMade() throws {
+		let state = try Self.source(named: "AppState.swift")
+
+		#expect(
+			state.contains("var primaryScene: WallpaperScene?"),
+			"`primaryScene` is non-optional again, so it owes the caller a scene it may not have and has to invent one to keep the promise."
+		)
+
+		let resolution = try Self.body(of: "var primaryScene: WallpaperScene?", in: state)
+
+		#expect(
+			!resolution.contains("rebuildScenes"),
+			"Reading `primaryScene` builds the scene list, so a Shortcuts query rebuilds every wallpaper as a side effect of being asked a question."
+		)
+
+		#expect(
+			!resolution.contains("scenes[0]"),
+			"`primaryScene` falls back to whichever scene is first, so an automation that means the main display acts on an arbitrary one while the displays reconfigure."
+		)
+
+		#expect(
+			state.contains("var actingScene: WallpaperScene?"),
+			"`actingScene` is non-optional while the thing it falls back to is not, so it has to force the answer `primaryScene` refuses to invent."
+		)
 	}
 }
