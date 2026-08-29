@@ -18,7 +18,7 @@ extension AppState {
 		let command = urlCommand(from: urlComponents)
 		let parameters = urlComponents.queryDictionary
 
-		func showMessage(_ message: String) {
+		func showMessage(_ message: LocalizedStringResource) {
 			SSApp.forceActivate()
 			NSAlert.showModal(title: message)
 		}
@@ -30,7 +30,7 @@ extension AppState {
 				let url = URL(string: urlString, encodingInvalidCharacters: false),
 				url.isValid
 			else {
-				showMessage(String(localized: "Invalid URL for the “add” command."))
+				showMessage("Invalid URL for the “add” command.")
 				return
 			}
 

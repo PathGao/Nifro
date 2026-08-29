@@ -197,8 +197,13 @@ struct RestoreDefaultsTests {
 		)
 
 		// Everything the file says to the user, taken out, so what is left is what it says to
-		// `UserDefaults`. Both spellings: the dialog's message is a multi-line literal.
-		let shown = try Regex(#"String\(localized: (?:""".*?"""|"(?:[^"\\]|\\.)*")\)"#, as: AnyRegexOutput.self)
+		// `UserDefaults`. It used to be every `String(localized:)` in the file; the alert's parameters
+		// are `LocalizedStringResource` now, so its four strings are bare literals at the call site and
+		// that pattern stopped seeing them — it went on passing while reading the dialog's copy as a
+		// list of preference keys. The alert call is where every user-facing string in this file lives,
+		// so the call is what comes out. If a second one appears, take it out here too rather than
+		// widening the list below.
+		let shown = try Regex(#"NSAlert\(.*?\n\t\t\)"#, as: AnyRegexOutput.self)
 			.dotMatchesNewlines()
 
 		let names = code.replacing(shown, with: "")

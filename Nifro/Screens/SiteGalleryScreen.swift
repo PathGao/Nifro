@@ -173,12 +173,15 @@ struct SiteGalleryScreen: View {
 		.padding(.vertical, 4)
 	}
 
-	private func badge(_ text: String, help: String) -> some View {
+	// `LocalizedStringResource` rather than `String`: a `String` parameter swallows the two literals at
+	// the call site whole — `Text` and `.help` then draw them verbatim, nothing extracts them, and no
+	// check in the repository can see them. Typed, the same two literals are keys.
+	private func badge(_ text: LocalizedStringResource, help: LocalizedStringResource) -> some View {
 		Text(text)
 			.font(.caption2)
 			.padding(.horizontal, 5)
 			.padding(.vertical, 1)
 			.background(.quaternary, in: Capsule())
-			.help(help)
+			.help(Text(help))
 	}
 }

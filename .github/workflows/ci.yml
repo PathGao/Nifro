@@ -54,6 +54,12 @@ jobs:
         env:
           NSUnbufferedIO: YES
 
+      # In this job because it reads the build's own output. The compiler writes a `.stringsdata` per
+      # source file naming every string it recognised as user-facing, so this asks the catalogue and
+      # the binary to agree with nothing guessing in between — see the script for what that replaces.
+      - name: Check every user-facing string is in the catalogue
+        run: python3 Tools/check-strings.py .xcode-build
+
   test:
     name: Geometry tests
     runs-on: macos-26
@@ -216,38 +222,7 @@ jobs:
                   print(f"  {key[:100]}")
               sys.exit(1)
 
-          # Every literal the app shows has to be in the catalogue at all. The check above only looks
-          # at what is already in there, so a string added to the source and never extracted passes
-          # it — untranslated, and invisible until somebody reads the other language. Both forms
-          # count: `String(localized:)` and a bare `Text("…")`, which SwiftUI localizes too. Block
-          # comments are stripped first, since the doc comments carry sample code.
-          import re
-
-          PATTERNS = [
-              r'String\(localized: "((?:[^"\\]|\\.)*)"\)',
-              r'\bText\("((?:[^"\\]|\\.)+)"\)',
-          ]
-
-          literals = set()
-          for path in pathlib.Path("Nifro").rglob("*.swift"):
-              source = re.sub(r"/\*.*?\*/", "", path.read_text(), flags=re.DOTALL)
-              for pattern in PATTERNS:
-                  for match in re.finditer(pattern, source):
-                      literal = match.group(1)
-                      # Interpolated strings are stored under a placeholder key, not this text.
-                      if "\\(" not in literal:
-                          literals.add(literal.replace('\\"', '"').replace("\\n", "\n"))
-
-          absent = sorted(literals - set(catalogue["strings"]))
-
-          if absent:
-              print(f"::error::{len(absent)} strings are in the source but not in the catalogue")
-              for key in absent[:20]:
-                  print(f"  {key[:100]}")
-              print("Build the app in Xcode to extract them, then translate them.")
-              sys.exit(1)
-
-          print(f"{len(catalogue['strings'])} strings, all translated; {len(literals)} literals all present")
+          print(f"{len(catalogue['strings'])} strings, all translated")
           CHECK
 
       - name: Check the generated catalogue is current

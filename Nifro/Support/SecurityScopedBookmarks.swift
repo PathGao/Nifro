@@ -53,7 +53,7 @@ enum SecurityScopedBookmarkManager {
 		func panel(_ sender: Any, validate url: URL) throws {
 			if url != currentURL {
 				throw NSError.appError(
-					String(localized: "Incorrect directory."),
+					"Incorrect directory.",
 					recoverySuggestion: "Select the directory “\(currentURL.tildePath)”."
 				)
 			}
