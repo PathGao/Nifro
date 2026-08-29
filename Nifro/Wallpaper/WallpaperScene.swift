@@ -214,6 +214,27 @@ final class WallpaperScene {
 	var menuBarBandTimer: Timer?
 
 	/**
+	The cadence a plain load watches the page on, until it has drawn something.
+
+	Only a plain load arms it. A swap keeps the outgoing page on screen for the whole fetch, so there
+	is nothing missing from the desktop to hurry — the wait is the point there. A plain load is the
+	one that leaves the display showing whatever is behind the wallpaper: a cold launch, coming back
+	from switched off or disabled, the screen unlocking, a display being plugged in.
+
+	Disarmed by `revealPage`, whoever gets there first, and by both exits with the other three.
+	*/
+	var firstPaintTimer: Timer?
+
+	/**
+	Whether a snapshot asked for by `watchForFirstPaint` is still outstanding.
+
+	One question at a time. A snapshot of a heavy page mid-load measured up to 176ms against a 150ms
+	cadence, so without this the ticks pile up on exactly the pages that are slowest to draw — which
+	is the moment the app can least afford to spend the time twice.
+	*/
+	private var isAskingWhetherPageHasDrawn = false
+
+	/**
 	Minutes since this display last moved to another website.
 
 	The rotation timer ticks once a minute whatever the display's interval is, because the schedule has
@@ -539,6 +560,8 @@ final class WallpaperScene {
 		delay(Self.loadTimeout) { [weak self] in
 			self?.revealPage()
 		}
+
+		watchForFirstPaint()
 	}
 
 	/**
@@ -580,6 +603,10 @@ final class WallpaperScene {
 
 		hasRevealedPage = true
 
+		// Whoever got here first, nothing is watching for a paint any more.
+		firstPaintTimer?.invalidate()
+		firstPaintTimer = nil
+
 		webViewController.webView.isHidden = false
 
 		// In this order, and only now: the band stands in for the top of the page, so there has to be
@@ -588,6 +615,77 @@ final class WallpaperScene {
 		refreshMenuBarBandColor()
 		updateMenuBarBandVisibility()
 		resetMenuBarBandTimer()
+	}
+
+	/**
+	How often a plain load asks whether the page has drawn anything yet.
+
+	Measured, on a hidden web view in a window on screen: the page is drawn 0.25–5.8s in, and
+	`didFinish` lands 0.6–3.2s after that. At this cadence the worst of those pages costs about forty
+	snapshots and the lightest costs two, at 4–14ms each — spread across a load that is already the
+	busiest moment the app has.
+	*/
+	private static let firstPaintInterval = 0.15
+
+	/**
+	Put the page on screen as soon as it has drawn, rather than when the whole load event fires.
+
+	`didFinish` waits for everything a page asks for. What the desktop needs is the first thing the
+	page draws, and those are 0.6–3.2s apart — apple.com draws a finished-looking page 0.35s in and
+	does not finish loading for another five seconds. For all of that the display was showing whatever
+	is behind the wallpaper, because the web view is hidden until `revealPage`.
+
+	**Asked, not waited for, and that is the whole mechanism.** A hidden web view runs no frame loop:
+	an injected `requestAnimationFrame` never fires while `isHidden` is true, measured, so the page
+	cannot report its own paint. But WebKit will render one on demand — which is why the panel's
+	thumbnail shows a page the desktop is not showing yet. This asks the same question the panel asks,
+	through the same `snapshot()`, at a slower cadence and for a different purpose.
+
+	`revealPage` stays the single door. This does not unhide anything itself, so the ordering that
+	hangs off that moment — the band's colour, its visibility, its cadence — is unchanged and has one
+	writer, and `didFinish` and the thirty-second backstop still reveal exactly as they did. This only
+	ever gets there first.
+
+	Not armed on the swap path. A swap keeps the outgoing page up for the whole fetch and reveals
+	through `adopt`, so there is nothing on the desktop to hurry.
+	*/
+	func watchForFirstPaint() {
+		firstPaintTimer?.invalidate()
+
+		firstPaintTimer = Timer.scheduledTimer(withTimeInterval: Self.firstPaintInterval, repeats: true) { [weak self] _ in
+			Task { @MainActor in
+				await self?.revealIfPageHasDrawn()
+			}
+		}
+
+		// A tenth of the interval, the same argument `resetTimer` makes beside its own timer.
+		firstPaintTimer?.tolerance = Self.firstPaintInterval / 10
+	}
+
+	private func revealIfPageHasDrawn() async {
+		guard
+			!hasRevealedPage,
+			!isAskingWhetherPageHasDrawn
+		else {
+			return
+		}
+
+		isAskingWhetherPageHasDrawn = true
+		let image = await snapshot()
+		isAskingWhetherPageHasDrawn = false
+
+		// `snapshot()` refuses a switched-off display, a display with no website and a rectangle the
+		// view has not caught up with, so a `nil` here is not "the page has not drawn" — it is "there
+		// is nothing to ask about", and the next tick asks again.
+		guard
+			!hasRevealedPage,
+			let image,
+			!image.isFlatColour
+		else {
+			return
+		}
+
+		revealPage()
 	}
 
 	/**
@@ -762,6 +860,8 @@ final class WallpaperScene {
 		rotationTimer = nil
 		menuBarBandTimer?.invalidate()
 		menuBarBandTimer = nil
+		firstPaintTimer?.invalidate()
+		firstPaintTimer = nil
 		pendingLoad?.cancel()
 
 		// Before the band: releasing installs an empty page, and installing content is one of the
@@ -778,6 +878,7 @@ final class WallpaperScene {
 		reloadTimer?.invalidate()
 		rotationTimer?.invalidate()
 		menuBarBandTimer?.invalidate()
+		firstPaintTimer?.invalidate()
 		pendingLoad?.cancel()
 		window.orderOut(nil)
 		content = .empty
