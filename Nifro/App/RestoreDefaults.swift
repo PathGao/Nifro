@@ -83,34 +83,17 @@ enum RestoreDefaults {
 	/**
 	The websites, and the two flags that say what has already been done to them.
 
-	`playlists` is the whole of where a website is stored and `websites` is the pre-playlist list it was
-	built from — the only copy of that there will ever be, which `Constants.swift` argues for keeping
-	and a settings reset is not a reason to burn.
+	`playlists` is the whole of where a website is stored.
 
-	**The three flags are the half that has teeth, and they are neither a setting nor data.** Each one
-	is a record of something already done *to* the data: the websites have been converted to playlists,
-	each of them has been told whether it overrides the reload interval, the shipped websites have been
-	installed. Reset one while what it describes survives and the app redoes
-	the work on top of a result that is already there. `migrateToPlaylistsIfNeeded` assigns `playlists`
-	outright, so a cleared `hasMigratedWebsitesToPlaylists` replaces every list the user has made with
-	one list built from a `websites` key they stopped editing before the conversion — on the very next
-	launch, silently, and with the playlists it overwrote already gone. A cleared
-	`hasInstalledFeaturedWebsites` is the milder one and still wrong: the next launch lays the shipped
-	eight back over the user's list, including the ones they deleted on purpose, and a second copy of
-	the ones they kept.
+	**The flag is the half that has teeth, and it is neither a setting nor data.** It is a record of
+	something already done *to* the data: the shipped websites have been installed. Reset it while what
+	it describes survives and the app redoes the work on top of a result that is already there — the
+	next launch lays the shipped eight back over the user's list, including the ones they deleted on
+	purpose, and a second copy of the ones they kept. A flag travels with the data it is about.
 
-	`hasMigratedWebsiteReloadOverrides` is the third and the sharpest. It guards a conversion that reads
-	each stored record for whether it carries a reload interval of its own, and this build writes one on
-	every record, because that field is no longer optional — so the question is answerable exactly once
-	and answers "yes, all of them" for ever after. Cleared, the next launch marks every website in the
-	user's list as overriding the reload interval, each with whatever number happens to be sitting in
-	its field. The other two cost the user work they had done; this one changes what their wallpapers
-	do. A flag travels with the data it is about.
-
-	The reload interval's *own* migration flag is deliberately not here.
-	`hasMigratedReloadIntervalToASwitch` decides an app setting from an app setting, so both go in the
-	wipe together: the next launch finds no stored interval and switches reloading off, which is where a
-	restore is meant to leave it.
+	There used to be three, and the other two guarded conversions from older storage shapes. Those
+	conversions are deleted, so the flags are gone and this list is shorter by the two of them and by
+	the `websites` key they read.
 
 	What is *not* here is the rest of what is filed under a website. `currentWebsites`,
 	`currentPlaylists`, `rotationModes`, `rotationIntervals`, `disabledDisplays` and `browsingDisplays`
@@ -118,9 +101,6 @@ enum RestoreDefaults {
 	*/
 	private static let websiteKeys = [
 		"playlists",
-		"websites",
-		"hasMigratedWebsitesToPlaylists",
-		"hasMigratedWebsiteReloadOverrides",
 		"hasInstalledFeaturedWebsites"
 	]
 

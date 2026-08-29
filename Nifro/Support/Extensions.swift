@@ -527,7 +527,7 @@ extension KeyedDecodingContainer {
 
 	This is the overload the property wrapper was designed around; an earlier cleanup removed it when
 	it happened to have no members, and adding `externalLinks` to `Website` in #53 was the first field
-	added since. `WebsiteMigrationTests` pins the behaviour rather than the presence of this code.
+	added since. `WebsiteDecodingTests` pins the behaviour rather than the presence of this code.
 	*/
 	// periphery:ignore - The only caller is a synthesised `init(from:)`, which no index attributes to
 	// this overload. That invisibility is not a footnote here: it is why the extension holding this was

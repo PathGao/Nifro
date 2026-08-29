@@ -102,9 +102,8 @@ extension Playlist {
 
 	A computed property and not a stored `let`, so it follows a language change in the same launch
 	rather than answering with whatever the language was the first time anything asked. Written once
-	here because two places name it — the migration that makes it and the add that has to find or
-	remake it — and a list called "Default" in one and something else in the other is two default
-	playlists.
+	here because the add that has to find or remake it is not the only thing that will ever name it,
+	and a list called "Default" in one place and something else in another is two default playlists.
 	*/
 	static var defaultName: String { String(localized: "Default Playlist") }
 
@@ -112,8 +111,8 @@ extension Playlist {
 	Bind this playlist to a display, or to none.
 
 	The refusal that `isDefault` argues for, stated a second time because there are two ways in. The
-	initializer drops a binding handed to the default playlist, and that covers the migration and the
-	copy; this covers the management page, where the user picks a display from a menu. `boundDisplay`
+	initializer drops a binding handed to the default playlist, and that covers the copy; this covers
+	the management page, where the user picks a display from a menu. `boundDisplay`
 	is `private(set)` so that these two are the only ways in, and the menu item is disabled as well —
 	a control the user cannot reach is the honest version, and this is what makes reaching it anyway
 	harmless.

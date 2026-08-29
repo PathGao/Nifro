@@ -79,9 +79,9 @@ private final class AppDelegate: NSObject, NSApplicationDelegate {
 				// The playlists, which are the whole of the list now. A store is filed under `website.id`
 				// and so is everything a page remembers, and both sweeps delete what no website claims —
 				// deleting a store signs the user out of that site with nothing able to put it back. This
-				// used to be a union with the `websites` key while both were live; that key is read only
-				// by the migration now, and keeping it in the union would preserve stores for websites
-				// the user has since deleted, for good.
+				// used to be a union with the pre-playlist `websites` key while both were live; that key
+				// and its last reader are both deleted, and keeping it in the union would have preserved
+				// stores for websites the user has since deleted, for good.
 				let websites = Defaults[.playlists].flatMap(\.websites)
 				let websiteIDs = Set(websites.map(\.id))
 

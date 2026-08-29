@@ -14,10 +14,10 @@
 // against the committed file, so `SiteCatalog` is kept free of `Website`, `Defaults` and SwiftUI in
 // order to be listed here.
 //
-// `PlaylistMigration` is listed for a different reason. It runs once, against a website list the user
-// built by hand, on a build that has no way back, and a grouping that drops an entry drops a website
-// with no error, no half-state and nothing to restore from. Keeping it free of `Website` and
-// `Defaults` is what lets the two-display case be run here without a second display.
+// `PlaylistCopying` is listed for a different reason. Duplicating a playlist has to hand back new
+// members rather than the ones it was given, and a copy that gets that wrong compiles, draws the
+// right rows, and then edits both lists at once. Keeping `withFreshIDs` free of `Website` and
+// `Defaults` is what lets that be run here at all.
 
 import PackageDescription
 
@@ -28,7 +28,7 @@ let package = Package(
 		.target(
 			name: "NifroLogic",
 			path: "Nifro",
-			sources: ["Sites/SiteCatalog.swift", "Sites/SiteCatalog.generated.swift", "Sites/PlaylistMigration.swift", "Support/ImageSampling.swift", "Support/DiskBudget.swift", "Support/Geometry.swift", "Support/UpdateCheck.swift", "Support/Rotation.swift", "Support/SettingsMigration.swift", "Support/RotationInterval.swift", "Support/Schedule.swift", "Support/URLCommand.swift", "Support/VideoEmbed.swift"]
+			sources: ["Sites/SiteCatalog.swift", "Sites/SiteCatalog.generated.swift", "Sites/PlaylistCopying.swift", "Support/ImageSampling.swift", "Support/DiskBudget.swift", "Support/Geometry.swift", "Support/UpdateCheck.swift", "Support/Rotation.swift", "Support/RotationInterval.swift", "Support/Schedule.swift", "Support/URLCommand.swift", "Support/VideoEmbed.swift"]
 		),
 		.testTarget(
 			name: "NifroTests",

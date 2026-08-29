@@ -45,7 +45,6 @@
 		A1C0DE01B0074E01A0000011 /* ScrollableTextView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000012 /* ScrollableTextView.swift */; };
 		A1C0DE01B0074E01A0000001 /* Rotation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000002 /* Rotation.swift */; };
 		A1C0DE01B0074E01A0000003 /* RotationInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000004 /* RotationInterval.swift */; };
-		A1C0DE01B0074E01A0000093 /* SettingsMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000094 /* SettingsMigration.swift */; };
 		5D03B00441481AA32BEF388F /* MenuSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = E84336098C3DBE55C6CA62CE /* MenuSupport.swift */; };
 		DD3CC9A78917D05BF2C0B573 /* Display.swift in Sources */ = {isa = PBXBuildFile; fileRef = FF3B75EF61B0B424DBE27645 /* Display.swift */; };
 		B908EAF815B4DAB91DF7F3CA /* SystemEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 348C6589BF6FF0DC7E0FC30E /* SystemEvents.swift */; };
@@ -79,7 +78,7 @@
 		E3FA21AD23C74E6B00059E43 /* InternetAccessPolicy.json in Resources */ = {isa = PBXBuildFile; fileRef = E3FA21AC23C74E6B00059E43 /* InternetAccessPolicy.json */; };
 		E3FAF815264333D300CF7963 /* Website.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3FAF814264333D300CF7963 /* Website.swift */; };
 		A1B2C3D101000000000000A1 /* Playlist.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D001000000000000A1 /* Playlist.swift */; };
-		A1B2C3D102000000000000A1 /* PlaylistMigration.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D002000000000000A1 /* PlaylistMigration.swift */; };
+		A1B2C3D102000000000000A1 /* PlaylistCopying.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D002000000000000A1 /* PlaylistCopying.swift */; };
 		A1C0DE01B0074E01A0000017 /* WebsiteIconFetcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000018 /* WebsiteIconFetcher.swift */; };
 /* End PBXBuildFile section */
 
@@ -150,7 +149,6 @@
 		A1C0DE01B0074E01A0000012 /* ScrollableTextView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ScrollableTextView.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A1C0DE01B0074E01A0000002 /* Rotation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Rotation.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A1C0DE01B0074E01A0000004 /* RotationInterval.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = RotationInterval.swift; sourceTree = "<group>"; usesTabs = 1; };
-		A1C0DE01B0074E01A0000094 /* SettingsMigration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = SettingsMigration.swift; sourceTree = "<group>"; usesTabs = 1; };
 		E84336098C3DBE55C6CA62CE /* MenuSupport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = MenuSupport.swift; sourceTree = "<group>"; usesTabs = 1; };
 		FF3B75EF61B0B424DBE27645 /* Display.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Display.swift; sourceTree = "<group>"; usesTabs = 1; };
 		348C6589BF6FF0DC7E0FC30E /* SystemEvents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = SystemEvents.swift; sourceTree = "<group>"; usesTabs = 1; };
@@ -183,7 +181,7 @@
 		E3FA21AC23C74E6B00059E43 /* InternetAccessPolicy.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; lineEnding = 0; path = InternetAccessPolicy.json; sourceTree = "<group>"; usesTabs = 1; };
 		E3FAF814264333D300CF7963 /* Website.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Website.swift; sourceTree = "<group>"; };
 		A1B2C3D001000000000000A1 /* Playlist.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Playlist.swift; sourceTree = "<group>"; };
-		A1B2C3D002000000000000A1 /* PlaylistMigration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistMigration.swift; sourceTree = "<group>"; };
+		A1B2C3D002000000000000A1 /* PlaylistCopying.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaylistCopying.swift; sourceTree = "<group>"; };
 		A1C0DE01B0074E01A0000018 /* WebsiteIconFetcher.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = WebsiteIconFetcher.swift; sourceTree = "<group>"; usesTabs = 1; };
 /* End PBXFileReference section */
 
@@ -334,7 +332,7 @@
 				A1C0DE01B0074E01A0000018 /* WebsiteIconFetcher.swift */,
 				E3FAF814264333D300CF7963 /* Website.swift */,
 				A1B2C3D001000000000000A1 /* Playlist.swift */,
-				A1B2C3D002000000000000A1 /* PlaylistMigration.swift */,
+				A1B2C3D002000000000000A1 /* PlaylistCopying.swift */,
 				2BA31C0FAF40DE6D9B93FFB1 /* WebsiteReport.swift */,
 				BE550ECBADBF01976B63976D /* SiteCatalog.generated.swift */,
 				144C837DC38F0A9C8BB73A61 /* SiteCatalog.swift */,
@@ -369,7 +367,6 @@
 				47F1A73D88562E6E93A3A692 /* VideoEmbed.swift */,
 				A1C0DE01B0074E01A0000002 /* Rotation.swift */,
 				A1C0DE01B0074E01A0000004 /* RotationInterval.swift */,
-				A1C0DE01B0074E01A0000094 /* SettingsMigration.swift */,
 				A1C0DE01B0074E01A0000012 /* ScrollableTextView.swift */,
 				A1C0DE01B0074E01A0000014 /* SecurityScopedBookmarks.swift */,
 				A1C0DE01B0074E01A0000042 /* DiskBudget.swift */,
@@ -550,7 +547,6 @@
 				D01E670AD9D65C111C3E3E3F /* VideoEmbed.swift in Sources */,
 				A1C0DE01B0074E01A0000001 /* Rotation.swift in Sources */,
 				A1C0DE01B0074E01A0000003 /* RotationInterval.swift in Sources */,
-				A1C0DE01B0074E01A0000093 /* SettingsMigration.swift in Sources */,
 				A1C0DE01B0074E01A0000011 /* ScrollableTextView.swift in Sources */,
 				A1C0DE01B0074E01A0000013 /* SecurityScopedBookmarks.swift in Sources */,
 				A1C0DE01B0074E01A0000041 /* DiskBudget.swift in Sources */,
@@ -583,7 +579,7 @@
 				A1C0DE01B0074E01A0000017 /* WebsiteIconFetcher.swift in Sources */,
 				E3FAF815264333D300CF7963 /* Website.swift in Sources */,
 				A1B2C3D101000000000000A1 /* Playlist.swift in Sources */,
-				A1B2C3D102000000000000A1 /* PlaylistMigration.swift in Sources */,
+				A1B2C3D102000000000000A1 /* PlaylistCopying.swift in Sources */,
 				E333EB1B2385244E005FCE44 /* SettingsScreen.swift in Sources */,
 				A1C0DE01B0074E01A0000075 /* DisplayPanelController.swift in Sources */,
 				A1C0DE01B0074E01A0000073 /* DisplayPanelModel.swift in Sources */,

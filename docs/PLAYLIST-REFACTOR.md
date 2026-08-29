@@ -218,7 +218,7 @@ what "readable" was meant to buy. It is deleted now and `Defaults[.websites]` is
 `Key<[Website]>`. Nothing about the data on disk changes: a synthesised `Codable` asks for the keys it
 declares and skips the rest, so the records that carry a `display` decode exactly as they already did,
 and the field stays on disk as the record of what the list was before the conversion.
-`WebsiteMigrationTests.aRecordWithADisplayStillDecodes` runs one of them.
+`WebsiteDecodingTests.aRecordWithADisplayStillDecodes` runs one of them.
 
 ## 7. Decided here, because the design forced the question
 

@@ -341,7 +341,7 @@ of `KeyedDecodingContainer.decode(_:forKey:)` in `Extensions.swift` routing the 
 runs at all. That extension was deleted once, while it happened to have no members, and the gap sat
 unnoticed until the next field was added — because a field only meets an absent key in records written
 *before* it existed, so the four already using the wrapper never proved anything about it.
-`WebsiteMigrationTests` now asserts the overload as well as the wrapper: being wrapped and surviving an
+`WebsiteDecodingTests` now asserts the overload as well as the wrapper: being wrapped and surviving an
 absent key are two facts that must agree, and nothing else requires them to.
 
 **A trap, not an item:** a fourth kind of per-page record must be a case of `PerPageDefaults` — that

@@ -500,26 +500,23 @@ struct CurrentWebsiteTests {
 /**
 How long a display waits between websites.
 
-Two things that only look simple. The fallback is what an upgrading user lands on — the interval was
-one number for the whole machine until now, and nobody's setting is allowed to vanish because the
-shape it is stored in changed. The clamp is the other end of a text field, where "0" and a nine-digit
-number are each one keystroke away and both mean a wallpaper that has stopped.
+Not as simple as it looks, in one place: the clamp. It is the far end of a text field where "0" and a
+nine-digit number are each one keystroke away and both mean a wallpaper that has stopped.
+
+There used to be a second: a fallback to the machine-wide interval every version up to 0.1.3 stored,
+so that an upgrading user's number survived the move to one per display. That key is deleted and so
+is the test for it.
 */
 @Suite("Rotation interval")
 struct RotationIntervalTests {
 	@Test("A display with a number of its own uses it")
 	func stored() {
-		#expect(rotationInterval(stored: 12, legacySeconds: 60 * 45) == 12)
-	}
-
-	@Test("A display with nothing of its own inherits the machine-wide number it replaced")
-	func legacyFallback() {
-		#expect(rotationInterval(stored: nil, legacySeconds: 60 * 45) == 45)
+		#expect(rotationInterval(stored: 12) == 12)
 	}
 
 	@Test("A machine that never set one gets the default")
 	func noSettingAtAll() {
-		#expect(rotationInterval(stored: nil, legacySeconds: nil) == defaultRotationIntervalMinutes)
+		#expect(rotationInterval(stored: nil) == defaultRotationIntervalMinutes)
 	}
 
 	@Test("Rotation being off is not stored as a missing interval any more")
@@ -527,14 +524,14 @@ struct RotationIntervalTests {
 		// Up to 0.1.3 a nil interval meant "do not rotate", and that meaning moved to `RotationMode`.
 		// So nil now has to mean a length rather than a refusal, or a display switched to Loop would
 		// come up with no interval and never move.
-		#expect(rotationInterval(stored: nil, legacySeconds: nil) >= rotationIntervalRange.lowerBound)
+		#expect(rotationInterval(stored: nil) >= rotationIntervalRange.lowerBound)
 	}
 
 	@Test("A stored number outside the range is brought back into it")
 	func storedIsClamped() {
-		#expect(rotationInterval(stored: 0, legacySeconds: nil) == rotationIntervalRange.lowerBound)
-		#expect(rotationInterval(stored: 99_999, legacySeconds: nil) == rotationIntervalRange.upperBound)
-		#expect(rotationInterval(stored: .nan, legacySeconds: nil) == defaultRotationIntervalMinutes)
+		#expect(rotationInterval(stored: 0) == rotationIntervalRange.lowerBound)
+		#expect(rotationInterval(stored: 99_999) == rotationIntervalRange.upperBound)
+		#expect(rotationInterval(stored: .nan) == defaultRotationIntervalMinutes)
 	}
 
 	@Test("A number typed in is taken as it is when it makes sense")

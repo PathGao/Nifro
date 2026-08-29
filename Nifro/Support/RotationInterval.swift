@@ -36,30 +36,26 @@ Half an hour, which is what the Settings toggle this replaces filled in when it 
 let defaultRotationIntervalMinutes = 30.0
 
 /**
-How long `stored` minutes means in practice, falling back to the machine-wide number it replaced.
+How long `stored` minutes means in practice.
 
-`legacySeconds` is `Defaults[.playlistInterval]`, which every version up to 0.1.3 used for every
-display at once. A display with nothing of its own inherits it, so somebody who had set forty-five
-minutes there keeps forty-five minutes on every screen rather than being quietly moved to the
-default.
+`nil` is a display nobody has typed a number for, which is most of them: `rotationIntervals` stores
+only the displays that differ, so a screen with nothing of its own lands here.
 
-Read on every tick rather than copied across once at launch, because the displays that exist at
-launch are not the displays that exist: a monitor plugged in next month was not there to be migrated,
-and it should inherit the same number its neighbours did rather than the default.
-
-The fallback can go once nobody is upgrading from 0.1.3 or older — there is no signal for that, so
-the honest condition is a version: delete `legacySeconds`, the `playlistInterval` key and this
-paragraph in 1.0.
+It used to fall back to `playlistInterval` as well — one number in seconds for the whole machine,
+which is what every version up to 0.1.3 had — so that an upgrading user kept their forty-five minutes
+on every screen instead of being moved to the default. That key and the divide-by-sixty beside it are
+gone: nobody is upgrading from 0.1.3 any more, and a fallback nothing can reach is a branch that
+still has to be read every time somebody changes this.
 */
-func rotationInterval(stored: Double?, legacySeconds: Double?) -> Double {
+func rotationInterval(stored: Double?) -> Double {
 	guard
-		let minutes = stored ?? legacySeconds.map({ $0 / 60 }),
-		minutes.isFinite
+		let stored,
+		stored.isFinite
 	else {
 		return defaultRotationIntervalMinutes
 	}
 
-	return min(max(minutes, rotationIntervalRange.lowerBound), rotationIntervalRange.upperBound)
+	return min(max(stored, rotationIntervalRange.lowerBound), rotationIntervalRange.upperBound)
 }
 
 /**
