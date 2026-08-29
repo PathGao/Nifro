@@ -440,10 +440,11 @@ final class AppState: ObservableObject {
 	wallpaper away, took the menu bar band with it and stopped both timers while `isEnabled` never
 	moved. The icon stayed drawn as fully on, over a desktop with nothing on it.
 
-	Across a quit it is worse, and the wrong way round. `isManuallyDisabled` is a plain property that
-	dies with the process; `disabledDisplays` is written to disk. The only "off" that survives a
-	relaunch is exactly the one the icon refused to draw, so a Mac whose only display was switched off
-	cold-starts with a normal-looking icon over an app doing nothing at all.
+	Across a quit it used to be worse, and the wrong way round: `isManuallyDisabled` died with the
+	process while `disabledDisplays` was written to disk, so the only "off" that survived a relaunch
+	was exactly the one the icon refused to draw — a Mac whose only display was switched off cold-started
+	with a normal-looking icon over an app doing nothing at all. Both switches are stored now, and this
+	reads through `isSwitchedOff`, which is where both of them meet.
 
 	Through `isSwitchedOff` and not by reading the two switches here, because that predicate is where
 	"off" is decided: a third thing that comes to mean off joins it and reaches this by existing. See
@@ -459,9 +460,24 @@ final class AppState: ObservableObject {
 
 	var isScreenLocked = false
 
-	var isManuallyDisabled = false {
-		didSet {
-			setEnabledStatus()
+	/**
+	Whether the user switched the whole app off.
+
+	Stored, because there is nothing to ask: the lock screen and the battery rule answer themselves
+	the moment somebody wants to know, and this one is a press. It was a plain property until now, so
+	Disable lasted until the next quit and the app came back on by itself — which is the failure
+	`Constants.swift` sorts its three classes to prevent, and the one member of class 2 that had no
+	storage.
+
+	No `didSet`. `Events` recomputes `isEnabled` from a change to the key rather than from an
+	assignment here, so the two writers that are not this property — Restore Defaults wiping the key,
+	and anything that edits the stored preferences — reach the running app by the same path as the
+	menu item. A `didSet` would have covered only the presses.
+	*/
+	var isManuallyDisabled: Bool {
+		get { Defaults[.isManuallyDisabled] }
+		set {
+			Defaults[.isManuallyDisabled] = newValue
 		}
 	}
 

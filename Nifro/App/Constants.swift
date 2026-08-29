@@ -65,10 +65,12 @@ Classes 1 and 2 together are what make unplug and replug behave, and they read a
 until they are told apart: the display coming back at all is class 1 restoring itself, and it coming
 back still switched off is class 2 never having been withdrawn.
 
-The one member out of place is `AppState.isManuallyDisabled`, which is class 2 — the user pressed
-Disable — and is a plain property that dies with the process. So the only "off" that survives a quit
-is the per-display one, which is what made the menu bar icon's old reading wrong at the moment it
-mattered most. Giving that switch storage is a change of its own.
+`AppState.isManuallyDisabled` was the one member out of place, and is the worked example of what
+getting the sort wrong costs. It is class 2 — the user pressed Disable, and nothing can ask the
+machine whether they did — and it was a plain property that died with the process. So the only "off"
+that survived a quit was the per-display one, and a Mac switched off as a whole came back on by
+itself the next morning. It has a key of its own below now, and `Events` turns a change to it into
+`setEnabledStatus()`, which is what carries the wipe in `RestoreDefaults` back into the running app.
 */
 extension Defaults.Keys {
 	// The website list as it was before playlists, read exactly once and never written. It is the only
@@ -234,6 +236,17 @@ extension Defaults.Keys {
 	// app. Stored as the exceptions rather than as a flag per display, so a screen nobody has touched
 	// needs no entry and an unplugged one leaves nothing behind.
 	static let disabledDisplays = Key<Set<String>>("disabledDisplays", default: [])
+
+	// The whole app switched off, as opposed to `disabledDisplays` above, which is one screen at a
+	// time. Nothing can ask the machine whether the user pressed Disable, so the answer has to be
+	// written down or their intent lasts until the next quit — see the classes at the top of this file,
+	// where this used to be named as the one member out of place.
+	//
+	// `AppState.isManuallyDisabled` reads and writes it, and `Events` turns a change here into
+	// `setEnabledStatus()`. That is also what makes Restore Defaults switch the app back on: the wipe
+	// removes this key one key at a time, so the change reaches the running app the same way a press
+	// of Disable does.
+	static let isManuallyDisabled = Key<Bool>("isManuallyDisabled", default: false)
 
 	static let contentRulesURL = Key<String?>("contentRulesURL")
 	static let hasInstalledFeaturedWebsites = Key<Bool>("hasInstalledFeaturedWebsites", default: false)

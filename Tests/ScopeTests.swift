@@ -1277,9 +1277,9 @@ struct ScopeTests {
 	`GetEnabledStateIntent` answered `true` to a script that had no other way to find out. Nothing was
 	wrong with `isEnabled`: none of the three things it is made of is per display.
 
-	Which relaunches into the same state, and only that state: `disabledDisplays` is written to disk
-	and `isManuallyDisabled` is not, so the one "off" the icon refused to draw is the one that
-	survives a quit.
+	Which relaunches into the same state. Both switches are on disk now — `disabledDisplays` always
+	was, and `isManuallyDisabled` was the one member of its class without storage, so the only "off"
+	that survived a quit was exactly the one the icon refused to draw.
 
 	One expression, `isShowingWallpaper`, and both readers named here. It asks `isSwitchedOff` rather
 	than the two switches, so a third thing that comes to mean off reaches the icon and the intent by

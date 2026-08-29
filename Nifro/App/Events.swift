@@ -231,6 +231,16 @@ extension AppState {
 			}
 			.store(in: &cancellables)
 
+		// The app-wide Disable, which is stored now. Watched rather than acted on where it is written,
+		// because it has three writers and only one of them is a press: the menu item and the Shortcuts
+		// action set it, and `RestoreDefaults` removes the key outright. The first delivery is what
+		// applies it on launch, the same as the line above.
+		Defaults.publisher(.isManuallyDisabled)
+			.sink { [self] _ in
+				setEnabledStatus()
+			}
+			.store(in: &cancellables)
+
 		Defaults.publisher(.bringBrowsingModeToFront, options: [])
 			.sink { [self] _ in
 				for scene in scenes {
