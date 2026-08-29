@@ -449,7 +449,7 @@ them again.
 
 ### Two negative results
 
-- **The site catalogue expresses less than the Add Website sheet, not more.** `SiteCatalog.Entry` decodes seven fields and `Entry.add()` applies five, all of which have controls; an entry cannot reach `allowsInteraction`, `display` or `startHour`/`endHour`. There is nothing hidden down that path.
+- **The site catalogue expresses less than the Add Website sheet, not more.** `SiteCatalog.Entry` decodes seven fields and `Entry.add()` applies five, all of which have controls; an entry cannot reach `display` or `startHour`/`endHour`. There is nothing hidden down that path.
 - **All nine keyboard shortcuts ship with a default binding** and a recorder row in Settings. Looked for one that shipped unbound; there is none.
 
 

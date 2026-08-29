@@ -467,16 +467,6 @@
         }
       }
     },
-    "Clickable on the desktop": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "在桌面上可点击"
-          }
-        }
-      }
-    },
     "Content blocking rules": {
       "localizations": {
         "zh-Hans": {
@@ -1163,16 +1153,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "让你临时操作网站，比如登录，或者滚到某个位置。"
-          }
-        }
-      }
-    },
-    "Lets you use the page without Browsing Mode, at the cost of your desktop icons sitting behind the window and the page having to keep rendering.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "不用切到浏览模式就能操作网页，代价是桌面图标被挡在窗口后面，而且网页必须一直渲染。"
           }
         }
       }
