@@ -52,7 +52,14 @@ thing is per display or per moment.
 **3. Not askable, and it describes one thing happening now. It must not outlive its host.**
 `browsingDisplays`, and `AppState.storedWebViewErrors` beside it in memory. When the display goes, the
 thing they describe stops existing, so there is nothing to restore — the entry is erased and made
-again on reconnect. `AppState.rebuildScenes` prunes both, and is the only place that could.
+again on reconnect. `AppState.rebuildScenes` prunes both when a display goes.
+
+A display going is not the only way a host ends, and reading it as though it were is what let a stored
+failure outlive the load it described. The host of that entry is the load, not the screen: it also ends
+when the page is dropped with the display still attached, which is a display switched off or the app
+disabled. `WallpaperScene.releaseWebView` clears it there, next to the `loadedWebsite` it clears for
+the same reason. Class 3 is the shortest-lived class in this file and the easiest to mistake for class
+2 — ask what the entry describes, then ask every way that thing can stop.
 
 Classes 1 and 2 together are what make unplug and replug behave, and they read as a contradiction only
 until they are told apart: the display coming back at all is class 1 restoring itself, and it coming

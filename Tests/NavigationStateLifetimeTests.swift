@@ -20,6 +20,14 @@ The download destination is not per web view or per navigation; it belongs to a 
 downloads in flight meant the second one's path was handed to the first one's completion, and the
 Dock bounced at a file that had not arrived.
 
+A third has the same shape one level out. `AppState.storedWebViewErrors` belongs to one load — it is
+what that load failed with — and was cleared only by the next load starting. So the host ending
+without a successor left the entry behind, and the way a user reaches that is the ordinary one:
+seeing a column say the page failed and switching that display off, which is the thing that
+guarantees no next load. The column then read "Switched off" and the failure at once, and on a second
+display the menu bar tooltip went on reporting a fetch nobody was attempting instead of naming the
+page that was still up.
+
 Shape rather than behaviour, for the reason `SwitchedOffTests` gives at length: the SwiftPM target
 next door compiles ten files out of `Sites` and `Support` and none of `Wallpaper`. Neither path here
 has a version that runs without WebKit, a window server and a network — one needs a page that answers
@@ -140,5 +148,40 @@ struct NavigationStateLifetimeTests {
 				"`\(declaration)` leaves its entry behind, so the map grows for the life of the app — the same defect as the single slot it replaced, with a bigger footprint."
 			)
 		}
+	}
+
+	/**
+	The stored failure ends where the load it describes ends.
+
+	Both ends, and the second one is the one that was missing. `load` clears at the top, so a load
+	starting takes the last failure with it — which is the whole clearing this had, and it only ever
+	runs when there *is* a next load. `releaseWebView` is the other end: the pending load cancelled,
+	`loadedWebsite` dropped, nothing being fetched for this display and nothing about to be.
+
+	Pinned on `releaseWebView` rather than on `suspend`, its only caller today, for the reason the
+	timers are pinned on both exits: the assertion has to sit where the load stops existing, so the
+	next thing that drops a page inherits the clearing by calling it rather than by remembering.
+	*/
+	@Test("A stored failure does not outlive the load it describes")
+	func theFailureEndsWithItsLoad() throws {
+		let scene = try Self.source("Nifro/Wallpaper/WallpaperScene.swift")
+
+		for (declaration, when) in [
+			("func load(_ url: URL?)", "A load starting"),
+			("func releaseWebView()", "A page being dropped — a display switched off, the app disabled")
+		] {
+			#expect(
+				try Self.body(of: declaration, in: scene).contains("setWebViewError(nil, on: display)"),
+				"\(when) leaves the last failure stored, so the panel and the menu bar go on describing a fetch that is not happening until something else clears it."
+			)
+		}
+
+		// The clearing is worth nothing if the entry is per app again. It was, and four per-display
+		// callers wrote it: a reload finishing on one display replaced another display's failure with
+		// its own page title, and the failure was simply gone.
+		#expect(
+			try Self.source("Nifro/App/AppState.swift").contains("storedWebViewErrors: [String: Error]"),
+			"The failure store is not keyed per display any more, so clearing one display's entry clears or misses every other display's."
+		)
 	}
 }

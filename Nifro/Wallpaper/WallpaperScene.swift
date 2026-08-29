@@ -427,12 +427,28 @@ final class WallpaperScene {
 
 	/**
 	Drop the page and the process behind it.
+
+	The stored failure goes with them. `setWebViewError` is written at the two ends of a load and was
+	cleared at only one of them — the start of the next one — so a failure outlived the load it
+	described for as long as no load followed. Switching a display off is the most likely next thing a
+	user does after seeing one, and it is the thing that guarantees no load follows: the panel's column
+	then read "Switched off" and "This page failed to load" at once, and on a second display the menu
+	bar tooltip went on reporting a fetch nobody was attempting instead of naming the page that was
+	still up. Only switching it back on cleared it, which is the user undoing what they meant.
+
+	Cleared here rather than in `suspend`, its only caller today, because this is where the load stops
+	existing — `pendingLoad` cancelled, `loadedWebsite` gone — and the next thing that wants to drop a
+	page would have to remember otherwise. `load` clears at the top for the same reason in the other
+	direction, so the pair is: a load starting clears it, a load ending sets it, a load abandoned
+	clears it. Nothing is lost by clearing: turning the display back on loads again, and a failure that
+	is still true is stored again by that load.
 	*/
 	func releaseWebView() {
 		pendingLoad?.cancel()
 		pendingWebView = nil
 		webViewController.releaseWebView()
 		loadedWebsite = nil
+		AppState.shared.setWebViewError(nil, on: display)
 		content = .live(zoom: nil)
 	}
 
