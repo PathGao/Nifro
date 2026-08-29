@@ -1323,4 +1323,52 @@ struct ScopeTests {
 			}
 		}
 	}
+
+	/**
+	The other Shortcuts action, which asked the same question one layer up.
+
+	`GetEnabledStateIntent` was half of a pair and the half that got fixed. `GetCurrentWebsiteIntent`
+	reads `AppState.currentWebsite`, and that read `primaryScene.website` — the website the main
+	display was *told* to show, which is not the website on it. Both ways they part are reachable and
+	neither leaves the script anything to check against.
+
+	A swap that fails moves the answer and leaves the page, so with the network down this named the
+	website that never arrived while the desktop kept the one that had — for as long as the network
+	stayed down. And a main display switched off keeps its website, so this named a page on a black
+	screen; with a second display still showing something, `isShowingWallpaper` is true, so the pair
+	agreed and a script asking both was told nothing was wrong.
+
+	`loadedWebsite`, the page, and the switched-off case falls out of it rather than being asked for:
+	`suspend` releases the web view and `releaseWebView` clears that property, so a display with
+	nothing on it has nothing to name. Pinned on the property rather than on the intent, because
+	`currentWebsite` exists to have exactly one reader and the reader is the thing that would be
+	rewritten.
+
+	Not `hasLoadedItsWebsite`, which is the neighbouring predicate and belongs to the controls: those
+	refuse when the two part because they write to the website. A query writes nothing, so the page
+	that is up is the answer, and `nil` there would be a refusal to say what the user is looking at.
+	*/
+	@Test("The Shortcuts query names the page, not the website the display was told to show")
+	func theCurrentWebsiteQueryNamesThePage() throws {
+		let state = try Self.source(named: "AppState.swift")
+
+		#expect(
+			try Self.body(of: "var currentWebsite: Website?", in: state).contains("loadedWebsite"),
+			"`currentWebsite` answers from the display's mark again, so a failed swap and a switched-off main display both name a website that is not on any screen."
+		)
+
+		#expect(
+			try !Self.body(of: "var currentWebsite: Website?", in: state).contains(".website"),
+			"`currentWebsite` reads the mark alongside the page, which is the two-layer answer this replaced rather than a narrowing of it."
+		)
+
+		// The one reader, so the property cannot be quietly stepped around by asking the scene
+		// directly — which is how the app-wide answer this replaced came to be read in four places.
+		for (name, text) in try Self.sources() where name == "Intents.swift" {
+			#expect(
+				!text.contains("primaryScene"),
+				"An intent reaches past `currentWebsite` to the scene, so it answers from whichever layer that line happened to pick. `primaryScene` also rebuilds the scene list as a side effect, which an intent is not the place to trigger."
+			)
+		}
+	}
 }

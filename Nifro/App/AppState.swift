@@ -159,8 +159,28 @@ final class AppState: ObservableObject {
 	scene of its own, and a keyboard shortcut goes to `actingScene`. There is deliberately no
 	list-wide answer to this any more: one existed, every entry point used it, and on two displays it
 	meant they all silently acted on whichever screen happened to hold the mark.
+
+	The page, not the answer. This read `website`, the website that display was told to show, and a
+	Shortcuts query named "the current website" is asked by a script that cannot look at the screen —
+	so the one layer it must not be given is the one the screen can disagree with. It did, twice. A
+	swap that fails leaves the answer moved and the page not, so the desktop kept the old page and
+	this named the new website for as long as the network stayed down. And a main display switched
+	off from the panel keeps its website, so this named a page on a screen that was black — with the
+	other display still showing something, `GetEnabledStateIntent` answers `true` there and the pair
+	agreed on a lie the user could disprove by looking up.
+
+	Both fall out of the one read: `suspend` releases the page, and `releaseWebView` clears
+	`loadedWebsite` with it, so a switched-off display answers nothing without a second question
+	being asked here. `hasLoadedItsWebsite` is the neighbouring predicate and the wrong one for this:
+	Crop refuses when the two part because it would write to the website, and a query has nothing to
+	write — the page that is up is the honest answer to what is on screen, where `nil` would be a
+	refusal to say what the user is looking at.
+
+	The cost, said plainly: for the seconds of an ordinary swap this answers the page being replaced
+	rather than the website just chosen. A script that sets a website and immediately asks gets the
+	old one back. That is what "current" means here, and it is a change a script can notice.
 	*/
-	var currentWebsite: Website? { primaryScene.website }
+	var currentWebsite: Website? { primaryScene.loadedWebsite }
 
 	/**
 	Whether *any* display is in Browsing Mode.
