@@ -436,15 +436,12 @@ extension WallpaperScene {
 	/**
 	How many minutes this display waits between websites.
 
-	Falls back to the machine-wide number this replaced when the display has none of its own — see
-	`rotationInterval(stored:legacySeconds:)`, which is where that and the bounds live.
+	A display with none of its own gets the default — see `rotationInterval(stored:)`, which is where
+	that and the bounds live.
 	*/
 	var rotationIntervalMinutes: Double {
 		get {
-			rotationInterval(
-				stored: Defaults[.rotationIntervals][Display.settingsKey(for: display)],
-				legacySeconds: Defaults[.playlistInterval]
-			)
+			rotationInterval(stored: Defaults[.rotationIntervals][Display.settingsKey(for: display)])
 		}
 		set { Defaults[.rotationIntervals][Display.settingsKey(for: display)] = newValue }
 	}

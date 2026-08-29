@@ -110,9 +110,9 @@ struct UnreadSettingsTests {
 	today. A key that genuinely has no reader has a different fix — delete it, and the work that
 	writes it.
 
-	Only keys the app writes are asked. A key that is read but never written is the opposite shape and
-	deliberately allowed: `playlistInterval` is a setting from an older version, kept so that nobody's
-	rotation interval disappears on upgrade.
+	Only keys the app writes are asked. A key that is read but never written is the opposite shape, and
+	there is none left: `playlistInterval` was the one, an older version's rotation interval kept so
+	that nobody's setting vanished on upgrade, and it is deleted.
 	*/
 	@Test("No setting is written and never read")
 	func everyWrittenKeyHasAReader() throws {

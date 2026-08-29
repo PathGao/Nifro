@@ -217,11 +217,6 @@ extension Defaults.Keys {
 	static let dimWhenUnfocused = Key<Bool>("dimWhenUnfocused", default: false)
 	static let dimmedOpacityFactor = Key<Double>("dimmedOpacityFactor", default: 0.5)
 
-	// Read, never written. Up to 0.1.3 this was the rotation interval in seconds for the whole machine,
-	// and a display with no interval of its own still inherits it so that nobody's setting disappears
-	// on upgrade. `rotationInterval(stored:legacySeconds:)` is the only reader; delete both in 1.0.
-	static let playlistInterval = Key<Double?>("playlistInterval")
-
 	// Keyed by display. A dictionary rather than a key per screen, because screens come and go and a
 	// key that named one would outlive it.
 	static let rotationModes = Key<[String: RotationMode]>("rotationModes", default: [:])
