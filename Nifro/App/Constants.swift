@@ -73,44 +73,9 @@ itself the next morning. It has a key of its own below now, and `Events` turns a
 `setEnabledStatus()`, which is what carries the wipe in `RestoreDefaults` back into the running app.
 */
 extension Defaults.Keys {
-	// The website list as it was before playlists, read exactly once and never written. It is the only
-	// input `migrateToPlaylistsIfNeeded` has, and plain `Website` is the whole of what that takes from
-	// it — everything lands in one playlist now, including what was pinned, which is argued where the
-	// migration is written.
-	//
-	// A record written before playlists carries the display it was pinned to as a `display` object
-	// sitting beside the website's own fields, and this decodes those records without it: a synthesised
-	// `Codable` asks for the keys it knows and ignores the rest, so `display` is skipped exactly as
-	// `isCurrent` — deleted a release earlier — already is. That is not a change in what happens, only
-	// in what is written down. The wrapper that used to be here read the pinning out and handed it to a
-	// `.map(\.website)`, which threw it away again.
-	//
-	// Left on disk rather than removed. Nothing in this build touches the stored value, so a list
-	// carried across by the migration is still there in its old shape — which is the only copy of it
-	// there will ever be, and the thing to look at if the playlists come out wrong. Nothing puts edits
-	// made here back into it, so an older build opened after this one shows the list as it stood when
-	// the migration ran, pinning and all.
-	static let websites = Key<[Website]>("websites", default: [])
-
-	// The lists a display picks between, and the whole of where a website is stored. Built once by
-	// `migrateToPlaylistsIfNeeded` out of the key above.
+	// The lists a display picks between, and the whole of where a website is stored. There is no other
+	// copy: the pre-playlist `websites` key and the conversion that read it are both deleted.
 	static let playlists = Key<[Playlist]>("playlists", default: [])
-
-	// Whether the list above has been built from `websites` yet. A flag of its own, and not "there are
-	// no playlists": an empty list is a state the user can reach and stay in, so reading it as "not
-	// done yet" would rebuild their playlists out of a website list they stopped editing long ago,
-	// every launch, for as long as they left it that way. Same shape and same reason as
-	// `hasInstalledFeaturedWebsites` below, and a sharper reason — deleting what that added undoes it,
-	// and what this adds is everything.
-	static let hasMigratedWebsitesToPlaylists = Key<Bool>("hasMigratedWebsitesToPlaylists", default: false)
-
-	// Whether every stored website has been told, in a field of its own, that it overrides the reload
-	// interval — see `migrateWebsiteReloadOverridesIfNeeded`. The same shape and the same reason as the
-	// flag above, and it is preserved by `RestoreDefaults` for the same reason that one is: it is a
-	// record of something already done to the user's websites, and the conversion it guards cannot be
-	// run twice. A second run reads records this build has already written, where the interval is
-	// always present because it is no longer optional, and marks every website as overriding.
-	static let hasMigratedWebsiteReloadOverrides = Key<Bool>("hasMigratedWebsiteReloadOverrides", default: false)
 
 	// Which website each display is showing, keyed by `Display.settingsKey(for:)` like every other
 	// per-display fact. It was a `Bool` on each website, kept unique by a sweep over the whole list —
@@ -162,27 +127,13 @@ extension Defaults.Keys {
 	// `dimmedOpacityFactor` are the shape this now copies: the switch says whether, the number says how
 	// long, and turning one off cannot reach the other.
 	//
-	// **The name is kept and the type changed, which is what makes the number survive the upgrade.** A
-	// stored 1800 is a `Double` on disk either way, so it reads back as 1800; somebody who stored
-	// nothing gets the default below. Nothing rewrites the entry. What cannot be recovered from the
-	// value alone is whether the switch was on — an absent entry and a default one now read the same —
-	// so that is decided once, from the raw store, by `migrateReloadIntervalToASwitch`.
+	// The pair is the shape from here on. It was converted into once, from an optional interval where
+	// absent meant off, and the conversion that read the raw store to tell "absent" from "the default"
+	// is deleted along with every other migration in this app.
 	static let reloadInterval = Key<Double>("reloadInterval", default: 60 * 60)
 
-	// Whether the number above is used at all. Off is what this app shipped with, and
-	// `migrateReloadIntervalToASwitch` is what stops that default reaching somebody who already had a
-	// reload interval set.
+	// Whether the number above is used at all. Off is what this app ships with.
 	static let reloadOnInterval = Key<Bool>("reloadOnInterval", default: false)
-
-	// Whether the switch above has been decided from what an older build stored. A flag of its own, the
-	// same shape and the same reason as `hasMigratedWebsitesToPlaylists`: the question it answers —
-	// "was there an entry under `reloadInterval`" — stops being answerable the moment this build writes
-	// one, so it can only be asked once.
-	//
-	// Not in `RestoreDefaults.websiteKeys`, unlike the website flag beside it. A restore empties the
-	// domain, so the migration runs again on the next launch, finds no stored interval and writes the
-	// switch off — which is exactly where a restore should leave it.
-	static let hasMigratedReloadIntervalToASwitch = Key<Bool>("hasMigratedReloadIntervalToASwitch", default: false)
 
 	// How often the menu bar band takes a fresh colour off the top of the page, in seconds, and
 	// whether it does. The pair above's shape, built that way from the start rather than converted into

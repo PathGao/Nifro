@@ -48,8 +48,8 @@ So the proposition is split in two, and both halves are here:
   nothing required them to — this asserts the second one, because the suite already asserted the
   first and that was not enough.
 */
-@Suite("A website written by an older build still decodes")
-struct WebsiteMigrationTests {
+@Suite("A website written by another build still decodes")
+struct WebsiteDecodingTests {
 	private static let root = URL(filePath: #filePath)
 		.deletingLastPathComponent()
 		.deletingLastPathComponent()
@@ -209,7 +209,7 @@ struct WebsiteMigrationTests {
 	/**
 	The per-website answer falls back to the app-wide switch rather than replacing it.
 
-	The migration is not only the decode. The state a website decodes into has to keep meaning what
+	Decoding is not the whole of it. The state a website decodes into has to keep meaning what
 	every existing website already means — "whatever Settings says" — or a shipped setting people have
 	already turned on stops applying to every website that has not been edited since.
 	*/
@@ -269,11 +269,11 @@ struct WebsiteMigrationTests {
 	/**
 	A record from before playlists decodes as a plain `Website`, extra keys and all.
 
-	This is the only bridge between the two eras of this app's storage. `Defaults[.websites]` is read
-	exactly once, by `migrateToPlaylistsIfNeeded`, against a list the user typed by hand, on a build
-	with no way back — and `Defaults` answers a failed decode with the key's default, which here is an
-	empty array. A decoder that refuses one of those records does not throw at the user, it hands them
-	an empty playlist and no reason.
+	The conversion that read those records is deleted and the records are nobody's input any more, so
+	this is kept for the shape of the claim rather than for the era: `Defaults` answers a failed decode
+	with the key's default, which here is an empty array, so a decoder that refuses a record does not
+	throw at the user — it hands them an empty playlist and no reason. That is true of any record this
+	build has to read, and an unknown key is the commonest way to reach it.
 
 	Those records carry two keys this build's `Website` has never had: `isCurrent`, gone when the
 	mark moved off the model, and `display`, the screen the website was pinned to. `display` is the
@@ -386,47 +386,6 @@ struct WebsiteMigrationTests {
 		#expect(website.audio == "muted")
 		#expect(website.externalLinks == "followSettings")
 		#expect(!website.usePrintStyles)
-	}
-
-	/**
-	And the real key is the plain list the test above stands in for.
-
-	Three claims, because the stand-in only proves the language rule and the wiring is what would
-	actually change. The key has to still be `websites` — a rename is every migrated user migrating
-	again — it has to hold bare `Website` values rather than a wrapper reading `display` back out, and
-	the migration has to hand the stored list to the playlist whole. That last one is where a wrapper
-	would leave its mark: the shape it forced was `stored.map(\.website)`, and anything mapping between
-	the read and the write is a place an entry can be lost from the only copy there is.
-	*/
-	@Test("The legacy key holds plain websites and the migration passes them through")
-	func theLegacyKeyIsAPlainWebsiteList() throws {
-		let constants = try Self.source("Nifro/App/Constants.swift")
-
-		#expect(
-			constants.contains("static let websites = Key<[Website]>(\"websites\""),
-			"""
-			The pre-playlist key is no longer a plain `Key<[Website]>` under the name `websites`. Its \
-			records are one flat JSON object each, holding fields no build writes any more; anything \
-			that has to read those keys rather than skip them is a decoder that can fail on stored data, \
-			and `Defaults` answers a failed decode with an empty list.
-			"""
-		)
-
-		let controller = try Self.source("Nifro/Sites/WebsitesController.swift")
-
-		#expect(
-			!controller.contains("PinnedWebsite"),
-			"""
-			The wrapper around the legacy key is back. It read the display each website was pinned to and \
-			the migration dropped it on the next line, so it bought nothing and stated a grouping this \
-			build does not do.
-			"""
-		)
-
-		#expect(
-			controller.contains("websites: stored"),
-			"The migration no longer hands the stored list to the playlist whole, so what it writes is not all of what it read."
-		)
 	}
 
 	/**

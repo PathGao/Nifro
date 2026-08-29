@@ -41,7 +41,7 @@ struct ClearWebsiteDataTests {
 	/**
 	The body of a declaration, from its opening brace to the brace that closes it.
 
-	Counted rather than matched with a regex, for the reason `PlaylistMigrationTests` gives: a pattern
+	Counted rather than matched with a regex, for the reason `PlaylistStorageTests` gives: a pattern
 	stopping at the first `}` reads a guard clause as the whole function.
 	*/
 	private static func body(of declaration: String, in source: String) throws -> String {

@@ -58,12 +58,10 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	Settings value or an hour. Set thirty minutes on a site, switch off, switch on, and thirty minutes
 	is gone with nothing said. The number is always valid now and the switch cannot reach it.
 
-	`@DecodableDefault` on both, which is what makes a record written before this existed decode at
-	all — see `WebsiteMigrationTests`. The interval's default is an hour: it is what the old switch
-	filled in when Settings had no number, so a website that has never had one of its own starts where
-	it used to start. Whether that website *overrides* is not decodable from its record under this
-	shape, which is the whole reason `migrateWebsiteReloadOverridesIfNeeded` reads the raw store once
-	before anything writes a new-shaped record back.
+	`@DecodableDefault` on both, which is what lets a field be added to this record without every
+	record already on disk failing to decode — see `WebsiteDecodingTests`. The interval's default is
+	an hour: it is what the old switch filled in when Settings had no number, so a website that has
+	never had one of its own starts where it used to start.
 	*/
 	@DecodableDefault.False var overridesReloadInterval
 	@DecodableDefault.Custom<DefaultReloadInterval> var reloadInterval

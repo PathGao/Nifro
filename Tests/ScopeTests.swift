@@ -1021,7 +1021,7 @@ struct ScopeTests {
 	/**
 	And the two methods that only ever add do not.
 
-	The trap is the same shape `PlaylistMigrationTests` guards the install flag against, one line down.
+	The trap is the same shape `PlaylistStorageTests` guards the install flag against, one line down.
 	`installDefaultPlaylist` is how the shipped websites get into the list, so anything about websites
 	and displays looks like it belongs in there — and its one caller is the Advanced pane's Add the
 	Default Playlist, which deletes nothing, while below it `prepareWebsiteStorage` is what every launch

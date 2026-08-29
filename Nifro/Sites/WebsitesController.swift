@@ -63,9 +63,8 @@ final class WebsitesController {
 	/**
 	All websites, in the order the playlists hold them.
 
-	`playlists` is the whole of where a website is stored. The `websites` key it replaced is read once
-	by `migrateToPlaylistsIfNeeded` and by nothing else ever again — see `Constants.swift` for what is
-	left of it.
+	`playlists` is the whole of where a website is stored. The `websites` key it replaced is deleted,
+	along with the conversion that was its last reader.
 
 	No setter. There was one, and every caller of it was writing a whole list back to say one thing —
 	change this website, drop that one, put this at the end — which is a shape that cannot say *which
@@ -597,11 +596,6 @@ extension WebsitesController {
 	likelier to be a bad read than the truth, and what those passes delete cannot be put back. Here it
 	is not a reading. It is what the user asked for.
 
-	Nothing is done about the `websites` key. It is the pre-playlist list, read once by the migration
-	and by nothing else in this build, and it is the only copy of what the user had before the
-	conversion — keeping it is what `Constants.swift` argues for, and clearing today's list is not a
-	reason to burn the record of the old one. It cannot come back on its own: the migration reads its
-	own flag, and this leaves that flag set.
 	*/
 	func removeEverything() {
 		// Before the three writes, and the same order as `remove`: every website is going, so every
@@ -615,94 +609,14 @@ extension WebsitesController {
 	}
 
 	/**
-	Bring the stored website list up to what this build expects: convert what an older build left
-	behind, then put the shipped websites in if that has never been done.
+	Put the shipped websites in if that has never been done.
 
-	**The migration first, the install second, and the order is the point of this method existing.**
-	Adding a website means adding it to a playlist, so the other way round is wrong on a first launch:
-	the shipped websites would be filed under a default playlist made on the spot, and the migration
-	would then run against the mirror those writes had produced and replace that playlist with another
-	one holding the same eight sites. The list a display picks would have changed identity between two
-	lines of the same launch.
-
-	Two lines, and they were written out twice — in `AppState.didLaunch` and at the top of
-	`installDefaultPlaylist` below — with nothing making the two copies agree. There is one ordering in
-	the app now, and both are callers of it.
-
-	**The install flag reset is not part of the order and must never move in here.**
-	`installDefaultPlaylist` forces `hasInstalledFeaturedWebsites` back to false before calling this.
-	That is right for its own caller, a button somebody pressed on purpose, and catastrophic on the
-	launch path, where it would put the shipped websites back on every single run, including the ones
-	the user has since deleted and cannot delete for good. So it stays above the call, at the one site
-	that wants it.
+	One line, and it kept its name and its callers: this was three, running two conversions before the
+	install in an order that was the whole reason the method existed. Both conversions are deleted —
+	there is no older shape left to convert from — and what is left is the install's own guard.
 	*/
 	func prepareWebsiteStorage() {
-		// Read here and applied three lines down, and that split is the whole of what makes the reload
-		// override survive. `migrateToPlaylistsIfNeeded` decodes the stored website list through this
-		// build's `Website` and writes it back, and this build's `Website` carries a reload interval
-		// always — so the moment it runs, "did this website have one" stops being a question the records
-		// can answer. No released version has the `playlists` key, so that migration is not a historical
-		// path: it is what happens to nearly everybody on the launch this build first runs.
-		//
-		// Asked before the flag rather than behind it, so that the read and the write are the same two
-		// lines whether or not there is anything to do; the flag is where it always was, in front of the
-		// write.
-		let overriding = websitesOverridingTheReloadInterval(
-			storedPlaylists: storedRecords(under: Defaults.Keys.playlists.name),
-			storedWebsites: storedRecords(under: Defaults.Keys.websites.name)
-		)
-
-		migrateToPlaylistsIfNeeded()
-		markWebsitesOverridingTheReloadInterval(overriding)
 		installFeaturedWebsitesIfNeeded()
-	}
-
-	/**
-	One key's stored records, as an older build left them.
-
-	`Defaults` stores an array of `Codable` values as an array of JSON strings, one per element, which
-	is what the decision above reads. The app's own persistent domain rather than
-	`UserDefaults.object(forKey:)`, for the reason `reloadIntervalSwitch` gives at length and
-	`RestoreDefaults` gives beside its own read: a plain read walks the search list.
-
-	An empty array for a key that has never been written, which is a state the decision knows how to
-	answer — it is what a fresh install looks like.
-	*/
-	private func storedRecords(under key: String) -> [String] {
-		UserDefaults.standard.persistentDomain(forName: SSApp.idString)?[key] as? [String] ?? []
-	}
-
-	/**
-	Write what the raw records said into the field that now holds it.
-
-	Guarded on a flag of its own, and the guard is not a nicety: run a second time, this reads records
-	*this* build has written, where the interval is present on every one of them because the field is
-	no longer optional — so every website in the list comes back overriding. `SettingsMigrationTests`
-	runs that second pass to show what it would decide. The flag goes down before the write, the same
-	order and for the same reason as `migrateToPlaylistsIfNeeded` below.
-
-	Every website is written, not only the ones in the set, because the false answer matters as much as
-	the true one: a record that inherits has to say so in the field, or the next thing to read it gets
-	whatever `@DecodableDefault` filled in and no way to tell that apart from a decision.
-	*/
-	private func markWebsitesOverridingTheReloadInterval(_ overriding: Set<Website.ID>) {
-		guard !Defaults[.hasMigratedWebsiteReloadOverrides] else {
-			return
-		}
-
-		Defaults[.hasMigratedWebsiteReloadOverrides] = true
-
-		Defaults[.playlists] = Defaults[.playlists].map { playlist in
-			var playlist = playlist
-
-			playlist.websites = playlist.websites.map {
-				var website = $0
-				website.overridesReloadInterval = overriding.contains(website.id)
-				return website
-			}
-
-			return playlist
-		}
 	}
 
 	/**
@@ -711,12 +625,6 @@ extension WebsitesController {
 	One path, and the Advanced pane's Add the Default Playlist is now the only caller. It was the end of
 	`RestoreDefaults.perform` too, back when a restore emptied the domain and had to put something back;
 	a restore keeps the websites now, so getting the shipped list is this button and nothing else.
-
-	**Only the install flag is forced**, and the pair below it is the same `prepareWebsiteStorage` the
-	launch path runs. `migrateToPlaylistsIfNeeded` is left to its own guard, and that is the whole of
-	what makes this safe to press from a settings pane: the flag is set on any Mac that has launched
-	this build, so the migration does nothing — which is what has to happen, because it assigns
-	`playlists` outright and would take every list the user has made with it.
 
 	**An existing default playlist is filled, not replaced and not doubled.** `add` puts each website
 	into the default playlist it finds and makes one only when there is none, so "there is already one"
@@ -730,63 +638,5 @@ extension WebsitesController {
 		Defaults[.hasInstalledFeaturedWebsites] = false
 
 		prepareWebsiteStorage()
-	}
-}
-
-extension WebsitesController {
-	/**
-	Turn the stored website list into playlists, once.
-
-	Every stored website becomes a member of the default playlist. Per-display settings —
-	`rotationModes`, `rotationIntervals`, `disabledDisplays` — are keyed by display and stay exactly
-	where they are, because they describe the screen and not what is on it.
-
-	**Guarded on a flag of its own, not on the playlist list being empty.** No playlists is a state the
-	user can reach and stay in, and a migration that read that as "not done yet" would rebuild their
-	playlists out of a website list they stopped editing long ago, every launch, for as long as they
-	left it that way. `installFeaturedWebsitesIfNeeded` above makes the same guard for the same reason;
-	stating it again rather than pointing at it, because the consequence here is worse. Deleting what
-	that installs undoes it. What this writes is everything the user has.
-
-	**Nothing here writes `websites`.** It is read and left as it was, which is now the only thing that
-	ever happens to it: this is the key's last reader, and what it reads is the only copy of a list
-	nothing else in the app can reach any more.
-
-	**Everything lands in one playlist, including what was pinned.** Grouping the pinned websites into a
-	playlist per display was the first shape of this, and it was wrong for the case it was built for:
-	a display that was pinned to got a playlist of one, which is the state the whole refactor exists to
-	end — a second screen whose chooser has a single entry. What the user has after this is one list of
-	everything, which every display offers and each walks on its own. What they lose is the record of
-	which screen a website used to be pinned to, and that record described a rule this build no longer
-	has.
-
-	Which is why nothing here reads the pinning, and why the key is typed `[Website]`. A record written
-	before playlists carries a `display` object beside the website's own fields; the decoder is not
-	looking for that key, so it goes past it, and what comes out is the website. There used to be a
-	wrapper that read it and a `.map(\.website)` that dropped it again on the next line — the same
-	result, spelled as though the grouping above still existed. `WebsiteMigrationTests` runs a real
-	record with the field in it.
-	*/
-	func migrateToPlaylistsIfNeeded() {
-		guard !Defaults[.hasMigratedWebsitesToPlaylists] else {
-			return
-		}
-
-		Defaults[.hasMigratedWebsitesToPlaylists] = true
-
-		// The stored key, not `all` — which reads the playlists this is about to write, and so would
-		// hand back an empty list and migrate nothing.
-		let stored = Defaults[.websites]
-
-		// The list whole, with nothing between the read and the write that could return fewer entries
-		// than it was given. Every stored entry becomes a member: this runs once, against the only copy
-		// of a list the user built themselves, and an entry dropped here is dropped for good.
-		Defaults[.playlists] = [
-			Playlist(
-				name: Playlist.defaultName,
-				websites: stored,
-				isDefault: true
-			)
-		]
 	}
 }

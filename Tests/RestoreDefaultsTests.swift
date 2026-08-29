@@ -99,11 +99,10 @@ struct RestoreDefaultsTests {
 		// that turns out to be the user's data is deleted by a restore and nobody finds out from the
 		// app. Whoever adds the key is the one person who can say which it is.
 		#expect(
-			names.count == 29,
-			"Constants.swift declares \(names.count) preferences and this test was written against 29. If the parser still works, a key has been added or removed — open `RestoreDefaults` and say whether it is one of the app's settings, which the wipe takes, or one of the user's websites, which `websiteKeys` has to name. Then correct this number."
+			names.count == 25,
+			"Constants.swift declares \(names.count) preferences and this test was written against 25. If the parser still works, a key has been added or removed — open `RestoreDefaults` and say whether it is one of the app's settings, which the wipe takes, or one of the user's websites, which `websiteKeys` has to name. Then correct this number."
 		)
 
-		#expect(names.contains("websites"))
 		#expect(names.contains("hasInstalledFeaturedWebsites"))
 	}
 
@@ -158,11 +157,12 @@ struct RestoreDefaultsTests {
 	/**
 	The exceptions, and the three ways they could stop being defensible.
 
-	They could multiply. The list was one key long and it is six, which is the change that made this
-	test worth reading again rather than a loosening of it: six named keys with an argument each is
-	not the same object as a keep-list somebody appends to when they are unsure, and the only thing
-	holding those two apart is that appending has to fail here first. So the check is an exact set and
-	not a ceiling — a seventh is as red as a hundredth, and the way past it is to write the reason down.
+	They could multiply. The list was one key long, grew to six, and is three now that the two
+	migration flags and the pre-playlist key they read are deleted — which is what makes this test
+	worth reading rather than a loosening of it: named keys with an argument each are not the same
+	object as a keep-list somebody appends to when they are unsure, and the only thing holding those
+	two apart is that appending has to fail here first. So the check is an exact set and not a ceiling
+	— a fourth is as red as a hundredth, and the way past it is to write the reason down.
 
 	They could be put back in the wrong place, before the wipe rather than after, which deletes them
 	again and leaves nothing to see until somebody restores their settings and comes back to an empty
@@ -209,12 +209,9 @@ struct RestoreDefaultsTests {
 			names == [
 				"\"AppleLanguages\"",
 				"\"playlists\"",
-				"\"websites\"",
-				"\"hasMigratedWebsitesToPlaylists\"",
-				"\"hasMigratedWebsiteReloadOverrides\"",
 				"\"hasInstalledFeaturedWebsites\""
 			],
-			"Restore names \(names.count) keys by hand (\(names.joined(separator: ", "))). Six have an argument each in the file: the interface language, because the running app cannot be shown a new value for it, and the websites and the three flags describing them, because restoring settings does not delete what the user made and must not re-run a conversion over it. A seventh needs one too, written down, before this list is the key list this file exists not to have."
+			"Restore names \(names.count) keys by hand (\(names.joined(separator: ", "))). Three have an argument each in the file: the interface language, because the running app cannot be shown a new value for it, and the playlists and the flag describing them, because restoring settings does not delete what the user made. A fourth needs one too, written down, before this list is the key list this file exists not to have."
 		)
 
 		let wipe = try #require(code.range(of: "Defaults.removeAll()"), "Restore no longer wipes the domain")
