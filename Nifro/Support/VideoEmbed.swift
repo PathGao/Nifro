@@ -111,8 +111,8 @@ enum VideoEmbed {
 	a player address has no link preview to read, so every entry falls back to the site's icon and the
 	list becomes a column of identical logos with only the titles to tell them apart.
 
-	YouTube publishes a cover at a fixed address derived from the video id. Bilibili does not — its
-	cover comes from an API call — so its entries still fall back to the site icon.
+	YouTube publishes a cover at a fixed address derived from the video id, so this answers on its own.
+	Bilibili's is behind an API call, which cannot be answered from a string — see `previewImageAPIURL(for:)`.
 	*/
 	static func previewImageURL(for url: URL) -> URL? {
 		guard
@@ -123,6 +123,68 @@ enum VideoEmbed {
 		}
 
 		return URL(string: "https://img.youtube.com/vi/\(identifier)/hqdefault.jpg")
+	}
+
+	/**
+	The API address whose answer holds the cover for `url`, or `nil` when there is nothing to ask.
+
+	Bilibili publishes no cover address derivable from the id the way YouTube does, so this is the one
+	place the app calls a website's API rather than loading its page. What that costs is worth naming:
+	one request per entry, carrying the video id and nothing else — no key, no account, no header — and
+	only for an entry the user added themselves. The answer lands in the same on-disk thumbnail cache as
+	every other row icon, so it is asked once and not once per redraw.
+
+	The request itself belongs to the caller. This file stays free of the network so its parsing can be
+	tested without one, which is why the answer comes back through `previewImageURL(inAPIResponse:)`.
+	*/
+	static func previewImageAPIURL(for url: URL) -> URL? {
+		guard
+			let host = url.host?.lowercased(),
+			let identifier = bilibiliVideoID(url: url, host: host) ?? bilibiliPlayerID(url: url, host: host)
+		else {
+			return nil
+		}
+
+		return URL(string: "https://api.bilibili.com/x/web-interface/view?bvid=\(identifier)")
+	}
+
+	/**
+	The cover address inside an answer from `previewImageAPIURL(for:)`.
+
+	Two things about that answer are not what its shape suggests. Its `pic` arrives as `http://`, which
+	App Transport Security refuses — the same file is served over TLS by the same host, so the scheme is
+	replaced rather than trusted. And it is the full-size cover: measured at 651 KB for one, against 30 KB
+	for the YouTube cover sitting next to it in the same list. `@320w_180h.jpg` is the CDN's own resize
+	and takes that to 7 KB, which is still more than a 44-point row can show.
+
+	The host is checked because everything after the request is somebody else's text. An answer naming a
+	host that is not the image CDN is one this app has no reason to fetch, and the resize suffix would
+	mean nothing there anyway.
+	*/
+	static func previewImageURL(inAPIResponse data: Data) -> URL? {
+		struct Answer: Decodable {
+			struct Video: Decodable {
+				let pic: String
+			}
+
+			let code: Int
+			let data: Video?
+		}
+
+		guard
+			let answer = try? JSONDecoder().decode(Answer.self, from: data),
+			answer.code == 0,
+			let pic = answer.data?.pic,
+			var components = URLComponents(string: pic),
+			components.host?.hasSuffix(".hdslb.com") == true
+		else {
+			return nil
+		}
+
+		components.scheme = "https"
+		components.path += "@320w_180h.jpg"
+
+		return components.url
 	}
 
 	/**
@@ -192,6 +254,26 @@ enum VideoEmbed {
 		let identifier = String(parts[index + 1])
 
 		return identifier.hasPrefix("BV") ? sanitised(identifier) : nil
+	}
+
+	/**
+	The id in a Bilibili address that is already a player, which `bilibiliVideoID` deliberately refuses.
+	*/
+	private static func bilibiliPlayerID(url: URL, host: String) -> String? {
+		guard host == "player.bilibili.com" else {
+			return nil
+		}
+
+		let value = URLComponents(url: url, resolvingAgainstBaseURL: false)?
+			.queryItems?
+			.first { $0.name == "bvid" }?
+			.value
+
+		guard let identifier = sanitised(value) else {
+			return nil
+		}
+
+		return identifier.hasPrefix("BV") ? identifier : nil
 	}
 
 	/**
