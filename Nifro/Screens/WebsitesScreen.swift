@@ -192,14 +192,24 @@ private struct PlaylistRow: View {
 		)
 	}
 
-	private var subtitle: String {
-		let count = String(localized: "^[\(playlist.websites.count) website](inflect: true)")
+	/**
+	`Text` rather than `String(localized:)`, and that is the whole of what this reads.
+
+	Automatic grammatical agreement — the `^[…](inflect: true)` above — is applied while the string is
+	still attributed, so `Text` and `AttributedString(localized:)` do it and `String(localized:)` does
+	not. With a translation to look up that never showed: zh-Hans stores "%lld 个网站" already inflected,
+	so the marker is gone before anything could fail to process it. English has no table to look up at
+	all — the development language has no `.lproj` in the bundle, see `Localization` — so the key came
+	back verbatim and the row read "^[8 website](inflect: true)". Measured both ways before changing it.
+	*/
+	private var subtitle: Text {
+		let count = Text("^[\(playlist.websites.count) website](inflect: true)")
 
 		guard let bound = playlist.boundDisplay?.nameWhenBound else {
 			return count
 		}
 
-		return "\(count) · \(bound)"
+		return count + Text(verbatim: " · \(bound)")
 	}
 
 	var body: some View {
@@ -215,7 +225,7 @@ private struct PlaylistRow: View {
 			NavigationLink(value: playlist.id) {
 				VStack(alignment: .leading, spacing: 2) {
 					Text(playlist.name)
-					Text(subtitle)
+					subtitle
 						.foregroundStyle(.secondary)
 						.font(.subheadline)
 				}
