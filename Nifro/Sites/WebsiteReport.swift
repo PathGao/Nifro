@@ -21,7 +21,6 @@ extension Website {
 			"URL: \(url.absoluteString)",
 			"Sound: \(audio.title)",
 			"Region: \(zoom.summaryText)",
-			"Clickable on the desktop: \(allowsInteraction ? "yes" : "no")",
 			// Same rule as the reload interval below: what this website does, plus where the answer came
 			// from when it is not the website's own.
 			"External links: \(opensExternalLinksInBrowser ? "browser" : "in Nifro")\(externalLinks == .followSettings ? " (from Settings)" : "")",

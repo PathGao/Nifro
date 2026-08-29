@@ -350,6 +350,45 @@ struct WebsiteMigrationTests {
 	}
 
 	/**
+	And a record still carrying a field this build has deleted decodes as if it were not there.
+
+	The other direction of the same rule, run because deleting a stored property is the change that
+	looks free. `allowsInteraction` was removed with the toggle it fed, so every record on disk — all
+	of them, since the field shipped with a `@DecodableDefault` and was written by every build since —
+	now carries a key the decoder does not declare. If a synthesised `init(from:)` refused those, the
+	one read of `Defaults[.websites]` would return an empty list and take the user's whole collection
+	with it.
+
+	Its own stand-in rather than `StoredWebsite` above, and that is the point: this one is shaped like
+	`Website` is *after* the deletion, while the payload is shaped like the disk still is.
+	*/
+	@Test("A record written with a field this build no longer has still decodes")
+	func aDeletedFieldIsJustAnotherUnknownKey() throws {
+		struct WithoutTheDeletedField: Decodable {
+			var id: UUID
+			var url: URL
+			var title: String
+			var audio: String
+			var externalLinks: String
+			var usePrintStyles: Bool
+		}
+
+		let website = try JSONDecoder().decode(
+			WithoutTheDeletedField.self,
+			from: Data(#"{"allowSelfSignedCertificate":false,"allowsInteraction":false,"audio":"muted","css":"","externalLinks":"followSettings","id":"622448DD-CC10-484C-A8EB-D66E6C3DF19F","invertColors2":"never","isCurrent":false,"javaScript":"","title":"World Monitor","url":"https://worldmonitor.app/","usePrintStyles":false}"#.utf8)
+		)
+
+		// The fields around the deleted one, not just that the decode returned: a decoder that skipped a
+		// key it should have read would also survive.
+		#expect(website.id == UUID(uuidString: "622448DD-CC10-484C-A8EB-D66E6C3DF19F"))
+		#expect(website.title == "World Monitor")
+		#expect(website.url.absoluteString == "https://worldmonitor.app/")
+		#expect(website.audio == "muted")
+		#expect(website.externalLinks == "followSettings")
+		#expect(!website.usePrintStyles)
+	}
+
+	/**
 	And the real key is the plain list the test above stands in for.
 
 	Three claims, because the stand-in only proves the language rule and the wiring is what would

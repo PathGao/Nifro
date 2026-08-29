@@ -75,24 +75,7 @@ struct WebsiteScheduleSetting: View {
 }
 
 /**
-Whether a website can be clicked without turning on Browsing Mode.
-*/
-struct WebsiteInteractionSetting: View {
-	@Binding var allowsInteraction: Bool
-
-	var body: some View {
-		Toggle(isOn: $allowsInteraction) {
-			Text("Clickable on the desktop")
-				.explained(String(localized: "Lets you use the page without Browsing Mode, at the cost of your desktop icons sitting behind the window and the page having to keep rendering."))
-		}
-	}
-}
-
-/**
 Where a link that leaves this website opens.
-
-Next to `WebsiteInteractionSetting` because it is the same question one step further on: that one is
-whether the page can be clicked at all, this is what a click that goes somewhere else does.
 
 A picker with three entries rather than a switch, because there really are three answers and only two
 of them are the website's own. "Follow Settings" is the state every website is in until somebody

@@ -339,8 +339,6 @@ final class WallpaperScene {
 	installs the menu bar band.
 	*/
 	private func applyContent() {
-		window.allowsPassiveInteraction = website?.allowsInteraction == true
-
 		var view: NSView?
 
 		switch content {
