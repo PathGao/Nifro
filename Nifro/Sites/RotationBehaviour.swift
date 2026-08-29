@@ -245,8 +245,8 @@ extension WebsitesController {
 	what lets Random be a mode rather than a branch: a shuffled display is one whose candidates come back
 	in a different order, and stepping does not have to know.
 	*/
-	func makeNextCurrent(on display: Display?) {
-		let candidates = ordered(eligible(for: display), on: display)
+	func makeNextCurrent(on display: Display?, at date: Date = .now) {
+		let candidates = ordered(eligible(for: display, at: date), on: display)
 
 		guard let next = nextRotationIndex(count: candidates.count, after: showingPosition(in: candidates, on: display)) else {
 			return
@@ -503,11 +503,17 @@ extension WallpaperScene {
 		// where the panel's arrows did not, and where the two could therefore step differently. The
 		// difference lives in `ordered(_:on:)` now: a shuffled display is one whose websites come back
 		// in a decided order, and everything that steps steps the list it is handed.
+		// One clock reading for the whole tick, for the reason `scheduled(in:on:)` gives for resolving
+		// one list once: a tick landing on the hour would otherwise step through the list the schedule
+		// allowed a moment ago and then read back the list it allows now, and the website just stepped
+		// to would not be in it.
+		let now = Date.now
+
 		if rotating {
-			controller.makeNextCurrent(on: display)
+			controller.makeNextCurrent(on: display, at: now)
 		}
 
-		guard let next = controller.scheduled(for: display) else {
+		guard let next = controller.scheduled(for: display, at: now) else {
 			return
 		}
 

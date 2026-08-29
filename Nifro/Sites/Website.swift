@@ -41,7 +41,7 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	/**
 	Whether this website can be clicked without turning on Browsing Mode.
 
-	Asked for repeatedly. Off by default and per website, because it costs something. A window that accepts clicks puts your desktop icons behind it, and it keeps the page awake. A page tracking the pointer cannot be frozen or drawn from stills.
+	Asked for repeatedly. Off by default and per website, because it costs something. A window that accepts clicks puts your desktop icons behind it, and it keeps the page awake. It does not bring the window forward or give it focus — that is Browsing Mode.
 	*/
 	@DecodableDefault.False var allowsInteraction
 

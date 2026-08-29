@@ -25,7 +25,6 @@ from in here — see `ZoomSetting`.
 */
 struct AddWebsiteScreen: View {
 	@Environment(\.dismiss) private var dismiss
-	@State private var hostingWindow: NSWindow?
 	@State private var isFetchingTitle = false
 	@State private var isApplyConfirmationPresented = false
 	@State private var isCustomCodePresented = false
@@ -99,7 +98,6 @@ struct AddWebsiteScreen: View {
 		.formStyle(.grouped)
 		.frame(width: 500)
 		.fixedSize()
-		.bindHostingWindow($hostingWindow)
 		// Note: Current only works when a text field is focused. (macOS 11.3)
 		.onExitCommand {
 			guard
@@ -349,10 +347,6 @@ struct AddWebsiteScreen: View {
 	}
 
 	private func chooseLocalWebsite() async -> URL? {
-//		guard let hostingWindow else {
-//			return nil
-//		}
-
 		let panel = NSOpenPanel()
 		panel.canChooseFiles = false
 		panel.canChooseDirectories = true
@@ -373,8 +367,7 @@ struct AddWebsiteScreen: View {
 			panel.directoryURL = url
 		}
 
-		// TODO: Make it a sheet instead when targeting the macOS bug is fixed. (macOS 15.3)
-//		let result = await panel.beginSheet(hostingWindow)
+		// TODO: Make it a sheet instead when the macOS bug is fixed. (macOS 15.3)
 		let result = await panel.begin()
 
 		guard

@@ -88,13 +88,13 @@ def main() -> int:
             f"\t\t\turl: {swift_string(data['url'])},\n"
             f"\t\t\tdescription: {swift_string(data['description'])},\n"
             f"\t\t\ttags: [{', '.join(swift_string(t) for t in data.get('tags', []))}],\n"
-            f"\t\t\treloadInterval: {data.get('reloadInterval') or 'nil'},\n"
+            f"\t\t\treloadInterval: {'nil' if data.get('reloadInterval') is None else data.get('reloadInterval')},\n"
             f"\t\t\tzoom: {swift_zoom(data.get('zoom'))},\n"
             f"\t\t\tcss: {swift_optional_string(data.get('css'))},\n"
             f"\t\t\tjavaScript: {swift_optional_string(data.get('js'))},\n"
             f"\t\t\trequiresLogin: {'true' if data.get('requiresLogin') else 'false'},\n"
             f"\t\t\tplaysSound: {'true' if plays_sound else 'false'},\n"
-            f"\t\t\tfeaturedRank: {data.get('featured') if data.get('featured') else 'nil'}\n"
+            f"\t\t\tfeaturedRank: {'nil' if data.get('featured') is None else data.get('featured')}\n"
             "\t\t)"
         )
 
