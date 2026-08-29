@@ -23,6 +23,24 @@ final class SSWebView: WKWebView {
 	*/
 	var websiteID: Website.ID?
 
+	/**
+	The MIME type the server gave for the document this web view is currently showing.
+
+	Belongs to one navigation, and lives on the web view because a navigation happens inside one. It
+	was a single slot on `WebViewController`, which is neither: the controller is one per display and
+	outlives every page it shows, while a swap keeps two web views alive at once and both of them
+	report through that one controller as their navigation delegate. So a replacement loading out of
+	sight answered "is this page an image?" for the page already on screen — and whichever of the two
+	finished last decided it for both.
+
+	Cleared when a navigation starts rather than only overwritten when one produces an
+	`HTTPURLResponse`, because the loads that produce none are exactly the ones that were reading
+	somebody else's answer: a local folder, and the host page a framed player is loaded into. Left to
+	inherit, a bare image followed by either of those centres and crops a page that is not an image,
+	and the reverse order leaves a real image sitting in the corner at its natural size.
+	*/
+	var responseMIMEType: String?
+
 	private var cancellables = Set<AnyCancellable>()
 
 	private static let excludedMenuItems: Set<MenuItemIdentifier> = [

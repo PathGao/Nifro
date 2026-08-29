@@ -15,7 +15,22 @@ final class WebViewController: NSObject {
 	weak var scene: WallpaperScene?
 
 	private let didLoadSubject = PassthroughSubject<Void, Error>()
-	private var currentDownloadFile: URL?
+
+	/**
+	Where each download still in flight is being written.
+
+	Keyed on the download, because the download is what a destination belongs to and one controller is
+	the delegate for every download a display starts. A single slot held the last destination decided
+	rather than the destination of the download that was finishing: two at once, and the second one's
+	path was handed to the first one's completion, so the Dock bounced at a file that had not arrived
+	while the one that had went unannounced.
+
+	`ObjectIdentifier` rather than the `WKDownload` itself, so that an entry nothing ever comes back
+	for costs a `URL` instead of pinning a download and its connection open for the rest of the
+	session. The address cannot be misread after it is reused: an entry is only ever read for the
+	download that wrote it, and the write happens before the download starts.
+	*/
+	private var downloadDestinations = [ObjectIdentifier: URL]()
 
 	/**
 	Whether a download this page is starting is one somebody asked for.
@@ -39,8 +54,6 @@ final class WebViewController: NSObject {
 	Publishes when the web view finishes loading a page.
 	*/
 	lazy var didLoadPublisher = didLoadSubject.eraseToAnyPublisher()
-
-	var response: HTTPURLResponse?
 
 	/**
 	Build a web view for this scene: the live one, its replacement while a new page loads out of sight,
@@ -284,11 +297,13 @@ extension WebViewController: WKNavigationDelegate {
 	}
 
 	func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse) async -> WKNavigationResponsePolicy {
-		if
-			navigationResponse.isForMainFrame,
-			let response = navigationResponse.response as? HTTPURLResponse
-		{
-			self.response = response
+		// Onto the web view this response is for, not onto the controller: see `responseMIMEType`.
+		// Assigned whatever the cast gives, including nothing, so that a main frame answered by
+		// something other than an `HTTPURLResponse` says so rather than leaving the previous answer in
+		// place — which is the same rule the clear on the way in enforces, in the one case that reaches
+		// here.
+		if navigationResponse.isForMainFrame {
+			(webView as? SSWebView)?.responseMIMEType = (navigationResponse.response as? HTTPURLResponse)?.mimeType
 		}
 
 		if navigationResponse.canShowMIMEType {
@@ -296,6 +311,23 @@ extension WebViewController: WKNavigationDelegate {
 		}
 
 		return isDownloadWanted ? .download : .cancel
+	}
+
+	/**
+	A new page is on its way into this web view, so nothing it is told is the last page's.
+
+	Here rather than at the top of `decidePolicyFor navigationAction` for two reasons, and either
+	one on its own would be enough. This runs for the main frame only, and the policy callback runs
+	for every subframe too — so an image page with an advert in an iframe would clear the answer it
+	had already been given. And this runs for loads the policy callback is not asked about at all,
+	which includes the two that have no response of their own to replace what they find: a local
+	folder and a framed player's host page.
+
+	Before `decidePolicyFor navigationResponse` and long before `didFinish`, which is the whole
+	order that makes a clear here safe.
+	*/
+	func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
+		(webView as? SSWebView)?.responseMIMEType = nil
 	}
 
 	/**
@@ -325,7 +357,8 @@ extension WebViewController: WKNavigationDelegate {
 	}
 
 	func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-		webView.centerAndAspectFillImage(mimeType: response?.mimeType)
+		// This web view's own answer, from the navigation that has just finished in it.
+		webView.centerAndAspectFillImage(mimeType: (webView as? SSWebView)?.responseMIMEType)
 
 		// The script starts every page muted and waits to be told. This is the telling.
 		webView.setAudioMuted(!(scene?.shouldPlaySound ?? false))
@@ -458,19 +491,35 @@ extension WebViewController: WKUIDelegate {
 extension WebViewController: WKDownloadDelegate {
 	func download(_ download: WKDownload, decideDestinationUsing response: URLResponse, suggestedFilename: String) async -> URL? {
 		let url = URL.downloadsDirectory.appendingPathComponent(suggestedFilename).incrementalFilename()
-		currentDownloadFile = url
+		downloadDestinations[ObjectIdentifier(download)] = url
 		return url
 	}
 
+	/**
+	One of the two endings, and it takes its entry out on the way past.
+
+	Taken rather than read. A map that is only ever written to is not a fix for a slot that was only
+	ever written to — it is the same defect with a bigger footprint, and the entry has nothing left to
+	say once the download it belongs to has ended.
+	*/
 	func downloadDidFinish(_ download: WKDownload) {
-		guard let currentDownloadFile else {
+		guard let destination = downloadDestinations.removeValue(forKey: ObjectIdentifier(download)) else {
 			return
 		}
 
-		NSWorkspace.shared.bounceDownloadsFolderInDock(for: currentDownloadFile)
+		NSWorkspace.shared.bounceDownloadsFolderInDock(for: destination)
 	}
 
+	/**
+	The other ending, and the only other one there is.
+
+	`WKDownloadDelegate` has exactly two terminal callbacks, and a cancelled download arrives at this
+	one — there is no third way out for the app to miss, because nothing in the app holds a
+	`WKDownload` to cancel it with. Clearing here as well as on success is what keeps the map to the
+	downloads actually in flight.
+	*/
 	func download(_ download: WKDownload, didFailWithError error: Error, resumeData: Data?) {
+		downloadDestinations[ObjectIdentifier(download)] = nil
 		error.presentAsModal()
 	}
 }
