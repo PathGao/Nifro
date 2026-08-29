@@ -10,11 +10,35 @@ final class WebsitesController {
 	/**
 	One shuffled order per display, so Random on one screen leaves the other where it was.
 
-	Keyed by display rather than one iterator over the whole list, for the same reason the cursor is:
-	each display walks its own playlist, and one iterator shared between them would let Random on the
-	screen in front of you move the wallpaper on the one behind you.
+	This held an `AnyIterator` per display until Random became shuffle, and an iterator is exactly what
+	a shuffled order must not be: it knows what it will hand out next and will not say, so the chooser
+	in the panel could not list what was coming and Previous could not walk back into it. A materialised
+	order is the same promise — every website once before any of them twice — written down where it can
+	be read. `Rotation.swift` holds the two rules for making one and keeping it.
+
+	**Keyed by `Display.settingsKey(for:)` and not by `Display?`.** The iterator was keyed by the
+	optional, and `nil` and `Display.main` are two keys for one screen: whichever caller reached this
+	with the concrete display got a second order over the same websites, and "no repeats until the list
+	is done" quietly stopped being true. `AppState.actingScene` had to return a whole scene rather than
+	the display under the pointer to keep that from happening, and said so in a comment. This is the key
+	`currentWebsites`, `currentPlaylists`, `rotationModes`, `rotationIntervals`, `disabledDisplays` and
+	`browsingDisplays` all use, so the screen has one name here as it does everywhere else.
+
+	**In memory, and nowhere else.** An order is a plan for the next few hours, and a plan a relaunch
+	restores is a plan made for a day that has ended. What does survive is the cursor, so a fresh order
+	is made around the website already up — see `shuffledOrder(of:startingWith:)`, which is the whole of
+	why a relaunch does not make the wallpaper jump.
+
+	The playlist the order was made for is kept beside it because two disjoint lists can be the same
+	*size*, and nothing else about the websites would say the display had been pointed somewhere new.
+	`ordered(_:on:)` is the only reader of either field, and argues the rest of it there.
 	*/
-	var randomIterators = [Display?: AnyIterator<Website>]()
+	var shuffledOrders = [String: ShuffledOrder]()
+
+	struct ShuffledOrder {
+		let playlist: Playlist.ID?
+		let websites: [Website.ID]
+	}
 
 	@MainActor let thumbnailCache = SimpleImageCache<String>(diskCacheName: "websiteThumbnailCache")
 
@@ -137,10 +161,20 @@ final class WebsitesController {
 						.map { $0.url.normalized() }
 				)
 
-				// We only reset the iterators if a website was added/removed.
-				if websites.map(\.id) != change.oldValue.flatMap(\.websites).map(\.id) {
-					randomIterators = [:]
-				}
+				// The shuffled orders used to be thrown away here, on "the flattened website ids
+				// changed", and that condition was wrong in both directions at once. Too broad: a
+				// website added to a list no display is showing, or a drag that only reordered one,
+				// restarted every display's shuffle over an edit that could not reach any of them —
+				// and list order is nothing at all to a shuffle. Too narrow, which is the half that
+				// was reported: pointing a display at a *different playlist* adds and removes no
+				// website anywhere, so the flattened ids were identical, nothing was reset, and Random
+				// went on drawing from the list the user had just switched away from.
+				//
+				// There is no reset here now, and no reset anywhere else either. An order is asked
+				// whether it still describes its display at the moment it is *read* rather than when
+				// some key moves — `ordered(_:on:)` is where, and it is one rule covering the added
+				// website, the deleted one, the playlist switch, and the one no publisher can announce
+				// at all: a website falling in or out of its scheduled hours.
 			}
 			.store(in: &cancellables)
 	}
@@ -175,16 +209,26 @@ final class WebsitesController {
 	so the answer is inherited rather than repeated nine times and forgotten in six of them.
 
 	Asked rather than answered: `AppState.wakeDisplay` is what a request to see something means, and
-	this is one of its two callers. The other is pointing a display at a playlist, which is the same
-	request one grain coarser and does not come through here — it writes a different key — so the
-	waking cannot live in this method without that one having to remember it separately, which is
-	exactly what it did not do.
+	this is the only caller left. Pointing a display at a playlist used to be the other one — the same
+	request one grain coarser, writing a different key, so it had to remember the waking separately and
+	for a while did not. It is not a request of its own any more. Choosing a playlist commits nothing;
+	choosing a website out of it is the commit, and it arrives here.
 
+	**Which is why the playlist is written from this method.** The two keys say one thing between them —
+	show this page, on this screen — and written apart they were briefly disagreeing on purpose: the
+	playlist moved, the cursor deliberately did not, and the wallpaper jumped to whatever the new list
+	happened to hold first. Here they move together, in one turn of the run loop, so the sinks in
+	`Events` that watch the pair never see a display pointed at a list it is not showing a page from.
+
+	- Parameter playlist: the list `website` was chosen out of, where the caller is offering a choice
+	between lists. `nil` — every caller but the panel — leaves the display pointed where it was, which
+	is what a rotation tick, a Shortcuts action and a `nifro://` command all mean: they step within the
+	list the display already has.
 	- Parameter switchingDisplayOn: `false` where the mark is bookkeeping rather than a request to
 	look at something. Adding a website has to leave *some* website marked on its display, and that is
 	not a reason to light up a screen the user switched off.
 	*/
-	func makeCurrent(_ website: Website, on display: Display?, switchingDisplayOn: Bool = true) {
+	func makeCurrent(_ website: Website, on display: Display?, from playlist: Playlist.ID? = nil, switchingDisplayOn: Bool = true) {
 		// Before the mark moves rather than after, which is the order the panel already used: the
 		// change reaches the scenes through a publisher on the next turn of the run loop, so a display
 		// switched on here is already on by the time the page it should be showing is worked out.
@@ -192,15 +236,24 @@ final class WebsitesController {
 			AppState.shared.wakeDisplay(display)
 		}
 
-		// One assignment, and it can only reach one display's answer. What it replaced rewrote the
-		// whole website list to move one mark, which is why the mark could travel: the sweep grouped the
-		// list by the display each website was pinned to, so it was free to clear a flag belonging to a
-		// screen nobody had asked about. Nothing here can touch another key.
+		// Two assignments now, and neither can reach any display's answer but this one. What they
+		// replaced rewrote the whole website list to move one mark, which is why the mark could travel:
+		// the sweep grouped the list by the display each website was pinned to, so it was free to clear
+		// a flag belonging to a screen nobody had asked about. Nothing here can touch another key, and
+		// the two keys below are one display's two halves of the same sentence.
 		//
 		// A website that has since been removed leaves a name nothing answers to, which `scheduled`
 		// already reads as "this display has not started" and answers with the top of its list — the
 		// same place the sweep's repair left it, at no cost and with nothing to run.
-		Defaults[.currentWebsites][Display.settingsKey(for: display)] = website.id
+		let key = Display.settingsKey(for: display)
+
+		// The list before the page, so that a sink reading both keys — `Events` merges them into one —
+		// reads the page as belonging to the list it was chosen from whichever key it wakes on.
+		if let playlist {
+			Defaults[.currentPlaylists][key] = playlist
+		}
+
+		Defaults[.currentWebsites][key] = website.id
 	}
 
 	/**

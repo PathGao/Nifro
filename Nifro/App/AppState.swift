@@ -82,9 +82,16 @@ final class AppState: ObservableObject {
 	that does nothing and says nothing is worse than one that acts somewhere reasonable.
 
 	It returns a *scene*, and callers pass `scene.display` on. Passing `Display.underMouse` straight
-	into the rotation would be a different value from the one the scenes are keyed by — and
-	`randomIterators` is keyed by exactly that, so a display would get two shuffle sequences and the
-	"no repeats until the list is done" promise would quietly stop holding.
+	into the rotation would be a different value from the one the scenes are keyed by: `nil` means the
+	main display to a scene and names no display at all to the pointer, so one screen would answer to
+	two names on the way in.
+
+	That used to be a defect waiting under this comment as well as an untidiness. The shuffled order was
+	keyed by `Display?` itself, so a display reached under both names got two orders over one list and
+	"no repeats until the list is done" quietly stopped holding. It is keyed by `Display.settingsKey(for:)`
+	now, like everything else that is one-per-display, and a screen has one name in the store however it
+	was reached. What is left here is the reason above it — a shortcut is pressed by somebody looking at
+	a screen, and the scene is the thing that knows which screen that is.
 	*/
 	var actingScene: WallpaperScene {
 		guard let pointer = Display.underMouse else {

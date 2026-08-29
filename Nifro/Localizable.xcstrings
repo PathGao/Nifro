@@ -327,6 +327,16 @@
         }
       }
     },
+    "Browsing mode (hold to use, tap to toggle)": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "浏览模式（按住操作，短按切换）"
+          }
+        }
+      }
+    },
     "CSS": {
       "localizations": {
         "zh-Hans": {
@@ -1677,22 +1687,12 @@
         }
       }
     },
-    "Random": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "随机"
-          }
-        }
-      }
-    },
     "Random website": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "随机网站"
+            "value": "随机一个网站"
           }
         }
       }
@@ -1957,22 +1957,22 @@
         }
       }
     },
-    "Rotating at random": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "随机轮播"
-          }
-        }
-      }
-    },
     "Rotating in order": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "按顺序轮播"
+          }
+        }
+      }
+    },
+    "Rotating in shuffled order": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "随机轮播"
           }
         }
       }
@@ -2212,7 +2212,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "切换到随机网站"
+            "value": "切换到随机一个网站"
           }
         }
       }
@@ -2232,7 +2232,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "切换到列表里的随机一个网站。"
+            "value": "切换到列表里随机一个网站。"
           }
         }
       }
@@ -2383,16 +2383,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "切换浏览模式"
-          }
-        }
-      }
-    },
-    "Browsing mode (hold to use, tap to toggle)": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "浏览模式（按住操作，短按切换）"
           }
         }
       }

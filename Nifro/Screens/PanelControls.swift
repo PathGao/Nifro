@@ -246,7 +246,7 @@ extension RotationMode {
 		case .loop:
 			String(localized: "Rotating in order")
 		case .random:
-			String(localized: "Rotating at random")
+			String(localized: "Rotating in shuffled order")
 		}
 	}
 }

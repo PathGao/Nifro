@@ -320,13 +320,20 @@ struct SwitchedOffTests {
 	The panel's own column had both halves of this wrong at once. Its arrows woke the display in
 	`step` *and* inherited the same answer from `makeCurrent` underneath, so the wake looked like the
 	arrows' own business — and the website chooser beside them, which is a bare `makeCurrent`, was read
-	as not doing it. Picking a playlist genuinely did not: it writes a different key and reaches no
-	`makeCurrent` at all, so it is the one caller that has to say `wakeDisplay` in its own body.
+	as not doing it.
 
-	`step` is asserted the other way round, as the absence: the day it grows its own copy back is the
-	day the column has two opinions again.
+	Picking a playlist was the exception and is no longer one, which is the more interesting half now.
+	It wrote `currentPlaylists` itself, reached no `makeCurrent` at all, and so had to repeat the wake
+	in its own body — and it is exactly that write, arriving before the user had said which page they
+	wanted, that took the display somewhere nobody had asked to go. It commits nothing now. So the
+	assertion inverts: a control that decides nothing must not light a screen, and the wake belongs to
+	the one control in the column that does decide, which reaches it through `makeCurrent` like the
+	arrows do.
+
+	`step` is asserted the same way round, as an absence: the day it grows its own copy back is the day
+	the column has two opinions again.
 	*/
-	@Test("Picking a website, stepping and picking a playlist all wake the display")
+	@Test("Picking a website wakes the display, and nothing that decides nothing does")
 	func everyRequestToSeeSomethingWakesTheDisplay() throws {
 		// That `makeCurrent` is the one place the answer lives is `ScopeTests`'s to assert, and it does.
 		// What is left for here is the three controls in one column that have to reach it, or say the
@@ -338,9 +345,16 @@ struct SwitchedOffTests {
 			"The panel's website chooser sets the mark some other way, so it no longer inherits the wake in `makeCurrent`."
 		)
 
+		let playlist = try Self.body(of: "func selectPlaylist(", in: model)
+
 		#expect(
-			try Self.body(of: "func selectPlaylist(", in: model).contains("wakeDisplay"),
-			"Picking a playlist for a switched-off display changes the label and leaves the screen dark. It writes `currentPlaylists` directly, so it is the one caller that cannot inherit the answer."
+			!playlist.contains("wakeDisplay"),
+			"Choosing a playlist lights up a screen again. Nothing has been asked for yet — the commit is the website chooser below it, and that inherits the wake from `makeCurrent`."
+		)
+
+		#expect(
+			!playlist.contains("Defaults["),
+			"Choosing a playlist writes a stored key again, so it is a decision after all: the wallpaper moves to whatever the new list holds first, before the user has said which page they wanted."
 		)
 
 		#expect(

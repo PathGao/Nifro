@@ -59,33 +59,105 @@ extension WebsitesController {
 	}
 
 	/**
-	Move `display` to the next website in its rotation.
+	Whether this display decides an order in advance rather than taking its playlist as it comes.
+
+	One predicate with two readers — `ordered` below and the end of a pass in `makeNextCurrent` — for
+	the reason every pair in this file is one expression: the two are asking whether the same display
+	is shuffled, and two spellings of that is a display whose order is consulted and never renewed.
 	*/
-	@discardableResult
-	fileprivate func advance(on display: Display?, at date: Date = .now) -> Website? {
-		let candidates = eligible(for: display, at: date)
+	private func isShuffled(_ display: Display?) -> Bool {
+		Defaults[.rotationModes][Display.settingsKey(for: display)] == .random
+	}
 
-		guard candidates.count > 1 else {
-			return candidates.first
+	/**
+	The same list in the order this display walks it.
+
+	**A permutation and never anything else**: the same websites, the same count, a different order. That
+	is what lets the panel go on lighting its arrows with `eligible(in:).count > 1` while the arrows step
+	through this — `ScopeTests` has that pair on record as one question with one derivation, and a
+	permutation cannot make the two disagree.
+
+	In every mode but Random this is the playlist's own order and this function is the identity. In
+	Random it is the shuffled order, and this is the only place one is decided, renewed or thrown away.
+
+	**The invalidation is here, where the order is read, rather than on a publisher.** What it replaced
+	watched `playlists` and compared the flattened website ids, which could not see a playlist switch —
+	the same websites are in the app either way — and there is a fourth change no key moves for at all:
+	a website leaves `eligible(in:at:)` when its scheduled hours end, on the turn of the hour, silently.
+	Asked here, all four are the same question — *is this order still made of the websites this display
+	can show* — and the answer costs a set and a filter over a list of tens, on a path that runs on an
+	edit and on a tick rather than on a frame.
+
+	Two ways for the answer to be no, and they are not the same no. A website added or removed leaves an
+	order that is still recognisably this display's, and `orderCarriedForward` keeps it — the argument
+	for appending rather than reshuffling is written there. A playlist switch leaves nothing of it, and
+	the order is decided again.
+
+	The stored playlist is asked first and is not merely an optimisation for that second case: two
+	playlists sharing a website would carry a single survivor forward and append the whole new list
+	behind it in list order, which is a shuffle that has not been shuffled. `Defaults[.currentPlaylists]`
+	rather than the resolved playlist, because that is a dictionary of ids and the resolved one is a
+	decode of every website in every list. **The ceiling**: the key holds no entry for a display that has
+	never been pointed anywhere, so explicitly choosing the default playlist a display was already
+	falling back to reads as a switch and costs one reshuffle. `orderCarriedForward` is what makes that
+	the ceiling and not a hole — a stored id naming a deleted playlist agrees with itself forever, and
+	the carry-forward finds nothing of that order left and starts again anyway.
+	*/
+	func ordered(_ candidates: [Website], on display: Display?) -> [Website] {
+		let key = Display.settingsKey(for: display)
+
+		guard
+			isShuffled(display),
+			!candidates.isEmpty
+		else {
+			return candidates
 		}
 
-		let current = currentWebsiteID(on: display)
-
-		guard let nextIndex = nextRotationIndex(count: candidates.count, after: candidates.firstIndex { $0.id == current }) else {
-			return nil
+		guard
+			let held = shuffledOrders[key],
+			held.playlist == Defaults[.currentPlaylists][key]
+		else {
+			return reshuffle(candidates, on: display)
 		}
 
-		let next = candidates[nextIndex]
-		makeCurrent(next, on: display)
+		let carried = orderCarriedForward(held.websites, through: candidates.map(\.id))
 
-		return next
+		guard !carried.isEmpty else {
+			return reshuffle(candidates, on: display)
+		}
+
+		shuffledOrders[key] = .init(playlist: held.playlist, websites: carried)
+
+		return carried.compactMap { candidates[id: $0] }
+	}
+
+	/**
+	Decide this display's order again, and hand it back.
+
+	The one writer of a fresh order, so that "a new order starts at the website already on screen" is
+	said once. Three things ask for one: a display with no order yet, which is every display on the
+	first tick after a relaunch; a pass that has reached its end; and the Random command, which is a
+	request for a website that is not the next one in the plan and therefore a request for another plan.
+
+	Stored for a display that is not in Random mode too, and not guarded against, because the Random
+	command is offered whatever the mode is. A looping display simply never reads it — until it is set
+	to Random, and then it picks up the order the command left, which is the answer that surprises
+	nobody: the shuffle it starts is the shuffle it was just given.
+	*/
+	private func reshuffle(_ candidates: [Website], on display: Display?) -> [Website] {
+		let key = Display.settingsKey(for: display)
+		let ids = shuffledOrder(of: candidates.map(\.id), startingWith: currentWebsiteID(on: display))
+
+		shuffledOrders[key] = .init(playlist: Defaults[.currentPlaylists][key], websites: ids)
+
+		return ids.compactMap { candidates[id: $0] }
 	}
 
 	/**
 	The website that should be showing on `display` right now, taking the schedule into account.
 	*/
 	func scheduled(for display: Display?, at date: Date = .now) -> Website? {
-		scheduled(in: eligible(for: display, at: date), on: display)
+		scheduled(in: ordered(eligible(for: display, at: date), on: display), on: display)
 	}
 
 	/**
@@ -101,6 +173,27 @@ extension WebsitesController {
 	in a list the schedule had already moved on from. One list resolved once has no such seam.
 	*/
 	private func scheduled(in candidates: [Website], on display: Display?) -> Website? {
+		showingPosition(in: candidates, on: display).map { candidates[$0] }
+	}
+
+	/**
+	Where in `candidates` this display is standing.
+
+	The position and the website standing at it are one answer asked two ways, and they have to stay one
+	answer: Previous steps by handing the website to `elementBeforeOrLast`, Next steps by handing the
+	number to `nextRotationIndex`, and the page on screen is the website. Worked out separately they
+	agree for exactly as long as the mark names a website the list still holds, and the app has everyday
+	ways of breaking that — a website falling out of its hours leaves the list from under the mark, and
+	a website deleted takes the mark's answer with it.
+
+	`showingIndex` and not a `firstIndex` of its own, because that function is where "nothing here is
+	marked means the top of the list" is settled, and it is the reading `scheduled(for:)` hands to every
+	scene. A mark this list does not recognise therefore means the same thing to the clock, to the arrows
+	and to the page already up: position zero, which is the page already up. Next from there is the
+	website after the one on screen, which is the only answer that is not a step to where the display is
+	already standing.
+	*/
+	private func showingPosition(in candidates: [Website], on display: Display?) -> Int? {
 		let current = currentWebsiteID(on: display)
 
 		// At most one of these can be true, because there is one entry per display to be true of. That
@@ -108,7 +201,6 @@ extension WebsitesController {
 		// by anything that wrote the list without going through the sweep — "Show on" was a `Binding`
 		// straight into it, so moving a website carried its mark to a screen that already had one.
 		return showingIndex(isCurrent: candidates.map { $0.id == current })
-			.map { candidates[$0] }
 	}
 
 	/**
@@ -118,19 +210,40 @@ extension WebsitesController {
 	same mechanism as the rotation timer: they move one display's rotation. Walking the whole list instead
 	would let a menu item on the screen in front of you change the wallpaper on the one behind you,
 	which is the version of this that shipped and is the reason they take a display at all.
+
+	Next is also what the clock presses. It had a second implementation for a while — `advance`, which
+	resolved the cursor with a `firstIndex` of its own — and the two agreed for exactly as long as the
+	mark named a website the list still held. That is now one verb with one caller more, which is also
+	what lets Random be a mode rather than a branch: a shuffled display is one whose candidates come back
+	in a different order, and stepping does not have to know.
 	*/
 	func makeNextCurrent(on display: Display?) {
-		let candidates = eligible(for: display)
+		let candidates = ordered(eligible(for: display), on: display)
 
-		guard let next = candidates.elementAfterOrFirst(scheduled(in: candidates, on: display)) else {
+		guard let next = nextRotationIndex(count: candidates.count, after: showingPosition(in: candidates, on: display)) else {
 			return
 		}
 
-		makeCurrent(next, on: display)
+		// The end of a pass, for a display that decided an order in advance. A wallpaper never finishes,
+		// so the order is decided again rather than repeated — and the fresh one starts at the website
+		// standing at the end of the old one, so the first step of the new pass cannot land back on the
+		// page that is already up. Index 1 for exactly that reason, and `count > 1` is what makes it a
+		// position rather than a crash: a one-website display wraps to itself on every step and has no
+		// pass to end. It still falls through to the write below, because a step is also a request to
+		// see something and that is how a display switched off is woken.
+		//
+		// Only forwards. Previous wrapping past the front is a walk back into the order that still
+		// stands, and a reshuffle there would mean the way back was never the way you came.
+		if next == 0, candidates.count > 1, isShuffled(display) {
+			makeCurrent(reshuffle(candidates, on: display)[1], on: display)
+			return
+		}
+
+		makeCurrent(candidates[next], on: display)
 	}
 
 	func makePreviousCurrent(on display: Display?) {
-		let candidates = eligible(for: display)
+		let candidates = ordered(eligible(for: display), on: display)
 
 		guard let previous = candidates.elementBeforeOrLast(scheduled(in: candidates, on: display)) else {
 			return
@@ -139,23 +252,31 @@ extension WebsitesController {
 		makeCurrent(previous, on: display)
 	}
 
+	/**
+	Point `display` at a website that is not the one coming next.
+
+	Which is what is left of "Random" as a command now that Random is a mode with a plan. A plan makes
+	the next website knowable, so a command that means "something else" cannot be a step along it: it
+	decides the plan again and takes the first website of the new one. That is a uniform choice among
+	the others — `shuffledOrder` puts the page already up at the front, so index 1 is any of the rest —
+	and it leaves the display with an order rather than with a jump it cannot walk back out of.
+	*/
 	func makeRandomCurrent(on display: Display?) {
 		let candidates = eligible(for: display)
 
-		// Built on demand and kept, because the point of the shuffled order is that it does not
-		// repeat until it has been all the way round, and an iterator made fresh each time cannot
-		// know where it had got to. Thrown away whenever a website is added or removed.
-		var iterator = randomIterators[display] ?? candidates.infiniteUniformRandomSequence().makeIterator()
-
-		defer {
-			randomIterators[display] = iterator
-		}
-
-		guard let website = iterator.next() else {
+		guard let only = candidates.first else {
 			return
 		}
 
-		makeCurrent(website, on: display)
+		// One website is not a choice, and this still has to mean "show me something": stepping a display
+		// that is switched off is how it is woken, and a command that refused here would leave the one
+		// screen with the least to say answering nothing at all.
+		guard candidates.count > 1 else {
+			makeCurrent(only, on: display)
+			return
+		}
+
+		makeCurrent(reshuffle(candidates, on: display)[1], on: display)
 	}
 }
 
@@ -326,12 +447,13 @@ extension WallpaperScene {
 	private func advanceRotation(rotating: Bool) {
 		let controller = WebsitesController.shared
 
+		// One verb whatever the mode is. There were two, and the mode chose between them — which put the
+		// difference between looping and shuffling in the caller, where the timer had to know about it,
+		// where the panel's arrows did not, and where the two could therefore step differently. The
+		// difference lives in `ordered(_:on:)` now: a shuffled display is one whose websites come back
+		// in a decided order, and everything that steps steps the list it is handed.
 		if rotating {
-			if self.rotationMode == .random {
-				controller.makeRandomCurrent(on: display)
-			} else {
-				controller.advance(on: display)
-			}
+			controller.makeNextCurrent(on: display)
 		}
 
 		guard let next = controller.scheduled(for: display) else {
