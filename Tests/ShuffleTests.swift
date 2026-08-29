@@ -287,6 +287,46 @@ struct ShuffleShapeTests {
 	}
 
 	/**
+	Arriving at Random deals a new order, and arriving is not the same as being written.
+
+	The order is held against the display and the playlist, and the mode is in neither — so it outlived
+	the mode, and a three-way button pressed three times came back to Random in the middle of the pass
+	it had left. That is the one change to a shuffled display a read cannot find for itself: the four
+	`ordered` covers all move the set of websites, and this one moves nothing a later read could compare
+	against.
+
+	Both halves are pinned, and for different lengths of reason. Without the call, the mode button is
+	the control that says "shuffle" and does not — that is a defect today. Without the mode in the
+	condition, the setter drops an order on every write rather than on arriving at one, which no caller
+	can tell apart right now because the only writer goes through `RotationMode.next`; it is pinned
+	because the second writer is the one that would find out.
+	*/
+	@Test("Arriving at Random deals again, and only on arrival")
+	func arrivingAtRandomDropsTheOrder() throws {
+		let setter = Self.body(
+			of: "var rotationMode: RotationMode",
+			in: try Self.source(named: "RotationBehaviour.swift")
+		)
+
+		#expect(
+			setter.contains("forgetOrder("),
+			"""
+			Setting the mode no longer drops the held order, so leaving Random and coming back resumes \
+			the pass the user left instead of dealing a new one — and the mode button is the only \
+			gesture that reads as "shuffle again".
+			"""
+		)
+
+		#expect(
+			setter.contains(".random"),
+			"""
+			The order is dropped on every write of the mode rather than on arriving at Random. Restore \
+			writes these from a dictionary, so an unconditional drop reshuffles displays nobody touched.
+			"""
+		)
+	}
+
+	/**
 	Where a display is standing is one answer, whether it is stepped by hand or by the clock.
 
 	The same shape as `canRotate` in `ScopeTests`, one turn further in. There, the arrows were lit by one
