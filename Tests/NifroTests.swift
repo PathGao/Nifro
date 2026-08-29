@@ -354,6 +354,66 @@ extension VideoEmbedTests {
 }
 
 /**
+Finding a video's cover for the row icon in the websites list.
+
+The address is asked for in one place and read out of the reply in another, so that both halves can
+be checked without a network. What they are guarding is that the app now talks to a site's API at
+all: the request must carry an id and nothing else, and the reply is somebody else's text.
+*/
+extension VideoEmbedTests {
+	@Test("A Bilibili entry has somewhere to ask, in either form")
+	func bilibiliCoverIsAskedFor() throws {
+		for source in [
+			"https://www.bilibili.com/video/BV1xx411c7mD?p=2",
+			"https://player.bilibili.com/player.html?bvid=BV1xx411c7mD&autoplay=1&danmaku=0"
+		] {
+			let url = try #require(URL(string: source))
+			let api = try #require(VideoEmbed.previewImageAPIURL(for: url))
+
+			#expect(api.absoluteString == "https://api.bilibili.com/x/web-interface/view?bvid=BV1xx411c7mD")
+		}
+	}
+
+	@Test("Nothing else is asked about")
+	func othersAreNotAskedAbout() throws {
+		// YouTube's cover needs no call, and a page that is not a video has no cover to want.
+		for source in [
+			"https://www.youtube.com/watch?v=jNQXAC9IVRw",
+			"https://www.youtube.com/embed/jNQXAC9IVRw?autoplay=1",
+			"https://live.bilibili.com/1234",
+			"https://example.com"
+		] {
+			let url = try #require(URL(string: source))
+			#expect(VideoEmbed.previewImageAPIURL(for: url) == nil, "should not call an API for \(source)")
+		}
+	}
+
+	@Test("The cover in the reply is taken over TLS and at the size a row can show")
+	func coverIsReadFromTheReply() throws {
+		// `pic` really does come back as http, and really is the full-size cover: 651 KB measured
+		// against 7 KB for the same file with the CDN's resize suffix.
+		let reply = Data(#"{"code":0,"data":{"pic":"http://i1.hdslb.com/bfs/archive/abc.jpg"}}"#.utf8)
+		let cover = try #require(VideoEmbed.previewImageURL(inAPIResponse: reply))
+
+		#expect(cover.absoluteString == "https://i1.hdslb.com/bfs/archive/abc.jpg@320w_180h.jpg")
+	}
+
+	@Test("A reply that is not an answer is not a cover")
+	func repliesAreNotTrusted() {
+		for source in [
+			// The video is gone; `data` is null and `code` says so.
+			#"{"code":-404,"message":"啥都木有","data":null}"#,
+			// An answer, but pointing somewhere this app has no reason to fetch.
+			#"{"code":0,"data":{"pic":"http://example.com/tracker.gif"}}"#,
+			#"{"code":0,"data":{}}"#,
+			"not json at all"
+		] {
+			#expect(VideoEmbed.previewImageURL(inAPIResponse: Data(source.utf8)) == nil, "should refuse \(source)")
+		}
+	}
+}
+
+/**
 How much of a screen the menu bar takes.
 
 Worth its own tests because the previous answer was a guess checked against a constant — "33 points

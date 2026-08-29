@@ -639,7 +639,7 @@ private struct IconView: View {
 		// A video's own cover first. The general fetcher would fall back to the site's icon here, and
 		// a list of videos all wearing the same logo is the case a picture was supposed to help with.
 		if
-			let previewURL = VideoEmbed.previewImageURL(for: website.url),
+			let previewURL = await coverURL(),
 			let (data, _) = try? await URLSession.shared.data(from: previewURL),
 			let image = NSImage(data: data)
 		{
@@ -662,5 +662,42 @@ private struct IconView: View {
 		cache[website.thumbnailCacheKey] = image
 
 		return image
+	}
+
+	/**
+	Where this entry's video cover is, when the entry is a video at all.
+
+	Two sites, two answers, and the difference is one network call. YouTube's cover is at an address
+	derived from the video id, so it is known without asking anybody. Bilibili's is only behind
+	`api.bilibili.com`, which is why a Bilibili row used to be the site's logo where the YouTube row
+	beside it was the video — the same generic icon on every entry, which is the one case a picture in
+	a list was meant to solve.
+
+	Only the answer is fetched here; both the address asked for and the address read out of the reply
+	are built in `VideoEmbed`, where they can be tested without a network. This runs once per entry:
+	the caller writes the image into the on-disk thumbnail cache and looks there first.
+	*/
+	private func coverURL() async -> URL? {
+		if let url = VideoEmbed.previewImageURL(for: website.url) {
+			return url
+		}
+
+		guard let apiURL = VideoEmbed.previewImageAPIURL(for: website.url) else {
+			return nil
+		}
+
+		// Six seconds, because this is a row icon and the list is drawn and usable without it.
+		// `URLSession`'s own minute would hold the task open long after the window it decorates.
+		var request = URLRequest(url: apiURL)
+		request.timeoutInterval = 6
+
+		guard
+			let (data, response) = try? await URLSession.shared.data(for: request),
+			(response as? HTTPURLResponse)?.statusCode == 200
+		else {
+			return nil
+		}
+
+		return VideoEmbed.previewImageURL(inAPIResponse: data)
 	}
 }

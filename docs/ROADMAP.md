@@ -61,7 +61,7 @@ different path and always worked, which is why it read as fine. There is no auto
 have caught this — see the trap in section 10.
 
 ```
-Open      W1 W3-W5 W9 wiring   K1 K6 K8 bugs   L1-L4  V1 V2 V4 V5  S1 S2 S4  D4 D6  E21 E23 E25  U2 U3
+Open      W1 W3-W5 W9 wiring   K1 K6 K40 bugs   L1-L4  V1 V2 V4 V5  S1 S2 S4  D4 D6  E21 E23 E25  U2 U3
 Parked    K7 HDR (your call), the P series (needs a measurement first)
 Blocked   nothing
 ```
@@ -275,10 +275,10 @@ what the panel is for rather than an argument about each one.
 
 | | What happens | What is known about it |
 |---|---|---|
-| **K1** | A YouTube video cannot be shrunk back into the YouTube page | The address is rewritten to the player-only page (its player answers error 153 when it is the document rather than a frame), so there is no page to navigate and Browsing Mode has nothing to click. **Signing in *is* possible:** change the address to `youtube.com/watch`, sign in, change it back — the cookie store is keyed on `website.id` and does not move with the address. Nobody is told this. The fix is a sentence of help text, not UI. Anything done here has to keep 153 away |
+| **K1** | A player-only page has no account, and both sites withhold something until it does | **One entry, two blockers, and the Bilibili half is the expensive one.** Every video entry ends up on a player-only page, because that is the address the app offers and the one that fills a wallpaper. Both sites keep something back from a signed-out viewer, and signing in has to happen *inside that entry's own web view*: the cookie store is `WKWebsiteDataStore(forIdentifier:)` on `website.id`, so being signed in in your real browser counts for nothing. **Bilibili, measured:** its player is first party (`player.bilibili.com`) and its 登录 control is an in-page dialog — `href="javascript:void(0)"`, not a navigation — so it can be signed into without leaving the page, *if the page can be clicked*, which means Browsing Mode on the player. The cost of not doing it is not a missing feature: the quality list reads 1080P 高清（登录即享）/ 720P（登录即享）/ 480P（登录即享）/ 360P 流畅, and what actually arrives is **640×360**. Every video, every time, on a wallpaper. Nothing anywhere says so. **YouTube:** the player is shown inside a one-line page this app builds, so it is third party to its own site, its cookies are partitioned, and there is nothing belonging to YouTube to click at all. A `Referer` header replaces that whole arrangement — measured on macOS 26.6.2 with a standalone WebKit harness: no referrer gives "error 153", `youtube.com` gives "152-4", and any third address plays, first party, `readyState=4`, without the `mute=1` the framed version needed. Plash reached the same answer independently in 2.17.0. **The two halves need different work.** Bilibili's is a matter of saying so and of having somewhere to say it; YouTube's is the `Referer` change, which is written, measured, and held because of K40 |
 | **K6** | The help text is right in places and thin in others | Counted this time: **30 sites** — 23 `.explained(…)` and 7 `.help(…)` — across three surfaces totalling 2838 lines. The earlier "seven" was wrong by four times. Worth one pass that reads them as a set, but it is a 30-string job, not a small one |
 | **K7** | Nothing anywhere handles HDR | **Parked, your call.** Confirmed by sweep: no API, entitlement or plist key touches it; the only matches are a colour-space option in the menu-bar sampler and the letters "HDR" inside one site's name. Needs a real HDR source and a measurement of what reaches the display before anything is worth designing |
-| **K8** | A Bilibili entry has a generic icon where a YouTube entry has the video's own cover | YouTube's cover is derivable from the video id; Bilibili's is behind `api.bilibili.com` (`data.pic`). Affects the Websites list row icon only — `previewImageURL` has one caller. It would be the first time the app calls a site's API rather than loading a page |
+| **K40** | Using a page's fullscreen leaves the Dock's window destroyed | **New, and it is not this app's to fix.** Element fullscreen is off (`isElementFullscreenEnabled = false`), which is what keeps this unreachable. Turned on, every successful fullscreen destroys the Dock's on-screen window at layer 20 — `kCGDockWindowLevel` — and nothing rebuilds it: not time, not an app switch, not `CoreDockSetAutoHideEnabled`, not the System Settings switch, which has nothing to change because the setting is already right. `killall Dock` is the only recovery. **Narrowed to three ingredients, each with a direct counter-example:** the app has no Dock tile (`.accessory` and `.prohibited` reproduce, `.regular` does not); the window has `.canJoinAllSpaces` (`.moveToActiveSpace`, the other flag in that pair, does not reproduce); and fullscreen is entered through WebKit (`requestFullscreen` and `video.webkitEnterFullScreen` reproduce, `NSWindow.toggleFullScreen` and the public `NSView.enterFullScreenMode` do not). Measured irrelevant: key window, whether the app ever activates, who is frontmost at the exit, borderless or titled, window level, transparency, exit route, every other `collectionBehavior` flag, display count, and any website — a 90-line sample with one `<div>` reproduces it. **Nifro needs all three** and dropping the flag for the duration of fullscreen is too late, so there is no app-side mitigation. Written up for Feedback Assistant with the reproducer; also seen in Firefox, which shares no code with WebKit |
 
 
 **One shape was behind six entries, and all six are closed.** K22, K26, K27, K29, K34 and K36 were
@@ -295,10 +295,14 @@ the panel half of W2 were the panel's reading of a scene disagreeing with the sc
 same disagreement one layer down, in who owns the window's content slot. They were fixed as two changes
 rather than five — #66 for the four that share `DisplayPanelModel`, #67 for the one that does not.
 
-**What is left is not a shape, and there is not much of it.** Three entries in the table above, with
-nothing in common: a rewritten address, thirty help strings, and an icon. The four closed with them — a
-poll cadence, an unswept cache, a process per reload and a dead `??` — had nothing in common either,
-which is why they could be done in parallel and why none turned out to be the first of a family.
+**What is left is not a shape, and one of the three is now a chain.** The icon is closed. Of the rest,
+the thirty help strings still have nothing to do with anything, and the rewritten address turned out
+to be two things rather than one. K1's Bilibili half needs nobody's permission — it is a fact about
+resolution that nothing in the app says out loud. Its YouTube half is written, measured, and tied to
+K40, and holding it is a decision about K40 rather than about K1. **That is the first dependency in
+this table**, and it is worth saying which way it runs — K1 does not cause K40, it makes it reachable. The four closed earlier — a poll cadence, an
+unswept cache, a process per reload and a dead `??` — had nothing in common either, which is why they
+could be done in parallel and why none turned out to be the first of a family.
 
 **One of the four is worth remembering as an ordering rather than as a fix.** K39 meant almost no
 website had a reload timer armed at all, so K38's process churn was mostly theoretical; fixing K39
@@ -458,6 +462,7 @@ One line each, kept only where the line stops a question being asked again.
 - **L0** Region picking is direct manipulation. See the two traps in section 3.
 - **K2** Region drift — gone with L0; there is no conversion left to be a point out.
 - **K3** A page on its way says so on both surfaces: the panel's chooser pulses and its column goes inert for that display, the menu bar icon pulses for any. Read off `WallpaperScene.isLoading` rather than counted, so the first load of a session, the one after a suspend and the one after a display is switched back on all report like every other — which is what the old entry said only the swap path did.
+- **K8** A Bilibili row wears the video's cover instead of the site's logo. Its address is only behind `api.bilibili.com`, so this is the app's first call to a website's API: one request per entry, carrying the video id and nothing else, and the answer goes into the same on-disk thumbnail cache as every other row icon. Two things about that answer are not what its shape suggests, and both are pinned by tests — `pic` arrives as `http://`, which ATS refuses, and it is the full-size cover at 651 KB against 30 KB for the YouTube cover beside it in the same list, so the CDN's own `@320w_180h` resize is what gets asked for.
 - **K5** Language picker shipped: `AppleLanguages` plus a relaunch prompt. Superseded by E22, which changes the mechanism rather than the feature.
 - **K9** A catalogue entry with a `zoom` no longer costs the whole gallery: both spellings decode, and the fetch skips a bad entry instead of dropping the list. The skip half has no test — it is `private`.
 - **K10** Browsing Mode is replayed by `isEnabled.didSet`. **K11** Page zoom is restored on the web view being handed the page, on both arrival paths.
