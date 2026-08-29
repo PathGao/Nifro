@@ -100,11 +100,10 @@ private final class AppDelegate: NSObject, NSApplicationDelegate {
 				// reaches for, and a thumbnail nothing can ask for again sat in the container until
 				// the app was uninstalled.
 				//
-				// Here rather than at the places a website changes. Deleting is one route, editing the
-				// address is a second, and accepting a redirect is a third with no button on it at
-				// all; all three end in this one list, which is why the other two sweeps read it here
-				// too. A hook per route is three places to remember and a fourth route away from being
-				// wrong again.
+				// Here rather than at the places a website changes. Deleting is one route and editing
+				// the address is a second; both end in this one list, which is why the other two
+				// sweeps read it here too. A hook per route is two places to remember and a third
+				// route away from being wrong again.
 				WebsitesController.shared.thumbnailCache.removeImages(
 					notMatching: Set(websites.map(\.thumbnailCacheKey))
 				)

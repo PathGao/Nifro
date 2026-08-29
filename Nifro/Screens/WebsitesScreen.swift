@@ -437,8 +437,6 @@ private struct RowView: View {
 	// periphery:ignore
 	@ObservedObject private var appState = AppState.shared
 
-	@Default(.redirectedAddresses) private var redirects
-
 	@State private var isConfirmingDelete = false
 
 	/**
@@ -458,36 +456,6 @@ private struct RowView: View {
 	*/
 	private var isShowing: Bool {
 		WebsitesController.shared.isShowing(website)
-	}
-
-	/**
-	Where this website's address actually serves the site from, when that is somewhere else.
-
-	Only for a redirect WebKit reported, never for an address that merely differs. A page that rewrites
-	its own address as a map is dragged, or a dashboard that adds a tab to the query, ends up with a
-	different address too — and neither means the stored one is wrong. Those are the snapshot's business:
-	the website plus what was remembered about it is what ends up on screen.
-
-	A redirect is different because it is durable. It happens again on every launch, costs a round trip
-	every time, and the day the site stops redirecting the entry stops working. So it is worth mentioning
-	once, here, where the addresses are — and worth leaving to the user, because rewriting it unasked is
-	how the old menu item turned a website into a GitHub 404.
-
-	That argument survives; the control it used to justify does not. The triangle was a `Button` with no
-	label, sitting at the trailing edge of the row among the badges and the tick, which are status and do
-	nothing. A yellow warning triangle promises information, and this one committed the rewrite on a
-	single click — irreversibly, because the write clears the record that offered it, so the address it
-	replaced goes with the offer. That is how a wallpaper became YouTube's "this video cannot be
-	embedded" support page, with nothing left in the app to say what it had been.
-
-	So one fact now has two shapes, which is why it is read here rather than inside a view of its own.
-	The triangle is an `Image`, pure status like everything beside it, and its tooltip both says what the
-	site does and points at the place to act on it. The acting is a menu item that spells out the address
-	it would save, so the decision cannot be taken without reading where it goes. Still the user's
-	decision, only now it looks like one.
-	*/
-	private var redirectDestination: URL? {
-		redirects[website.id.uuidString].flatMap { URL(string: $0) }
 	}
 
 	var body: some View {
@@ -522,12 +490,6 @@ private struct RowView: View {
 			}
 			.lineLimit(1)
 			Spacer()
-			if let redirectDestination {
-				Image(systemName: "exclamationmark.triangle.fill")
-					.renderingMode(.original)
-					.imageScale(.large)
-					.help(String(localized: "This site sends Nifro to \(redirectDestination.humanString) every time it loads. Right-click the row to save that address instead."))
-			}
 			if isShowing {
 				Image(systemName: "checkmark.circle.fill")
 					.renderingMode(.original)
@@ -555,19 +517,6 @@ private struct RowView: View {
 			Divider()
 			Button("Edit…") {
 				selection = website.id
-			}
-			// Next to `Edit…` because it edits the same field, and inside its group so that the two
-			// items either end of the menu keep their places: `Set as Current` at the top and `Delete`
-			// alone at the bottom behind its own divider. A conditional item has to shift something,
-			// and the thing it must not shift is the destructive one, which people aim for by position.
-			if let redirectDestination {
-				Button(String(localized: "Update Address to \(redirectDestination.humanString)")) {
-					WebsitesController.shared.update(website.id) {
-						$0.url = redirectDestination
-					}
-
-					redirects[website.id.uuidString] = nil
-				}
 			}
 			Divider()
 			// Not refused for the website on screen, which it was for a while. What made refusing look

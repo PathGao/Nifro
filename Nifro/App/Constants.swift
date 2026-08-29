@@ -228,11 +228,6 @@ extension Defaults.Keys {
 	// needs no entry and an unplugged one leaves nothing behind.
 	static let disabledDisplays = Key<Set<String>>("disabledDisplays", default: [])
 
-	// Website id -> where the server sent it instead. Only written when WebKit reports an actual
-	// redirect, never inferred by comparing addresses: a page that rewrites its own address as you
-	// drag a map is not a redirect, and telling the user their website is wrong because they moved a
-	// map would be worse than saying nothing.
-	static let redirectedAddresses = Key<[String: String]>("redirectedAddresses", default: [:])
 	static let contentRulesURL = Key<String?>("contentRulesURL")
 	static let hasInstalledFeaturedWebsites = Key<Bool>("hasInstalledFeaturedWebsites", default: false)
 

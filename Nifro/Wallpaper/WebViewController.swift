@@ -330,32 +330,6 @@ extension WebViewController: WKNavigationDelegate {
 		(webView as? SSWebView)?.responseMIMEType = nil
 	}
 
-	/**
-	The server sent us somewhere else.
-
-	This is the one thing a URL comparison cannot tell apart from everything else that changes an
-	address. A page that writes its own fragment as it is dragged, a dashboard that adds a tab to the
-	query, a link followed in Browsing Mode — all of those end with `webView.url` different from the
-	stored one, and none of them means the stored one is wrong. A redirect does: it will happen again
-	on every launch, and the day the site stops redirecting the entry breaks.
-
-	Recorded rather than acted on. Rewriting the address behind the user's back is how "Update Website
-	to Current" once turned a website into a GitHub 404.
-	*/
-	func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
-		guard
-			let website = scene?.website,
-			let destination = webView.url?.normalized(),
-			website.url.normalized() != destination,
-			// A framed player's host page is ours, and its address is not anywhere anybody went.
-			VideoEmbed.hostPage(for: website.url) == nil
-		else {
-			return
-		}
-
-		Defaults[.redirectedAddresses][website.id.uuidString] = destination.absoluteString
-	}
-
 	func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
 		// This web view's own answer, from the navigation that has just finished in it.
 		webView.centerAndAspectFillImage(mimeType: (webView as? SSWebView)?.responseMIMEType)
