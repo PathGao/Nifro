@@ -30,6 +30,10 @@ struct WebsitesScreen: View {
 
 	@State private var isAddWebsiteDialogPresented = false
 
+	// Made here because here is what it is scoped to, and handed down rather than reached for. A row
+	// that cannot ask for the record without being given it cannot outlive the window it belongs to.
+	@State private var iconFailures = IconFetchFailures()
+
 	var body: some View {
 		NavigationStack(path: $path) {
 			Form {
@@ -58,7 +62,7 @@ struct WebsitesScreen: View {
 				// deleted while open leaves nothing to draw, and the stack is popped rather than left
 				// showing a list that no longer exists.
 				if let playlist = $playlists[id: id] {
-					PlaylistWebsites(playlist: playlist)
+					PlaylistWebsites(playlist: playlist, iconFailures: iconFailures)
 				} else {
 					Color.clear.onAppear {
 						path.removeAll { $0 == id }
@@ -67,6 +71,17 @@ struct WebsitesScreen: View {
 			}
 		}
 		.frame(width: 480, height: 500)
+		// Emptied when the window comes on screen and not left to the view being rebuilt, because
+		// whether a closed `Window` scene is torn down or merely put away is SwiftUI's business and not
+		// something written here can see. Said out loud, it holds either way — and it is the half of
+		// the rule that matters most: a network that was down for a moment must not leave a grey square
+		// for the rest of the session, and closing the window is how the user says "try again".
+		//
+		// On the stack rather than inside it, so pushing into a playlist and coming back is not an
+		// opening.
+		.onAppear {
+			iconFailures.urls.removeAll()
+		}
 		.sheet(isPresented: $isAddWebsiteDialogPresented) {
 			AddWebsiteScreen(
 				isEditing: false,
@@ -310,6 +325,8 @@ rotates in, and a website added while this is open is added to this list.
 private struct PlaylistWebsites: View {
 	@Binding var playlist: Playlist
 
+	let iconFailures: IconFetchFailures
+
 	@State private var editedWebsite: Website.ID?
 	@State private var searchText = ""
 
@@ -337,7 +354,7 @@ private struct PlaylistWebsites: View {
 				let matches = self.matches(for: query)
 
 				List(matches, id: \.wrappedValue.id) { website in
-					RowView(website: website, selection: $editedWebsite)
+					RowView(website: website, selection: $editedWebsite, iconFailures: iconFailures)
 				}
 				.overlay {
 					if matches.isEmpty {
@@ -349,7 +366,8 @@ private struct PlaylistWebsites: View {
 			List($playlist.websites, editActions: .all) { website in
 				RowView(
 					website: website,
-					selection: $editedWebsite
+					selection: $editedWebsite,
+					iconFailures: iconFailures
 				)
 			}
 			.id(playlist.websites) // Workaround for the row not updating when changing the current active website. It's placed here and not on the row to prevent another issue where adding a new website makes it scroll outside the view. (macOS 15.3)
@@ -422,6 +440,8 @@ private struct RowView: View {
 	@Binding var website: Website
 	@Binding var selection: Website.ID?
 
+	let iconFailures: IconFetchFailures
+
 	// The tick used to be a field of the website, so the binding above redrew the row when it moved.
 	// It is a per-display fact now and lives with the other per-display facts, which this row has to
 	// watch for itself or it would go on drawing the tick against the website that used to hold it.
@@ -455,7 +475,7 @@ private struct RowView: View {
 				.foregroundStyle(.tertiary)
 				.accessibilityHidden(true)
 
-			IconView(website: website)
+			IconView(website: website, iconFailures: iconFailures)
 			VStack(alignment: .leading, spacing: 2) {
 				// TODO: This should use something like `.lineBreakMode = .byCharWrapping` if SwiftUI ever supports that.
 				if let title = website.title.nilIfEmpty {
@@ -547,10 +567,34 @@ private struct RowView: View {
 	}
 }
 
+/**
+The websites this window has looked for an icon for and not found.
+
+`.task(id:)` belongs to the row, not to the list, so it starts again every time the row is built —
+which is every time it scrolls out of view and back. What it starts is not cheap: metadata for the
+page, and then, for a site that has none, a whole page load in a web view. A lookup that came back
+empty came back empty for reasons that do not change while the user is sitting there looking at the
+list, so paying for it again on the way back up the list buys nothing.
+
+Not the thumbnail cache, which is the successful half of the same question and is right to be on
+disk. A miss is worth remembering for exactly as long as one sitting: it can be a site with no icon
+to find, and it can equally be a minute of no network. Remembering it for the life of the app, or
+across launches, would turn the second into the first.
+
+A class and not another piece of `@State`, because a row writes into this while it is being drawn and
+that write must not redraw the window around it. Nothing observes it — the next lookup reads it, and
+that is all.
+*/
+@MainActor
+private final class IconFetchFailures {
+	var urls = Set<URL>()
+}
+
 private struct IconView: View {
 	@State private var icon: Image?
 
 	let website: Website
+	let iconFailures: IconFetchFailures
 
 	var body: some View {
 		VStack {
@@ -587,6 +631,11 @@ private struct IconView: View {
 			return image
 		}
 
+		// Once per opening of this window, for the reason `IconFetchFailures` gives.
+		guard !iconFailures.urls.contains(website.url) else {
+			return nil
+		}
+
 		// A video's own cover first. The general fetcher would fall back to the site's icon here, and
 		// a list of videos all wearing the same logo is the case a picture was supposed to help with.
 		if
@@ -599,6 +648,14 @@ private struct IconView: View {
 		}
 
 		guard let image = try? await WebsiteIconFetcher.fetch(for: website.url) else {
+			// A cancelled lookup found nothing because it was stopped, not because there is nothing to
+			// find, and scrolling a row away is what stops it. Recorded, it would mean that hurrying down
+			// a long list left a grey square behind every row that went past mid-fetch, which is the
+			// failure this record exists to avoid rather than one to cause.
+			if !Task.isCancelled {
+				iconFailures.urls.insert(website.url)
+			}
+
 			return nil
 		}
 
