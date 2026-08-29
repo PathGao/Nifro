@@ -46,7 +46,7 @@ difference is the whole point of putting it here. A count in a comment goes stal
 in a test cannot: it is wrong only in front of the person who made it wrong, in the same commit. Its
 ceiling is that a key removed and another added in one change nets to the same number and slips
 through. That is a narrower hole than the one it closes, and closing it too would mean writing all
-twenty-five names down here.
+thirty names down here.
 
 The key list is parsed out of `Constants.swift` on every run rather than copied here, so it is the
 declaration itself that is compared against, and a key added tomorrow is in this check by existing.
@@ -94,8 +94,8 @@ struct RestoreDefaultsTests {
 		// that turns out to be the user's data is deleted by a restore and nobody finds out from the
 		// app. Whoever adds the key is the one person who can say which it is.
 		#expect(
-			names.count == 25,
-			"Constants.swift declares \(names.count) preferences and this test was written against 25. If the parser still works, a key has been added or removed — open `RestoreDefaults` and say whether it is one of the app's settings, which the wipe takes, or one of the user's websites, which `websiteKeys` has to name. Then correct this number."
+			names.count == 30,
+			"Constants.swift declares \(names.count) preferences and this test was written against 30. If the parser still works, a key has been added or removed — open `RestoreDefaults` and say whether it is one of the app's settings, which the wipe takes, or one of the user's websites, which `websiteKeys` has to name. Then correct this number."
 		)
 
 		#expect(names.contains("websites"))
@@ -153,11 +153,11 @@ struct RestoreDefaultsTests {
 	/**
 	The exceptions, and the three ways they could stop being defensible.
 
-	They could multiply. The list was one key long and it is five, which is the change that made this
-	test worth reading again rather than a loosening of it: five named keys with an argument each is
+	They could multiply. The list was one key long and it is six, which is the change that made this
+	test worth reading again rather than a loosening of it: six named keys with an argument each is
 	not the same object as a keep-list somebody appends to when they are unsure, and the only thing
 	holding those two apart is that appending has to fail here first. So the check is an exact set and
-	not a ceiling — a sixth is as red as a hundredth, and the way past it is to write the reason down.
+	not a ceiling — a seventh is as red as a hundredth, and the way past it is to write the reason down.
 
 	They could be put back in the wrong place, before the wipe rather than after, which deletes them
 	again and leaves nothing to see until somebody restores their settings and comes back to an empty
@@ -176,7 +176,7 @@ struct RestoreDefaultsTests {
 	The literal check is the load of this test: every string in `RestoreDefaults.swift` that is not
 	shown to the user has to be one of those five key names.
 	*/
-	@Test("The wipe has exactly five exceptions, put back after it and argued for")
+	@Test("The wipe has exactly six exceptions, put back after it and argued for")
 	func onlyTheseSurviveTheWipe() throws {
 		let source = try Self.source("Nifro/App/RestoreDefaults.swift")
 		let code = try Self.stripComments(source)
@@ -206,9 +206,10 @@ struct RestoreDefaultsTests {
 				"\"playlists\"",
 				"\"websites\"",
 				"\"hasMigratedWebsitesToPlaylists\"",
+				"\"hasMigratedWebsiteReloadOverrides\"",
 				"\"hasInstalledFeaturedWebsites\""
 			],
-			"Restore names \(names.count) keys by hand (\(names.joined(separator: ", "))). Five have an argument each in the file: the interface language, because the running app cannot be shown a new value for it, and the websites and the two flags describing them, because restoring settings does not delete what the user made. A sixth needs one too, written down, before this list is the key list this file exists not to have."
+			"Restore names \(names.count) keys by hand (\(names.joined(separator: ", "))). Six have an argument each in the file: the interface language, because the running app cannot be shown a new value for it, and the websites and the three flags describing them, because restoring settings does not delete what the user made and must not re-run a conversion over it. A seventh needs one too, written down, before this list is the key list this file exists not to have."
 		)
 
 		let wipe = try #require(code.range(of: "Defaults.removeAll()"), "Restore no longer wipes the domain")

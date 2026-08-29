@@ -58,6 +58,14 @@ extension Defaults.Keys {
 	// and what this adds is everything.
 	static let hasMigratedWebsitesToPlaylists = Key<Bool>("hasMigratedWebsitesToPlaylists", default: false)
 
+	// Whether every stored website has been told, in a field of its own, that it overrides the reload
+	// interval — see `migrateWebsiteReloadOverridesIfNeeded`. The same shape and the same reason as the
+	// flag above, and it is preserved by `RestoreDefaults` for the same reason that one is: it is a
+	// record of something already done to the user's websites, and the conversion it guards cannot be
+	// run twice. A second run reads records this build has already written, where the interval is
+	// always present because it is no longer optional, and marks every website as overriding.
+	static let hasMigratedWebsiteReloadOverrides = Key<Bool>("hasMigratedWebsiteReloadOverrides", default: false)
+
 	// Which website each display is showing, keyed by `Display.settingsKey(for:)` like every other
 	// per-display fact. It was a `Bool` on each website, kept unique by a sweep over the whole list —
 	// one slot per website answering a question per display, so a sweep run for one screen could rewrite
@@ -104,7 +112,59 @@ extension Defaults.Keys {
 	// Settings
 	static let hideMenuBarIcon = Key<Bool>("hideMenuBarIcon", default: false)
 	static let opacity = Key<Double>("opacity", default: 1)
-	static let reloadInterval = Key<Double?>("reloadInterval")
+	// **A switch and a number, not a number that goes missing.** This was `Key<Double?>` with `nil`
+	// meaning off, and the switch in Settings wrote `nil` on the way off and a constant on the way back
+	// on — so somebody who set thirty minutes, switched the reload off and switched it on again got an
+	// hour. The setting throws away the only thing the user typed into it. `dimWhenUnfocused` and
+	// `dimmedOpacityFactor` are the shape this now copies: the switch says whether, the number says how
+	// long, and turning one off cannot reach the other.
+	//
+	// **The name is kept and the type changed, which is what makes the number survive the upgrade.** A
+	// stored 1800 is a `Double` on disk either way, so it reads back as 1800; somebody who stored
+	// nothing gets the default below. Nothing rewrites the entry. What cannot be recovered from the
+	// value alone is whether the switch was on — an absent entry and a default one now read the same —
+	// so that is decided once, from the raw store, by `migrateReloadIntervalToASwitch`.
+	static let reloadInterval = Key<Double>("reloadInterval", default: 60 * 60)
+
+	// Whether the number above is used at all. Off is what this app shipped with, and
+	// `migrateReloadIntervalToASwitch` is what stops that default reaching somebody who already had a
+	// reload interval set.
+	static let reloadOnInterval = Key<Bool>("reloadOnInterval", default: false)
+
+	// Whether the switch above has been decided from what an older build stored. A flag of its own, the
+	// same shape and the same reason as `hasMigratedWebsitesToPlaylists`: the question it answers —
+	// "was there an entry under `reloadInterval`" — stops being answerable the moment this build writes
+	// one, so it can only be asked once.
+	//
+	// Not in `RestoreDefaults.websiteKeys`, unlike the website flag beside it. A restore empties the
+	// domain, so the migration runs again on the next launch, finds no stored interval and writes the
+	// switch off — which is exactly where a restore should leave it.
+	static let hasMigratedReloadIntervalToASwitch = Key<Bool>("hasMigratedReloadIntervalToASwitch", default: false)
+
+	// How often the menu bar band takes a fresh colour off the top of the page, in seconds, and
+	// whether it does. The pair above's shape, built that way from the start rather than converted into
+	// it: the switch is the on/off and the number is always valid, so switching off and on again
+	// returns the interval the user typed rather than the one the switch happens to write.
+	//
+	// Off is what ships, so the colour moves when the website does and at no other time — which is what
+	// the app did before these keys existed.
+	//
+	// Five minutes when it is switched on, where the reload interval above fills in an hour, and the
+	// gap is measured rather than a matter of taste. That one refetches a page over the network; this
+	// one photographs a strip of a view already on screen and averages it, at 0.52ms end to end in
+	// `NSImage.averageColor` — cheaper than one refresh of the panel. What it buys is the case this app
+	// is for: a webcam at dusk, a fluid simulation, a picture of the day. None of those navigates, so
+	// none of them fired the load events the band is otherwise sampled on, and the menu bar kept a
+	// colour taken hours ago from the wallpaper directly behind it.
+	//
+	// Both are the app's settings and not the user's websites, which is the question
+	// `RestoreDefaultsTests` makes every new key answer. They describe how the app draws a display, like
+	// `opacity` and `dimWhenUnfocused`; nothing the user wrote is stored in them. So
+	// `Defaults.removeAll()` takes them with the rest and `RestoreDefaults.websiteKeys` must not name
+	// them — a restore puts the menu bar colour back to moving only when the website does.
+	static let menuBarColorInterval = Key<Double>("menuBarColorInterval", default: 5 * 60)
+	static let updateMenuBarColorOnInterval = Key<Bool>("updateMenuBarColorOnInterval", default: false)
+
 	static let deactivateOnBattery = Key<Bool>("deactivateOnBattery", default: false)
 	static let bringBrowsingModeToFront = Key<Bool>("bringBrowsingModeToFront", default: false)
 	static let openExternalLinksInBrowser = Key<Bool>("openExternalLinksInBrowser", default: false)

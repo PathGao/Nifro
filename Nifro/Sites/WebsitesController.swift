@@ -521,7 +521,15 @@ extension SiteCatalog.Entry {
 			// the Sound item in the menu writes to this same field, and nothing puts the entry's answer
 			// back. Whatever the menu shows a tick against is what the page is actually doing.
 			$0.audio = playsSound ? .unmuted : .muted
-			$0.reloadInterval = reloadInterval
+
+			// The entry's interval is an override or it is nothing. An entry that names none leaves the
+			// website inheriting, and its interval field is left at what it starts at rather than set to
+			// a number nobody asked for — the switch and the number are separate now, and writing the
+			// number while the switch is off is the shape this change exists to remove.
+			if let reloadInterval {
+				$0.overridesReloadInterval = true
+				$0.reloadInterval = reloadInterval
+			}
 		}
 
 		return website.id
@@ -632,8 +640,72 @@ extension WebsitesController {
 	that wants it.
 	*/
 	func prepareWebsiteStorage() {
+		// Read here and applied three lines down, and that split is the whole of what makes the reload
+		// override survive. `migrateToPlaylistsIfNeeded` decodes the stored website list through this
+		// build's `Website` and writes it back, and this build's `Website` carries a reload interval
+		// always — so the moment it runs, "did this website have one" stops being a question the records
+		// can answer. No released version has the `playlists` key, so that migration is not a historical
+		// path: it is what happens to nearly everybody on the launch this build first runs.
+		//
+		// Asked before the flag rather than behind it, so that the read and the write are the same two
+		// lines whether or not there is anything to do; the flag is where it always was, in front of the
+		// write.
+		let overriding = websitesOverridingTheReloadInterval(
+			storedPlaylists: storedRecords(under: Defaults.Keys.playlists.name),
+			storedWebsites: storedRecords(under: Defaults.Keys.websites.name)
+		)
+
 		migrateToPlaylistsIfNeeded()
+		markWebsitesOverridingTheReloadInterval(overriding)
 		installFeaturedWebsitesIfNeeded()
+	}
+
+	/**
+	One key's stored records, as an older build left them.
+
+	`Defaults` stores an array of `Codable` values as an array of JSON strings, one per element, which
+	is what the decision above reads. The app's own persistent domain rather than
+	`UserDefaults.object(forKey:)`, for the reason `reloadIntervalSwitch` gives at length and
+	`RestoreDefaults` gives beside its own read: a plain read walks the search list.
+
+	An empty array for a key that has never been written, which is a state the decision knows how to
+	answer — it is what a fresh install looks like.
+	*/
+	private func storedRecords(under key: String) -> [String] {
+		UserDefaults.standard.persistentDomain(forName: SSApp.idString)?[key] as? [String] ?? []
+	}
+
+	/**
+	Write what the raw records said into the field that now holds it.
+
+	Guarded on a flag of its own, and the guard is not a nicety: run a second time, this reads records
+	*this* build has written, where the interval is present on every one of them because the field is
+	no longer optional — so every website in the list comes back overriding. `SettingsMigrationTests`
+	runs that second pass to show what it would decide. The flag goes down before the write, the same
+	order and for the same reason as `migrateToPlaylistsIfNeeded` below.
+
+	Every website is written, not only the ones in the set, because the false answer matters as much as
+	the true one: a record that inherits has to say so in the field, or the next thing to read it gets
+	whatever `@DecodableDefault` filled in and no way to tell that apart from a decision.
+	*/
+	private func markWebsitesOverridingTheReloadInterval(_ overriding: Set<Website.ID>) {
+		guard !Defaults[.hasMigratedWebsiteReloadOverrides] else {
+			return
+		}
+
+		Defaults[.hasMigratedWebsiteReloadOverrides] = true
+
+		Defaults[.playlists] = Defaults[.playlists].map { playlist in
+			var playlist = playlist
+
+			playlist.websites = playlist.websites.map {
+				var website = $0
+				website.overridesReloadInterval = overriding.contains(website.id)
+				return website
+			}
+
+			return playlist
+		}
 	}
 
 	/**

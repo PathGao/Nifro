@@ -122,25 +122,17 @@ one — a calendar, a departure board, a poster that never changes — sets it h
 the website rather than being imposed on every other one.
 */
 struct WebsiteReloadSetting: View {
-	@Binding var reloadInterval: Double?
-
-	@Default(.reloadInterval) private var settingsInterval
-
-	private var isOverriding: Binding<Bool> {
-		.init(
-			get: { reloadInterval != nil },
-			set: { reloadInterval = $0 ? (settingsInterval ?? 60 * 60) : nil }
-		)
-	}
+	@Binding var overridesReloadInterval: Bool
+	@Binding var reloadInterval: Double
 
 	var body: some View {
-		Toggle(isOn: isOverriding) {
+		Toggle(isOn: $overridesReloadInterval) {
 			Text("Reload on its own schedule")
 				.explained(String(localized: "How often a page goes stale is a property of the page; off follows the interval in Settings."))
 		}
 
-		if reloadInterval != nil {
-			IntervalField(seconds: $reloadInterval.withDefaultValue(60 * 60))
+		if overridesReloadInterval {
+			IntervalField(seconds: $reloadInterval)
 		}
 	}
 }

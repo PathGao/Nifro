@@ -170,6 +170,16 @@ final class AppState: ObservableObject {
 
 	/**
 	Turn Browsing Mode on or off for one display.
+
+	**Leaving takes a fresh colour for the menu bar band, and that is deliberately not behind the
+	setting that names an interval.** Somebody has just spent Browsing Mode scrolling that wallpaper,
+	signing in to it, or clicking through to another view of it, so the top of the page is almost
+	certainly not the strip the band was painted from — and unlike the pages the interval exists for,
+	this is a moment we know about. It belongs with "sample when a load finishes" rather than with the
+	clock: an event, one sample, at a point the user was in front of. A switch named after an interval
+	turns a cadence off, and it must not be able to turn off the events beside it, or somebody who
+	preferred the old behaviour would get a worse version of it than the app had before the switch
+	existed.
 	*/
 	func setBrowsingMode(_ isOn: Bool, on display: Display?) {
 		let key = Display.settingsKey(for: display)
@@ -181,6 +191,13 @@ final class AppState: ObservableObject {
 		}
 
 		applyBrowsingMode()
+
+		// After `applyBrowsingMode`, which is what puts the window back to how it is drawn outside
+		// Browsing Mode. The sample itself refuses on a display with no band, one switched off and one
+		// whose page is not up, so there is nothing to ask here that it does not ask for itself.
+		if !isOn {
+			scenes.first { $0.display == display }?.refreshMenuBarBandColor()
+		}
 	}
 
 	/**
@@ -559,6 +576,11 @@ final class AppState: ObservableObject {
 
 	private func didLaunch() {
 		_ = statusItemButton
+
+		// First, because everything under it reads the reload setting rather than converting it:
+		// `rebuildScenes` arms a reload timer per display and `setUpEvents` subscribes to both halves.
+		migrateReloadIntervalToASwitch()
+
 		// Before `rebuildScenes`, because a scene reads the list this writes. The migration and the
 		// install inside it run in an order that matters and is argued for where it lives; this used to
 		// be that pair spelled out, which is the same order kept in two places at once.
@@ -566,6 +588,39 @@ final class AppState: ObservableObject {
 		rebuildScenes()
 		setUpEvents()
 		showWelcomeScreenIfNeeded()
+	}
+
+	/**
+	Decide, once, whether the app-wide reload interval was switched on.
+
+	The setting was an optional number where absent meant off, and it is a switch and an always-valid
+	number now — see `Constants.swift`, which argues the shape. The number carries itself across
+	unchanged; the switch cannot, because its old answer was "is there an entry under this key" and
+	the new key has a default, so every user reads a number whether or not they ever set one. Left to
+	the `Bool`'s own default, everybody who had a reload interval would come back with reloading off
+	and no sign of why.
+
+	So it is read out of the persistent domain, which is the one place that still distinguishes the
+	two, and it is read on exactly one launch. `reloadIntervalSwitch` is where the decision lives and
+	what `SettingsMigrationTests` runs; this is the `Defaults` around it, and the flag goes down before
+	the write in the shape `migrateToPlaylistsIfNeeded` established.
+
+	It is allowed to run again after Restore All Settings, which empties the domain and takes the flag
+	with it. That run finds no stored interval and switches reloading off — which is where a restore
+	is supposed to leave it, so the flag is deliberately not one of `RestoreDefaults`'s exceptions.
+	*/
+	private func migrateReloadIntervalToASwitch() {
+		guard !Defaults[.hasMigratedReloadIntervalToASwitch] else {
+			return
+		}
+
+		let isOn = reloadIntervalSwitch(
+			storedSettings: UserDefaults.standard.persistentDomain(forName: SSApp.idString) ?? [:],
+			intervalKey: Defaults.Keys.reloadInterval.name
+		)
+
+		Defaults[.hasMigratedReloadIntervalToASwitch] = true
+		Defaults[.reloadOnInterval] = isOn
 	}
 
 	func handleMenuBarIcon() {

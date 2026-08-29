@@ -75,12 +75,31 @@ private struct BehaviorSettings: View {
 				BringBrowsingModeToFrontSetting()
 			}
 			Section {
-				ReloadIntervalSetting()
+				IntervalSetting(
+					isOn: .reloadOnInterval,
+					seconds: .reloadInterval,
+					label: "Page reload interval",
+					help: String(localized: "For websites that do not set their own; one that does, in its own settings, ignores this."),
+					accessibilityLabel: "Reload interval"
+				)
 				Defaults.Toggle(key: .restoreScrollPosition) {
 					Text("Restore the page position after a reload")
 						.explained(String(localized: "A page that reloads on a timer starts over; this puts back where it was scrolled or moved to."))
 				}
 				Defaults.Toggle(String(localized: "Reload the page when the Mac wakes"), key: .reloadOnWake)
+				// macOS tints the menu bar from what is rendered under it, and the strip under it is
+				// Nifro's own band wearing the average colour of the top of the page — see `MenuBarBand`.
+				// That colour is taken when a page loads, which never happens on the wallpapers this app
+				// is for: a webcam, a simulation, a picture of the day. Off is the app as it was, which is
+				// why the help text says what off means rather than what on does — here that is also what
+				// happens to somebody who never touches it.
+				IntervalSetting(
+					isOn: .updateMenuBarColorOnInterval,
+					seconds: .menuBarColorInterval,
+					label: "Menu bar colour interval",
+					help: String(localized: "With this off, the colour only changes when the website does."),
+					accessibilityLabel: "Menu bar colour interval"
+				)
 			}
 			Section {
 				OpenExternalLinksInBrowserSetting()
@@ -614,10 +633,51 @@ private struct OpacitySetting: View {
 	}
 }
 
-private struct ReloadIntervalSetting: View {
-	private static let defaultReloadInterval = 60.0 * 60
+/**
+A length of time that can be switched off, and the one control two settings in this pane share.
 
-	@Default(.reloadInterval) private var reloadInterval
+Page reload and menu bar colour ask the same question in the same row — a number, a unit, a switch —
+and were two copies of it. One of them is where the switch wrote the number: with the setting stored
+as an optional, switching off wrote `nil` and switching back on wrote a constant, so a user who had
+typed thirty minutes got an hour back and nothing said so. Both settings are a `Bool` and an
+always-valid `Double` now, which is the shape `dimWhenUnfocused` and `dimmedOpacityFactor` already
+had, and with the shape shared there is one control rather than two that have to be kept in step.
+
+Keyed rather than bound, because the two keys are what differ between the callers and a pair of
+bindings would put a `@Default` back at each of them.
+
+**Nothing here writes the number.** The switch has no value to fill in when it is turned on: a setting
+nobody has touched reads its key's own default, and one somebody has touched reads what they typed.
+An hour and five minutes are declared once each, on the keys in `Constants.swift`, rather than a
+second time beside this control where the two copies would have nothing making them agree.
+
+**The per-website reload override is not a third caller, and that is a decision rather than an
+oversight.** It draws a switch above a field rather than a row with the switch at the end, its
+question is override-versus-inherit rather than on-versus-off, and it lives in the website dialog
+where a `Defaults` key would be the wrong storage entirely — it writes a field of one `Website`. It
+took the same fix for the same defect, in `WebsiteSettings.swift`, and shares no code with this.
+*/
+private struct IntervalSetting: View {
+	private let label: LocalizedStringKey
+	private let help: String
+	private let accessibility: LocalizedStringKey
+
+	@Default private var isOn: Bool
+	@Default private var seconds: Double
+
+	init(
+		isOn: Defaults.Key<Bool>,
+		seconds: Defaults.Key<Double>,
+		label: LocalizedStringKey,
+		help: String,
+		accessibilityLabel: LocalizedStringKey
+	) {
+		_isOn = Default(isOn)
+		_seconds = Default(seconds)
+		self.label = label
+		self.help = help
+		self.accessibility = accessibilityLabel
+	}
 
 	// TODO: Improve VoiceOver accessibility for this control.
 	var body: some View {
@@ -625,19 +685,19 @@ private struct ReloadIntervalSetting: View {
 			// One row, switch last, like every other switch on this tab. Two views straight in a
 			// `LabeledContent` stack vertically, which put the switch on a line of its own under the field.
 			HStack {
-				if reloadInterval != nil {
-					IntervalField(seconds: $reloadInterval.withDefaultValue(Self.defaultReloadInterval))
+				if isOn {
+					IntervalField(seconds: $seconds)
 				}
 
-				Toggle("Page reload interval", isOn: $reloadInterval.isNotNil(trueSetValue: Self.defaultReloadInterval))
+				Toggle(label, isOn: $isOn)
 					.labelsHidden()
 					.toggleStyle(.switch)
 			}
 		} label: {
-			Text("Page reload interval")
-				.explained(String(localized: "For websites that do not set their own; one that does, in its own settings, ignores this."))
+			Text(label)
+				.explained(help)
 		}
-		.accessibilityLabel("Reload interval")
+		.accessibilityLabel(accessibility)
 		.contentShape(.rect)
 	}
 }

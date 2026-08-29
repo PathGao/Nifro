@@ -205,6 +205,15 @@ final class WallpaperScene {
 	var rotationTimer: Timer?
 
 	/**
+	The cadence the band re-reads the page's colour on. Armed and disarmed by `resetMenuBarBandTimer`,
+	which is next to the band it belongs to.
+
+	Not `private`, for the same reason `rotationTimer` above is not: the behaviour it drives is
+	written in another file, and the timer is state of the scene rather than of that file.
+	*/
+	var menuBarBandTimer: Timer?
+
+	/**
 	Minutes since this display last moved to another website.
 
 	The rotation timer ticks once a minute whatever the display's interval is, because the schedule has
@@ -498,6 +507,15 @@ final class WallpaperScene {
 
 		hasRevealedPage = false
 
+		// One of the two writers of the line above, and the band's cadence is armed on it — there is
+		// nothing worth photographing between here and the reveal, which is the same thing
+		// `refreshMenuBarBandColor` refuses on. `revealPage` is the other writer and arms it again.
+		//
+		// Beside the write rather than inside a `didSet` on it: `LoadingIndicatorTests` requires that
+		// observer to hold the loading bridge and nothing else, which is a rule worth more than the
+		// two lines it costs here.
+		resetMenuBarBandTimer()
+
 		// Only for a page that settles neither way. A load that finishes or fails reveals the page
 		// itself — see `WebViewController.pageDidSettle` — so what is left is a main frame that never
 		// stops loading at all, which is real: `loadAndWait` polls for the same reason. Without this
@@ -549,9 +567,11 @@ final class WallpaperScene {
 		webViewController.webView.isHidden = false
 
 		// In this order, and only now: the band stands in for the top of the page, so there has to be
-		// a page for it to stand in for.
+		// a page for it to stand in for. The cadence that keeps the colour matching a page which
+		// changes without navigating waits for the same moment, and `load` above takes it back down.
 		refreshMenuBarBandColor()
 		updateMenuBarBandVisibility()
+		resetMenuBarBandTimer()
 	}
 
 	/**
@@ -724,6 +744,8 @@ final class WallpaperScene {
 		reloadTimer = nil
 		rotationTimer?.invalidate()
 		rotationTimer = nil
+		menuBarBandTimer?.invalidate()
+		menuBarBandTimer = nil
 		pendingLoad?.cancel()
 
 		// Before the band: releasing installs an empty page, and installing content is one of the
@@ -739,6 +761,7 @@ final class WallpaperScene {
 	func tearDown() {
 		reloadTimer?.invalidate()
 		rotationTimer?.invalidate()
+		menuBarBandTimer?.invalidate()
 		pendingLoad?.cancel()
 		window.orderOut(nil)
 		content = .empty

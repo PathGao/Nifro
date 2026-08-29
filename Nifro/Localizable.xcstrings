@@ -1207,6 +1207,16 @@
         }
       }
     },
+    "Menu bar colour interval": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "菜单栏颜色更新间隔"
+          }
+        }
+      }
+    },
     "Minutes between websites": {
       "localizations": {
         "zh-Hans": {
@@ -2563,6 +2573,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "整页"
+          }
+        }
+      }
+    },
+    "With this off, the colour only changes when the website does.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭后，菜单栏颜色只在网站变化时才跟着变。"
           }
         }
       }

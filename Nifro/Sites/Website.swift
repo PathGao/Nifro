@@ -39,14 +39,34 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	@DecodableDefault.Custom<Audio> var audio
 
 	/**
-	How often to reload this website, in seconds. `nil` follows the interval in Settings.
+	How often to reload this website, in seconds, and whether this website answers that question at
+	all.
 
 	Per website because how fast a page goes stale is a property of the page: a calendar is wrong
 	after fifteen minutes, a poster is never wrong. It used to be one app-wide number, so a catalogue
 	entry that wanted a daily reload set that for every website at once — which is how a wallpaper
 	nobody had touched came to be reloading every 1440 minutes.
+
+	**Two fields where there was one optional, and the pair does not mean what the pair in `Defaults`
+	means.** There, off means the wallpaper does not reload; here, off means this website has no
+	opinion and takes the app-wide answer. Same names, same shape, different question — which is worth
+	saying because the shared spelling invites the assumption that a website with the switch off does
+	not reload, and it may well be reloading every hour.
+
+	What the two conversions do share is the defect. The switch used to write the number: turning the
+	override off wrote `nil` over the interval somebody had typed, and turning it back on wrote the
+	Settings value or an hour. Set thirty minutes on a site, switch off, switch on, and thirty minutes
+	is gone with nothing said. The number is always valid now and the switch cannot reach it.
+
+	`@DecodableDefault` on both, which is what makes a record written before this existed decode at
+	all — see `WebsiteMigrationTests`. The interval's default is an hour: it is what the old switch
+	filled in when Settings had no number, so a website that has never had one of its own starts where
+	it used to start. Whether that website *overrides* is not decodable from its record under this
+	shape, which is the whole reason `migrateWebsiteReloadOverridesIfNeeded` reads the raw store once
+	before anything writes a new-shaped record back.
 	*/
-	var reloadInterval: Double?
+	@DecodableDefault.False var overridesReloadInterval
+	@DecodableDefault.Custom<DefaultReloadInterval> var reloadInterval
 
 	/**
 	Where a link off this website opens.
@@ -69,20 +89,24 @@ struct Website: Hashable, Codable, Identifiable, Sendable, Defaults.Serializable
 	How often this website actually reloads: its own interval, or the app-wide one from Settings when
 	it names none.
 
-	`if let` and not `??`, and it has to stay that way. `Defaults[.reloadInterval]` is a `Double?`
-	reached through the package's generic subscript, and that drives `??` to the `T ?? T` overload with
-	`T == Double?` — a left side that is no longer optional, so the right side is dead code and the
-	compiler says so. Every website that named no interval of its own therefore answered `nil`,
-	`WallpaperScene.resetTimer` returned at its own `let`, and no timer was ever armed: the number in
-	Settings was drawn, saved, and reached nothing but the value a per-website override starts at.
+	Three answers, not two, and the third is why this still returns an optional: a website that
+	overrides reloads on its own number, one that does not reloads on the app-wide number *if that is
+	switched on*, and otherwise nothing reloads it at all. `WallpaperScene.resetTimer` reads `nil` as
+	"arm no timer".
 
-	`DefaultsFallbackTests` holds the same shape away from every optional key, not just this one.
+	It used to be `reloadInterval ?? Defaults[.reloadInterval]`, which is where `DefaultsFallbackTests`
+	came from: both sides were `Double?`, the package's generic subscript drove `??` to the `T ?? T`
+	overload, the left side stopped being optional and the right side never ran — so the number in
+	Settings was drawn, saved, published, and reached nothing. That trap needs an optional key to spring
+	and `reloadInterval` is no longer one, but the test still guards every key that is.
 	*/
 	var effectiveReloadInterval: Double? {
-		if let reloadInterval {
+		if overridesReloadInterval {
 			reloadInterval
-		} else {
+		} else if Defaults[.reloadOnInterval] {
 			Defaults[.reloadInterval]
+		} else {
+			nil
 		}
 	}
 
@@ -285,6 +309,25 @@ extension Website.ExternalLinks: DecodableDefault.Source {
 	// Every website that existed before this setting followed the app-wide switch, and it has to go on
 	// following it — anything else silently changes what a wallpaper does on upgrade.
 	static let defaultValue = followSettings
+}
+
+extension Website {
+	/**
+	What a website's own reload interval is before anybody has set one.
+
+	An hour, which is the number the switch beside the field used to fill in when Settings had none —
+	so a website that has never overridden starts exactly where it used to start when somebody first
+	turns the override on. It is only ever read while `overridesReloadInterval` is true, so a record
+	that inherits carries a number nothing looks at.
+
+	Not shared with `Defaults[.reloadInterval]`'s own default, though the two are the same hour. They
+	answer different questions — what the app does for websites with no opinion, and where a website's
+	own field starts — and tying them together would mean a user's app-wide number silently deciding
+	where every new override begins.
+	*/
+	enum DefaultReloadInterval: DecodableDefault.Source {
+		static let defaultValue = 60.0 * 60
+	}
 }
 
 extension Website.Audio: DecodableDefault.Source {
