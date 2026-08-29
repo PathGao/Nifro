@@ -466,7 +466,13 @@ private struct DisplayColumn: View {
 	}
 
 	/**
-	The playlist this display is showing, from the ones it may be offered.
+	The playlist this column is offering websites from, out of the ones this display may be offered.
+
+	Offering and showing are the same list until somebody opens this menu. Choosing from it commits
+	nothing — it changes what the chooser below holds, and choosing from *that* is what points the
+	display at both at once. The label follows what is being offered rather than what is showing, or the
+	control would answer a press by doing nothing visible; `DisplayPanelModel.selectPlaylist` is where
+	the whole of that trade is argued.
 
 	Built to match the website chooser below rather than as a `Picker`, for the reason that one is a
 	`Menu`: a picker draws the chosen value itself and truncates it, and a playlist's name is the user's
@@ -492,7 +498,12 @@ private struct DisplayColumn: View {
 	}
 
 	/**
-	The website on this display, from the playlist it is showing.
+	The website on this display, from the playlist above it.
+
+	The one control in the column that decides anything about what is on this screen: it commits the
+	website and the playlist together. Which is also why it is a list and not a set — a display set to
+	Random lists its shuffled order here, in the order it will happen, so the menu is both the way to
+	choose and the answer to "what is coming".
 
 	Adding a website is a different act with a different home, so a playlist with nothing in it offers
 	nothing here rather than a form: the panel points displays at things that exist.

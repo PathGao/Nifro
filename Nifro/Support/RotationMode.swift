@@ -32,7 +32,20 @@ enum RotationMode: String, CaseIterable, Defaults.Serializable {
 	case loop
 
 	/**
-	A different one each time, chosen at random.
+	Round the list in an order decided in advance.
+
+	Shuffle play, not random playback, and the two are different promises rather than two spellings of
+	one. Random playback picks a website when the last one ends, so it can offer the same page twice in
+	a row and take four rounds to get to a list of four. Shuffle deals the whole list out at once and
+	goes through it, which is the promise a wallpaper wants: every website is seen once before any of
+	them is seen again.
+
+	Because the order is decided rather than drawn, it can be shown — the website chooser lists it, in
+	the order it will happen — and it can be walked backwards, which is a meaning Previous did not have
+	while this was an iterator handing out one website at a time and remembering none of them.
+
+	The order is not stored. A relaunch decides a new one around the page already up, so the wallpaper
+	carries on rather than starting over; `WebsitesController.shuffledOrders` is where it lives and why.
 	*/
 	case random
 

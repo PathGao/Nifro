@@ -139,11 +139,14 @@ extension AppState {
 		// `applyWebsiteChanges` and deliberately not the live-settings shortcut beside it: which website
 		// a display shows is never something the page already up can absorb, it is a different page.
 		//
-		// The playlist alongside it, because "which website" is now worked out from "which list": the
-		// picker in the panel writes a key of its own and never touches the cursor, so on its own it
-		// changed which websites the display was choosing between and left the one on screen where it
-		// was. Two keys and one sink, like the four inputs to opacity below — a second sink calling the
-		// same function is a second place to forget it.
+		// The playlist alongside it, because "which website" is worked out from "which list". The two
+		// keys are written together by `makeCurrent` — choosing a website out of a list is the one act
+		// that commits either — so what arrives here is one change wearing two names, and merging them
+		// is what makes it one event. Two keys and one sink, like the four inputs to opacity below: a
+		// second sink calling the same function is a second place to forget it.
+		//
+		// The playlist half is not redundant even so. `clearAllWebsiteData` empties both dictionaries,
+		// and it empties them separately.
 		Publishers.MergeMany(
 			Defaults.publisher(.currentWebsites, options: []).map { _ in }.eraseToAnyPublisher(),
 			Defaults.publisher(.currentPlaylists, options: []).map { _ in }.eraseToAnyPublisher()

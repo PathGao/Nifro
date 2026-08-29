@@ -22,7 +22,9 @@ final class DisplayPanelModel: ObservableObject {
 		let snapshot: NSImage?
 
 		/**
-		The websites this display can be pointed at: the members of the playlist it is showing.
+		The websites this display can be pointed at: the members of the playlist the column is offering,
+		in the order it offers them — see `choices(in:isCommitted:on:)`, which is where the playlist and
+		the order are settled.
 
 		It was the websites whose own `display` was this one, which is K17 — a display could only offer
 		what already named it, so the second monitor's chooser had one item in it and the first launch
@@ -116,6 +118,26 @@ final class DisplayPanelModel: ObservableObject {
 
 	@Published private(set) var columns: [Column] = []
 
+	/**
+	The playlist a column is *browsing*, where that is not the one its display is showing.
+
+	Choosing a playlist commits nothing. It changes which websites the chooser below it offers, and
+	choosing one of those is the commit — which writes the display's playlist and its website together,
+	in `WebsitesController.makeCurrent`. So this is the whole of what a playlist choice does, and it
+	lives here rather than in `Defaults` because it is not a fact about the display, it is a fact about
+	a popover that is open in front of it.
+
+	What that buys is the defect it replaces. Picking a playlist wrote the stored key, the key reached
+	`rebuildScenes` through `Events`, and the wallpaper jumped to whatever the new list happened to hold
+	first — before the user had said which page they wanted, and with no way to look at a list without
+	being moved to it. What it costs is stated and accepted: pointing a display at another playlist is
+	done by choosing a website from that playlist. There is no "switch the list and keep this page".
+
+	Keyed by `Display.settingsKey(for:)` and cleared on every opening, which is the same statement twice:
+	a browse is one visit to one column. Reopening the panel shows what the display is committed to.
+	*/
+	private var browsedPlaylists = [String: Playlist.ID]()
+
 	private var liveRefresh: Task<Void, Never>?
 
 	/**
@@ -187,6 +209,11 @@ final class DisplayPanelModel: ObservableObject {
 		// the end, after its awaits.
 		openings += 1
 
+		// A list somebody was looking at and did not choose from is not a decision, and an opening that
+		// began where the last one was abandoned would be the panel remembering something the user does
+		// not know it kept.
+		browsedPlaylists.removeAll()
+
 		let playlists = Defaults[.playlists]
 		columns = AppState.shared.scenes.map { column(for: $0, snapshot: nil, playlists: playlists) }
 	}
@@ -241,7 +268,14 @@ final class DisplayPanelModel: ObservableObject {
 	*/
 	private func column(for scene: WallpaperScene, snapshot: NSImage?, playlists: [Playlist]) -> Column {
 		let controller = WebsitesController.shared
-		let playlist = controller.playlist(for: scene.display, in: playlists)
+
+		// Two playlists, and the difference between them is the whole of change A. `showing` is what
+		// this display is committed to, and it is what the arrows step and what the interval walks.
+		// `offered` is the list the chooser below draws from, which is the same thing until somebody
+		// picks a playlist and does not pick a website out of it yet.
+		let showing = controller.playlist(for: scene.display, in: playlists)
+		let browsed = browsedPlaylists[Display.settingsKey(for: scene.display)].flatMap { playlists[id: $0] }
+		let offered = browsed ?? showing
 
 		return Column(
 			display: scene.display,
@@ -249,12 +283,12 @@ final class DisplayPanelModel: ObservableObject {
 			websiteID: scene.website?.id,
 			websiteName: scene.website?.menuTitle.nilIfEmpty,
 			snapshot: snapshot,
-			choices: playlist?.websites ?? [],
+			choices: choices(in: offered, isCommitted: offered?.id == showing?.id, on: scene),
 			// `boundDisplay == nil` is every display and is the default a playlist is made with, so this
 			// is "everything nobody has claimed, plus what this screen was given". The default playlist
 			// refuses a binding outright, which is what keeps this from ever being empty.
 			playlistChoices: playlists.filter { $0.boundDisplay == nil || $0.boundDisplay?.id == scene.display?.id },
-			playlistName: playlist?.name ?? String(localized: "No Playlist"),
+			playlistName: offered?.name ?? String(localized: "No Playlist"),
 			// `isSwitchedOff`, not the per-display switch under it. The column was the last reader
 			// asking one of the two switches on its own, so with the app disabled — on battery, on a
 			// locked screen, from the Disable shortcut — every wallpaper was gone and every column still
@@ -269,13 +303,45 @@ final class DisplayPanelModel: ObservableObject {
 			// through `eligible`, which narrows that by the schedule and by whether a website can be
 			// shown at all. So a display with two websites and one of them unshowable lit both arrows
 			// and did nothing when either was pressed, which is K24. One expression, asked twice.
-			canRotate: controller.eligible(in: playlist).count > 1,
+			canRotate: controller.eligible(in: showing).count > 1,
 			isLoading: scene.isLoading,
 			disabledReading: Self.disabledReading,
 			// Read here rather than in the view, with everything else the column says. The panel is the
 			// second reader of this store and the first one a user ever sees.
 			failure: AppState.shared.webViewError(on: scene.display)?.localizedDescription
 		)
+	}
+
+	/**
+	The websites a column offers, in the order it offers them.
+
+	The playlist's own order, which is what a list is, except for one case: a display showing that list
+	and set to Random offers the shuffled order instead, because for that display the order is the
+	answer to "what is coming" — that is the whole of why shuffle is a decided order rather than an
+	iterator, and a dropdown that would not say it would be hiding the one thing that changed.
+
+	`isCommitted` is the reason a list being *browsed* is offered plainly even in Random. A display that is
+	not pointed at a list has no order for it, and making one here would take the order it is actually
+	walking and throw it away to describe a list it is not on. The order for that list is made when the
+	display is pointed at it, which is the moment a website is chosen — and made around that website, so
+	the first thing the dropdown says afterwards is the page that is up.
+
+	Not narrowed by the schedule, in either case, which is what it did before this and is left alone:
+	the chooser offers what the list holds, so a website outside its hours can still be asked for by
+	hand. Rotation is where the hours apply. The Random order is the exception that proves it — it comes
+	from `eligible`, so a site out of hours is missing from that one dropdown until its hours come round.
+	*/
+	private func choices(in playlist: Playlist?, isCommitted: Bool, on scene: WallpaperScene) -> [Website] {
+		let controller = WebsitesController.shared
+
+		guard
+			isCommitted,
+			scene.rotationMode == .random
+		else {
+			return playlist?.websites ?? []
+		}
+
+		return controller.ordered(controller.eligible(in: playlist), on: scene.display)
 	}
 
 	/**
@@ -462,30 +528,42 @@ final class DisplayPanelModel: ObservableObject {
 	to see something answers that, and the arrows above this chooser reach it by the same door. Two
 	sibling controls in one column had two answers about what picking a website means for as long as
 	either of them wrote its own.
+
+	**This is the column's only commit**, and the playlist rides with it. A list being browsed is handed
+	over here and forgotten here, so the two keys move in one turn of the run loop and there is never a
+	moment when the display is pointed at a list it is not showing a page from — which is exactly the
+	moment the wallpaper used to jump in.
 	*/
 	func selectWebsite(_ website: Website, on display: Display?) {
-		WebsitesController.shared.makeCurrent(website, on: display)
+		let key = Display.settingsKey(for: display)
+
+		WebsitesController.shared.makeCurrent(website, on: display, from: browsedPlaylists[key])
+
+		// Committed, so there is nothing left to be browsing: the column reads the same answer from the
+		// stored key from here on, and a stale entry would go on winning over a playlist changed from
+		// somewhere else while the panel stayed open.
+		browsedPlaylists[key] = nil
 	}
 
 	/**
-	Point `display` at a playlist.
+	Show `display`'s column the websites in a playlist.
 
-	The one write of `currentPlaylists`, for the reason `makeCurrent` is the one write of the cursor: a
-	per-display fact with two writers is the shape every entry in `ScopeTests` was found in. The mark
-	saying which website is up is deliberately left alone — it names a website the new playlist may not
-	contain, which `scheduled(for:)` already reads as "this display has not started" and answers with
-	the top of the list.
+	**And nothing else.** This wrote `currentPlaylists` and woke the display, which made choosing a list
+	a decision the user had not finished making: the key reached `rebuildScenes` through `Events`, and
+	the wallpaper moved to whatever that list happened to hold first before anybody had said which page
+	they wanted. There was no way to look inside a list without being moved into it.
 
-	The waking is not left alone, and it is the one thing this has to say for itself rather than
-	inherit. Every other way of pointing a display at something goes through `makeCurrent`, which asks
-	`wakeDisplay` — this is the one that writes a different key, so it is the one place the answer had
-	to be repeated. Without it, picking a list for a dark screen changed the label above the picture
-	and left the screen dark, which is the same report the website chooser produced before its own
-	route was fixed.
+	So it does not write, and it does not wake either — nothing is being asked for yet, and a screen
+	that lit up here would be answering a question with a look at a menu. `selectWebsite` below is the
+	commit — it is directly above — and it inherits the waking from `makeCurrent`, where every
+	request to see something meets.
+
+	`objectWillChange` because the answer is held here rather than in `Defaults`, so nothing else will
+	say it moved; `refresh` for the pictures, as everything in this file does.
 	*/
 	func selectPlaylist(_ id: Playlist.ID, on display: Display?) {
-		Defaults[.currentPlaylists][Display.settingsKey(for: display)] = id
-		AppState.shared.wakeDisplay(display)
+		browsedPlaylists[Display.settingsKey(for: display)] = id
+		objectWillChange.send()
 
 		Task {
 			await refresh()

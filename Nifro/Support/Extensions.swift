@@ -237,65 +237,6 @@ extension Collection {
 	*/
 	var nilIfEmpty: Self? { isEmpty ? nil : self }
 }
-extension Collection {
-	/**
-	Returns a infinite sequence with unique random elements from the collection.
-
-	Elements will only repeat after all elements have been seen.
-
-	This can be useful for slideshows and music playlists where you want to ensure that the elements are better spread out.
-
-	If the collection only has a single element, that element will be repeated forever.
-	If the collection is empty, it will never return any elements.
-
-	```
-	let sequence = [1, 2, 3, 4].infiniteUniformRandomSequence()
-
-	for element in sequence.prefix(3) {
-		print(element)
-	}
-	//=> 3
-	//=> 1
-	//=> 2
-
-	let iterator = sequence.makeIterator()
-
-	iterator.next()
-	//=> 4
-	iterator.next()
-	//=> 1
-	```
-	*/
-	func infiniteUniformRandomSequence() -> AnySequence<Element> {
-		guard !isEmpty else {
-			return [].eraseToAnySequence()
-		}
-
-		return AnySequence { () -> AnyIterator in
-			guard count > 1 else {
-				return AnyIterator { first }
-			}
-
-			var currentIndices = [Index]()
-			var previousIndex: Index?
-
-			return AnyIterator {
-				if currentIndices.isEmpty {
-					currentIndices = indices.shuffled()
-
-					// Ensure there are no duplicate elements on the edges.
-					if currentIndices.last == previousIndex {
-						currentIndices = currentIndices.reversed()
-					}
-				}
-
-				let index = currentIndices.popLast()! // It cannot be nil.
-				previousIndex = index
-				return self[index]
-			}
-		}
-	}
-}
 extension Collection where Index == Int, Element: Equatable {
 	/**
 	Returns an array where the given element has moved to the `to` index.
@@ -376,43 +317,6 @@ extension Collection where Element: Equatable {
 		}
 
 		return self[targetIndex]
-	}
-
-	/**
-	Get the element after the first element equaling the given element.
-
-	```
-	let x = [1, 2, 3]
-	x.element(after: 2)
-	//=> 3
-	```
-	*/
-	func element(after element: Element) -> Element? {
-		guard
-			let elementIndex = firstIndex(of: element),
-			let targetIndex = index(elementIndex, offsetBy: 1, limitedBy: index(endIndex, offsetBy: -1))
-		else {
-			return nil
-		}
-
-		return self[targetIndex]
-	}
-}
-extension Collection where Element: Equatable {
-	/**
-	Get the element after the first element equaling the given element, or the first element if there's no element after or if the given element is `nil`
-
-	This can be useful when imitating a circular array.
-	*/
-	func elementAfterOrFirst(_ element: Element?) -> Element? {
-		guard
-			let element,
-			let nextElement = self.element(after: element)
-		else {
-			return first
-		}
-
-		return nextElement
 	}
 }
 extension Collection where Element: Identifiable {
@@ -1015,9 +919,6 @@ extension Sequence {
 		}
 		return dictionary
 	}
-}
-extension Sequence {
-	func eraseToAnySequence() -> AnySequence<Element> { .init(self) }
 }
 extension Sequence where Element: Equatable {
 	/**
