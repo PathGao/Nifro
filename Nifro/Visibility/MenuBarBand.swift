@@ -305,15 +305,6 @@ extension WallpaperScene {
 
 extension NSImage {
 	/**
-	One rendering context for every sample.
-
-	A `CIContext` is a renderer, not a value: building one per call stood up a fresh one on every page
-	load on every scene, to produce a single pixel. It holds nothing belonging to a particular image,
-	so there is nothing for the callers to disagree about.
-	*/
-	private static let averageColorContext = CIContext(options: [.workingColorSpace: NSNull()])
-
-	/**
 	The average colour of the whole image, or `nil` if it cannot be read.
 
 	The pixels are asked for, not re-encoded. This used to go out through `tiffRepresentation` and
@@ -345,7 +336,7 @@ extension NSImage {
 
 		var pixel = [UInt8](repeating: 0, count: 4)
 
-		Self.averageColorContext.render(
+		ImageSampling.context.render(
 			output,
 			toBitmap: &pixel,
 			rowBytes: 4,
