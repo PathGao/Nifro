@@ -8,8 +8,6 @@ import AppKit
 This always requests the permission to a directory. If you give it file URL, it will ask for permission to the parent directory.
 */
 enum SecurityScopedBookmarkManager {
-	private static let lock = NSLock()
-
 	// TODO: Abstract this to a generic class to have a Dictionary like thing that is synced to UserDefaults and the subclass it here.
 	private final class BookmarksUserDefaults: @unchecked Sendable {
 		// TODO: This should probably be an argument to init.
@@ -106,18 +104,14 @@ enum SecurityScopedBookmarkManager {
 
 	/**
 	Returns `nil` if the user didn't give permission or if the bookmark couldn't be saved.
+
+	No lock around the panel, deliberately. `@MainActor` is the mutual exclusion, and the compiler enforces it rather than a reviewer having to. A lock here would also be worse than none: `runModal` spins a nested run loop, main-queue work is delivered inside it, and a second display's queued load arrives on the same thread and calls straight back in here — which a non-recursive `NSLock` answers by wedging the main thread with the panel still on screen. Two stacked panels is the bad case without one.
 	*/
 	@MainActor
 	static func promptUserForPermission(
 		atDirectory directoryURL: URL,
 		message: String? = nil
 	) -> URL? {
-		lock.lock()
-
-		defer {
-			lock.unlock()
-		}
-
 		let delegate = NSOpenSavePanelDelegateHandler(url: directoryURL)
 
 		let openPanel = with(NSOpenPanel()) {
