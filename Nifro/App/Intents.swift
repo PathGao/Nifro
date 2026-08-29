@@ -115,8 +115,9 @@ struct GetEnabledStateIntent: AppIntent {
 	This returned `AppState.isEnabled`, three app-wide inputs — the Disable command, the lock screen,
 	the battery rule — and not one of them per display. So a Mac whose displays had each been switched
 	off from the panel had no wallpaper anywhere and answered `true`, and a script had no signal that
-	the screen was black. It is also the state that outlives a relaunch, and the only one that does:
-	`disabledDisplays` is on disk and `isManuallyDisabled` is not.
+	the screen was black. It was also, for a while, the only state that outlived a relaunch:
+	`disabledDisplays` was on disk and `isManuallyDisabled` was not. Both are stored now, so this
+	answers the same question after a quit as before one.
 
 	The expression the menu bar icon is drawn from, so the two readings of "is Nifro on" cannot part —
 	which is what they had already done.

@@ -48,6 +48,11 @@ ceiling is that a key removed and another added in one change nets to the same n
 through. That is a narrower hole than the one it closes, and closing it too would mean writing all
 thirty names down here.
 
+`isManuallyDisabled` is the most recent key to be sorted here, and it is one of the app's settings:
+the wipe takes it, so a restore switches the app back on. That is what the dialog promises, and it is
+also the only state a user could be left in with no way to read it — an app switched off by a setting
+that has just been reset.
+
 The key list is parsed out of `Constants.swift` on every run rather than copied here, so it is the
 declaration itself that is compared against, and a key added tomorrow is in this check by existing.
 */
@@ -94,8 +99,8 @@ struct RestoreDefaultsTests {
 		// that turns out to be the user's data is deleted by a restore and nobody finds out from the
 		// app. Whoever adds the key is the one person who can say which it is.
 		#expect(
-			names.count == 29,
-			"Constants.swift declares \(names.count) preferences and this test was written against 29. If the parser still works, a key has been added or removed — open `RestoreDefaults` and say whether it is one of the app's settings, which the wipe takes, or one of the user's websites, which `websiteKeys` has to name. Then correct this number."
+			names.count == 30,
+			"Constants.swift declares \(names.count) preferences and this test was written against 30. If the parser still works, a key has been added or removed — open `RestoreDefaults` and say whether it is one of the app's settings, which the wipe takes, or one of the user's websites, which `websiteKeys` has to name. Then correct this number."
 		)
 
 		#expect(names.contains("websites"))
