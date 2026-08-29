@@ -1265,4 +1265,62 @@ struct ScopeTests {
 			}
 		}
 	}
+
+	/**
+	The menu bar icon says whether there is a wallpaper anywhere, and the Shortcuts action says the same.
+
+	Both asked `AppState.isEnabled`, which is the app-wide switch and nothing per display, and both are
+	the single answer a whole Mac gets — so this is the scope defect this suite is about, in the one
+	place where "the app-wide question" was the only question anybody thought there was. On a
+	single-display Mac, switching that display off from the panel took the wallpaper, the menu bar band
+	and both timers, and left the icon drawn as fully on with a tooltip naming a website, while
+	`GetEnabledStateIntent` answered `true` to a script that had no other way to find out. Nothing was
+	wrong with `isEnabled`: none of the three things it is made of is per display.
+
+	Which relaunches into the same state, and only that state: `disabledDisplays` is written to disk
+	and `isManuallyDisabled` is not, so the one "off" the icon refused to draw is the one that
+	survives a quit.
+
+	One expression, `isShowingWallpaper`, and both readers named here. It asks `isSwitchedOff` rather
+	than the two switches, so a third thing that comes to mean off reaches the icon and the intent by
+	joining that predicate — which is `SwitchedOffTests`'s subject, and why the first assertion is the
+	only one about the inside of it here.
+	*/
+	@Test("The icon and the Shortcuts answer ask about the displays")
+	func theIconAndTheIntentAskAboutTheDisplays() throws {
+		let state = try Self.source(named: "AppState.swift")
+
+		#expect(
+			try Self.body(of: "var isShowingWallpaper: Bool", in: state).contains("isSwitchedOff"),
+			"`isShowingWallpaper` works out what \"off\" means for itself again, so the per-display half can drop out of it the way it already did once."
+		)
+
+		for (file, declaration, what) in [
+			("AppState.swift", "func refreshStatusItem()", "The menu bar icon"),
+			("Intents.swift", "func perform() async throws -> some IntentResult & ReturnsValue<Bool>", "The Shortcuts action")
+		] {
+			#expect(
+				try Self.body(of: declaration, in: Self.source(named: file)).contains("isShowingWallpaper"),
+				"\(what) answers \"is Nifro on\" from something other than `isShowingWallpaper`, which is how it came to say yes on a Mac with every display switched off."
+			)
+		}
+
+		// One writer, for the reason the tooltip has one: two places dimming the icon is two places
+		// deciding what "off" means, and the second one is where the per-display half goes missing.
+		let owner = try Self.body(of: "func refreshStatusItem()", in: state)
+
+		for (name, text) in try Self.sources() {
+			let outside = name == "AppState.swift" ? text.replacing(owner, with: "") : text
+
+			for match in outside.matches(of: try Regex("appearsDisabled")) {
+				Issue.record(
+					"""
+					\(name) dims the menu bar icon directly. Change what `refreshStatusItem()` answers \
+					and call it, so the icon cannot be drawn from a narrower reading of "off" than the \
+					one the wallpapers obey. Around: \(Self.context(around: match.range, in: outside))
+					"""
+				)
+			}
+		}
+	}
 }

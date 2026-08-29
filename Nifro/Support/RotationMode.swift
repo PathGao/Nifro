@@ -75,6 +75,11 @@ extension Display {
 	gets a name of its own rather than being folded into whichever display that currently is —
 	otherwise every setting made against it would move the day the user rearranged their displays or
 	docked the laptop.
+
+	A key here outlives the display it names, which is what makes a monitor come back as it was left.
+	Which per-display facts are kept that way and which are erased when the display goes is the three
+	classes at `Defaults.Keys`; there is deliberately no key saying whether a display is attached at
+	all.
 	*/
 	static func settingsKey(for display: Self?) -> String {
 		display?.id.uuidString ?? "default"

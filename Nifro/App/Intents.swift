@@ -109,9 +109,26 @@ struct GetEnabledStateIntent: AppIntent {
 		Summary("Get the current enabled state of Nifro")
 	}
 
+	/**
+	Whether there is a wallpaper on any screen, which is not what the app-wide switch says.
+
+	This returned `AppState.isEnabled`, three app-wide inputs — the Disable command, the lock screen,
+	the battery rule — and not one of them per display. So a Mac whose displays had each been switched
+	off from the panel had no wallpaper anywhere and answered `true`, and a script had no signal that
+	the screen was black. It is also the state that outlives a relaunch, and the only one that does:
+	`disabledDisplays` is on disk and `isManuallyDisabled` is not.
+
+	The expression the menu bar icon is drawn from, so the two readings of "is Nifro on" cannot part —
+	which is what they had already done.
+
+	`ensureRunning()` for the reason every other action here has it, and this was the only one without.
+	An intent runs inside the app, so asking a Nifro that was not running starts one, with an
+	activation policy of `.prohibited` and nothing holding it: it answers and quits again immediately.
+	*/
 	@MainActor
 	func perform() async throws -> some IntentResult & ReturnsValue<Bool> {
-		.result(value: AppState.shared.isEnabled)
+		ensureRunning()
+		return .result(value: AppState.shared.isShowingWallpaper)
 	}
 }
 
