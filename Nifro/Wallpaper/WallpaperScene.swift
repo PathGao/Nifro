@@ -679,9 +679,22 @@ final class WallpaperScene {
 	own view, not the screen. Screen Recording would be the other way to get this, and asking a
 	wallpaper app for it to draw a thumbnail is a trade nobody should have to make.
 
-	`nil` when there is nothing to photograph: this display is switched off, it has no website, or its
-	page has not arrived yet. The panel draws its own reading for each rather than a blank rectangle
-	that looks like a broken page.
+	`nil` when there is nothing to photograph: this display is switched off, or it has no website. The
+	panel draws its own reading for each rather than a blank rectangle that looks like a broken page.
+
+	**Not `nil` while a page is loading**, and this used to claim a third clause saying it was — "or its
+	page has not arrived yet" — which no expression here has ever implemented. The missing guard was
+	read as the defect. It is the other way round. `loadedWebsite` is set when the load starts and the
+	web view stays hidden until `revealPage`, so the window that clause describes is one where the page
+	is painted and the desktop is not showing it yet, and photographing it is the only honest report
+	anything makes during that window.
+
+	Measured, because the claim rested on a guess about what a hidden web view returns. A `WKWebView`
+	hidden inside a window, snapshotted exactly as below: `takeSnapshot(afterScreenUpdates: false)`
+	hands back the painted page 0.6 to 3.2 seconds before `didFinish` — about 1.5s on an ordinary
+	page, up to 3.2s on a video embed — and `revealPage` hangs on `didFinish`. So the preview is not
+	early; the desktop is late, by the width of that gap, and the column already says so with a
+	spinner over a dimmed thumbnail while it waits.
 
 	The first of those is not covered by the other two. A switched-off display keeps its website, and
 	the load that should never have happened left `loadedWebsite` set — so this went on handing the
