@@ -70,8 +70,8 @@ retain_files: []
 # A `Defaults` key that is written and never read is a use as far as any symbol graph is concerned.
 # `Localizable.xcstrings` is not Swift and is outside this tool's world entirely.
 #
-# Two inline `periphery:ignore`s, and both are recorded here because a retention nobody can find is
-# the same failure as a retention nobody argued.
+# Four inline `periphery:ignore`s, and all four are recorded here because a retention nobody can find
+# is the same failure as a retention nobody argued.
 #
 # The second is in `App.swift`, on `AppMain.appState`. It is a `@StateObject` nothing reads, and that
 # is the whole of what it does: the three screens were handed it through `environmentObject` and none
@@ -87,6 +87,20 @@ retain_files: []
 # the annotation sits at the declaration rather than here because the reason is about that code. That
 # overload was already deleted once for looking unreferenced, and the cost was every user's website
 # list on the next field added to `Website` — which is where the rule above comes from.
+#
+# The third and fourth are in `WebsitesScreen.swift`, on `RowView`'s `disabledDisplays` and `appState`.
+# They are the same case as `AppMain.appState` above, in two property wrappers: `@Default` and
+# `@ObservedObject` are both `DynamicProperty`, so what subscribes the row is SwiftUI calling
+# `update()` on the declaration, not any code reading the value. The row asks
+# `WebsitesController.isShowing(_:)` for the answer — one derivation, which is the rule both exist to
+# keep — and reads neither, so the scan is right that nothing names them and wrong about what they are
+# for.
+#
+# Two rather than three: `currentWebsites` was here and is gone, because the tick stopped reading that
+# key. `AppState` publishes when `rebuildScenes` has moved the scenes, which is the moment the answer
+# changes; the key changes a turn earlier. There was also a `_ = currentWebsites` in the row once, with
+# a comment saying the read was what subscribed. It was not, so the line bought nothing but this
+# entry's absence.
 #
 # The three findings that used to be listed here were parameters that `#selector` signatures require
 # and nothing reads. They are written `_` now, which is what they always were — the scan was right,

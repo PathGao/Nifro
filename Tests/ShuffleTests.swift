@@ -9,12 +9,12 @@ The order a shuffled display walks its websites in, and what a change to those w
 Random used to be random playback: an iterator that picked the next website when the last one ended.
 Shuffle play is the other thing, and it is the one a wallpaper wants — the whole order is decided at
 once, so it can be listed in the chooser, walked backwards, and finished. Everything about deciding one
-and keeping it is a list and a cursor, which is why it is in `Rotation.swift` and runnable here rather
+and keeping it is a list and a mark, which is why it is in `Rotation.swift` and runnable here rather
 than argued about in a comment: the rules read as obvious and two of them are not.
 
 **What was actually wrong**, and it was worse than "the shuffle repeated". The iterator was thrown away
 only when the flattened website ids across every playlist changed, which a playlist switch does not do.
-So after a switch the iterator went on yielding the *old* list's websites; each tick wrote the cursor to
+So after a switch the iterator went on yielding the *old* list's websites; each tick wrote the mark to
 a website the new playlist does not contain; `scheduled(for:)` read that as "this display has not
 started" and answered with the top of the list; and the guard above the load saw no change and returned.
 The display froze on the new playlist's first website, rotation looked dead, and a website picked by
@@ -48,7 +48,7 @@ struct ShuffleOrderTests {
 	The page already up heads the new order.
 
 	Which is the whole of why a relaunch does not make the wallpaper jump: the order is not stored and
-	the cursor is, so the first tick of a session decides an order around what is already on screen. It
+	the mark is, so the first tick of a session decides an order around what is already on screen. It
 	is also what settles the end of a pass — the website the last pass ended on heads the next one, so
 	the first step of a new pass cannot land back on the page that is up.
 	*/
@@ -291,7 +291,7 @@ struct ShuffleShapeTests {
 
 	The same shape as `canRotate` in `ScopeTests`, one turn further in. There, the arrows were lit by one
 	expression and stepped by another. Here the clock had a whole second verb — `advance`, which looked
-	the cursor up with a `firstIndex` of its own while Next asked `scheduled`. The two agree for exactly
+	the mark up with a `firstIndex` of its own while Next asked `scheduled`. The two agree for exactly
 	as long as the mark names a website the list still holds, and there are two everyday ways to break
 	that: a website falling out of its hours, and a website deleted.
 
@@ -332,7 +332,7 @@ struct ShuffleShapeTests {
 	carry the playlist, choosing a website out of a list the display is not pointed at shows a page from
 	a list it is not on, and the next tick takes it back.
 
-	Absolute on the write, with no allowlist, for the reason `ScopeTests` gives about the cursor: a
+	Absolute on the write, with no allowlist, for the reason `ScopeTests` gives about the mark: a
 	per-display fact with two writers is the shape that suite was written for, and `makeCurrent` is
 	where every route to either key now meets.
 	*/

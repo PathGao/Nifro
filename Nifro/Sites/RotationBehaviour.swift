@@ -212,7 +212,7 @@ extension WebsitesController {
 	which is the version of this that shipped and is the reason they take a display at all.
 
 	Next is also what the clock presses. It had a second implementation for a while — `advance`, which
-	resolved the cursor with a `firstIndex` of its own — and the two agreed for exactly as long as the
+	resolved the mark with a `firstIndex` of its own — and the two agreed for exactly as long as the
 	mark named a website the list still held. That is now one verb with one caller more, which is also
 	what lets Random be a mode rather than a branch: a shuffled display is one whose candidates come back
 	in a different order, and stepping does not have to know.

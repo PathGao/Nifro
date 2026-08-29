@@ -24,7 +24,7 @@ and not four lines inside the controller: the mechanism was written on a one-dis
 only wrong when there are two, and reasoning is what got it wrong the first time.
 
 The two below about the order are here for the second half of that reason rather than the first. An
-order and the rules for keeping it are a list and a cursor and nothing else — no `Defaults`, no
+order and the rules for keeping it are a list and a mark and nothing else — no `Defaults`, no
 display, no web view — so they can be run rather than reasoned about, and the rules are exactly the
 kind that read as obvious and are not: what happens to a website added halfway through a pass, and
 what "halfway through" even means once it has been added.
@@ -35,7 +35,7 @@ The position after `current` in a rotation of `count` websites, wrapping at the 
 
 `nil` means no website on this display is marked, which is the state a display should never be left
 in: the answer is the first one, so a display that has lost its mark starts again rather than stopping.
-Reaching that state on every tick is the failure the per-display cursor exists to prevent, and this is
+Reaching that state on every tick is the failure the per-display mark exists to prevent, and this is
 where it showed — as a display that never advanced.
 */
 func nextRotationIndex(count: Int, after current: Int?) -> Int? {
@@ -83,14 +83,14 @@ looping one and there is no second kind of stepping to keep in agreement with th
 
 `showing` is what is on that screen at the moment the order is decided, and putting it at the front is
 what stops the wallpaper jumping. An order is decided three times and in all three there is already a
-page up. On the first tick after a relaunch, because the order is not stored and the cursor is — a
+page up. On the first tick after a relaunch, because the order is not stored and the mark is — a
 wallpaper has no "start listening" moment, so it carries on rather than starting over. At the end of a
 pass, because a wallpaper never finishes. And when a display is pointed at another list, which is the
 one of the three the user just asked for and still not a reason to replace the page they are looking
 at before they have looked away.
 
-At the front rather than left where it fell, so that the position the cursor names is the position the
-stepping starts from: the order and the mark agree by construction instead of by a repair. It also
+At the front rather than left where it fell, so that the position the mark names is the position the
+stepping starts from: the two agree by construction instead of by a repair. It also
 settles the end of a pass without a rule of its own — the website the last pass ended on heads the next
 one, so the first step of a new pass cannot land on the website that was just up.
 

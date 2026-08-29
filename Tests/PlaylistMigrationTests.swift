@@ -180,10 +180,10 @@ struct PlaylistMigrationTests {
 
 	`prepareWebsiteStorage` exists so the migrate-then-install order is written once instead of twice.
 	The reason it is not simply the body of `installDefaultPlaylist` is one line: that method first
-	forces `hasInstalledFeaturedWebsites` back to false, which is what its own callers want — restoring
-	defaults, and the Advanced pane's button, both of which must be able to reinstall a set the flag
-	says is already installed. On the launch path the same line reinstalls the shipped websites on every
-	run, including the ones the user has deleted.
+	forces `hasInstalledFeaturedWebsites` back to false, which is what its own caller wants — the
+	Advanced pane's button, which must be able to reinstall a set the flag says is already installed. On
+	the launch path the same line reinstalls the shipped websites on every run, including the ones the
+	user has deleted.
 
 	So the trap is not the ordering, it is the tidying-up that comes for it later: folding that line into
 	the shared method reads like finishing the extraction and is silent when it lands, because a fresh
@@ -206,7 +206,7 @@ struct PlaylistMigrationTests {
 
 		#expect(
 			install.contains("hasInstalledFeaturedWebsites"),
-			"`installDefaultPlaylist` no longer resets the installed flag, so restoring defaults and the Advanced pane's button both silently do nothing once the shipped websites have been installed once."
+			"`installDefaultPlaylist` no longer resets the installed flag, so the Advanced pane's button silently does nothing once the shipped websites have been installed once."
 		)
 	}
 

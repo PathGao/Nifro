@@ -3,11 +3,24 @@ import Defaults
 import KeyboardShortcuts
 
 /**
-Putting the whole app back to the state it shipped in.
+Putting the app's settings back to how they shipped.
 
 The one action in Nifro that cannot be undone, which is why it asks first, why the question spells
-out all four of what resets, what comes back, what goes, and what stays, and why it lives on its own
-at the bottom of Advanced rather than next to a control that adds something.
+out both of what resets and what stays, and why it lives on its own at the bottom of Advanced rather
+than next to a control that adds something.
+
+**The settings and not the websites, which is a line this file used to be on the wrong side of.** A
+restore emptied the domain, `playlists` was in the domain, and `playlists` is the whole of where a
+website is stored — so restoring settings deleted every website the user had, and the three
+destructive-looking actions in Advanced were one action wearing three labels. They are three now.
+This resets the settings. Clear All Website Data switches the displays off and takes every website
+and every playlist. Add the Default Playlist puts the shipped list back. Somebody who wants their
+opacity back does not have to spend their websites on it, and nothing here has to reinstall anything
+to make up for what it took, because it takes nothing.
+
+What that leaves on screen is the point of it: `currentPlaylists` and `currentWebsites` go with the
+rest, an absent entry in each is "the default playlist" and "the top of the list", so every display
+lands on the default playlist showing its first website — out of the websites the user still has.
 
 **It wipes the domain rather than a list of keys.** Written out here, the keys would be a second
 place answering "what are the app's preferences", with nothing making the two agree — and the way it
@@ -21,9 +34,23 @@ preference added tomorrow is covered by existing.
 list and goes stale in exactly the way the sentence after it warns about, so correcting the number
 would only have set the same trap one key further out.
 
-The price of that is reach: it also clears things that are not `Defaults.Keys` — where each page was
-scrolled to, the one-off tips, the flag that first launch checks. All of that is the app's own state
-and all of it is part of "how it shipped", so the reach is wanted, with one exception.
+The price of that is reach: it also clears things that are not `Defaults.Keys` — the one-off tips,
+the flag that first launch checks. Both still go, and both are the app's own state rather than
+anything the user made, so the reach is still wanted. What has come out from under it is the third
+thing that used to be in this sentence, where each page was scrolled to: `ScrollRestoration` calls
+those records website data in as many words, and Clear All Website Data is what deletes them.
+
+**So the wipe now has a list of what it may not take, and that is a real cost stated rather than
+argued away.** It is the defect above pointing the other way. A preference added tomorrow is covered
+by `removeAll()` for free; a *website* key added tomorrow is covered by nothing, and somebody who
+never finds `websiteKeys` below has their key eaten by a restore — which is worse than the failure
+this file was built to avoid, because a setting that survives is an annoyance and a website that does
+not is gone. Two things are done about it and neither is a promise to remember. The per-page records
+are matched by prefix through `PerPageDefaults.allCases`, so a fourth kind of thing a page remembers
+is preserved by existing, exactly as `Shortcut.allNames` covers a shortcut added later. And the four
+named keys are pinned in `RestoreDefaultsTests` against the count of keys `Constants.swift` declares,
+so adding any preference at all fails that test until somebody has said which side of this line it
+falls on. The list cannot rot quietly; it can only rot in front of whoever added the key.
 
 **The interface language is lifted out of the wipe and put back.** It is an exception for a reason
 that is about *when it is read*, not about how much it matters: `AppleLanguages` is consulted once
@@ -33,8 +60,8 @@ them to do that. Every other preference in the domain applies the moment it chan
 here needs a relaunch and this file does not offer one. The exception is `preservedKey`: one key,
 named once, guarded by a test that fails the moment a second one joins it.
 
-Website data is not in `UserDefaults` at all. Cookies, logins and the WebKit cache live in the data
-store, so keeping the user signed in takes nothing but this file never reaching for
+What a page *did* is not in `UserDefaults` at all. Cookies, logins and the WebKit cache live in the
+data store, so keeping the user signed in takes nothing but this file never reaching for
 `WKWebsiteDataStore`. Whether Nifro launches at login is not here either — that is a login item
 registered with the system through `SMAppService`, and silently unregistering it would stop the
 wallpaper coming back after a reboot, which is not something anybody asks for by restoring settings.
@@ -54,6 +81,50 @@ enum RestoreDefaults {
 	private static let preservedKey = "AppleLanguages"
 
 	/**
+	The websites, and the two flags that say what has already been done to them.
+
+	`playlists` is the whole of where a website is stored and `websites` is the pre-playlist list it was
+	built from — the only copy of that there will ever be, which `Constants.swift` argues for keeping
+	and a settings reset is not a reason to burn.
+
+	**The two flags are the half that has teeth, and they are neither a setting nor data.** Each one is
+	a record of something already done *to* the data: the websites have been converted to playlists, the
+	shipped websites have been installed. Reset one while what it describes survives and the app redoes
+	the work on top of a result that is already there. `migrateToPlaylistsIfNeeded` assigns `playlists`
+	outright, so a cleared `hasMigratedWebsitesToPlaylists` replaces every list the user has made with
+	one list built from a `websites` key they stopped editing before the conversion — on the very next
+	launch, silently, and with the playlists it overwrote already gone. A cleared
+	`hasInstalledFeaturedWebsites` is the milder one and still wrong: the next launch lays the shipped
+	eight back over the user's list, including the ones they deleted on purpose, and a second copy of
+	the ones they kept. A flag travels with the data it is about.
+
+	What is *not* here is the rest of what is filed under a website. `redirectedAddresses` is a note the
+	app took, rebuilt by the next page load. `currentWebsites`, `currentPlaylists`, `rotationModes`,
+	`rotationIntervals`, `disabledDisplays` and `browsingDisplays` describe screens rather than
+	websites, and resetting them is what a restore visibly *is*.
+	*/
+	private static let websiteKeys = [
+		"playlists",
+		"websites",
+		"hasMigratedWebsitesToPlaylists",
+		"hasInstalledFeaturedWebsites"
+	]
+
+	/**
+	Whether this raw key is one of the user's websites rather than one of the app's preferences.
+
+	Two shapes because the storage has two. The keys above are written down once each; the per-page
+	records — where a page was scrolled to, the fragment it had moved itself to, how far it was zoomed
+	— are one key per website per kind, so there is nothing to write down and a prefix is the only way
+	to ask. `PerPageDefaults.allCases` is the same table `forgetWherePagesWere` sweeps with, which is
+	what makes these two agree: the button that deletes them and the wipe that has to skip them read
+	one list, and a fourth kind of record is in both by being a case.
+	*/
+	private static func isWebsiteData(_ key: String) -> Bool {
+		websiteKeys.contains(key) || PerPageDefaults.allCases.contains { key.hasPrefix($0.rawValue) }
+	}
+
+	/**
 	Ask, and do it if the answer is yes.
 
 	Cancel is the default button, so Return on a dialog nobody read leaves everything alone. The other
@@ -61,8 +132,8 @@ enum RestoreDefaults {
 	*/
 	static func confirmAndRun() {
 		let alert = NSAlert(
-			title: String(localized: "Restore Nifro to how it shipped?"),
-			message: String(localized: "Reset: every setting, every keyboard shortcut, and which display each website is on.\n\nReinstalled: the websites Nifro comes with, in the order it comes with them.\n\nLost: the websites you added yourself, and every change you made to any website. There is no undo.\n\nKept: your logins, the language you picked, and whether Nifro launches at login."),
+			title: String(localized: "Restore all settings?"),
+			message: String(localized: "Reset: every setting, every keyboard shortcut, and what each display is showing. Every display goes back to the default playlist and its first website. There is no undo.\n\nKept: your websites and playlists, your logins, the language you picked, and whether Nifro launches at login."),
 			buttonTitles: [
 				String(localized: "Restore All Settings"),
 				String(localized: "Cancel")
@@ -88,6 +159,13 @@ enum RestoreDefaults {
 		// there was nothing here to preserve.
 		let chosenLanguage = UserDefaults.standard.persistentDomain(forName: SSApp.idString)?[preservedKey]
 
+		// The same domain, read again rather than folded into the line above, because these two are
+		// preserved for reasons that have nothing to do with each other: one is a key the running app
+		// cannot be shown a new value for, and this is everything the user made. Sharing a read would
+		// put them in one bucket and invite the next person to add to whichever bucket was nearer.
+		let websiteData = UserDefaults.standard.persistentDomain(forName: SSApp.idString)?
+			.filter { isWebsiteData($0.key) } ?? [:]
+
 		// Before the wipe, and the order is the whole point. `Defaults.removeAll` deletes the
 		// `KeyboardShortcuts_` entries as raw keys, which tells the package nothing: a shortcut the
 		// user had changed would stay registered with the system for the rest of the session, firing on
@@ -96,8 +174,9 @@ enum RestoreDefaults {
 		// it just wrote — and an absent entry already means "the default", so the two still agree, and
 		// `Name` writes it back the next time anything asks for the shortcut.
 		//
-		// `Shortcut.allNames` rather than a list written here, for the same reason as the keys below:
-		// the table is `CaseIterable`, so a shortcut added later is in this reset by existing.
+		// `Shortcut.allNames` rather than a list written here, for the same reason as
+		// `PerPageDefaults.allCases` above: the table is `CaseIterable`, so a shortcut added later is in
+		// this reset by existing.
 		KeyboardShortcuts.reset(Shortcut.allNames)
 
 		Defaults.removeAll()
@@ -112,20 +191,27 @@ enum RestoreDefaults {
 			UserDefaults.standard.set(chosenLanguage, forKey: preservedKey)
 		}
 
-		// The migration and then the install, in the order `didLaunch` uses — and now literally the same
-		// code rather than the same two lines written down twice. Both routes end in
-		// `WebsitesController.prepareWebsiteStorage`, which is where the order is argued for. There is
-		// one ordering in the app.
+		// After the wipe for the same reason, and each entry exactly as it was read: these are encoded
+		// blobs the wipe has already taken out, so there is nothing here to merge with and nothing to
+		// decode. Writing `playlists` is also what finishes the restore visibly — it is the key the rest
+		// of the app watches, so the scenes are rebuilt against the marks that just went, and every
+		// preference with a publisher took its default on the way past.
 		//
-		// This file goes through `installDefaultPlaylist` rather than calling that directly, because a
-		// wipe needs one thing the launch path must never have: `hasInstalledFeaturedWebsites` forced
-		// back to false, so the shipped websites come back. On the launch path that same line would
-		// reinstall them every single run, including the ones the user has since deleted. It stays in
-		// `installDefaultPlaylist`, which this and the button in Advanced are the two callers of.
+		// Nothing is installed afterwards. It used to be: `installDefaultPlaylist` forced
+		// `hasInstalledFeaturedWebsites` back to false and put the shipped eight in, which was the only
+		// way to leave a working desktop behind a wipe that had just deleted every website. With the
+		// websites still here that same line lays the shipped list *over* the user's own — the ones they
+		// deleted back again, the ones they kept in duplicate — to fix a problem this no longer causes.
+		// Getting the shipped list back is Add the Default Playlist, in the same pane, which is the one
+		// caller of that method now.
 		//
-		// Nothing else has to be driven from here. Writing the website list is what the rest of the app
-		// already watches, so the scenes are rebuilt and every preference that has a publisher took its
-		// default on the way past.
-		WebsitesController.shared.installDefaultPlaylist()
+		// And nothing is switched off either. Every deletion in this app switches off the displays
+		// showing what it takes, because there is no replacement the app could pick that the user asked
+		// for — see `WebsitesController.switchOffDisplaysShowing`. This deletes no website, so the rule
+		// has nothing to say here: what each display is showing goes back to the default playlist's
+		// first website, out of a list that is still the user's.
+		for (key, value) in websiteData {
+			UserDefaults.standard.set(value, forKey: key)
+		}
 	}
 }
