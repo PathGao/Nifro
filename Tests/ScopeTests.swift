@@ -544,6 +544,158 @@ struct ScopeTests {
 	}
 
 	/**
+	The property that says the page in the web view is the website the display resolves to.
+
+	A private name, and the file's other tests say why that is usually the wrong thing to anchor on. It
+	is what there is: this question has no stored key and no exported symbol behind it, and the
+	alternative is matching the comparison itself — which is exactly the thing the second test below
+	forbids anybody from writing again.
+	*/
+	private static let pageIsTheAnswer = "hasLoadedItsWebsite"
+
+	/**
+	Nothing writes what the user chose to a website while the page they chose it in front of is another one.
+
+	The same mistake as the one this suite was built for, one layer further in. `beginCropSelection`
+	used to find a scene by matching the list-wide current website, so on two displays it framed
+	whichever screen last held the mark; that was fixed by passing the scene. The scene then answers
+	with `website`, which is where the display is *heading*, and the region the user drags out lands on
+	whatever the web view is actually showing. Those two are the same for all but a few seconds of a
+	swap, and the panel disables the column for exactly those seconds — so the gap opens only when a
+	load stops being outstanding without arriving.
+
+	Which is what a failed swap is. `loadBySwapping` stores the error and returns, its `defer` clears
+	`pendingWebView`, `isLoading` goes false, and the column comes back naming the website that never
+	loaded over the picture of the one still up. Crop then framed the page on screen and stored the
+	region on the other website, and Mute changed the audio of a website that was not the one making
+	the sound. The next successful load closed the window, so the column looked right again and neither
+	write was ever seen to be wrong. With the network down that window is as long as the network is down.
+
+	**The two writers, and only those two.** The set is not "controls that touch the page" — Browsing
+	Mode does that and is deliberately outside, because it writes `browsingDisplays`, keyed by display,
+	and nothing per website: what it hands over is the page genuinely on the screen, so there is no
+	wrong record for it to write and gating it only took away the page the user could still see. It is
+	`hasPage`'s doc that argues that, and a third writer arriving is what this test is here to catch.
+
+	On each verb rather than on each button, because a button is one of several ways in: the keyboard
+	shortcuts reach `beginCropSelection` and `toggleSound` without going past anything the panel draws.
+	The panel's own gate is asserted too — a control that does nothing should not look pressable — but
+	it is the second line of defence and not the first.
+
+	Shape rather than behaviour for this suite's usual reason: the SwiftPM target next door compiles
+	nothing from `App`, `Wallpaper`, `Zoom`, `Sites`' scene extensions or `Screens`, and there is no
+	`WallpaperScene` here to give a page that disagrees with its website. What was run by hand is in
+	the pull request.
+	*/
+	@Test("Both writers wait for the page to be the website they will write to")
+	func theWritersRefuseAPageThatIsNotTheAnswer() throws {
+		let writers = [
+			("CropSelection.swift", "func beginCropSelection(on scene: WallpaperScene? = nil)", "store the region on"),
+			("RotationBehaviour.swift", "func toggleSound()", "change the audio setting of")
+		]
+
+		for (file, declaration, writes) in writers {
+			#expect(
+				try Self.body(of: declaration, in: Self.source(named: file)).contains(Self.pageIsTheAnswer),
+				"""
+				`\(declaration)` no longer checks that the page on screen is the website it will \
+				\(writes). A load that failed leaves those two disagreeing with nothing on screen \
+				saying so, and a keyboard shortcut reaches this without passing the panel.
+				"""
+			)
+		}
+
+		let hasPage = try Self.body(
+			of: "private var hasPage: Bool",
+			in: Self.source(named: "DisplayPanel.swift")
+		)
+
+		#expect(
+			hasPage.contains(Self.pageIsTheAnswer),
+			"""
+			The panel enables its writing controls on the display's answer rather than on the page in \
+			its web view, so they look pressable on a column whose load failed.
+			"""
+		)
+	}
+
+	/**
+	And muting is written in one place, so the guard above cannot be half-applied.
+
+	It was two copies — one in the `Action` table, one in the panel's column — which is exactly what
+	`toggleBrowsingMode` was pulled out of, and it failed the same way: the panel's copy checked there
+	was a website, the shortcut's copy checked the same, and the guard the panel later needed could
+	only ever be added to one of them. The flip lives on the scene now, beside `shouldPlaySound`, which
+	is the property it writes.
+
+	Matched on the flip rather than on `audio =`, which a website is also given when it is imported
+	from the site catalogue — a starting value is not a toggle.
+	*/
+	@Test("Only the scene flips its own sound")
+	func theAudioFlipHasOneHome() throws {
+		let flip = try Regex("audio\\s*==\\s*\\.unmuted\\s*\\?")
+
+		for (name, text) in try Self.sources() {
+			let remaining = name == "RotationBehaviour.swift"
+				? text.replacing(try Self.body(of: "func toggleSound()", in: text), with: "")
+				: text
+
+			for match in remaining.matches(of: flip) {
+				Issue.record(
+					"""
+					\(name) carries its own copy of the mute flip. Call `WallpaperScene.toggleSound()`, \
+					which is the copy that checks the page making the sound is the website being \
+					written to. Around: \(Self.context(around: match.range, in: remaining))
+					"""
+				)
+			}
+		}
+	}
+
+	/**
+	And the page and the answer are compared in one place.
+
+	The test above reads a name, so a caller that writes the comparison out by hand satisfies it by
+	saying nothing — an expression copied N times is either wrong N times or fixed in one of them, and
+	the panel is the copy that was never written at all. Two existing ones came out on this test's first
+	run. `AppState.applyLiveSettings` had it exactly, and reads the property now. `installContentView`
+	had it with `loadedWebsiteID == nil ||` in front, which is not the same claim — it lets a display
+	that has loaded nothing through, where the controls have to refuse one — so it keeps the `nil` and
+	reads the property for the rest.
+
+	Only the identity comparison. `loadedWebsite == website` in `reloadInPlace` and
+	`loadedWebsite == scheduled(for:)` in `isUpToDate` compare the whole struct on purpose, because a
+	page built from an older version of the same website has to be built again — a different question,
+	with a different answer, and both argue for themselves where they are written.
+	*/
+	@Test("One expression asks whether the page is the answer")
+	func thePageAndTheAnswerAreComparedOnce() throws {
+		// Not `== nil`, which is "has this display loaded anything at all" and is a question about one
+		// layer rather than a comparison of two — `installContentView` asks it beside the property and
+		// says why.
+		let byHand = try Regex("loadedWebsite(ID|\\?\\.id)\\s*(==|!=)(?!\\s*nil\\b)|(==|!=)\\s*[A-Za-z.]*loadedWebsite(ID|\\?\\.id)")
+
+		for (name, text) in try Self.sources() {
+			// Defining the question is not asking it, the way the tests above strike the readers they
+			// are counting.
+			let remaining = name == "WallpaperScene.swift"
+				? text.replacing(try Self.body(of: "var \(Self.pageIsTheAnswer): Bool", in: text), with: "")
+				: text
+
+			for match in remaining.matches(of: byHand) {
+				Issue.record(
+					"""
+					\(name) compares the page with the display's answer by hand. Read \
+					`WallpaperScene.\(Self.pageIsTheAnswer)`, so the panel and the controls it draws \
+					cannot come to two answers about one display. \
+					Around: \(Self.context(around: match.range, in: remaining))
+					"""
+				)
+			}
+		}
+	}
+
+	/**
 	A rebuild leaves the clocks of the displays nothing changed for alone.
 
 	`rebuildScenes` runs on every edit to the website list, every display change and every wake, and it

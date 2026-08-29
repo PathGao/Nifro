@@ -877,7 +877,7 @@ final class AppState: ObservableObject {
 			// The page on screen is still the right page and it now carries the new setting, so record
 			// that. Left stale, the next ordinary edit would compare against the copy from before this
 			// one and reload a page that had already taken the change.
-			if scene.loadedWebsiteID == scene.website?.id {
+			if scene.hasLoadedItsWebsite {
 				scene.adoptLoadedWebsite()
 			}
 

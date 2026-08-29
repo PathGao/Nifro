@@ -217,15 +217,34 @@ private struct DisplayColumn: View {
 	}
 
 	/**
-	Whether there is a page here for a control to act on.
+	Whether a control that writes to this display's website may act.
 
-	Named rather than written out at both of its call sites, for `inertOpacity`'s reason above: Crop
-	and Browsing Mode both reach into the wallpaper's web view, so both ask the one question — the
-	display is showing and it has a website — and two copies of it are two chances for half of the row
-	to answer differently.
+	Crop and Mute both do: Crop stores the region and Mute stores the audio setting, in both cases onto
+	`scene.website`, which is where the display is *heading*. What the user is looking at and listening
+	to is the page in the web view, and the two are the same except while a load is outstanding — the
+	column is disabled for as long as one is, so the gap opens only when a load stops being outstanding
+	without arriving. A swap that fails does exactly that. Crop then framed the page that was up and
+	stored the region on the website that never loaded, and Mute changed the audio of a website that
+	was not making the sound.
+
+	The second half used to be `websiteID != nil`, which is that same heading and so cannot tell the
+	two apart. `hasLoadedItsWebsite` is the page, and it implies the website, so nothing here asks twice.
+
+	**Browsing Mode is deliberately not one of these**, though it sat here until this was sharpened. It
+	writes `browsingDisplays`, keyed by display, and nothing per website — so there is no wrong record
+	to write, and what it hands over is the page that is genuinely on the screen. Gating it here bought
+	nothing and cost the user the one moment they most want to reach a page by hand: the load has just
+	failed, the last good page is still up, and the button to interact with it would be dark.
+
+	Named rather than written out at both call sites, for `inertOpacity`'s reason above: two copies are
+	two chances for half of the row to answer differently.
+
+	This is not the guard. `beginCropSelection` and `WallpaperScene.toggleSound` each refuse the case
+	themselves, because the keyboard shortcuts reach both without going near a button that can be drawn
+	dark. What this does is stop a control that would do nothing from looking pressable.
 	*/
 	private var hasPage: Bool {
-		column.isShowing && column.websiteID != nil
+		column.isShowing && column.hasLoadedItsWebsite
 	}
 
 	/**
@@ -303,7 +322,10 @@ private struct DisplayColumn: View {
 			PanelWideButton(
 				title: String(localized: "Browsing Mode"),
 				isOn: browsingDisplays.contains(Display.settingsKey(for: column.display)),
-				isEnabled: hasPage
+				// Not `hasPage`, which is the question the two writers beside it ask — see there. This
+				// one hands over whatever page is in the window, so it needs only a window with a page
+				// in it.
+				isEnabled: column.isShowing && column.websiteID != nil
 			) {
 				model.toggleBrowsingMode(on: column.display)
 			}
@@ -420,7 +442,7 @@ private struct DisplayColumn: View {
 				PanelButton(
 					symbol: column.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill",
 					label: column.isMuted ? String(localized: "Muted") : String(localized: "Playing sound"),
-					isEnabled: column.websiteID != nil
+					isEnabled: hasPage
 				) {
 					model.toggleMuted(on: column.display)
 				}

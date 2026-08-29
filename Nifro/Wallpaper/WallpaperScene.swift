@@ -74,6 +74,42 @@ final class WallpaperScene {
 	var loadedWebsiteID: Website.ID? { loadedWebsite?.id }
 
 	/**
+	Whether the page on screen is the website this scene answers with.
+
+	The question every control that **writes to a website record** has to ask before it acts, because
+	those controls are handed a display, look up a website from it, and store something the user chose
+	while looking at a page. `WebsitesController`'s header names the three layers and this compares the
+	last two: the display's answer, `website`, against the page, `loadedWebsite`.
+
+	Only the writers. A control that acts on the page in front of the user and stores nothing against a
+	website needs no guard, because the page in front of the user is exactly what it acts on — Browsing
+	Mode is the one of those, and `DisplayPanel.hasPage` says why it is not in this set.
+
+	They differ for the length of a swap and that is deliberate — the panel says a page is on its way
+	and disables the whole column for it. What that argument does not cover is a swap that *fails*:
+	`loadBySwapping` stores the error and returns, its `defer` clears `pendingWebView`, `isLoading` goes
+	false, and the column comes back with the answer moved and the page not. It then names the new
+	website over the old website's picture, and every control is live again against a page that is not
+	the one they would write to. Crop was the expensive one — the user drags over the page that is up
+	and the region is stored on the website that never arrived — and the next successful load closes the
+	window and makes the column look right again, so the wrong write is silently covered over. That
+	window is a reload interval, a wake or a keypress wide, and it is as wide as the network is down.
+
+	**Not `isUpToDate`**, which looks like this question and is a different one. That compares the whole
+	website against what the list offers now, so it is false for a page that is the right website built
+	from an older version of it — the case a reload exists for, and the case where Crop is still acting
+	on exactly the website the user means. It also re-reads the website list, which decodes every entry,
+	and this is read from a view body.
+
+	False for a scene that has loaded nothing, rather than letting two `nil`s compare equal: a display
+	with no page on it has nothing for these controls to act on either, and a property that answers
+	"yes" for an empty scene is one every caller has to guard a second time.
+	*/
+	var hasLoadedItsWebsite: Bool {
+		loadedWebsiteID != nil && loadedWebsiteID == website?.id
+	}
+
+	/**
 	Whether the page for the current load has been put on screen yet.
 	*/
 	private(set) var hasRevealedPage = false {
@@ -297,6 +333,12 @@ final class WallpaperScene {
 	so a framed wallpaper snapped back to the whole page and stayed there until the switch completed.
 	`adopt` calls this again once the new page is actually up.
 
+	`hasLoadedItsWebsite` is that question, and the `nil` beside it is the difference between this
+	caller and the controls that read the property on its own. Those refuse a display with nothing on
+	it, because there is no page for them to act on. This one has to let it through: a scene that has
+	loaded nothing is every first load of the session, and refusing there would install no content view
+	at all.
+
 	Does nothing at all while this display is being framed. Everything that reloads, switches website or
 	edits the list comes back through here, and a rebuild runs on every display change and every wake,
 	so without the refusal framing had a few seconds to survive rather than as long as the user needed.
@@ -325,7 +367,7 @@ final class WallpaperScene {
 			return
 		}
 
-		guard loadedWebsiteID == nil || loadedWebsiteID == website?.id else {
+		guard loadedWebsiteID == nil || hasLoadedItsWebsite else {
 			return
 		}
 

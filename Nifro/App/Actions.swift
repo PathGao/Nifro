@@ -85,13 +85,10 @@ enum Action: String, CaseIterable {
 		case .toggleBrowsingMode:
 			AppState.shared.toggleBrowsingMode(on: scene.display)
 		case .toggleSound:
-			guard let website = scene.website else {
-				return
-			}
-
-			WebsitesController.shared.update(website.id) {
-				$0.audio = $0.audio == .unmuted ? .muted : .unmuted
-			}
+			// The scene's own verb, not a second copy of the flip. This one had no guard at all: the
+			// panel's copy checked there was a website and this one checked the same, and neither asked
+			// whether the page making the noise is the website being written to.
+			scene.toggleSound()
 		case .chooseRegion:
 			// The scene resolved above, handed over rather than looked up again. `beginCropSelection`
 			// falls back to `actingScene` when it is given nothing, which is the same answer today
