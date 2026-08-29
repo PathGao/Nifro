@@ -766,6 +766,136 @@ struct ScopeTests {
 	}
 
 	/**
+	"Is this website up" is asked of the screens, not of what the screens were last told.
+
+	`currentWebsites` is an intention and the scenes are the fact, and they are allowed to disagree —
+	`add(_:to:)` ends in `makeCurrent(…, switchingDisplayOn: false)`, "marked, not shown", so adding a
+	website moves the mark and changes no wallpaper. The entry also outlives both its display and its
+	website: nothing prunes it when a monitor is unplugged, by design, and `remove(_:)` does not clear
+	it either. All three were live on one Mac at once — the mark naming a website deleted weeks ago,
+	`scheduled` resolving that ghost to the top of the order, and the one tick in the window drawn
+	against the ghost while the website actually on screen had none.
+
+	So the assertion that carries this is the negative one: `isShowing` must not consult the mark, by
+	either spelling. `currentWebsiteID(on:)` is pinned by name two tests up, so renaming it fails there
+	first rather than quietly loosening this — and `.values` is the original defect, which read the
+	dictionary without going through that function at all.
+
+	Two positives, and the second is not implied by the first. The scenes are one per attached display,
+	which is what "the screens" means. `isSwitchedOff` is separate because a switched-off scene keeps
+	its `website`: `rebuildScenes` assigns it before it asks whether the display is off, and `suspend()`
+	does not clear it.
+	*/
+	@Test("What is on a screen is asked of the screens")
+	func showingIsAskedOfTheLiveDisplays() throws {
+		let controller = try Self.source(named: "WebsitesController.swift")
+		let answer = try Self.body(of: "func isShowing(", in: controller)
+
+		// Both, because they are one question. The tick says a website is on a screen and the rule says
+		// removing what is on a screen switches it off, so the two disagreeing is a display left on and
+		// substituted under — which is what the rule is for. Asserted together rather than in two tests,
+		// so the pair cannot drift a spelling apart.
+		for (name, body) in [
+			("isShowing", answer),
+			("switchOffDisplaysShowing", try Self.body(of: "func switchOffDisplaysShowing(", in: controller))
+		] {
+			#expect(
+				!body.contains("currentWebsiteID"),
+				"`\(name)` asks what the display was last told rather than what it is holding. The two diverge on purpose — adding a website marks it without showing it — and a mark naming a website that was deleted and never cleared makes the answer a ghost."
+			)
+
+			#expect(
+				body.contains(".website"),
+				"`\(name)` no longer reads the scene's own website, which is the fact the mark beside it is only the intention of."
+			)
+		}
+
+		#expect(
+			!answer.contains(".values"),
+			"`isShowing` reads across every entry again, so a key left by a display that is not attached answers for one that is."
+		)
+
+		#expect(
+			answer.contains("scenes"),
+			"`isShowing` no longer asks the scenes, which are the only thing that knows what a screen resolved its mark into."
+		)
+
+		#expect(
+			answer.contains("isSwitchedOff"),
+			"`isShowing` no longer asks whether the display is switched off, and a switched-off scene still holds the website it was showing."
+		)
+	}
+
+	/**
+	Removing what a display is showing switches that display off, on every route that removes.
+
+	Left alone, a deleted website leaves its display's entry naming nothing, and `showingPosition`
+	reads nothing-named as position zero — so the screen moves to whatever sorts first in whatever list
+	it falls back to. That is the app choosing a wallpaper, in the middle of an act that was about
+	something else, and indistinguishable from a rotation tick. Off instead: the app does not pick a
+	replacement, because there is no replacement the user asked for.
+
+	Three routes, and the reason this is a list rather than one assertion is that two of them do not go
+	through the third. A website leaves the list by being deleted, by its playlist being deleted, or by
+	Clear All Website Data, and only the first is `remove(_:)`. A rule enforced on the route somebody
+	happened to be looking at is the defect this suite keeps finding.
+
+	`switchOffDisplaysShowing` where the websites are known and `switchOffEveryDisplay` where the answer
+	is all of them.
+
+	**Restore All Settings was a fourth row here and is not one now**, which is a change in what Restore
+	does rather than a hole in this rule. It emptied the domain, `playlists` was in the domain, so it
+	deleted every website and owed the rule an answer. It preserves the websites now — the rule is about
+	removing what a screen is showing, and it removes nothing. What each display shows goes back to the
+	default playlist's first website, out of a list that is still there, which is a restored setting and
+	not a substitution. Put the row back the day Restore deletes a website again.
+	*/
+	@Test("Every route that deletes a website switches off the displays showing it")
+	func everyDeletionSwitchesTheDisplayOff() throws {
+		let routes = [
+			("WebsitesController.swift", "func remove(_ website: Website)", "switchOffDisplaysShowing", "a website deleted from its row, or by the Shortcuts action"),
+			("WebsitesScreen.swift", "private func delete(_ playlist: Playlist)", "switchOffDisplaysShowing", "a playlist deleted with websites in it"),
+			("WebsitesController.swift", "func removeEverything()", "switchOffEveryDisplay", "Clear All Website Data")
+		]
+
+		for (file, declaration, verb, what) in routes {
+			#expect(
+				try Self.body(of: declaration, in: Self.source(named: file)).contains(verb),
+				"`\(declaration)` in \(file) takes a website out of the list without switching off the displays showing it, so \(what) moves those screens on to whatever sorts first."
+			)
+		}
+	}
+
+	/**
+	And the two methods that only ever add do not.
+
+	The trap is the same shape `PlaylistMigrationTests` guards the install flag against, one line down.
+	`installDefaultPlaylist` is how the shipped websites get into the list, so anything about websites
+	and displays looks like it belongs in there — and its one caller is the Advanced pane's Add the
+	Default Playlist, which deletes nothing, while below it `prepareWebsiteStorage` is what every launch
+	runs. Folded into either, the app comes up dark on every run, for everybody, and a fresh install
+	cannot tell the difference.
+
+	Asserted on both bodies rather than on the one that would hurt more, so moving the line fails rather
+	than only adding it in the wrong place.
+	*/
+	@Test("Installing the shipped websites switches nothing off")
+	func theInstallPathSwitchesNothingOff() throws {
+		let controller = try Self.source(named: "WebsitesController.swift")
+
+		for declaration in ["func prepareWebsiteStorage()", "func installDefaultPlaylist()"] {
+			let body = try Self.body(of: declaration, in: controller)
+
+			#expect(!body.isEmpty)
+
+			#expect(
+				!body.contains("switchOff"),
+				"`\(declaration)` switches displays off. Every launch runs it through `prepareWebsiteStorage`, and the Advanced pane\'s Add the Default Playlist runs it without deleting anything — so Nifro comes up with every screen dark."
+			)
+		}
+	}
+
+	/**
 	Stepping is one answer, in the one place every route to it passes through.
 
 	Pressing Next over a display that is switched off moved that display's mark under a dark screen and

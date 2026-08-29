@@ -1877,12 +1877,12 @@
         }
       }
     },
-    "Reset: every setting, every keyboard shortcut, and which display each website is on.\n\nReinstalled: the websites Nifro comes with, in the order it comes with them.\n\nLost: the websites you added yourself, and every change you made to any website. There is no undo.\n\nKept: your logins, the language you picked, and whether Nifro launches at login.": {
+    "Reset: every setting, every keyboard shortcut, and what each display is showing. Every display goes back to the default playlist and its first website. There is no undo.\n\nKept: your websites and playlists, your logins, the language you picked, and whether Nifro launches at login.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "重置：所有设置、所有键盘快捷键，以及每个网站所在的显示器。\n\n重新安装：Nifro 自带的网站，按它自带的顺序。\n\n丢失：你自己添加的网站，以及你对任何网站所做的全部修改。无法撤销。\n\n保留：你的登录状态、你选的语言，以及 Nifro 是否随登录启动。"
+            "value": "重置：所有设置、所有键盘快捷键，以及每个显示器正在显示的内容；每个显示器都会回到默认播放列表和它的第一个网站。无法撤销。\n\n保留：你的网站和播放列表、你的登录状态、你选的语言，以及 Nifro 是否随登录启动。"
           }
         }
       }
@@ -1897,12 +1897,12 @@
         }
       }
     },
-    "Restore Nifro to how it shipped?": {
+    "Restore all settings?": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "将 Nifro 恢复到出厂时的状态？"
+            "value": "要还原所有设置吗？"
           }
         }
       }

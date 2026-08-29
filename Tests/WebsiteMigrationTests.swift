@@ -276,7 +276,7 @@ struct WebsiteMigrationTests {
 	an empty playlist and no reason.
 
 	Those records carry two keys this build's `Website` has never had: `isCurrent`, gone when the
-	cursor moved off the model, and `display`, the screen the website was pinned to. `display` is the
+	mark moved off the model, and `display`, the screen the website was pinned to. `display` is the
 	interesting one, because it is an *object* rather than a scalar — `{"id":"…"}` — so a decoder that
 	tripped over unknown keys would trip over a nested container, which is the harder shape to be right
 	about by accident.

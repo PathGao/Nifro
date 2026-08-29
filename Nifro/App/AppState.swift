@@ -316,6 +316,24 @@ final class AppState: ObservableObject {
 				return
 			}
 
+			// The only publish `AppState` makes, and it is inside the guard on purpose. `@Published` on
+			// this property would send on every assignment instead of every change, which is the same
+			// replay the guard above was written to stop: `setEnabledStatus` recomputes and assigns
+			// whether or not the answer moved, and the battery publisher assigns `true` over `true` on
+			// every launch. A view redrawn for that is cheaper than a page load and no less wrong.
+			//
+			// Sent from `didSet` rather than `willSet`, so what a redraw reads is the new answer.
+			// `ObservableObject` schedules the redraw for the next turn of the run loop either way; the
+			// name is about ordering with SwiftUI, not with this line.
+			//
+			// Who needs it: the Websites window ticks the website each screen is showing, and a screen
+			// showing nothing has no tick. The three inputs folded in here — the menu bar's Disable, the
+			// lock screen, the battery rule — are stored properties with no key behind them, so a window
+			// left open while any of them fires has nothing else to hear it from. `RowView` is the
+			// observer; `disabledDisplays` is the other half and is a `Defaults` key that publishes
+			// itself.
+			objectWillChange.send()
+
 			statusItemButton.appearsDisabled = !isEnabled
 
 			guard isEnabled else {
@@ -705,6 +723,13 @@ final class AppState: ObservableObject {
 			scene.resetTimer()
 			scene.resetRotationTimer()
 		}
+
+		// The second of this object's two publishes, and the loop above is what makes it one: this is
+		// where each display's mark becomes its answer — `scene.website` — and nothing else tells a view
+		// that it moved. The Websites window's tick reads the answer, so `currentWebsites` changing is
+		// the wrong moment to redraw on: it fires before this runs, which would leave the tick a turn
+		// behind the screen and then never correct it. `WebsitesController`'s header separates the two.
+		objectWillChange.send()
 	}
 
 	/**

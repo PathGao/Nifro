@@ -407,17 +407,18 @@ private struct ClearWebsiteDataButton: View {
 }
 
 /**
-Getting a working starting state back without putting the whole app back.
+Getting a working starting state back, and now the only thing that does.
 
-Clearing above leaves no playlists and no websites, and until now the only thing that could rebuild
-them was Restore All Settings — which also resets every preference and every keyboard shortcut. Two
-irreversible actions where one was wanted is how somebody loses the shortcuts they set in order to
-get eight websites back.
+Clearing above leaves no playlists and no websites. Rebuilding them used to come attached to Restore
+All Settings, which reset every preference and every keyboard shortcut in the same press — two
+irreversible actions where one was wanted, which is how somebody loses the shortcuts they set in order
+to get eight websites back. This button is that half on its own, and Restore is the other half on its
+own: it keeps the websites now and installs nothing, so this is the one control in the app that puts
+the shipped list back.
 
-It runs what a first launch runs, through the one entry point a restore also goes through. What it
-does when a default playlist already exists is argued over `WebsitesController.installDefaultPlaylist`
-and is a property of that function rather than a decision this view makes — which is the point of
-there being one entry point.
+It runs what a first launch runs. What it does when a default playlist already exists is argued over
+`WebsitesController.installDefaultPlaylist` and is a property of that function rather than a decision
+this view makes.
 
 It says something afterwards, for the same reason the button above it does: what it adds appears in
 another window, so a press in this one changes nothing visible from in front of it.
@@ -475,9 +476,9 @@ rather than as punctuation, "Restore All Settings…" trails off in a way that r
 the one control that should not sound hesitant. It says the same thing as the button in its own
 dialog, which is what somebody comparing the two reads for.
 
-What it asks is in `RestoreDefaults`, spelled out there and not repeated here: a second copy of those
-four lists in this pane would be a second copy to keep in step, and the one the user actually reads
-is the one in the dialog.
+What it asks is in `RestoreDefaults`, spelled out there and not repeated here: a second copy of what
+resets and what stays would be a second copy to keep in step, and the one the user actually reads is
+the one in the dialog.
 */
 private struct RestoreDefaultsSetting: View {
 	var body: some View {

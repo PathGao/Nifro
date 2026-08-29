@@ -117,7 +117,17 @@ struct WebsitesScreen: View {
 		playlists.insert(playlist.duplicated(), at: playlists.index(after: index))
 	}
 
+	/**
+	Delete a playlist, and switch off whatever screen was showing something out of it.
+
+	The same rule a single website's Delete obeys, said here because this is the other way a website
+	leaves the list: a playlist takes its websites with it, and a display pointed at one of them would
+	otherwise move to whatever sorts first in whatever list it falls back to. `switchOffDisplaysShowing`
+	is where that is argued.
+	*/
 	private func delete(_ playlist: Playlist) {
+		WebsitesController.shared.switchOffDisplaysShowing(Set(playlist.websites.map(\.id)))
+
 		playlists.removeAll { $0.id == playlist.id }
 	}
 }
@@ -363,14 +373,19 @@ private struct PlaylistWebsites: View {
 					}
 				}
 			} else {
-			List($playlist.websites, editActions: .all) { website in
+			// `.move` rather than `.all`, which is `.move` plus the list's own delete. That delete
+			// removes straight through the binding — past `WebsitesController.remove`, which is where
+			// every route out of the list meets and where switching off the display showing the website
+			// is decided. It skipped the confirmation too: Delete in the row's menu asks first because
+			// this app has no undo, and swiping the same website away asked nothing and told nobody.
+			// Dragging is the half worth keeping, and dragging is what `.move` is.
+			List($playlist.websites, editActions: .move) { website in
 				RowView(
 					website: website,
 					selection: $editedWebsite,
 					iconFailures: iconFailures
 				)
 			}
-			.id(playlist.websites) // Workaround for the row not updating when changing the current active website. It's placed here and not on the row to prevent another issue where adding a new website makes it scroll outside the view. (macOS 15.3)
 			.overlay {
 				if playlist.websites.isEmpty {
 					Text("No Websites")
@@ -442,26 +457,46 @@ private struct RowView: View {
 
 	let iconFailures: IconFetchFailures
 
-	// The tick used to be a field of the website, so the binding above redrew the row when it moved.
-	// It is a per-display fact now and lives with the other per-display facts, which this row has to
-	// watch for itself or it would go on drawing the tick against the website that used to hold it.
-	@Default(.currentWebsites) private var currentWebsites
+	// Neither is read anywhere in this row, and reading one would not be what subscribes: both
+	// wrappers are `DynamicProperty`, so SwiftUI subscribes through `update()` when the row is built
+	// and rebuilds the row when the thing changes. Declaring them is the whole of it.
+	// `.id(playlist.websites)` on the list was the workaround for this and never worked after
+	// `Website.isCurrent` was deleted — the identity keys on the websites, which do not change when the
+	// answer does.
+	//
+	// **`currentWebsites` is deliberately not one of them**, though it was. The tick asks for the
+	// display's answer and that key is the mark — `rebuildScenes` is where the mark becomes the answer,
+	// and it publishes when it has. Subscribing to the key as well would redraw the row a turn before
+	// the answer moved and then never again, which is the shape of the staleness this row was rewritten
+	// to stop having.
+	//
+	// So: the per-display power button, which is a key because `setDisplayEnabled` does not rebuild
+	// anything; and `AppState`, which publishes twice — the app-wide switch and the rebuild — and is
+	// the only thing that knows either.
+	// periphery:ignore
+	@Default(.disabledDisplays) private var disabledDisplays
+	// periphery:ignore
+	@ObservedObject private var appState = AppState.shared
 
 	@State private var isConfirmingDelete = false
 
 	/**
-	Whether this website is the one on screen where it lives.
+	Whether this website is on a screen at this moment.
 
-	This list is one list for every screen and a row has no display, so the question it can ask is
-	whether this website is the one on screen where it lives.
+	The whole of what the tick claims, and no rule is built on top of it. Deleting a website that is on
+	a screen is allowed, like it is from the other three routes that can do it; what it does is switch
+	that screen off. The only thing still reading this is "Set as Current" greying itself out, which is
+	not a rule but a no-op — the display is already showing this website — and which predates all of
+	it. The mark is worth drawing on that footing rather than in spite of it: it says one thing and is
+	right about it, which is more than it managed while something hung off it.
+
+	This list is one list for every screen and a row has no display, so "on a screen" is the widest the
+	question gets, and `WebsitesController` is where it is answered — from the display's answer and not
+	from the mark, which its header separates and `isShowing` argues. Asked of the mark this row ticked
+	a website that was added and never shown.
 	*/
 	private var isShowing: Bool {
-		// Read for the redraw and not for the answer. Which display is showing what is one question
-		// with one derivation of its key, and a list of rows is the last place that should get a
-		// second one — the tick and the wallpaper disagreeing is the whole failure being fixed here.
-		_ = currentWebsites
-
-		return WebsitesController.shared.isShowing(website)
+		WebsitesController.shared.isShowing(website)
 	}
 
 	var body: some View {
@@ -526,6 +561,14 @@ private struct RowView: View {
 				selection = website.id
 			}
 			Divider()
+			// Not refused for the website on screen, which it was for a while. What made refusing look
+			// necessary was the substitution underneath: deleting the showing website left its display
+			// pointed at a name nothing answers to, and `scheduled` reads that as "this display has not
+			// started" and answers with the top of the list — a wallpaper nobody chose, arriving as the
+			// result of deleting something else. `switchOffDisplaysShowing` is that fixed, and it is
+			// fixed for the playlist delete, Clear All Website Data and the Shortcuts action too. With
+			// the outcome defined for all four, a refusal here would be the only door of the four that
+			// closed, and the user would be looking at it.
 			Button("Delete", role: .destructive) {
 				isConfirmingDelete = true
 			}

@@ -1,6 +1,24 @@
 import SwiftUI
 import LinkPresentation
 
+/**
+Three things mean "what that screen is showing", and they differ on purpose. Named here because every
+question that has to pick one of them is answered in this file.
+
+- **The mark.** `Defaults[.currentWebsites]`, one entry per display: what a display was *told* to
+  show. It outlives what it names — nothing clears it when a website is deleted or a monitor is
+  unplugged, deliberately, so a monitor plugged back in comes back showing what it was showing.
+- **The display's answer.** `WallpaperScene.website`: the mark resolved by `scheduled(for:)` against
+  what that display's playlist is offering this hour. It differs from the mark whenever the mark is
+  unreachable — a website added and marked but never shown, a mark naming a website since deleted, an
+  hour that has ended.
+- **The page.** `WallpaperScene.loadedWebsiteID`: what the web view actually has. It lags the answer
+  for the length of a swap.
+
+Ask the mark where a display is *standing* — stepping, the shuffled order, what to write. Ask the
+answer whether a website is on a screen, which `isShowing` and `switchOffDisplaysShowing` do; asking
+the mark for that is the bug those two were rewritten out of. Ask the page only about loading.
+*/
 @MainActor
 final class WebsitesController {
 	static let shared = WebsitesController()
@@ -25,7 +43,7 @@ final class WebsitesController {
 	`browsingDisplays` all use, so the screen has one name here as it does everywhere else.
 
 	**In memory, and nowhere else.** An order is a plan for the next few hours, and a plan a relaunch
-	restores is a plan made for a day that has ended. What does survive is the cursor, so a fresh order
+	restores is a plan made for a day that has ended. What does survive is the mark, so a fresh order
 	is made around the website already up — see `shuffledOrder(of:startingWith:)`, which is the whole of
 	why a relaunch does not make the wallpaper jump.
 
@@ -98,29 +116,40 @@ final class WebsitesController {
 	}
 
 	/**
-	Whether `website` is up on any screen.
+	Whether `website` is on a screen at this moment.
 
-	The question the display-less lists ask — the Websites window and the Shortcuts entity — neither of
-	which is about one screen. It used to be asked of the display the website was pinned to, and that
-	was the right question only while a website belonged to a screen.
-	A screen picks a list now: the display showing a website is whichever one selected the playlist
-	holding it, which has nothing to do with the screen that website was once pinned to. Asked the old
-	way, a list drew its tick against the wrong row for every website whose playlist is shown anywhere
-	but the main display — systematically, and on the normal configuration rather than an edge of it.
+	The question a caller with no display of its own has to ask — the Websites window's list, which is
+	one list for every screen, and `WebsiteAppEntity.isCurrent`, which Shortcuts reads off an entity
+	that is a website and nothing else. It used to be asked of the display the website was pinned to,
+	and that was the right question only while a website belonged to a screen. A screen picks a list
+	now: the display showing a website is whichever one selected the playlist holding it.
 
-	It can also be true on more than one row at once, and that is not a defect either: two displays
-	showing one playlist are two screens each with their own cursor, and both of those websites are up.
+	**The answer and not the mark**, in the header's words, and both ways of getting that wrong were on
+	one Mac at once. Adding a website marks it without showing it — `add(_:to:)` ends in
+	`makeCurrent(…, switchingDisplayOn: false)` and says why — so the mark ticked a website no screen
+	had taken up. And a mark outlives the website it names, because `remove(_:)` does not clear it, so
+	a website deleted weeks earlier held the one tick in the window while the wallpaper actually up had
+	none. Neither is worth fixing by tidying the dictionary: pruning it is what would take the
+	unplugged monitor's page away.
 
-	**What it gives up**, so that it is a trade and not an oversight. A cursor entry outlives its
-	display — deliberately, so a monitor unplugged at night comes back in the morning showing what it
-	was showing — and `scheduled` reads an entry naming a website that is gone as "this display has not
-	started". So an entry left by an unplugged display can put a tick on a row nothing is currently
-	drawing. That is one stale row against every row being wrong, and the direction of the error is the
-	safe one: it over-reports what is showing rather than under-reporting it, and "Set as Current"
-	beside it is not disabled by anything the user would want.
+	`isSwitchedOff` is the second half and is not implied by the first. A switched-off scene keeps its
+	`website` — `rebuildScenes` assigns it before it asks whether the display is off, and `suspend()`
+	releases the web view without touching it — so the answer outlives the screen going dark, and this
+	is what "showing nothing" means: the app-wide switch folded together with the display's own power
+	button, for the reason `SwitchedOffTests` gives.
+
+	During a swap the answer has moved and the page has not, so the tick names the arriving website for
+	a second or two. That is the right reading for a list of wallpapers — the display's answer *has*
+	changed — and a caller that wants the page has `loadedWebsiteID`.
+
+	True of two websites at once when two displays are showing two different ones, and true once when
+	both are showing the same one. "On a screen" is the whole of the claim, and no caller that cannot
+	name a display can be given a narrower one.
 	*/
 	func isShowing(_ website: Website) -> Bool {
-		Defaults[.currentWebsites].values.contains(website.id)
+		AppState.shared.scenes.contains {
+			!$0.isSwitchedOff && $0.website?.id == website.id
+		}
 	}
 
 	/**
@@ -216,7 +245,7 @@ final class WebsitesController {
 
 	**Which is why the playlist is written from this method.** The two keys say one thing between them —
 	show this page, on this screen — and written apart they were briefly disagreeing on purpose: the
-	playlist moved, the cursor deliberately did not, and the wallpaper jumped to whatever the new list
+	playlist moved, the mark deliberately did not, and the wallpaper jumped to whatever the new list
 	happened to hold first. Here they move together, in one turn of the run loop, so the sinks in
 	`Events` that watch the pair never see a display pointed at a list it is not showing a page from.
 
@@ -333,9 +362,72 @@ final class WebsitesController {
 	}
 
 	/**
+	Switch off every display showing one of these websites.
+
+	**The rule every deletion in the app obeys, and the reason it needs saying.** Take a website out of
+	the list and the mark naming it names nothing, which `showingPosition` reads as "this display is at
+	the top of its list" — so the screen moves on to whatever sorts first. Deleting one website changed
+	the wallpaper to a different one, chosen by the app, indistinguishable from a rotation tick.
+	Removing what a screen is showing switches that screen off instead: there is no replacement the app
+	could pick that the user asked for.
+
+	Off means the display's own power switch — `disabledDisplays`, through the one verb that writes it
+	— and not an emptied mark, which is the substitution again one rotation tick later: a display with
+	nothing marked is a display at position zero, and the clock is still armed. Switched off, `load`,
+	both timers and the menu bar band all refuse, for the reason `SwitchedOffTests` gives.
+
+	**"Showing" is the answer and not the mark, exactly as in `isShowing`.** A display whose mark is a
+	ghost is showing whatever `scheduled` resolved that ghost into, and deleting *that* website has to
+	switch it off. Asked the other way it would not match, the display would stay on, and what happened
+	next is the substitution this function exists to stop.
+
+	Nothing here asks whether the display is already off, unlike `isShowing`: switching off a display
+	that is off is the same write and the same suspend.
+
+	The way back is the power button under that display's picture in the panel, which is where a
+	display switched off any other way is turned back on, and picking a website for that display from
+	the panel does it too — `makeCurrent` wakes the display it writes.
+	*/
+	func switchOffDisplaysShowing(_ websites: Set<Website.ID>) {
+		for scene in AppState.shared.scenes {
+			guard
+				let showing = scene.website?.id,
+				websites.contains(showing)
+			else {
+				continue
+			}
+
+			AppState.shared.setDisplayEnabled(false, on: scene.display)
+		}
+	}
+
+	/**
+	Switch every display off.
+
+	For the deletion that takes everything: Clear All Website Data. Asking which displays are showing
+	something about to be deleted is the same answer as "all of them" when the answer is everything.
+
+	One caller and kept separate from `switchOffDisplaysShowing` anyway, because the two say different
+	things and the shorter one is not a special case of the other running out of arguments: handing an
+	empty set to that would switch nothing off, which is the opposite of what "everything is going"
+	means. Restore All Settings was the second caller until it stopped deleting websites.
+	*/
+	func switchOffEveryDisplay() {
+		for scene in AppState.shared.scenes {
+			AppState.shared.setDisplayEnabled(false, on: scene.display)
+		}
+	}
+
+	/**
 	Remove a website.
+
+	The switch-off first, because it reads the entry the removal is about to orphan and because that is
+	the order the rule is written in: close the screen, then delete. Here rather than at the two callers
+	— the row's Delete and the Shortcuts action — so a third one inherits it.
 	*/
 	func remove(_ website: Website) {
+		switchOffDisplaysShowing([website.id])
+
 		Defaults[.playlists] = Defaults[.playlists].map {
 			var playlist = $0
 			playlist.websites = playlist.websites.removingAll(website)
@@ -481,7 +573,9 @@ extension WebsitesController {
 
 extension WebsitesController {
 	/**
-	Throw the whole list away: every playlist, every website, and every key that named one.
+	Throw the whole list away: every playlist, every website, and every key that named one — and
+	switch the displays off first, because a screen whose website is being deleted is a screen with
+	nothing to show and the app does not choose the next one.
 
 	The four writes are one function because they are one fact. `playlists` is the whole of where a
 	website is stored; `currentWebsites` and `currentPlaylists` are per-display keys whose values are a
@@ -504,6 +598,11 @@ extension WebsitesController {
 	own flag, and this leaves that flag set.
 	*/
 	func removeEverything() {
+		// Before the four writes, and the same order as `remove`: every website is going, so every
+		// screen showing one is a screen with nothing to show. Reading which is pointless when the
+		// answer is all of them.
+		switchOffEveryDisplay()
+
 		Defaults[.playlists] = []
 		Defaults[.currentWebsites] = [:]
 		Defaults[.currentPlaylists] = [:]
@@ -522,15 +621,15 @@ extension WebsitesController {
 	lines of the same launch.
 
 	Two lines, and they were written out twice — in `AppState.didLaunch` and at the top of
-	`installDefaultPlaylist` below — with nothing making the two copies agree. `RestoreDefaults` named
-	extracting them as still owed; this is it, and both are callers now.
+	`installDefaultPlaylist` below — with nothing making the two copies agree. There is one ordering in
+	the app now, and both are callers of it.
 
 	**The install flag reset is not part of the order and must never move in here.**
 	`installDefaultPlaylist` forces `hasInstalledFeaturedWebsites` back to false before calling this.
-	That is right for its own two callers — a wipe that left nothing installed, and a button somebody
-	pressed on purpose — and catastrophic on the launch path, where it would put the shipped websites
-	back on every single run, including the ones the user has since deleted and cannot delete for good.
-	So it stays above the call, at the one site that wants it.
+	That is right for its own caller, a button somebody pressed on purpose, and catastrophic on the
+	launch path, where it would put the shipped websites back on every single run, including the ones
+	the user has since deleted and cannot delete for good. So it stays above the call, at the one site
+	that wants it.
 	*/
 	func prepareWebsiteStorage() {
 		migrateToPlaylistsIfNeeded()
@@ -540,17 +639,15 @@ extension WebsitesController {
 	/**
 	Build the state a fresh install has: the default playlist, holding the websites Nifro ships with.
 
-	One path with two callers — restoring the whole app, and the button in Advanced that wants only
-	this half of it. This was the end of `RestoreDefaults.perform`, and a second control wanting the
-	same state would have meant a second way to build it.
+	One path, and the Advanced pane's Add the Default Playlist is now the only caller. It was the end of
+	`RestoreDefaults.perform` too, back when a restore emptied the domain and had to put something back;
+	a restore keeps the websites now, so getting the shipped list is this button and nothing else.
 
 	**Only the install flag is forced**, and the pair below it is the same `prepareWebsiteStorage` the
-	launch path runs. `migrateToPlaylistsIfNeeded` keeps the position `RestoreDefaults` argued for and
-	is left to its own guard, and that is the whole of what makes this safe to press from a settings
-	pane. After a restore the flag went with the domain, so the migration runs against nothing and
-	writes the empty default list the install then fills. Pressed from Advanced the flag is set, so the
-	migration does nothing — which is what has to happen, because it assigns `playlists` outright and
-	would take every list the user has made with it.
+	launch path runs. `migrateToPlaylistsIfNeeded` is left to its own guard, and that is the whole of
+	what makes this safe to press from a settings pane: the flag is set on any Mac that has launched
+	this build, so the migration does nothing — which is what has to happen, because it assigns
+	`playlists` outright and would take every list the user has made with it.
 
 	**An existing default playlist is filled, not replaced and not doubled.** `add` puts each website
 	into the default playlist it finds and makes one only when there is none, so "there is already one"

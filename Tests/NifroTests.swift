@@ -458,7 +458,7 @@ one per display" is the shape of the storage and there is nothing left here to c
 `ScopeTests` for the two things about it that can still be got wrong, and that a `swift test` can
 reach: that nothing reads the flag it replaced, and that the key is the display.
 
-What is left is the arithmetic the cursor is fed into. It was written and shipped on a one-display
+What is left is the arithmetic the mark is fed into. It was written and shipped on a one-display
 machine, where a list-wide answer and a per-display answer are the same answer, and the difference is
 not visible by reading: it shows as one screen quietly refusing to rotate.
 */

@@ -74,6 +74,10 @@ extension Defaults.Keys {
 	// with `browsingDisplays`: the user picked that wallpaper for that screen, so a monitor unplugged at
 	// night comes back in the morning showing it. An unplug does nothing else at all — a display that
 	// is gone has no scene, so there is nothing on that screen to move anywhere.
+	//
+	// Which is why this is the mark and not the answer: it says what a display was told, and a display
+	// that is not there was told something it never carried out. `WebsitesController`'s header names
+	// the three and says which questions go to which.
 	static let currentWebsites = Key<[String: Website.ID]>("currentWebsites", default: [:])
 
 	// Which playlist each display is pointed at, keyed by `Display.settingsKey(for:)` like every other
