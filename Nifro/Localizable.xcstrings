@@ -2307,16 +2307,6 @@
         }
       }
     },
-    "This site sends Nifro to %@ every time it loads. Right-click the row to save that address instead.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "这个站点每次加载都会把 Nifro 送到 %@。在这一行上点右键，就能把那个地址存下来。"
-          }
-        }
-      }
-    },
     "Title": {
       "localizations": {
         "zh-Hans": {
@@ -2433,16 +2423,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "已是最新"
-          }
-        }
-      }
-    },
-    "Update Address to %@": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "把地址改为「%@」"
           }
         }
       }

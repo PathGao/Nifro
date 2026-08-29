@@ -585,14 +585,12 @@ extension WebsitesController {
 	switch the displays off first, because a screen whose website is being deleted is a screen with
 	nothing to show and the app does not choose the next one.
 
-	The four writes are one function because they are one fact. `playlists` is the whole of where a
-	website is stored; `currentWebsites` and `currentPlaylists` are per-display keys whose values are a
-	website and a playlist out of it, and `redirectedAddresses` is filed under `website.id`. Emptying
-	the first and leaving any of the other three is a display pointed at a website that does not exist,
-	a display pointed at a list that does not exist, or a redirect nothing can ever apply — and none of
-	the three has a symptom until somebody plugs in a second monitor or wonders why an address they
-	fixed came back. Written here, in one place, so that the answer is the same for all four rather
-	than three call sites that each remembered a different subset.
+	The three writes are one function because they are one fact. `playlists` is the whole of where a
+	website is stored, and `currentWebsites` and `currentPlaylists` are per-display keys whose values
+	are a website and a playlist out of it. Emptying the first and leaving either of the other two is a
+	display pointed at a website that does not exist or at a list that does not exist, and neither has
+	a symptom until somebody plugs in a second monitor. Written here, in one place, so that the answer
+	is the same for all three rather than two call sites that each remembered a different subset.
 
 	**Not a sweep over what is left.** The two housekeeping passes in `App.swift` refuse an empty
 	website list on purpose, and they are right to: "every website is gone" read off a list is far
@@ -606,7 +604,7 @@ extension WebsitesController {
 	own flag, and this leaves that flag set.
 	*/
 	func removeEverything() {
-		// Before the four writes, and the same order as `remove`: every website is going, so every
+		// Before the three writes, and the same order as `remove`: every website is going, so every
 		// screen showing one is a screen with nothing to show. Reading which is pointless when the
 		// answer is all of them.
 		switchOffEveryDisplay()
@@ -614,7 +612,6 @@ extension WebsitesController {
 		Defaults[.playlists] = []
 		Defaults[.currentWebsites] = [:]
 		Defaults[.currentPlaylists] = [:]
-		Defaults[.redirectedAddresses] = [:]
 	}
 
 	/**

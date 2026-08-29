@@ -112,10 +112,9 @@ enum RestoreDefaults {
 	wipe together: the next launch finds no stored interval and switches reloading off, which is where a
 	restore is meant to leave it.
 
-	What is *not* here is the rest of what is filed under a website. `redirectedAddresses` is a note the
-	app took, rebuilt by the next page load. `currentWebsites`, `currentPlaylists`, `rotationModes`,
-	`rotationIntervals`, `disabledDisplays` and `browsingDisplays` describe screens rather than
-	websites, and resetting them is what a restore visibly *is*.
+	What is *not* here is the rest of what is filed under a website. `currentWebsites`,
+	`currentPlaylists`, `rotationModes`, `rotationIntervals`, `disabledDisplays` and `browsingDisplays`
+	describe screens rather than websites, and resetting them is what a restore visibly *is*.
 	*/
 	private static let websiteKeys = [
 		"playlists",
