@@ -267,96 +267,126 @@ struct WebsiteMigrationTests {
 	}
 
 	/**
-	The one field a payload written by an older build is still read *for*, and how it is got at.
+	A record from before playlists decodes as a plain `Website`, extra keys and all.
 
-	`Website` has no display any more, and the display each website was pinned to is the whole input to
-	`migrateToPlaylistsIfNeeded` — so `PinnedWebsite` decodes it out of the stored payload beside the
-	website rather than off the model. It is the only bridge between the two eras of this app's storage
-	and it runs exactly once, against a list the user built by hand, on a build with no way back.
+	This is the only bridge between the two eras of this app's storage. `Defaults[.websites]` is read
+	exactly once, by `migrateToPlaylistsIfNeeded`, against a list the user typed by hand, on a build
+	with no way back — and `Defaults` answers a failed decode with the key's default, which here is an
+	empty array. A decoder that refuses one of those records does not throw at the user, it hands them
+	an empty playlist and no reason.
 
-	Two things about it can be wrong in silence, and both are checked. The first is the language rule
-	the type rests on: `Website(from: decoder)` is handed the decoder itself, not a nested container,
-	because the payload is one flat object per website. Written as `decode(Website.self, forKey:)` it
-	would look for a `website` object that has never been written, fail, and hand every user an empty
-	list. The second is the sibling read — the display sat beside the website's own fields — which a
-	decoder that descends into a container of its own cannot see, and whose failure is not an error at
-	all: every pinned website lands in one flat playlist and the user's per-display lists are gone with
-	nothing to say that anything happened.
+	Those records carry two keys this build's `Website` has never had: `isCurrent`, gone when the
+	cursor moved off the model, and `display`, the screen the website was pinned to. `display` is the
+	interesting one, because it is an *object* rather than a scalar — `{"id":"…"}` — so a decoder that
+	tripped over unknown keys would trip over a nested container, which is the harder shape to be right
+	about by accident.
 
-	Run on a stand-in, following `optionalMeansTheKeyMayBeAbsent` above, because `PinnedWebsite` reaches
-	`Website` and `Defaults` and this target compiles neither. The shape assertion underneath is what
-	ties the stand-in to the real one.
+	It does not trip, and that is the whole of what this asserts: a synthesised `init(from:)` asks its
+	keyed container for the properties it declares and never enumerates the keys it was given, so a key
+	nobody looks for is not read at all. The key used to be typed through a wrapper that read `display`
+	out and a `.map(\.website)` that dropped it on the next line, which is the same result written down
+	as though it were a different one.
+
+	The payload below is a real record, copied out of the maintainer's own `websites` key — the one of
+	his eight that carries a `display`. Run on a stand-in, following `optionalMeansTheKeyMayBeAbsent`
+	above, because `Website` reaches `Defaults` and this target compiles neither; the stand-in declares
+	every field the real struct does, and `theLegacyKeyIsAPlainWebsiteList` underneath ties it to the
+	real one.
 	*/
-	@Test("A pinned website's display is read out of the payload it was stored beside")
-	func aFlatPayloadYieldsBothHalves() throws {
-		struct Inner: Codable, Equatable {
-			var url: String
+	@Test("A website stored with the display it was pinned to still decodes")
+	func aRecordWithADisplayStillDecodes() throws {
+		struct Zoom: Codable, Equatable {
+			var center: [Double]
+			var scale: Double
 		}
 
-		struct Outer: Codable, Equatable {
-			var inner: Inner
-			var display: String?
-
-			private enum CodingKeys: String, CodingKey {
-				case display
-			}
-
-			init(from decoder: any Decoder) throws {
-				inner = try Inner(from: decoder)
-				display = try decoder.container(keyedBy: CodingKeys.self).decodeIfPresent(String.self, forKey: .display)
-			}
-
-			func encode(to encoder: any Encoder) throws {
-				try inner.encode(to: encoder)
-
-				var container = encoder.container(keyedBy: CodingKeys.self)
-				try container.encodeIfPresent(display, forKey: .display)
-			}
+		struct StoredWebsite: Codable, Equatable {
+			var id: UUID
+			var url: URL
+			var title: String
+			var invertColors2: String
+			var usePrintStyles: Bool
+			var css: String
+			var javaScript: String
+			var allowSelfSignedCertificate: Bool
+			var zoom: Zoom?
+			var startHour: Int?
+			var endHour: Int?
+			var audio: String
+			var allowsInteraction: Bool
+			var externalLinks: String
 		}
 
-		// One flat object, carrying a key this build no longer knows about, as an older build wrote it.
-		let pinned = try JSONDecoder().decode(
-			Outer.self,
-			from: Data(#"{"url":"https://example.com","isCurrent":true,"display":"A"}"#.utf8)
+		let stored = #"""
+			{"allowSelfSignedCertificate":false,"allowsInteraction":false,"audio":"unmuted","css":"","display":{"id":"973839E9-48B4-409A-B85E-16DDE8C64837"},"externalLinks":"followSettings","id":"F7645742-B728-44E6-A1BF-72E080260DDA","invertColors2":"never","isCurrent":false,"javaScript":"","title":"Svalbard","url":"https://www.youtube.com/embed/AQ79_eDLg4w?autoplay=1&playsinline=1","usePrintStyles":false}
+			"""#
+
+		let website = try JSONDecoder().decode(StoredWebsite.self, from: Data(stored.utf8))
+
+		// Every field the user could have set, not just that the decode returned. A decoder can survive
+		// an unknown key and still be reading the wrong ones.
+		#expect(website.id == UUID(uuidString: "F7645742-B728-44E6-A1BF-72E080260DDA"))
+		#expect(website.title == "Svalbard")
+		#expect(website.url.absoluteString == "https://www.youtube.com/embed/AQ79_eDLg4w?autoplay=1&playsinline=1")
+		#expect(website.audio == "unmuted")
+		#expect(website.externalLinks == "followSettings")
+		#expect(website.invertColors2 == "never")
+		#expect(!website.usePrintStyles)
+		#expect(!website.allowsInteraction)
+		#expect(!website.allowSelfSignedCertificate)
+		#expect(website.zoom == nil)
+
+		// And a record with no `display` at all, which is seven of his eight and the ordinary case.
+		let unpinned = try JSONDecoder().decode(
+			StoredWebsite.self,
+			from: Data(#"{"allowSelfSignedCertificate":false,"allowsInteraction":false,"audio":"muted","css":"","externalLinks":"followSettings","id":"622448DD-CC10-484C-A8EB-D66E6C3DF19F","invertColors2":"never","isCurrent":false,"javaScript":"","title":"World Monitor","url":"https://worldmonitor.app/","usePrintStyles":false}"#.utf8)
 		)
 
-		#expect(pinned.inner.url == "https://example.com")
-		#expect(pinned.display == "A")
+		#expect(unpinned.title == "World Monitor")
 
-		// And a website that was on no display in particular, which is most of them.
-		let unpinned = try JSONDecoder().decode(Outer.self, from: Data(#"{"url":"https://b.example"}"#.utf8))
-
-		#expect(unpinned.display == nil)
-
-		// The encoder writes back what the decoder reads. Nothing calls it, and a `Codable` whose two
-		// halves disagree about the shape is a trap for whoever first does.
-		#expect(try JSONDecoder().decode(Outer.self, from: JSONEncoder().encode(pinned)) == pinned)
+		// The two are not the same record, so the assertions above are about what was in each payload
+		// rather than about a decoder that returns something fixed.
+		#expect(website != unpinned)
 	}
 
 	/**
-	And the real type is still written that way.
+	And the real key is the plain list the test above stands in for.
+
+	Three claims, because the stand-in only proves the language rule and the wiring is what would
+	actually change. The key has to still be `websites` — a rename is every migrated user migrating
+	again — it has to hold bare `Website` values rather than a wrapper reading `display` back out, and
+	the migration has to hand the stored list to the playlist whole. That last one is where a wrapper
+	would leave its mark: the shape it forced was `stored.map(\.website)`, and anything mapping between
+	the read and the write is a place an entry can be lost from the only copy there is.
 	*/
-	@Test("The migration's decoder still reads the website out of the payload it is handed")
-	func thePinnedWebsiteDecoderIsFlat() throws {
+	@Test("The legacy key holds plain websites and the migration passes them through")
+	func theLegacyKeyIsAPlainWebsiteList() throws {
+		let constants = try Self.source("Nifro/App/Constants.swift")
+
+		#expect(
+			constants.contains("static let websites = Key<[Website]>(\"websites\""),
+			"""
+			The pre-playlist key is no longer a plain `Key<[Website]>` under the name `websites`. Its \
+			records are one flat JSON object each, holding fields no build writes any more; anything \
+			that has to read those keys rather than skip them is a decoder that can fail on stored data, \
+			and `Defaults` answers a failed decode with an empty list.
+			"""
+		)
+
 		let controller = try Self.source("Nifro/Sites/WebsitesController.swift")
 
 		#expect(
-			controller.contains("website = try Website(from: decoder)"),
+			!controller.contains("PinnedWebsite"),
 			"""
-			`PinnedWebsite` no longer decodes the website from the decoder it is handed. A stored website \
-			is one flat object, so anything that descends into a container first is looking for a key that \
-			has never been written — and `Defaults` answers a failed decode with an empty list, which is \
-			every website the user had before playlists existed.
+			The wrapper around the legacy key is back. It read the display each website was pinned to and \
+			the migration dropped it on the next line, so it bought nothing and stated a grouping this \
+			build does not do.
 			"""
 		)
 
 		#expect(
-			controller.contains("forKey: .display"),
-			"""
-			`PinnedWebsite` no longer reads the display each website was pinned to, which is the whole of \
-			what the migration groups by. It would not fail: every list a user had per display becomes one \
-			flat playlist instead, once, with nothing to restore from.
-			"""
+			controller.contains("websites: stored"),
+			"The migration no longer hands the stored list to the playlist whole, so what it writes is not all of what it read."
 		)
 	}
 

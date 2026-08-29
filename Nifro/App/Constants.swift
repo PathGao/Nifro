@@ -28,16 +28,23 @@ enum Constants {
 
 extension Defaults.Keys {
 	// The website list as it was before playlists, read exactly once and never written. It is the only
-	// input `migrateToPlaylistsIfNeeded` has, which is why it is typed as `PinnedWebsite` rather than
-	// `Website`: the display each website was pinned to is what the migration groups by, and `Website`
-	// does not carry one any more.
+	// input `migrateToPlaylistsIfNeeded` has, and plain `Website` is the whole of what that takes from
+	// it — everything lands in one playlist now, including what was pinned, which is argued where the
+	// migration is written.
+	//
+	// A record written before playlists carries the display it was pinned to as a `display` object
+	// sitting beside the website's own fields, and this decodes those records without it: a synthesised
+	// `Codable` asks for the keys it knows and ignores the rest, so `display` is skipped exactly as
+	// `isCurrent` — deleted a release earlier — already is. That is not a change in what happens, only
+	// in what is written down. The wrapper that used to be here read the pinning out and handed it to a
+	// `.map(\.website)`, which threw it away again.
 	//
 	// Left on disk rather than removed. Nothing in this build touches the stored value, so a list
 	// carried across by the migration is still there in its old shape — which is the only copy of it
 	// there will ever be, and the thing to look at if the playlists come out wrong. Nothing puts edits
 	// made here back into it, so an older build opened after this one shows the list as it stood when
-	// the migration ran.
-	static let websites = Key<[PinnedWebsite]>("websites", default: [])
+	// the migration ran, pinning and all.
+	static let websites = Key<[Website]>("websites", default: [])
 
 	// The lists a display picks between, and the whole of where a website is stored. Built once by
 	// `migrateToPlaylistsIfNeeded` out of the key above.

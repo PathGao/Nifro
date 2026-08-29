@@ -124,8 +124,11 @@ struct PlaylistMigrationTests {
 	user built by hand, and an entry it drops is dropped for good.
 
 	Stated as an absence, which is what a shape test is the right tool for. The names below are every
-	way Swift has to return fewer elements than it was given; a `map` cannot lose one, and a `map` is
-	what the migration is.
+	way Swift has to return fewer elements than it was given, and the migration uses none of them: the
+	stored list goes into the playlist as it came out of the key. It used to go through a
+	`stored.map(\.website)`, unwrapping a type that carried the display each website was pinned to — a
+	`map` cannot lose an entry either, but it was a step that did nothing and a step is a place a
+	`compactMap` gets typed by mistake.
 	*/
 	@Test("The migration cannot drop a website on its way into the playlist")
 	func migrationKeepsEveryStoredWebsite() throws {
@@ -145,7 +148,7 @@ struct PlaylistMigrationTests {
 			)
 		}
 
-		#expect(body.contains("stored.map("), "The migration no longer maps the stored list, so what it writes is not derived from all of it.")
+		#expect(body.contains("websites: stored"), "The migration no longer puts the stored list into the playlist whole, so what it writes is not all of what it read.")
 	}
 
 	/**
@@ -170,6 +173,41 @@ struct PlaylistMigrationTests {
 				"The migration writes the website list (`\(write)`), which is the one thing it must not do until nothing reads that key any more."
 			)
 		}
+	}
+
+	/**
+	The flag reset stays out of the shared ordering.
+
+	`prepareWebsiteStorage` exists so the migrate-then-install order is written once instead of twice.
+	The reason it is not simply the body of `installDefaultPlaylist` is one line: that method first
+	forces `hasInstalledFeaturedWebsites` back to false, which is what its own callers want — restoring
+	defaults, and the Advanced pane's button, both of which must be able to reinstall a set the flag
+	says is already installed. On the launch path the same line reinstalls the shipped websites on every
+	run, including the ones the user has deleted.
+
+	So the trap is not the ordering, it is the tidying-up that comes for it later: folding that line into
+	the shared method reads like finishing the extraction and is silent when it lands, because a fresh
+	install cannot tell the difference. Asserted on both bodies rather than one, so moving the line
+	fails rather than only removing it.
+	*/
+	@Test("The shared ordering does not carry the flag reset")
+	func theFlagResetStaysWithItsOwnCallers() throws {
+		let controller = try Self.source("Nifro/Sites/WebsitesController.swift")
+		let shared = try Self.body(of: "func prepareWebsiteStorage()", in: controller)
+		let install = try Self.body(of: "func installDefaultPlaylist()", in: controller)
+
+		#expect(!shared.isEmpty)
+		#expect(!install.isEmpty)
+
+		#expect(
+			!shared.contains("hasInstalledFeaturedWebsites"),
+			"The shared ordering resets the installed flag, so launching reinstalls the shipped websites every run — including the ones the user deleted."
+		)
+
+		#expect(
+			install.contains("hasInstalledFeaturedWebsites"),
+			"`installDefaultPlaylist` no longer resets the installed flag, so restoring defaults and the Advanced pane's button both silently do nothing once the shipped websites have been installed once."
+		)
 	}
 
 	/**

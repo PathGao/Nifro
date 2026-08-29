@@ -458,19 +458,46 @@ extension WebsitesController {
 	}
 
 	/**
+	Bring the stored website list up to what this build expects: convert what an older build left
+	behind, then put the shipped websites in if that has never been done.
+
+	**The migration first, the install second, and the order is the point of this method existing.**
+	Adding a website means adding it to a playlist, so the other way round is wrong on a first launch:
+	the shipped websites would be filed under a default playlist made on the spot, and the migration
+	would then run against the mirror those writes had produced and replace that playlist with another
+	one holding the same eight sites. The list a display picks would have changed identity between two
+	lines of the same launch.
+
+	Two lines, and they were written out twice — in `AppState.didLaunch` and at the top of
+	`installDefaultPlaylist` below — with nothing making the two copies agree. `RestoreDefaults` named
+	extracting them as still owed; this is it, and both are callers now.
+
+	**The install flag reset is not part of the order and must never move in here.**
+	`installDefaultPlaylist` forces `hasInstalledFeaturedWebsites` back to false before calling this.
+	That is right for its own two callers — a wipe that left nothing installed, and a button somebody
+	pressed on purpose — and catastrophic on the launch path, where it would put the shipped websites
+	back on every single run, including the ones the user has since deleted and cannot delete for good.
+	So it stays above the call, at the one site that wants it.
+	*/
+	func prepareWebsiteStorage() {
+		migrateToPlaylistsIfNeeded()
+		installFeaturedWebsitesIfNeeded()
+	}
+
+	/**
 	Build the state a fresh install has: the default playlist, holding the websites Nifro ships with.
 
 	One path with two callers — restoring the whole app, and the button in Advanced that wants only
-	this half of it. These two lines were the end of `RestoreDefaults.perform`, and a second control
-	wanting the same state would have meant a second way to build it, with nothing making the two agree
-	about the order they run in.
+	this half of it. This was the end of `RestoreDefaults.perform`, and a second control wanting the
+	same state would have meant a second way to build it.
 
-	**Only the install flag is forced.** `migrateToPlaylistsIfNeeded` keeps the position
-	`RestoreDefaults` argued for and is left to its own guard, and that is the whole of what makes this
-	safe to press from a settings pane. After a restore the flag went with the domain, so the migration
-	runs against nothing and writes the empty default list the install then fills. Pressed from
-	Advanced the flag is set, so the migration does nothing — which is what has to happen, because it
-	assigns `playlists` outright and would take every list the user has made with it.
+	**Only the install flag is forced**, and the pair below it is the same `prepareWebsiteStorage` the
+	launch path runs. `migrateToPlaylistsIfNeeded` keeps the position `RestoreDefaults` argued for and
+	is left to its own guard, and that is the whole of what makes this safe to press from a settings
+	pane. After a restore the flag went with the domain, so the migration runs against nothing and
+	writes the empty default list the install then fills. Pressed from Advanced the flag is set, so the
+	migration does nothing — which is what has to happen, because it assigns `playlists` outright and
+	would take every list the user has made with it.
 
 	**An existing default playlist is filled, not replaced and not doubled.** `add` puts each website
 	into the default playlist it finds and makes one only when there is none, so "there is already one"
@@ -483,8 +510,7 @@ extension WebsitesController {
 	func installDefaultPlaylist() {
 		Defaults[.hasInstalledFeaturedWebsites] = false
 
-		migrateToPlaylistsIfNeeded()
-		installFeaturedWebsitesIfNeeded()
+		prepareWebsiteStorage()
 	}
 }
 
@@ -492,10 +518,9 @@ extension WebsitesController {
 	/**
 	Turn the stored website list into playlists, once.
 
-	Websites with a display of their own become a playlist bound to that display; everything else
-	becomes the default playlist. Per-display settings — `rotationModes`, `rotationIntervals`,
-	`disabledDisplays` — are keyed by display and stay exactly where they are, because they describe
-	the screen and not what is on it.
+	Every stored website becomes a member of the default playlist. Per-display settings —
+	`rotationModes`, `rotationIntervals`, `disabledDisplays` — are keyed by display and stay exactly
+	where they are, because they describe the screen and not what is on it.
 
 	**Guarded on a flag of its own, not on the playlist list being empty.** No playlists is a state the
 	user can reach and stay in, and a migration that read that as "not done yet" would rebuild their
@@ -515,6 +540,13 @@ extension WebsitesController {
 	everything, which every display offers and each walks on its own. What they lose is the record of
 	which screen a website used to be pinned to, and that record described a rule this build no longer
 	has.
+
+	Which is why nothing here reads the pinning, and why the key is typed `[Website]`. A record written
+	before playlists carries a `display` object beside the website's own fields; the decoder is not
+	looking for that key, so it goes past it, and what comes out is the website. There used to be a
+	wrapper that read it and a `.map(\.website)` that dropped it again on the next line — the same
+	result, spelled as though the grouping above still existed. `WebsiteMigrationTests` runs a real
+	record with the field in it.
 	*/
 	func migrateToPlaylistsIfNeeded() {
 		guard !Defaults[.hasMigratedWebsitesToPlaylists] else {
@@ -527,50 +559,15 @@ extension WebsitesController {
 		// hand back an empty list and migrate nothing.
 		let stored = Defaults[.websites]
 
-		// `map`, not `filter` or `compactMap`. Every stored entry becomes a member: this runs once,
-		// against the only copy of a list the user built themselves, and an entry dropped here is
-		// dropped for good.
+		// The list whole, with nothing between the read and the write that could return fewer entries
+		// than it was given. Every stored entry becomes a member: this runs once, against the only copy
+		// of a list the user built themselves, and an entry dropped here is dropped for good.
 		Defaults[.playlists] = [
 			Playlist(
 				name: Playlist.defaultName,
-				websites: stored.map(\.website),
+				websites: stored,
 				isDefault: true
 			)
 		]
-	}
-}
-
-/**
-A website as the builds before playlists wrote it: the website itself, and the display it was pinned to.
-
-`Website` has no display of its own any more — a website belongs to a playlist and a display picks a
-playlist — and the pinning is exactly what `migrateToPlaylistsIfNeeded` above turns into playlists. So
-it has to be read out of the stored payload rather than off the model, and this is the shape that
-payload has. Nothing else reads it and nothing writes it at all.
-
-`Website(from:)` is handed the same decoder rather than a nested container because the stored payload
-is one flat object per website: the display sat beside the website's own fields, not inside them.
-`encode(to:)` puts it back the same way. Nothing calls it — the key is read-only — and it is written
-out anyway, because a `Codable` whose two halves disagree about the shape is a trap laid for whoever
-does call it.
-*/
-struct PinnedWebsite: Hashable, Codable, Defaults.Serializable {
-	var website: Website
-	var display: Display?
-
-	private enum CodingKeys: String, CodingKey {
-		case display
-	}
-
-	init(from decoder: any Decoder) throws {
-		website = try Website(from: decoder)
-		display = try decoder.container(keyedBy: CodingKeys.self).decodeIfPresent(Display.self, forKey: .display)
-	}
-
-	func encode(to encoder: any Encoder) throws {
-		try website.encode(to: encoder)
-
-		var container = encoder.container(keyedBy: CodingKeys.self)
-		try container.encodeIfPresent(display, forKey: .display)
 	}
 }

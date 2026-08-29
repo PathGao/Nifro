@@ -534,14 +534,10 @@ final class AppState: ObservableObject {
 
 	private func didLaunch() {
 		_ = statusItemButton
-		// Before the line below, not after it. Adding a website means adding it to a playlist, so the
-		// order that used to be right is now the wrong way round: on a first launch, the shipped
-		// websites would be filed under a default playlist made on the spot, and the migration would
-		// then run against the mirror those writes had produced and replace that playlist with another
-		// one holding the same eight sites. The list a display picks would have changed identity
-		// between two lines of the same launch.
-		WebsitesController.shared.migrateToPlaylistsIfNeeded()
-		WebsitesController.shared.installFeaturedWebsitesIfNeeded()
+		// Before `rebuildScenes`, because a scene reads the list this writes. The migration and the
+		// install inside it run in an order that matters and is argued for where it lives; this used to
+		// be that pair spelled out, which is the same order kept in two places at once.
+		WebsitesController.shared.prepareWebsiteStorage()
 		rebuildScenes()
 		setUpEvents()
 		showWelcomeScreenIfNeeded()
