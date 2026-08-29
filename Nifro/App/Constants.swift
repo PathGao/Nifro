@@ -26,6 +26,43 @@ enum Constants {
 	}
 }
 
+/**
+What is stored here, and what is deliberately not.
+
+Everything the app knows sorts into three classes, and the test that sorts it is **"can this be asked
+again?"** — asked of the machine, at the moment somebody wants the answer. Getting it wrong compiles,
+reviews clean and works on one display; what it produces is a setting the user made and lost, or a
+screen that comes back from a night unplugged as something they did not choose.
+
+**1. Askable. Do not store it — there is nothing to store.** The condition lifting restores the answer
+by itself. Whether this Mac is on battery is `AppState.isDeactivatedOnBattery`, a computed property
+with no storage anywhere behind it. Whether the screen is locked is fed by a system publisher. Whether
+a display is plugged in has no flag at all, and that absence is the proof rather than an oversight:
+`Display.all` is asked afresh every time, which is why a rebuild needs no record of what was attached
+last time.
+
+**2. Not askable, and the user pressed it. Store it, or their intent is lost.** `disabledDisplays`,
+`rotationModes`, `rotationIntervals`, and `currentWebsites` and `currentPlaylists` — which website a
+display shows and which list it is pointed at. Nothing prunes these when a display goes away: the
+choice was made about that screen, so a monitor unplugged at night has to come back in the morning as
+it was left. Forgetting one for good is a thing to ask for, and Restore Defaults is where it is asked.
+Every plain setting further down this file is class 2 too; the sort is only interesting where the
+thing is per display or per moment.
+
+**3. Not askable, and it describes one thing happening now. It must not outlive its host.**
+`browsingDisplays`, and `AppState.storedWebViewErrors` beside it in memory. When the display goes, the
+thing they describe stops existing, so there is nothing to restore — the entry is erased and made
+again on reconnect. `AppState.rebuildScenes` prunes both, and is the only place that could.
+
+Classes 1 and 2 together are what make unplug and replug behave, and they read as a contradiction only
+until they are told apart: the display coming back at all is class 1 restoring itself, and it coming
+back still switched off is class 2 never having been withdrawn.
+
+The one member out of place is `AppState.isManuallyDisabled`, which is class 2 — the user pressed
+Disable — and is a plain property that dies with the process. So the only "off" that survives a quit
+is the per-display one, which is what made the menu bar icon's old reading wrong at the moment it
+mattered most. Giving that switch storage is a change of its own.
+*/
 extension Defaults.Keys {
 	// The website list as it was before playlists, read exactly once and never written. It is the only
 	// input `migrateToPlaylistsIfNeeded` has, and plain `Website` is the whole of what that takes from
@@ -78,10 +115,8 @@ extension Defaults.Keys {
 	// than something a function has to keep true on every write. That is the whole of the change: there
 	// is no repair pass any more because there is no state a repair could find.
 	//
-	// Nothing forgets an entry, which puts this with `rotationModes` and the two beside it rather than
-	// with `browsingDisplays`: the user picked that wallpaper for that screen, so a monitor unplugged at
-	// night comes back in the morning showing it. An unplug does nothing else at all — a display that
-	// is gone has no scene, so there is nothing on that screen to move anywhere.
+	// Class 2 above, so nothing forgets an entry. An unplug does nothing else at all either — a display
+	// that is gone has no scene, so there is nothing on that screen to move anywhere.
 	//
 	// Which is why this is the mark and not the answer: it says what a display was told, and a display
 	// that is not there was told something it never carried out. `WebsitesController`'s header names
@@ -99,9 +134,8 @@ extension Defaults.Keys {
 	// fresh install draws "No Website" and waits to be told. It is also why the default playlist
 	// refuses a binding: it is the one every picker offers and every display falls back to.
 	//
-	// Nothing forgets an entry, which puts this with `currentWebsites` above rather than with
-	// `browsingDisplays`: the list a user chose for a screen is a choice about that screen, so a
-	// monitor unplugged at night comes back in the morning showing it.
+	// Class 2 above, with `currentWebsites`: the list a user chose for a screen is a choice about that
+	// screen, so nothing forgets an entry.
 	static let currentPlaylists = Key<[String: Playlist.ID]>("currentPlaylists", default: [:])
 	// Which displays are interactive, not whether any is. Browsing Mode was one flag for the whole app,
 	// so entering it on the monitor also raised the laptop's wallpaper over its desktop icons — and its

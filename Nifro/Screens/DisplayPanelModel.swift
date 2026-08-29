@@ -103,10 +103,12 @@ final class DisplayPanelModel: ObservableObject {
 		goes, and until this the panel's whole account of it was four columns each blaming their own
 		screen.
 
-		A sentence rather than the reason, because the column is the only thing that will ever draw it
-		and `AppState.DisabledReason` is not the panel's vocabulary. There is no control here to undo
-		either state — the app has no "turn me back on" button anywhere, which is its own gap — so this
-		is a reading and not a label on something.
+		A sentence rather than the reason, because a column draws text and `AppState.DisabledReason` is
+		not something to draw. It is not the only thing drawing this sentence any more — the menu bar
+		icon's tooltip says the same one when there is no wallpaper anywhere — which is why the words
+		are chosen at `DisabledReason.reading` rather than here. There is no control here to undo either
+		state — the app has no "turn me back on" button anywhere, which is its own gap — so this is a
+		reading and not a label on something.
 		*/
 		let disabledReading: String?
 
@@ -321,7 +323,9 @@ final class DisplayPanelModel: ObservableObject {
 			canRotate: controller.eligible(in: showing).count > 1,
 			isLoading: scene.isLoading,
 			hasLoadedItsWebsite: scene.hasLoadedItsWebsite,
-			disabledReading: Self.disabledReading,
+			// The app's own sentence for being off, which the menu bar icon's tooltip also says — one
+			// choice of words for one fact, kept where the reason itself is decided.
+			disabledReading: AppState.shared.disabledReason?.reading,
 			// Read here rather than in the view, with everything else the column says. The panel is the
 			// second reader of this store and the first one a user ever sees.
 			failure: AppState.shared.webViewError(on: scene.display)?.localizedDescription
@@ -359,26 +363,6 @@ final class DisplayPanelModel: ObservableObject {
 
 		return controller.ordered(controller.eligible(in: playlist), on: scene.display)
 	}
-
-	/**
-	What the panel says when the app itself is off.
-
-	One sentence each, and the second one is the reason this is not simply "off": the battery rule
-	takes every wallpaper away without anybody having asked for it in that moment, and a column that
-	will not name it leaves the user looking for a fault in their website. Neither sentence names a
-	control, because there is none to name.
-	*/
-	private static var disabledReading: String? {
-		switch AppState.shared.disabledReason {
-		case .switchedOff:
-			String(localized: "Nifro is off")
-		case .onBattery:
-			String(localized: "Off while this Mac is on battery")
-		case nil:
-			nil
-		}
-	}
-
 
 	/**
 	Hand the display's page over, or take it back.

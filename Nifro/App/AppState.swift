@@ -44,12 +44,14 @@ final class AppState: ObservableObject {
 
 	The observer is here for the same reason the ones on `WallpaperScene`'s loading state are: a
 	display unplugged mid-load takes its scene out of this list without any of that scene's own
-	properties moving, so the answer below changes without any of them having said so. Without this
-	the icon would go on pulsing for a load whose display is gone.
+	properties moving, so the answers below change without any of them having said so. Without this
+	the icon would go on pulsing for a load whose display is gone, and it would go on being drawn as
+	on because the last display still showing anything has just left.
 	*/
 	private(set) var scenes: [WallpaperScene] = [] {
 		didSet {
 			refreshLoadingIndicator()
+			refreshStatusItem()
 		}
 	}
 
@@ -68,6 +70,28 @@ final class AppState: ObservableObject {
 	*/
 	func refreshLoadingIndicator() {
 		statusItemButton.setShowingActivity(scenes.contains(where: \.isLoading))
+	}
+
+	/**
+	Say whether there is a wallpaper anywhere, on the menu bar icon.
+
+	Two readings of one fact, so they are settled by one call: the icon drawn dim, and the sentence
+	under the pointer. Written apart they parted — with every display switched off the icon was drawn
+	as fully on and the tooltip named the website the main display would have been showing.
+
+	The pulse is deliberately not in here. It answers a different question, it is driven from the
+	scenes as loads begin and end, and it is called far more often than this is.
+
+	Called wherever either half of "off" moves: `isEnabled`'s `didSet` for the app-wide switch,
+	`setDisplayEnabled` for one display's, and `scenes`' `didSet` for the list of displays itself,
+	because unplugging the one screen that was still on changes the answer with neither switch having
+	been touched. There is no observer on `disabledDisplays` and this adds none — `setDisplayEnabled`
+	is the one verb that writes that key, and the one thing that wipes it, Restore Defaults, ends in a
+	rebuild.
+	*/
+	func refreshStatusItem() {
+		statusItemButton.appearsDisabled = !isShowingWallpaper
+		refreshStatusItemTooltip()
 	}
 
 	/**
@@ -351,7 +375,7 @@ final class AppState: ObservableObject {
 			// itself.
 			objectWillChange.send()
 
-			statusItemButton.appearsDisabled = !isEnabled
+			refreshStatusItem()
 
 			guard isEnabled else {
 				for scene in scenes {
@@ -384,6 +408,33 @@ final class AppState: ObservableObject {
 				scene.resetRotationTimer()
 			}
 		}
+	}
+
+	/**
+	Whether any display has a wallpaper on it.
+
+	The question the menu bar icon and the Shortcuts action are actually asking, and neither of them
+	asked it: both read `isEnabled`, which is the app-wide switch and nothing else. None of the three
+	things that switch is made of — the Disable command, the lock screen, the battery rule — is per
+	display, so on a Mac with one display, pressing that display's power button in the panel took the
+	wallpaper away, took the menu bar band with it and stopped both timers while `isEnabled` never
+	moved. The icon stayed drawn as fully on, over a desktop with nothing on it.
+
+	Across a quit it is worse, and the wrong way round. `isManuallyDisabled` is a plain property that
+	dies with the process; `disabledDisplays` is written to disk. The only "off" that survives a
+	relaunch is exactly the one the icon refused to draw, so a Mac whose only display was switched off
+	cold-starts with a normal-looking icon over an app doing nothing at all.
+
+	Through `isSwitchedOff` and not by reading the two switches here, because that predicate is where
+	"off" is decided: a third thing that comes to mean off joins it and reaches this by existing. See
+	`WallpaperScene.isSwitchedOff`, and `SwitchedOffTests` for what happens when a site answers half of
+	it on its own.
+
+	`scenes` is empty only before the first `rebuildScenes`, and there is genuinely no wallpaper
+	anywhere at that moment, so the empty answer is the true one and needs no case of its own.
+	*/
+	var isShowingWallpaper: Bool {
+		scenes.contains { !$0.isSwitchedOff }
 	}
 
 	var isScreenLocked = false
@@ -438,6 +489,27 @@ final class AppState: ObservableObject {
 
 		/// The battery rule in Settings is on and the machine is running off its battery.
 		case onBattery
+
+		/**
+		What to tell the user, in one sentence.
+
+		One each, and the second is the reason this is not simply "off": the battery rule takes every
+		wallpaper away without anybody having asked for it in that moment, and a reading that will not
+		name it leaves the user looking for a fault in their website. Neither sentence names a control,
+		because there is none to name.
+
+		Here rather than in the panel, where it was written. The menu bar icon's tooltip has to answer
+		the same question for the whole machine, and two surfaces choosing their own words for one fact
+		is how the app comes to say two things about it.
+		*/
+		var reading: String {
+			switch self {
+			case .switchedOff:
+				String(localized: "Nifro is off")
+			case .onBattery:
+				String(localized: "Off while this Mac is on battery")
+			}
+		}
 	}
 
 	/**
@@ -527,13 +599,21 @@ final class AppState: ObservableObject {
 	}
 
 	/**
-	Say what the menu bar icon is about: the failure if there is one, and otherwise the page.
+	Say what the menu bar icon is about: why there is nothing on screen, the failure if there is one, or
+	the page.
 
 	One writer, for the reason `refreshLoadingIndicator` is one — the icon is a single glyph shared by
 	every display, so two per-display paths writing it directly meant whichever ran last spoke for all
 	of them. A routine reload finishing on the monitor replaced the laptop's failure with the monitor's
 	page title, and until the store below was per display the failure was not kept anywhere else
 	either, so it was simply gone.
+
+	Whether there is anything on screen at all is read before either, and that is the half that was
+	missing: with every display switched off this named a website, because the scenes still hold the
+	one they would be showing and nothing here asked whether they were showing it. A stale failure would have been the same claim one step
+	quieter — the page did not fail to arrive, nobody asked for it. The two sentences are the panel's
+	own, through `DisabledReason.reading`, and "Switched off" is the phrase its power button uses, for
+	the case where the app is running and every display has been switched off one at a time.
 
 	A failure outranks a title, because a title is always available and a failure is the thing worth
 	saying. Which failure, when two displays have one, is settled by the display key rather than by the
@@ -544,6 +624,11 @@ final class AppState: ObservableObject {
 	from places that are in the middle of building it.
 	*/
 	func refreshStatusItemTooltip() {
+		guard isShowingWallpaper else {
+			statusItemButton.toolTip = disabledReason?.reading ?? String(localized: "Switched off")
+			return
+		}
+
 		if let failure = storedWebViewErrors.min(by: { $0.key < $1.key })?.value {
 			statusItemButton.toolTip = "Error: \(failure.localizedDescription)"
 			return
@@ -696,22 +781,17 @@ final class AppState: ObservableObject {
 
 		scenes = kept
 
-		// Browsing Mode is "somebody is interacting with this page *right now*" — the one per-display
-		// entry that is a state rather than a preference, and so the one that cannot outlive the
-		// display. It lives in `Defaults` and nothing removed it, so a display unplugged while its
-		// Browsing Mode was on left the key behind across relaunches. The panel draws one column per
-		// scene, so the departed display had no button to switch it off from, and there was no other
-		// way out.
+		// Browsing Mode is somebody interacting with this page *right now*, which is class 3 in the sort
+		// at `Defaults.Keys`: it cannot outlive the display it is about. It lives in `Defaults` and
+		// nothing removed it, so a display unplugged while its Browsing Mode was on left
+		// the key behind across relaunches. The panel draws one column per scene, so the departed
+		// display had no button to switch it off from, and there was no other way out.
 		//
 		// Stated as "only displays that have a scene" rather than as a removal beside `tearDown`,
 		// because that also clears a key stranded by a version that had no pruning at all — and this
 		// runs on every display change, so it needs no unplug of its own to find one.
 		//
-		// The other per-display settings are deliberately left alone. `disabledDisplays`,
-		// `rotationModes` and `rotationIntervals` are preferences: a monitor switched off, pinned, or
-		// set to rotate hourly before it was unplugged has to come back that way, which is exactly what
-		// keeping its key buys. Forgetting one for good is a thing to ask for, and Restore Defaults is
-		// where it is asked.
+		// The other per-display keys are class 2 there and are deliberately left alone.
 		//
 		// Written only when it takes something away. `Defaults` observes with plain KVO and filters
 		// nothing, so storing back an identical set still publishes, and `SSWebView` subscribes to this
@@ -725,16 +805,9 @@ final class AppState: ObservableObject {
 			Defaults[.browsingDisplays].formIntersection(live)
 		}
 
-		// Which website each display is showing, and which playlist it is pointed at, are on the other
-		// side of that line, with the three preferences and not with Browsing Mode — and they are the
-		// case the line was drawn for: the user picked that wallpaper for that screen, so a monitor
-		// unplugged at night has to come back in the morning showing it. Nothing here forgets either
-		// entry, and nothing has to move one anywhere: a display that is gone has no scene, so there is
-		// no wallpaper on it to be pushed onto a screen the user did not choose it for.
-		//
-		// A failed load is state in the same sense, and is pruned for the same reason rather than kept
-		// for the opposite one: it describes a page that was on its way to a display that is gone. It
-		// is in memory rather than in `Defaults`, so this is the only place it could be dropped.
+		// A failed load is class 3 as well: it describes a page that was on its way to a display that is
+		// gone, so there is nothing left for it to be about. It is in memory rather than in `Defaults`,
+		// which makes this the only place it could ever be dropped.
 		storedWebViewErrors = storedWebViewErrors.filter { key, _ in
 			scenes.contains { Display.settingsKey(for: $0.display) == key }
 		}
@@ -831,6 +904,11 @@ final class AppState: ObservableObject {
 
 	/**
 	Switch one display off, or back on, without touching the others.
+
+	The one verb that writes `disabledDisplays`, which is why the icon is repainted from here and not
+	from an observer on the key. Nothing else moves when this display was the last one still showing
+	anything: `isEnabled` does not, so its `didSet` never ran, and until now that was the only thing
+	that ever drew the icon.
 	*/
 	func setDisplayEnabled(_ isEnabledForDisplay: Bool, on display: Display?) {
 		guard let scene = scenes.first(where: { $0.display == display }) else {
@@ -838,6 +916,10 @@ final class AppState: ObservableObject {
 		}
 
 		scene.isDisabledForDisplay = !isEnabledForDisplay
+
+		// Above the guard below, because the icon says whether there is a wallpaper anywhere and the
+		// setting has just been recorded whether or not the app is in a position to act on it.
+		refreshStatusItem()
 
 		guard isEnabled else {
 			// The app is off anyway; the setting is recorded and applies when it comes back.
