@@ -17,12 +17,23 @@ extension AppState {
 	The scene is passed rather than looked up. It used to find one by matching the list-wide current
 	website, which on two displays meant framing whichever screen last held the mark — the overlay
 	would appear on a page the user was not looking at.
+
+	`hasLoadedItsWebsite` is the same mistake one layer down, and the guard is here rather than on the
+	panel's Crop button because the button is one of three ways in — the keyboard shortcut and
+	`Action.chooseRegion` are the others, and neither of them can see a disabled button.
+	`WallpaperScene.toggleSound` is the other control that writes what the user chose against a website
+	and guards itself for the same reason. The region is
+	dragged out over whatever the web view is showing and stored on `scene.website`, so those two have
+	to be the same website or the user frames one page and adjusts another. Refusing is the whole
+	response: there is nothing to say, the state clears itself the moment a load succeeds, and the
+	panel already draws the failure that caused it.
 	*/
 	func beginCropSelection(on scene: WallpaperScene? = nil) {
 		guard
 			!isSelectingCrop,
 			let scene = scene ?? Optional(actingScene),
 			let website = scene.website,
+			scene.hasLoadedItsWebsite,
 			scene.screen != nil
 		else {
 			return

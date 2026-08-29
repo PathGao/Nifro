@@ -324,6 +324,41 @@ extension WallpaperScene {
 	}
 
 	/**
+	Mute this display's website, or unmute it.
+
+	Beside the reader above, because the two are one fact written and read: `shouldPlaySound` answers
+	off `website.audio` and this is the only thing that flips it.
+
+	It was written out twice instead — once in the `Action` table, once in the panel's column — which
+	is the shape `toggleBrowsingMode` was pulled out of one defect ago, and it went the same way. The
+	guard below reached only the copy that had one, so the shortcut had none at all.
+
+	**The guard.** `website` is where the display is heading and the web view holds where it is, and
+	this writes to the first while the user is listening to the second. They differ for the length of
+	a swap, and the column is disabled for exactly that long — but a swap that *fails* clears
+	`pendingWebView` without adopting anything, so the display sits there with the arriving website's
+	name over the previous website's page for as long as the network is down. Muting then wrote the
+	setting onto a website that is not making the sound, and the sound went on coming out; the next
+	successful load closed the window, so the column looked right again and the write was never seen
+	to be wrong.
+
+	Refusing is the whole response. There is nothing to say that the panel's failure line does not
+	already say, and the state clears itself the moment a load succeeds.
+	*/
+	func toggleSound() {
+		guard
+			hasLoadedItsWebsite,
+			let website
+		else {
+			return
+		}
+
+		WebsitesController.shared.update(website.id) {
+			$0.audio = $0.audio == .unmuted ? .muted : .unmuted
+		}
+	}
+
+	/**
 	Whether this display is switched off on its own.
 
 	Separate from the app-wide Disable, and beneath it: turning the app off turns every display off,

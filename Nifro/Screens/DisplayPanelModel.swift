@@ -76,6 +76,21 @@ final class DisplayPanelModel: ObservableObject {
 		let isLoading: Bool
 
 		/**
+		Whether the page on this display is the website the column above it is naming.
+
+		Carried rather than worked out from `websiteID`, because the column cannot work it out: it holds
+		the display's answer and the page is a second thing, which is `WallpaperScene.hasLoadedItsWebsite`
+		— read there so the panel and `beginCropSelection` cannot come to two answers about the same
+		display.
+
+		Only the controls that write to a website record read it, and they read it through `hasPage`,
+		which lists them. The name, the picture and the chooser go on describing the answer while the two
+		differ, which is what they are for: the picture is the page and the name is where the display is
+		heading, and a failed load is exactly the moment a user needs to see both.
+		*/
+		let hasLoadedItsWebsite: Bool
+
+		/**
 		Why the app is showing nothing anywhere, in the app's own words, or `nil` when it is showing
 		something.
 
@@ -305,6 +320,7 @@ final class DisplayPanelModel: ObservableObject {
 			// and did nothing when either was pressed, which is K24. One expression, asked twice.
 			canRotate: controller.eligible(in: showing).count > 1,
 			isLoading: scene.isLoading,
+			hasLoadedItsWebsite: scene.hasLoadedItsWebsite,
 			disabledReading: Self.disabledReading,
 			// Read here rather than in the view, with everything else the column says. The panel is the
 			// second reader of this store and the first one a user ever sees.
@@ -478,17 +494,18 @@ final class DisplayPanelModel: ObservableObject {
 		}
 	}
 
+	/**
+	Mute this display's website, or unmute it.
+
+	Through the scene's own verb, which is where the flip and the guard on it live — the button here
+	and the keyboard shortcut had a copy each, and the shortcut's copy never grew the guard.
+	*/
 	func toggleMuted(on display: Display?) {
-		guard
-			let scene = AppState.shared.scenes.first(where: { $0.display == display }),
-			let website = scene.website
-		else {
+		guard let scene = AppState.shared.scenes.first(where: { $0.display == display }) else {
 			return
 		}
 
-		WebsitesController.shared.update(website.id) {
-			$0.audio = $0.audio == .unmuted ? .muted : .unmuted
-		}
+		scene.toggleSound()
 
 		Task {
 			await refresh()
