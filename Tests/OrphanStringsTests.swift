@@ -109,6 +109,27 @@ struct OrphanStringsTests {
 	}
 
 	/**
+	Whether a fragment is written in the sources as text rather than swallowed by a longer name.
+
+	A bare substring search says yes to `RandomWebsiteIntent` for a fragment of a key no screen shows,
+	which is how a dead key survived. So a fragment whose edge is a letter or digit has to sit against
+	something that is not one — a quote, a space, punctuation, the end of the file — and only its
+	punctuation edges are left unguarded, since those already cannot be part of an identifier.
+	*/
+	private static func isWritten(_ fragment: String, in sources: String) -> Bool {
+		func isName(_ character: Character?) -> Bool {
+			character?.isLetter == true || character?.isNumber == true || character == "_"
+		}
+
+		return sources.ranges(of: fragment).contains { range in
+			let before = range.lowerBound == sources.startIndex ? nil : sources[sources.index(before: range.lowerBound)]
+			let after = range.upperBound == sources.endIndex ? nil : sources[range.upperBound]
+
+			return !(isName(fragment.first) && isName(before)) && !(isName(fragment.last) && isName(after))
+		}
+	}
+
+	/**
 	Every string in the catalogue is one something can put on screen.
 
 	Absolute, with no allowlist. A key that no source carries is not a judgement call — either
@@ -133,8 +154,10 @@ struct OrphanStringsTests {
 				continue
 			}
 
+			let written = fragments.contains { Self.isWritten($0, in: sources) }
+
 			#expect(
-				fragments.contains(where: sources.contains),
+				written,
 				"""
 				\"\(key.prefix(60))\" is in the catalogue and written in no source file, so it is \
 				translated into every language this app ships and shown in none of them. Delete it — and \
