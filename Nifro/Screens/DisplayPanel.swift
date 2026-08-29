@@ -156,11 +156,6 @@ private struct DisplayColumn: View {
 
 			VStack(spacing: 9) {
 				VStack(spacing: 9) {
-					MarqueeText(text: websiteLabel, isActive: isHovering)
-						.font(.subheadline)
-						.foregroundStyle(.secondary)
-						.frame(width: PanelMetrics.columnWidth, height: 16)
-
 					preview
 
 					rotationControls
@@ -219,17 +214,6 @@ private struct DisplayColumn: View {
 	*/
 	private var inertOpacity: Double {
 		column.isLoading ? 0.45 : 1
-	}
-
-	/**
-	The website's name, or the two words that stand in for it.
-
-	One property for the marquee above the picture and the chooser below it, because the two are
-	naming the same thing on the same card — a column with two spellings of "there is nothing here"
-	is a column disagreeing with itself.
-	*/
-	private var websiteLabel: String {
-		column.websiteName ?? String(localized: "No Website")
 	}
 
 	/**
@@ -512,10 +496,18 @@ private struct DisplayColumn: View {
 
 	Adding a website is a different act with a different home, so a playlist with nothing in it offers
 	nothing here rather than a form: the panel points displays at things that exist.
+
+	The two words standing in for a missing name are written here rather than shared with the picture
+	above, which spells the same two words for a neighbouring fact. They are not one statement: the
+	picture asks whether this display has a website at all, and this asks whether the website it has
+	gave the app anything to call it — a page whose `<title>` is empty has one and no name for it. They
+	were shared, through a `websiteLabel` that also fed a caption over the picture; the caption said
+	the name a second time on a card 260 points wide and is gone, and a name held in common by a single
+	caller is only a second spelling of the line it stands for.
 	*/
 	private var picker: some View {
 		chooser(
-			title: websiteLabel,
+			title: column.websiteName ?? String(localized: "No Website"),
 			width: PanelMetrics.websiteChooserWidth,
 			isEnabled: !column.choices.isEmpty,
 			isLoading: column.isLoading
@@ -560,7 +552,7 @@ private struct DisplayColumn: View {
 			// An explicit height, because `MarqueeText` is a `GeometryReader` and has no height of its
 			// own to offer the label. No chevron of ours beside it: a stock pull-down draws one itself,
 			// at the trailing edge, where every other pull-down on the Mac has it.
-			MarqueeText(text: title, isActive: isHovering)
+			MarqueeText(text: title)
 				.frame(height: 16)
 		}
 		.controlSize(.large)

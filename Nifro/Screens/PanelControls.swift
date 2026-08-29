@@ -258,49 +258,98 @@ A website's name is whatever the site put in its `<title>`, so the column has to
 "Windy" to a sentence. Truncating loses the end, which for a video is the part that says which video;
 sliding shows all of it without making the column wider than its neighbours.
 
-It only slides while the column is under the pointer. A panel with two names sliding at once, forever,
-is a panel nobody can read the rest of — and the whole reason to look at a column is that you are
-already pointing at it.
+It slides because the name does not fit, and for no other reason. It used to slide only while the
+column was under the pointer, on the argument that four names moving at once — two choosers, two
+displays — is a panel nobody can read the rest of. The pointer turned out to be the wrong place to ask
+the question: a name is too long to read whether or not somebody happens to be over that column, and a
+label that tells you the rest of itself only once you have found where to hover has kept it. What
+makes four of them readable instead is the rest at each end of every pass, in `slide` below — at any
+moment most of them are standing still, and each one stands still where its name can be read from.
 */
 struct MarqueeText: View {
 	let text: String
-	let isActive: Bool
 
-	@State private var overflow = 0.0
+	/**
+	How wide the name wants to be.
+
+	The width it is *allowed* is not kept beside it. That one comes from the reader in `body`, which
+	SwiftUI re-evaluates on every layout pass, so the distance between the two is worked out there
+	rather than stored — a stored distance is the defect this type had, one level up.
+	*/
+	@State private var textWidth = 0.0
+
 	@State private var isSlid = false
 
 	var body: some View {
 		GeometryReader { outer in
+			let overflow = max(0, textWidth - outer.size.width)
+
 			Text(text)
 				.fixedSize()
-				.background {
-					GeometryReader { inner in
-						Color.clear.onAppear {
-							overflow = max(0, inner.size.width - outer.size.width)
-						}
-					}
-				}
+				// The measurement follows the name. It was read in an `onAppear` on a nested reader, and
+				// `onAppear` fires once per view identity — while this view keeps its identity through a
+				// change of text, because a rotation swaps the website under a panel that is already open.
+				// So a long name inherited a short one's measurement, was centred by the alignment below
+				// and clipped at both ends at once, which is the one thing that alignment exists to
+				// prevent; the reverse left a short name hard against the left edge.
+				//
+				// `onGeometryChange` is the reading that stays current. It re-evaluates on every layout
+				// pass and delivers only when the number actually moves, so the six rebuilds a second the
+				// panel does while it is open cost nothing here — and it hands the value over after the
+				// pass rather than during it, which is what stops the state written back from feeding the
+				// layout that produced it.
+				.onGeometryChange(for: Double.self) { $0.size.width } action: { textWidth = $0 }
 				.offset(x: isSlid ? -overflow : 0)
 				// Centred while it fits, and left-aligned once it does not — a name that has to slide has
 				// to start at its beginning, and centring one that overflows would cut both ends at once.
 				.frame(width: outer.size.width, alignment: overflow > 0 ? .leading : .center)
 				.clipped()
+				.task(id: overflow) { await slide(overflow) }
 		}
-		.onChange(of: isActive) {
-			guard isActive, overflow > 0 else {
-				// Back to the start rather than wherever it had got to, so the next look begins at the
-				// beginning of the name.
-				withAnimation(.easeOut(duration: 0.2)) {
-					isSlid = false
+	}
+
+	/**
+	Out, back, and again, standing still at each end.
+
+	A loop rather than `repeatForever`, for two reasons that are both about stopping. A repeating
+	animation belongs to SwiftUI from the moment it starts and nothing in the view ever ends it; this
+	draws inside a popover, which spends almost all of its life closed. A `task` is cancelled when its
+	view goes away and runs again when it comes back, so whether anybody can see this is asked of the
+	framework rather than assumed of it. The second reason is the pause: `repeatForever` repeats one
+	animation, and whether a `delay` attached to that animation belongs to each repetition or only to
+	the first is written down nowhere. Spelled out, there is no reading of it to get wrong.
+
+	The pause is at both ends and before the first move, so a name that has sat there a minute behaves
+	exactly like one that arrived a moment ago: whatever you look at, you find it still, and it starts
+	0.4 seconds later. A pause only at the beginning would have made those two different — the label
+	you happened to catch on its first pass readable, and every pass after it a name already moving.
+
+	Paced by how far it has to go, so a name twice as long takes twice as long rather than twice the
+	speed. `id: overflow` is what a changed name arrives through: a new distance cancels this and runs
+	it again from the start, instead of sliding the new name by the old one's measurement.
+	*/
+	@MainActor
+	private func slide(_ overflow: Double) async {
+		isSlid = false
+
+		guard overflow > 0 else {
+			return
+		}
+
+		// Thirty points a second.
+		let travel = overflow / 30
+
+		while !Task.isCancelled {
+			do {
+				try await Task.sleep(for: .seconds(0.4))
+
+				withAnimation(.linear(duration: travel)) {
+					isSlid.toggle()
 				}
 
+				try await Task.sleep(for: .seconds(travel))
+			} catch {
 				return
-			}
-
-			// Paced by how far it has to go, so a name twice as long takes twice as long rather than
-			// twice the speed. `autoreverses` walks it back instead of snapping.
-			withAnimation(.linear(duration: overflow / 30).delay(0.4).repeatForever(autoreverses: true)) {
-				isSlid = true
 			}
 		}
 	}
