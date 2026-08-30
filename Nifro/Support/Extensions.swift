@@ -551,10 +551,10 @@ extension NSAlert {
 	*/
 	@discardableResult
 	static func show(
-		title: String,
-		message: String? = nil,
+		title: LocalizedStringResource,
+		message: LocalizedStringResource? = nil,
 		style: Style = .warning,
-		buttonTitles: [String] = [],
+		buttonTitles: [LocalizedStringResource] = [],
 		defaultButtonIndex: Int? = nil
 	) async -> NSApplication.ModalResponse {
 		await NSAlert(
@@ -574,10 +574,10 @@ extension NSAlert {
 	*/
 	@discardableResult
 	static func showModal(
-		title: String,
-		message: String? = nil,
+		title: LocalizedStringResource,
+		message: LocalizedStringResource? = nil,
 		style: Style = .warning,
-		buttonTitles: [String] = [],
+		buttonTitles: [LocalizedStringResource] = [],
 		defaultButtonIndex: Int? = nil
 	) -> NSApplication.ModalResponse {
 		NSAlert(
@@ -612,18 +612,18 @@ extension NSAlert {
 	}
 
 	convenience init(
-		title: String,
-		message: String? = nil,
+		title: LocalizedStringResource,
+		message: LocalizedStringResource? = nil,
 		style: Style = .warning,
-		buttonTitles: [String] = [],
+		buttonTitles: [LocalizedStringResource] = [],
 		defaultButtonIndex: Int? = nil
 	) {
 		self.init()
-		self.messageText = title
+		self.messageText = String(localized: title)
 		self.alertStyle = style
 
 		if let message {
-			self.informativeText = message
+			self.informativeText = String(localized: message)
 		}
 
 		addButtons(withTitles: buttonTitles)
@@ -635,10 +635,17 @@ extension NSAlert {
 
 	/**
 	Adds buttons with the given titles to the alert.
+
+	`LocalizedStringResource` rather than `String`, which is the point of this method existing rather
+	than `addButton(withTitle:)` being called directly. AppKit's own takes a `String`, so a literal and
+	a translated string have the same type there and nothing can tell them apart — which is how three
+	alerts in this file ended up with a localized "Log In" beside a hardcoded "Cancel". Here a literal
+	at the call site is a key: the compiler refuses a plain `String`, and Xcode extracts the literal
+	into the catalogue on its own.
 	*/
-	func addButtons(withTitles buttonTitles: [String]) {
+	func addButtons(withTitles buttonTitles: [LocalizedStringResource]) {
 		for buttonTitle in buttonTitles {
-			addButton(withTitle: buttonTitle)
+			addButton(withTitle: String(localized: buttonTitle))
 		}
 	}
 }
@@ -671,16 +678,16 @@ extension NSError {
 	- Parameter domainPostfix: String to append to the `domain` to make it easier to identify the error. The domain is the app's bundle identifier.
 	*/
 	static func appError(
-		_ description: String,
-		recoverySuggestion: String? = nil,
+		_ description: LocalizedStringResource,
+		recoverySuggestion: LocalizedStringResource? = nil,
 		userInfo: [String: Any] = [:],
 		domainPostfix: String? = nil
 	) -> Self {
 		var userInfo = userInfo
-		userInfo[NSLocalizedDescriptionKey] = description
+		userInfo[NSLocalizedDescriptionKey] = String(localized: description)
 
 		if let recoverySuggestion {
-			userInfo[NSLocalizedRecoverySuggestionErrorKey] = recoverySuggestion
+			userInfo[NSLocalizedRecoverySuggestionErrorKey] = String(localized: recoverySuggestion)
 		}
 
 		return .init(
@@ -2213,9 +2220,9 @@ extension WKWebView {
 	func defaultConfirmHandler(message: String) async -> Bool {
 		let alert = NSAlert()
 		alert.alertStyle = .informational
+		// The page's own text, verbatim on purpose — it is not ours and there is nothing to translate.
 		alert.messageText = message
-		alert.addButton(withTitle: "OK")
-		alert.addButton(withTitle: "Cancel")
+		alert.addButtons(withTitles: ["OK", "Cancel"])
 		return await alert.run() == .alertFirstButtonReturn
 	}
 
@@ -2225,9 +2232,9 @@ extension WKWebView {
 	func defaultPromptHandler(prompt: String, defaultText: String?) async -> String? {
 		let alert = NSAlert()
 		alert.alertStyle = .informational
+		// The page's own text, verbatim on purpose — it is not ours and there is nothing to translate.
 		alert.messageText = prompt
-		alert.addButton(withTitle: "OK")
-		alert.addButton(withTitle: "Cancel")
+		alert.addButtons(withTitles: ["OK", "Cancel"])
 
 		let textField = AutofocusedTextField(frame: CGRect(x: 0, y: 0, width: 200, height: 22))
 		textField.stringValue = defaultText ?? ""
@@ -2288,9 +2295,8 @@ extension WKWebView {
 		}
 
 		let alert = NSAlert()
-		alert.messageText = "Log in to \(host)"
-		alert.addButton(withTitle: String(localized: "Log In"))
-		alert.addButton(withTitle: "Cancel")
+		alert.messageText = String(localized: "Log in to \(host)")
+		alert.addButtons(withTitles: ["Log In", "Cancel"])
 
 		let view = NSView(frame: CGRect(x: 0, y: 0, width: 200, height: 54))
 		alert.accessoryView = view

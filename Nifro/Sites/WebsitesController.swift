@@ -561,20 +561,38 @@ extension WebsitesController {
 		// own — and `all.first` was then one of theirs.
 		let installed = SiteCatalog.featured.compactMap { $0.add() }
 
-		// Nothing is assigned to a display. It used to be: the Nth of these went to the Nth attached
-		// display, because a scene existed only for a display some website named, so the second screen
-		// was blank unless something was pinned to it. Scenes come from `Display.all` now, so every
-		// attached display has one whether or not a website names it, and the pinning would be a
-		// decision made on the user's behalf — one they then have to find and undo before they can use
-		// these eight as the single list they look like.
+		// The Nth screen gets the Nth of them, which is what `SiteCatalog.featured` has said all along
+		// and what the install stopped doing at #64. Adding makes each one current in turn, so without
+		// a placement here every screen would be showing whichever was added last rather than the first
+		// of a list that is ordered on purpose — and on two screens somebody would be shown one website
+		// twice by an app whose whole point is that each screen can hold a different page.
+		//
+		// **This is not the pinning that was taken out, and the objection to that one does not reach
+		// it.** Before #64 a scene existed only for a display some website named, so placing the second
+		// website on the second screen meant writing a pin onto the website itself — a decision made on
+		// the user's behalf that they then had to find and undo. Scenes come from `Display.all` now, so
+		// all this writes is which page each screen is showing: the same key the panel writes when they
+		// pick another one, changed by picking another one, and carried off by the next rotation tick.
+		//
+		// Main screen first rather than `Display.all`'s own order, so the first of the list lands on the
+		// screen with the menu bar whatever the arrangement says. `zip` handles both mismatches: more
+		// screens than websites leaves the extra screens to `scheduled`, which starts them at the top of
+		// the list, and more websites than screens leaves the rest in the list unshown, which is where a
+		// list of eight is meant to be.
+		let displays = firstLaunchDisplayOrder(main: Display.main, attached: Display.all)
 
-		// Adding makes each one current in turn, so without this the wallpaper would be whichever was
-		// added last rather than the first of a list that is ordered on purpose.
-		guard let first = installed.first.flatMap({ all[id: $0] }) else {
-			return
+		for (index, (display, id)) in zip(displays, installed).enumerated() {
+			guard let website = all[id: id] else {
+				continue
+			}
+
+			// Only the first placement switches its screen on, which is what this has always done: a
+			// fresh install has to put something up somewhere. The rest do not, because the Advanced
+			// pane's Add the Default Playlist runs this same function, and a screen the user switched
+			// off is not asking to be switched back on by a button that says it adds a playlist. On a
+			// fresh install it costs nothing either way — `disabledDisplays` starts empty.
+			makeCurrent(website, on: display, switchingDisplayOn: index == 0)
 		}
-
-		makeCurrent(first, on: Display.main)
 	}
 }
 

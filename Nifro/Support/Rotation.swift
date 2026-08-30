@@ -155,3 +155,26 @@ func orderCarriedForward<ID: Hashable>(_ order: [ID], through eligible: [ID]) ->
 
 	return kept + eligible.filter { !known.contains($0) }
 }
+
+/**
+The screens the shipped websites are dealt onto, the first time the app runs, in the order they are
+dealt.
+
+The Nth screen gets the Nth shipped website. It is stated for any number of screens rather than for
+the one and two cases, because "the first website, on the main screen" alone left every other screen
+showing that same first website — one page repeated across a desk by an app whose point is that each
+screen can hold a different one.
+
+**Main first, whatever order the screens come in.** `NSScreen.screens` is ordered by the arrangement
+rather than by which screen carries the menu bar, and the first of a list ranked on purpose belongs on
+the screen the user is looking at. The main screen is then dropped from the rest, so it is not dealt a
+second website further down.
+
+**An empty result would mean no wallpaper at all**, so no screens at all still yields one placement,
+against `nil` — the fallback key, which is what a screen that arrives later reads from. That case is
+not hypothetical: `Display.all` is empty on a Mac with the lid shut and nothing plugged in.
+*/
+func firstLaunchDisplayOrder<Screen: Equatable>(main: Screen?, attached: [Screen]) -> [Screen?] {
+	let ordered = (main.map { [$0] } ?? []) + attached.filter { $0 != main }
+	return ordered.isEmpty ? [nil] : ordered
+}

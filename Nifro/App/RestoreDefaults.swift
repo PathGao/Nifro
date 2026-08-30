@@ -126,11 +126,11 @@ enum RestoreDefaults {
 	*/
 	static func confirmAndRun() {
 		let alert = NSAlert(
-			title: String(localized: "Restore all settings?"),
-			message: String(localized: "Reset: every setting, every keyboard shortcut, and what each display is showing. Every display goes back to the default playlist and its first website. There is no undo.\n\nKept: your websites and playlists, your logins, the language you picked, and whether Nifro launches at login."),
+			title: "Restore all settings?",
+			message: "Reset: every setting, every keyboard shortcut, and what each display is showing. Every display goes back to the default playlist and its first website. There is no undo.\n\nKept: your websites and playlists, your logins, the language you picked, and whether Nifro launches at login.",
 			buttonTitles: [
-				String(localized: "Restore All Settings"),
-				String(localized: "Cancel")
+				"Restore All Settings",
+				"Cancel"
 			],
 			defaultButtonIndex: 1
 		)

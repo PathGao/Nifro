@@ -56,7 +56,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			featuredRank: 3
+			featuredRank: 2
 		),
 		.init(
 			name: "Cocktail Chart",
@@ -342,7 +342,7 @@ extension SiteCatalog {
 			javaScript: nil,
 			requiresLogin: false,
 			playsSound: false,
-			featuredRank: 2
+			featuredRank: 3
 		),
 		.init(
 			name: "Twitch",

@@ -302,8 +302,8 @@ final class AppState: ObservableObject {
 		SSApp.runOnce(identifier: "activatedBrowsingMode") {
 			DispatchQueue.main.async {
 				NSAlert.showModal(
-					title: String(localized: "Lets you temporarily interact with the website, to log in or scroll to a particular place."),
-					message: String(localized: "If you cannot see the website, hide some windows to reveal the desktop.")
+					title: "Lets you temporarily interact with the website, to log in or scroll to a particular place.",
+					message: "If you cannot see the website, hide some windows to reveal the desktop."
 				)
 			}
 		}
@@ -673,7 +673,7 @@ final class AppState: ObservableObject {
 		}
 
 		if let failure = storedWebViewErrors.min(by: { $0.key < $1.key })?.value {
-			statusItemButton.toolTip = "Error: \(failure.localizedDescription)"
+			statusItemButton.toolTip = String(localized: "Error: \(failure.localizedDescription)")
 			return
 		}
 

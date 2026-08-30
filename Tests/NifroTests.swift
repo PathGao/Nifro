@@ -1113,8 +1113,8 @@ struct ShippedWebsitesTests {
 	func featuredOrder() throws {
 		#expect(try Self.featured().map(\.name) == [
 			"Floor796",
-			"Svalbard — A Journey to the North Pole",
 			"Calculating Empires",
+			"Svalbard — A Journey to the North Pole",
 			"WindowSwap",
 			"World Monitor",
 			"Windy",
@@ -1133,6 +1133,32 @@ struct ShippedWebsitesTests {
 	@Test("Every shipped website has its own rank")
 	func featuredRanksAreUnique() throws {
 		#expect(try Self.featured().compactMap(\.featuredRank) == Array(1...8))
+	}
+
+	/**
+	The placement half of the order above: ranking the list decides nothing if every screen is dealt
+	the same page off the top of it.
+
+	`firstLaunchDisplayOrder` rather than the install, because the install writes `Defaults`, asks
+	`NSScreen` and needs a running app — the arithmetic is the part that can be wrong, so it is the
+	part that was pulled out where it can be called. What it hands back is zipped against the ranked
+	websites, so its Nth entry is the screen the Nth website lands on.
+	*/
+	@Test("The Nth screen is dealt the Nth shipped website, main screen first")
+	func firstLaunchPlacement() {
+		#expect(firstLaunchDisplayOrder(main: "main", attached: ["main", "side"]) == ["main", "side"])
+
+		// The arrangement puts the main screen second; the first website still belongs on it.
+		#expect(firstLaunchDisplayOrder(main: "main", attached: ["side", "main"]) == ["main", "side"])
+
+		// More screens than websites: `zip` stops at the eighth, and the ninth screen starts at the top
+		// of the list on its own. More websites than screens: the rest stay in the list, unshown.
+		#expect(firstLaunchDisplayOrder(main: "a", attached: ["a", "b", "c"]) == ["a", "b", "c"])
+		#expect(Array(zip(firstLaunchDisplayOrder(main: "a", attached: ["a", "b"]), 1...8)).count == 2)
+
+		// A Mac with the lid shut and nothing plugged in still gets one wallpaper, under the key a
+		// screen that arrives later reads from.
+		#expect(firstLaunchDisplayOrder(main: String?.none, attached: []) == [nil])
 	}
 
 	/**

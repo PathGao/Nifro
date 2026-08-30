@@ -377,7 +377,7 @@ struct AddWebsiteScreen: View {
 		}
 
 		guard url.appendingPathComponent("index.html", isDirectory: false).exists else {
-			await NSAlert.show(title: String(localized: "Please choose a directory that contains a “index.html” file."))
+			await NSAlert.show(title: "Please choose a directory that contains a “index.html” file.")
 			return await chooseLocalWebsite()
 		}
 

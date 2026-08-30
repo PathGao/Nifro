@@ -47,12 +47,12 @@
         }
       }
     },
-    "A list of pages that work well as wallpapers, each with the settings that make it work; adding one takes a single file.": {
+    "A list of pages that work well as wallpapers, each with the settings that make it work.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "一份适合当壁纸的网页清单，每条都带着让它好用的设置；添加一条只需要一个文件。"
+            "value": "一份适合当壁纸的网页清单，每条都带着让它好用的设置。"
           }
         }
       }
@@ -657,6 +657,16 @@
         }
       }
     },
+    "Double-click a website in the list to edit it, toggle dark mode, add custom CSS/JavaScript, and more.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "在列表里双击一个网站即可编辑：切换深色模式、加自定义 CSS/JavaScript，等等。"
+          }
+        }
+      }
+    },
     "Drag or scroll to move the frame · pinch to resize · Return to keep · Esc to cancel": {
       "localizations": {
         "zh-Hans": {
@@ -1017,6 +1027,16 @@
         }
       }
     },
+    "Invalid URL: %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "URL 无效：%@"
+          }
+        }
+      }
+    },
     "Invert colors": {
       "localizations": {
         "zh-Hans": {
@@ -1187,6 +1207,16 @@
         }
       }
     },
+    "Log in to %@": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "登录 %@"
+          }
+        }
+      }
+    },
     "Main Display": {
       "localizations": {
         "zh-Hans": {
@@ -1277,16 +1307,6 @@
         }
       }
     },
-    "Next": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "下一个"
-          }
-        }
-      }
-    },
     "Next website": {
       "localizations": {
         "zh-Hans": {
@@ -1317,12 +1337,32 @@
         }
       }
     },
+    "Nifro is open source and its issue tracker is open. If something is broken, missing, or just annoying, the feedback button in the app goes straight there.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nifro 是开源的，问题追踪也是公开的。有东西坏了、缺了，或者只是用着别扭，app 里的反馈按钮直接通向那里。"
+          }
+        }
+      }
+    },
     "Nifro is open source under the MIT licence.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
             "value": "Nifro 以 MIT 许可开源。"
+          }
+        }
+      }
+    },
+    "Nifro lives in the menu bar, towards the right of the screen. Click its icon and choose “Add Website…” to get started.\n\nUse “Browsing Mode” when you need to log into a site or interact with it. Everything you do there is remembered, so you only have to sign in once.\n\nNot sure what to put up there? “Site Gallery…” in the same menu lists pages that work well as wallpapers, each with the settings that make it work.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nifro 待在菜单栏靠右的位置。点它的图标，选“添加网站…”就可以开始了。\n\n需要登录网站或者和它交互时，用“浏览模式”。在那里做的一切都会记住，所以只需登录一次。\n\n不知道该放什么？同一个菜单里的“推荐站点…”列出了适合当壁纸的网页，每条都附带让它好用的设置。"
           }
         }
       }
@@ -1423,6 +1463,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "没有匹配的网站"
+          }
+        }
+      }
+    },
+    "OK": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "好"
           }
         }
       }
@@ -1617,16 +1667,6 @@
         }
       }
     },
-    "Previous": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "上一个"
-          }
-        }
-      }
-    },
     "Previous website": {
       "localizations": {
         "zh-Hans": {
@@ -1663,16 +1703,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "区域"
-          }
-        }
-      }
-    },
-    "Reload": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "重新加载"
           }
         }
       }
@@ -1957,6 +1987,16 @@
         }
       }
     },
+    "Select the directory “%@”.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "请选取“%@”这个文件夹。"
+          }
+        }
+      }
+    },
     "Set Current Website": {
       "localizations": {
         "zh-Hans": {
@@ -2097,16 +2137,6 @@
         }
       }
     },
-    "Sound": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "声音"
-          }
-        }
-      }
-    },
     "Starts Nifro when you log in, so the wallpaper is already up when you reach the desktop.": {
       "localizations": {
         "zh-Hans": {
@@ -2133,16 +2163,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "提交站点…"
-          }
-        }
-      }
-    },
-    "Switch": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "切换网站"
           }
         }
       }
@@ -2243,6 +2263,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "原生默认播放列表不可绑定显示器。请复制后再绑定。"
+          }
+        }
+      }
+    },
+    "The command “%@” is not supported.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "不支持“%@”这个命令。"
           }
         }
       }
@@ -2577,6 +2607,16 @@
         }
       }
     },
+    "You will need to log in through Browsing Mode once.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需要先用浏览模式登录一次。"
+          }
+        }
+      }
+    },
     "Zoom In": {
       "localizations": {
         "zh-Hans": {
@@ -2627,6 +2667,16 @@
         }
       }
     },
+    "by PathGao": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "作者 PathGao"
+          }
+        }
+      }
+    },
     "min": {
       "localizations": {
         "zh-Hans": {
@@ -2643,6 +2693,16 @@
           "stringUnit": {
             "state": "translated",
             "value": "显示时间。"
+          }
+        }
+      }
+    },
+    "sign-in": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "需登录"
           }
         }
       }
