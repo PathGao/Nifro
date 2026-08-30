@@ -281,8 +281,8 @@ private struct DisplayColumn: View {
 			PanelButton(
 				symbol: column.rotationMode.symbol,
 				label: column.rotationMode.label,
-				// Lit while it is doing something. Pinned is the resting state and says so by staying dark.
-				isOn: column.rotationMode != .pinned
+				// This always names the selected mode, so Pin, Loop and Random all use the selected state.
+				isOn: true
 			) {
 				model.cycleRotationMode(on: column.display)
 			}
@@ -442,6 +442,7 @@ private struct DisplayColumn: View {
 				PanelButton(
 					symbol: column.isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill",
 					label: column.isMuted ? String(localized: "Muted") : String(localized: "Playing sound"),
+					isOn: !column.isMuted,
 					isEnabled: hasPage
 				) {
 					model.toggleMuted(on: column.display)
@@ -453,7 +454,7 @@ private struct DisplayColumn: View {
 					// Lit while the wallpaper is up, like every other lit control in the panel. It used
 					// to be the inverse — lit while the display was switched *off* — which made this the
 					// one control reading its lit state as "this button is engaged" instead of as "the
-					// thing it turns on is on". Five controls now answer that question the same way.
+					// thing it turns on is on". The panel's stateful controls answer that question the same way.
 					isOn: column.isShowing
 				) {
 					model.toggleShowing(on: column.display)
