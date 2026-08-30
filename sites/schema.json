@@ -66,7 +66,7 @@
         "snapshot",
         "live"
       ],
-      "description": "Nothing reads this field today. The two rendering backends it selected between were built, measured and taken back out (docs/ROADMAP.md section 4), and it is recorded so the answer does not have to be worked out again for 38 sites when they return. snapshot: the page settles and then holds still, so it would not need to keep rendering. live: the page animates, or being able to click it is the point. Default to snapshot; only say live when animation or interaction is what the page is for."
+      "description": "Nothing reads this field today. The two rendering backends it selected between were built, measured and taken back out; see the ‘Lower idle-wallpaper cost’ experiment in docs/ROADMAP.md. It is recorded so the answer does not have to be worked out again for every site if that experiment returns. snapshot: the page settles and then holds still, so it would not need to keep rendering. live: the page animates, or being able to click it is the point. Default to snapshot; only say live when animation or interaction is what the page is for."
     },
     "backendNote": {
       "type": "string",

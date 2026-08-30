@@ -111,95 +111,94 @@ empties it on demand.
 
 Inspired by [Plash](https://github.com/sindresorhus/Plash) by Sindre Sorhus.
 
-Nifro exists because a website-as-wallpaper app, as the idea is usually built, rests on two
-assumptions worth revisiting:
+Nifro starts with the same idea: use a web page as your desktop wallpaper. Everything around that idea
+has been rebuilt.
 
-- It keeps a browser rendering continuously to display content that changes once a minute.
-- It is not really a wallpaper. It is a transparent window sitting just above one.
+The interface makes the relationship between websites, playlists and displays easy to see and control.
+Each display has its own wallpaper, controls and state. You can crop a page to the part that belongs on
+your desktop, and manage sites as playlists instead of a flat list.
 
-Undoing those is what this fork is about, and the first one has been harder than it looks: two
-rendering backends, occlusion measurement and automatic still detection were all built, and every one
-of them turned out to own an answer that Browsing Mode also owns. They came back out — 811 lines — and
-go back in one piece at a time, each with a measurement first. [docs/ROADMAP.md](docs/ROADMAP.md) §2
-has what that cost and what has to be true before any of it returns.
+Performance and day-to-day use are part of that redesign too. The idea remains; nearly every part of
+the app that delivers it has been rebuilt.
 
 ## What it does
 
-**Frame part of a page by moving it.** Drag or two-finger scroll the wallpaper, pinch to zoom, and
-what you leave on screen is the region. You aim at the result rather than at the thing you are
-framing, and it starts from the region a website already has, so it adjusts as well as creates. The
-page still lays out at full size, so the site does not reflow into something you did not frame, and
-the region is re-rendered rather than scaled up, so text stays sharp.
+**Put a web page on your desktop.** Use a live camera, an art site, a map, a dashboard or any other
+page that works better in the background than in another browser tab.
 
-**A region survives moving to another display.** It is stored as a place and a magnification rather
-than a rectangle, so a screen of a different shape works out its own rectangle around the same part
-of the page.
+**Give every display its own page.** On a multi-display Mac, each screen can show something different.
+The menu-bar panel puts every display side by side, with its current page and only its own controls.
 
-**One page per display, and a panel that shows them side by side.** Assign a website to a screen and
-each screen gets its own. The menu bar icon opens one column per display: a live preview of what is on
-it, its name, the controls that belong to that screen alone — mute, off, previous and next, pin or
-rotate, Crop, Browsing Mode — and nothing that would apply to a screen you were not looking at.
+**Show only the useful part of a page.** Drag, scroll or zoom to frame the region you want. Nifro
+remembers that region and keeps the same place in view when you move it to a display of another size.
+
+**Organize sites as playlists.** Make playlists for work, scenery or anything else, then let a display
+stay on one site, move through them in order or at random, or follow each site's schedule.
 
 <p align="center">
   <img src="assets/panel-two-displays.jpg" alt="The display panel with one column per screen" width="900">
 </p>
 
-**Rotation with hours.** Rotate through the websites on a display, and let a website say when it
-is allowed to be up. A schedule never leaves a display empty.
+**Use a page when you need to.** Hold a key to click, scroll and zoom it; let go and it becomes a
+wallpaper again. Sound and link behaviour are remembered for each website.
 
-**Hold a key to use the page.** Press and hold to click, scroll and zoom; let go and it is a
-wallpaper again.
+**Start from a gallery or make your own.** The built-in gallery has sites selected for desktop use,
+and you can add any page yourself. Nifro is available in English and Simplified Chinese.
 
-**Audio per website.** A clock should never make a sound, a live stream is pointless without one.
+## Best uses
 
-**A curated site list.** Pages that work well as wallpapers, each carrying the settings that make it
-work. The in-app gallery reads it straight from this branch, so a merged entry appears without waiting
-for a release. Suggesting one takes a form and the app's Copy Settings button.
+Nifro works best with pages that are pleasant to leave on screen and still useful when you only glance
+at them.
 
-**Links decide per website where they open.** A site you sign in to has to keep its links in Nifro,
-because signing in navigates away from it; a dashboard's links belong in your browser. Each website
-answers for itself, or follows the app-wide default.
-
-**Placeholders for the screen it is on.** `[[screenWidth]]` and `[[screenHeight]]` in an address are
-replaced, on every load, with the size of the wallpaper on that display — so one entry is right on
-every machine instead of on the one it was typed on.
-
-**Content blocking says what became of the address.** Paste a rule list and the setting answers:
-blocking, could not download, or not a rule list.
-
-**English and Simplified Chinese**, throughout the app.
+- **Generative art and ambient animation.** [Floor796](https://floor796.com/) and similar art sites
+  turn a static desktop into something that keeps changing without demanding attention.
+- **Music and long-form video.** A YouTube lofi stream, ambient music or HDR landscape video can sit
+  behind your work, while sound stays under per-website control.
+- **Live scenery.** Window views, nature cameras and [WindowSwap](https://www.window-swap.com/) make
+  a calm background that keeps changing throughout the day.
+- **Work and world dashboards.** OpenAI or Claude usage pages, and live dashboards such as
+  [World Monitor](https://www.worldmonitor.app/), make information you check repeatedly available at
+  a glance.
+- **Live maps.** [Windy](https://www.windy.com/) and [Flightradar24](https://www.flightradar24.com/)
+  are useful when weather or flight activity is worth keeping in view.
 
 ## Build from source
 
+### Requirements
+
+- macOS 15 or later
+- Xcode 26 or later
+
+### Open and run in Xcode
+
 ```sh
-git clone https://github.com/PathGao/Nifro
+git clone https://github.com/PathGao/Nifro.git
 cd Nifro
 open Nifro.xcodeproj
 ```
 
-Needs Xcode 26 or later. Swift 6 language mode, deployment target macOS 15.
+In Xcode, select the `Nifro` scheme and **My Mac**, then press **Run** (⌘R).
 
-`./Tools/build-local.sh` builds and installs a test copy signed the way releases are. Do that
-rather than signing a build by hand: re-signing an app after Xcode has already signed it replaces
-the signature and drops the sandbox entitlement with it, and an un-sandboxed Nifro reads a
-different preferences file than a real install.
+### Build a local test copy
+
+```sh
+./Tools/build-local.sh
+```
+
+The script creates the local signing identity when needed, builds with the app's sandbox entitlement,
+and installs `Nifro-test.app` on the Desktop. Use it instead of re-signing an Xcode build by hand:
+re-signing an already signed bundle can remove its entitlements and make it use a different preferences
+container from the released app.
+
+### Run tests
 
 ```sh
 swift test
 ```
 
-153 tests. Two kinds, and the split is deliberate. The first exercises pure logic that needs no app
-bundle and no window server — crop and zoom geometry, the menu bar strip and what the colour band
-samples from it, schedule windows, which website is current on which display, video embedding, URL
-commands, the disk budget, the update check.
-
-The second is guardrails: assertions about the source itself, for rules a type cannot carry. Every
-`Timer` sets a tolerance. No `Defaults` key is written and never read. No string is translated and
-never shown. Every `[[placeholder]]` the code substitutes is named in the help text. No KVC key
-reaches into a WebKit class. A field added to `Website` decodes from a payload written before it
-existed. Nothing keeps a per-display fact — a load failure, which display is being browsed, whether
-a display is switched off — in a slot with room for one answer. They exist because each of those rules had already been broken once, silently, and nothing
-went red.
+The suite covers both app behaviour and project guardrails: display-specific state, playlist migration,
+crop and zoom behaviour, URL handling, settings compatibility, and source-level rules that types alone
+cannot enforce.
 
 ## Contributing
 
