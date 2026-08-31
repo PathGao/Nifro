@@ -197,4 +197,33 @@ struct LoadingIndicatorTests {
 			"`adopt` does not reveal the page it just put on screen, so `isLoading` stays true until the backstop from the previous load fires — and the menu bar band keeps the colour it took off the page before this one."
 		)
 	}
+
+	/**
+	The panel reports a load and does nothing else with it.
+
+	A load used to disable the whole column, on the argument that every control in it would be aimed
+	at a display already on its way somewhere, and that it "lasts a few seconds and lets go by itself,
+	so nothing has to be exempt from it". A page that never answers holds it for the whole of
+	`WallpaperScene.loadTimeout` instead, and the website chooser — the control that would take the
+	display off the page that is stuck — was disabled with the rest. The way out of a stuck load was
+	the gallery in another window.
+
+	Counted rather than matched against the spelling of any one control. `disabled(column.isLoading)`
+	was the shape it took the first time; asserting that exact call back out would pass on a ternary,
+	on an `opacity`, on a guard inside a button's action. One use of `column.isLoading` in the file is
+	the whole rule: the spinner beside the chooser. Anything that consults a load to decide whether a
+	control may act has to add a second.
+
+	Comments stripped for the reason `stripComments` gives — the block above the column argues this,
+	names it, and would otherwise be the second use.
+	*/
+	@Test("A load is reported to the panel and does not disable it")
+	func aLoadDoesNotTrapTheColumn() throws {
+		let source = try Self.stripComments(Self.source("Nifro/Screens/DisplayPanel.swift"))
+
+		#expect(
+			source.components(separatedBy: "column.isLoading").count == 2,
+			"`column.isLoading` is read more than once in the panel. The second reader is deciding whether some control may act, which traps the column behind a page that never answers — the fault this file's chooser spinner replaced."
+		)
+	}
 }

@@ -952,13 +952,25 @@ struct SiteCatalogTests {
 	`DecodingError` names the key and the entry, which is more than any assertion here could say.
 	*/
 	static func published() throws -> [SiteCatalog.Entry] {
-		let root = URL(filePath: #filePath)
-			.deletingLastPathComponent()
-			.deletingLastPathComponent()
-
 		let data = try Data(contentsOf: root.appending(path: "sites/index.json"))
 
 		return try JSONDecoder().decode([SiteCatalog.Entry].self, from: data)
+	}
+
+	static let root = URL(filePath: #filePath)
+		.deletingLastPathComponent()
+		.deletingLastPathComponent()
+
+	/**
+	The entries as they are authored: one YAML file each.
+
+	Counted rather than parsed. What this is for is the count, and a YAML parser in the test target
+	to get a number the file system already knows would be a second reader of the format for no gain.
+	*/
+	static func authored() throws -> [URL] {
+		try FileManager.default
+			.contentsOfDirectory(at: root.appending(path: "sites"), includingPropertiesForKeys: nil)
+			.filter { $0.pathExtension == "yml" }
 	}
 
 	/**
@@ -976,16 +988,26 @@ struct SiteCatalogTests {
 	hand back the snapshot on any failure — the same shrug that hid this. Nothing here is skippable:
 	one entry that will not decode fails the test, because on the way out of the repository there is
 	no reason to tolerate one.
+
+	The count is checked against the directory the entries are authored in, not against a number
+	written here. It was `== 38`, which is the registry's size stated a second time in a place nothing
+	updates: every site added or removed failed this test, and the failure said nothing about the
+	fault it exists to catch. Against the YAML files in `sites` it says the published file covers
+	everything that was authored — which is what a generator dropping entries would break, and it
+	cannot go stale.
 	*/
 	@Test("Every published entry decodes")
 	func everyEntryDecodes() throws {
-		#expect(try Self.published().count == 38)
+		let authored = try Self.authored()
+
+		#expect(!authored.isEmpty)
+		#expect(try Self.published().count == authored.count)
 	}
 
 	/**
 	One entry, checked field by field.
 
-	A count alone passes on a file of 38 entries whose optional fields all silently arrived as `nil`
+	A count alone passes on a file whose optional fields all silently arrived as `nil`
 	— which is most of the ways this could break, since almost everything on `Entry` is optional.
 	Floor796 is the rank-1 entry, so it is also the wallpaper somebody sees before they have chosen
 	anything.

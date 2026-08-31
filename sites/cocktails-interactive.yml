@@ -1,7 +1,0 @@
-name: Cocktail Chart
-url: https://informationisbeautiful.net/visualizations/cocktails-interactive/
-description: Information Is Beautiful's chart of what actually goes into every classic cocktail.
-tags: [data, art]
-backend: snapshot
-backendNote: A static infographic. Nothing changes until the authors update it.
-source: The maintainer's own shortlist.

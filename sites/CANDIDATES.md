@@ -72,7 +72,6 @@ The bar comes from the entries this list started with — `Windy`, `World Monito
 
 ## Graphics and animation
 
-- [Pavel DoGreat — WebGL Fluid Simulation](https://paveldogreat.github.io/WebGL-Fluid-Simulation/) — Left alone it is colour in motion; hold the Nifro key when you want to stir it.
 - [Mr.doob Lab — Clouds](https://mrdoob.com/lab/javascript/webgl/clouds/) — An early WebGL cloud field, quiet and content to sit behind the windows in front of it.
 - [Flat Surface Shader](https://matthew.wagerfield.com/flat-surface-shader/) — A low-poly surface lit by the pointer, restrained in both colour and movement.
 - [Patatap](https://patatap.com/) — Keys trigger sounds and shapes; untouched, the screen stays plain, which makes it a page for occasional interaction.

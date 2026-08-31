@@ -2597,12 +2597,12 @@
         }
       }
     },
-    "You could, for example,": {
+    "A nature film, a live camera, a map, a dashboard — anything a browser can draw.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "比如，你可以让它"
+            "value": "自然影片、实时摄像头、地图、仪表盘——浏览器画得出来的都行。"
           }
         }
       }
@@ -2683,16 +2683,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "分钟"
-          }
-        }
-      }
-    },
-    "show the time.": {
-      "localizations": {
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "显示时间。"
           }
         }
       }
