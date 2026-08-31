@@ -72,33 +72,24 @@ select. `zoom` exists so you do not have to paste a transform script into every 
 
 ## A complete entry
 
-`sites/helvetictoc.yml`:
+`sites/infinitown.yml`:
 
 ```yaml
-name: Helvetictoc
-url: http://www.helvetictoc.com/
-description: A Helvetica word clock that spells out the time in prose.
-tags: [clock]
-backend: snapshot
-reloadInterval: 60
+name: Infinitown
+url: https://demos.littleworkshop.fr/infinitown
+description: An endlessly scrolling low-poly town with cars and trees, seen from above.
+tags: [art, ambient, 3d, screensaver]
+backend: live
+backendNote: A continuously animating 3D scene.
 css: |
-  body.day, body.night {
-    background-color: transparent;
-    color: white
+  #about-button {
+    display: none;
   }
-
-  div.screen {
-    margin: 4%;
-    font-size: 100px !important;
-    bottom: 0;
-    top: auto;
-  }
-
-  #colophon { display: none }
-source: >-
-  The maintainer's own shortlist. The CSS above makes the background transparent, enlarges the
-  type, moves it to the bottom and hides the colophon.
+source: The maintainer's own shortlist. The CSS above hides the about button.
 ```
+
+It carries no `reloadInterval`, because the page never stops moving and has nothing to fetch again.
+An entry that shows a reading — a forecast, a calendar, a chart — needs one.
 
 ## Contributing an entry
 
@@ -106,7 +97,7 @@ source: >-
    query parameters, the CSS that hides the nav bar, the reload interval that is often enough
    without being wasteful. An entry nobody has actually used is worse than no entry.
 2. **Write the file.** One site per file, named in kebab-case after `name`
-   (`Polish TV Clock` → `polish-tv-clock.yml`). Copy the example above and edit it. Fill in `source`
+   (`Random Street View` → `random-street-view.yml`). Copy the example above and edit it. Fill in `source`
    honestly, and credit whoever's CSS you borrowed.
 3. **Open a pull request.** CI validates every file against [`schema.json`](schema.json). To check
    locally before pushing, run the same script CI runs — see [`../Tools/README.md`](../Tools/README.md)

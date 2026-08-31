@@ -69,7 +69,6 @@ featured      首次启动时装好，之后就是一个用户可编辑、可删
 
 ## 图形与动画
 
-- [Pavel DoGreat — WebGL Fluid Simulation](https://paveldogreat.github.io/WebGL-Fluid-Simulation/) — 静置时是流动的颜色；想互动时再通过 Nifro 快捷键进入页面。
 - [Mr.doob Lab — Clouds](https://mrdoob.com/lab/javascript/webgl/clouds/) — 早期 WebGL 云海实验，安静、不抢画面。
 - [Flat Surface Shader](https://matthew.wagerfield.com/flat-surface-shader/) — 鼠标带动的低多边形空间，颜色和动感都克制。
 - [Patatap](https://patatap.com/) — 键盘触发的声音与图形；不操作时画面保持简洁，适合偶尔互动。

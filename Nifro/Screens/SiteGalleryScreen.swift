@@ -91,8 +91,8 @@ struct SiteGalleryScreen: View {
 	/**
 	Two ways out: more pages than are in the list yet, and the way to add one.
 
-	Neither points at the directory the entries are authored in. That is thirty-eight YAML files of
-	settings — the format for writing an entry, not for reading a list.
+	Neither points at the directory the entries are authored in. That is a YAML file of settings per
+	site — the format for writing an entry, not for reading a list.
 	*/
 	private var footer: some View {
 		HStack(spacing: 12) {

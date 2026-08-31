@@ -59,32 +59,6 @@ extension SiteCatalog {
 			featuredRank: 2
 		),
 		.init(
-			name: "Cocktail Chart",
-			url: "https://informationisbeautiful.net/visualizations/cocktails-interactive/",
-			description: "Information Is Beautiful's chart of what actually goes into every classic cocktail.",
-			tags: ["data", "art"],
-			reloadInterval: nil,
-			zoom: nil,
-			css: nil,
-			javaScript: nil,
-			requiresLogin: false,
-			playsSound: false,
-			featuredRank: nil
-		),
-		.init(
-			name: "Douyu",
-			url: "https://www.douyu.com",
-			description: "Douyu's live directory. Replace the path with a room number to pin one stream.",
-			tags: ["live", "gaming"],
-			reloadInterval: nil,
-			zoom: nil,
-			css: ".layout-Player-barrage, .Header, .Aside { display: none !important; }\n",
-			javaScript: nil,
-			requiresLogin: false,
-			playsSound: false,
-			featuredRank: nil
-		),
-		.init(
 			name: "Explore.org Live Cams",
 			url: "https://explore.org/livecams",
 			description: "A wall of live nature cameras. Bears, puffins, reefs, aurora, running around the clock.",
@@ -137,32 +111,6 @@ extension SiteCatalog {
 			featuredRank: 1
 		),
 		.init(
-			name: "Gitstalk",
-			url: "https://gitstalk.netlify.app/PathGao",
-			description: "A GitHub user's recent public activity as a card feed. Replace the username in the URL with your own.",
-			tags: ["dashboard", "personal", "data"],
-			reloadInterval: 1800,
-			zoom: nil,
-			css: nil,
-			javaScript: nil,
-			requiresLogin: false,
-			playsSound: false,
-			featuredRank: nil
-		),
-		.init(
-			name: "Google Calendar",
-			url: "https://calendar.google.com/",
-			description: "Your week laid over the desktop, with all of Google's chrome stripped away.",
-			tags: ["calendar", "dashboard"],
-			reloadInterval: 900,
-			zoom: nil,
-			css: "* {\n  background-color: transparent !important;\n  color: white !important;\n}\n\n.QQYuzf,\n.gboEAb,\nheader.NkK3Fc,\n.Hrn1mc {\n  display: none !important;\n}\n\n[role=\"grid\"] * {\n  border-color: rgba(255, 255, 255, 0.3) !important;\n}\n\n.tNDBE:not(.Wyo4Qe),\n.SGWAac,\n.QIadxc:last-child {\n  border: none !important;\n}\n\n[data-chips-dialog] {\n  background-color: rgba(0 0 0 / 80%) !important;\n}\n",
-			javaScript: nil,
-			requiresLogin: true,
-			playsSound: false,
-			featuredRank: nil
-		),
-		.init(
 			name: "Google Trends",
 			url: "https://trends.google.com/tv/",
 			description: "What the world is searching for right now, as a self-updating tile wall.",
@@ -185,19 +133,6 @@ extension SiteCatalog {
 			css: nil,
 			javaScript: nil,
 			requiresLogin: true,
-			playsSound: false,
-			featuredRank: nil
-		),
-		.init(
-			name: "Helvetictoc",
-			url: "http://www.helvetictoc.com/",
-			description: "A Helvetica word clock that spells out the time in prose.",
-			tags: ["clock"],
-			reloadInterval: nil,
-			zoom: nil,
-			css: "body.day, body.night {\n  background-color: transparent;\n  color: white\n}\n\ndiv.screen {\n  margin: 4%;\n  font-size: 100px !important;\n  bottom: 0;\n  top: auto;\n}\n\n#colophon { display: none }\n",
-			javaScript: nil,
-			requiresLogin: false,
 			playsSound: false,
 			featuredRank: nil
 		),
@@ -267,19 +202,6 @@ extension SiteCatalog {
 			featuredRank: nil
 		),
 		.init(
-			name: "Minimal Clock",
-			url: "https://time.pablopunk.com/?fg=white&bg=transparent&font=SFMono-Regular,Consolas,%27Liberation%20Mono%27,Menlo,monospace",
-			description: "A plain monospace clock on a transparent background, so the wallpaper underneath shows through.",
-			tags: ["clock"],
-			reloadInterval: nil,
-			zoom: nil,
-			css: nil,
-			javaScript: nil,
-			requiresLogin: false,
-			playsSound: false,
-			featuredRank: nil
-		),
-		.init(
 			name: "Panomax Webcam",
 			url: "https://panodata.panomax.com/cams/879/recent_full.jpg",
 			description: "The latest frame from a Panomax panoramic outdoor webcam, served as a plain image.",
@@ -298,19 +220,6 @@ extension SiteCatalog {
 			description: "A rotating full-bleed photograph pulled from Pexels.",
 			tags: ["photo", "ambient"],
 			reloadInterval: 3600,
-			zoom: nil,
-			css: nil,
-			javaScript: nil,
-			requiresLogin: false,
-			playsSound: false,
-			featuredRank: nil
-		),
-		.init(
-			name: "Polish TV Clock",
-			url: "https://aresluna.org/polish-tv-clock/",
-			description: "A recreation of the clock that opened Polish state television broadcasts.",
-			tags: ["clock", "art"],
-			reloadInterval: nil,
 			zoom: nil,
 			css: nil,
 			javaScript: nil,
@@ -375,32 +284,6 @@ extension SiteCatalog {
 			url: "https://mwood77.github.io/ws4kp-international/?kiosk=true",
 			description: "The WeatherStar 4000+ presentation, rebuilt for locations outside the United States.",
 			tags: ["weather", "ambient", "data"],
-			reloadInterval: nil,
-			zoom: nil,
-			css: nil,
-			javaScript: nil,
-			requiresLogin: false,
-			playsSound: false,
-			featuredRank: nil
-		),
-		.init(
-			name: "WebClock",
-			url: "https://findtreasureisland.github.io/clock/index.html",
-			description: "A large full-screen digital clock with the date.",
-			tags: ["clock"],
-			reloadInterval: nil,
-			zoom: nil,
-			css: nil,
-			javaScript: nil,
-			requiresLogin: false,
-			playsSound: false,
-			featuredRank: nil
-		),
-		.init(
-			name: "WebGL Fluid Simulation",
-			url: "https://paveldogreat.github.io/WebGL-Fluid-Simulation/",
-			description: "Coloured fluid that swirls across the screen and reacts to the pointer in browsing mode.",
-			tags: ["art", "ambient", "screensaver", "3d"],
 			reloadInterval: nil,
 			zoom: nil,
 			css: nil,

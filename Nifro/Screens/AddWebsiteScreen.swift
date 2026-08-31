@@ -153,18 +153,24 @@ struct AddWebsiteScreen: View {
 		}
 	}
 
+	/**
+	What to put in the field, said rather than filled in.
+
+	It used to be a link that typed one address into the field for you. That address was a site in the
+	catalogue, written out a second time here, so the entry could be dropped without this noticing —
+	which is what happened: the site went, and the first thing the app suggested to a new user was a
+	page nobody had watched in months. One suggestion hard-coded next to a directory of thirty is the
+	third shape in `WORKSPACE_GUIDE.md`, and the cheap way out of it is to stop answering the question
+	twice. The gallery is where a page you can actually add lives, and the link beside this goes there.
+
+	So a description of the range instead, in the words the README uses for it. Nothing to keep in step.
+	*/
 	private var firstLaunchView: some View {
 		Section {
 			HStack {
-				HStack(spacing: 3) {
-					Text("You could, for example,")
-					Button("show the time.") {
-						urlString = "https://time.pablopunk.com/?seconds&fg=white&bg=transparent"
-					}
-					.buttonStyle(.link)
-				}
+				Text("A nature film, a live camera, a map, a dashboard — anything a browser can draw.")
 				Spacer()
-			Link("Browse more wallpaper ideas", destination: Constants.candidateSitesURL)
+				Link("Browse more wallpaper ideas", destination: Constants.candidateSitesURL)
 					.buttonStyle(.link)
 			}
 		}
