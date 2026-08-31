@@ -242,11 +242,11 @@ extension RotationMode {
 	var label: String {
 		switch self {
 		case .pinned:
-			String(localized: "Staying on this website")
+			String(localized: "Keep this page displayed")
 		case .loop:
-			String(localized: "Rotating in order")
+			String(localized: "Rotate in order")
 		case .random:
-			String(localized: "Rotating in shuffled order")
+			String(localized: "Rotate randomly")
 		}
 	}
 }

@@ -391,7 +391,7 @@ private struct DisplayColumn: View {
 	and note that the two below it are both about a screen the user chose something for, while this one
 	is about there being no wallpapers anywhere. "Switched off", where the power button beside it is
 	off — the same two words that button's accessibility label uses, because they are describing the
-	same fact and a column should not have two vocabularies for it. "No Website", but only where the
+same fact and a column should not have two vocabularies for it. "No page selected", but only where the
 	display genuinely has none — that used to be what any column without a picture said, so a display
 	whose page simply had not been photographed yet was told it had nothing on it. And the bare
 	rectangle for the rest: the panel opens without pictures and the first refresh fills them in about
@@ -425,7 +425,7 @@ private struct DisplayColumn: View {
 			} else if !column.isShowing {
 				reading(String(localized: "Switched off"))
 			} else if column.websiteID == nil {
-				reading(String(localized: "No Website"))
+reading(String(localized: "No page selected"))
 			}
 		}
 		.frame(width: PanelMetrics.columnWidth, height: 162)
@@ -541,7 +541,7 @@ private struct DisplayColumn: View {
 	*/
 	private var picker: some View {
 		chooser(
-			title: column.websiteName ?? String(localized: "No Website"),
+title: column.websiteName ?? String(localized: "No page selected"),
 			width: PanelMetrics.websiteChooserWidth,
 			isEnabled: !column.choices.isEmpty,
 			isLoading: column.isLoading

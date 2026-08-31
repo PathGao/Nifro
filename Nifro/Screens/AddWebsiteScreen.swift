@@ -164,7 +164,7 @@ struct AddWebsiteScreen: View {
 					.buttonStyle(.link)
 				}
 				Spacer()
-				Link("More ideas", destination: Constants.candidateSitesURL)
+			Link("Browse more wallpaper ideas", destination: Constants.candidateSitesURL)
 					.buttonStyle(.link)
 			}
 		}
@@ -226,11 +226,11 @@ struct AddWebsiteScreen: View {
 			// Offered rather than applied. Rewriting what somebody just typed is rude, and the point
 			// of showing the rewritten URL in the field is that they can see it and undo it.
 			if let player = VideoEmbed.playerURL(for: website.wrappedValue.url) {
-				Button("Use the player-only page") {
+				Button("Use the video-only page") {
 					urlString = player.absoluteString
 					website.wrappedValue.url = player
 				}
-				.help("The address of the player on its own, so the video fills the wallpaper without the navigation, recommendations and comments around it.")
+				.help("Shows only the video, so it fills the wallpaper without navigation, recommendations or comments.")
 			}
 
 			TextField("Title", text: website.title)
@@ -294,7 +294,7 @@ struct AddWebsiteScreen: View {
 		Section("Advanced") {
 			Toggle(isOn: website.allowSelfSignedCertificate) {
 				Text("Allow self-signed certificate")
-					.explained(String(localized: "Loads the page even though macOS does not trust its certificate — normal for a device on your own network, unsafe for anything from the public internet."))
+					.explained(String(localized: "Load this page even if macOS does not trust its certificate. Use this only for devices on a trusted network."))
 			}
 
 			// Last, because it copies everything above it. A button that gathers the settings should

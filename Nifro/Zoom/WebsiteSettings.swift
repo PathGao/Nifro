@@ -26,7 +26,7 @@ struct ZoomSetting: View {
 			}
 		} label: {
 			Text("Region")
-				.explained(String(localized: "Use the panel's Crop button to move and zoom the wallpaper, and where you leave it is the region — remembered as a place and a magnification rather than a rectangle."))
+				.explained(String(localized: "Use Crop in the panel to choose which part of the page fills the wallpaper. Nifro remembers the position and zoom level."))
 		}
 	}
 }
@@ -91,7 +91,7 @@ struct WebsiteExternalLinksSetting: View {
 			}
 		} label: {
 			Text("External links")
-				.explained(String(localized: "Where a link off this website goes — a site you sign in to wants “In Nifro”, because signing in navigates away from it and the page you come back to is the one you wanted."))
+				.explained(String(localized: "Choose where links from this page open. Select “In Nifro” when you need to sign in or keep navigating within the same site."))
 		}
 	}
 }
@@ -109,7 +109,7 @@ struct WebsiteAudioSetting: View {
 			}
 		} label: {
 			Text("Audio")
-				.explained(String(localized: "Whether this website may make noise, remembered per website; it mutes the page's audio and video elements, not sound made with the Web Audio API."))
+				.explained(String(localized: "Allow or mute this website's media. This controls audio and video elements, but not sound made with the Web Audio API."))
 		}
 	}
 }
@@ -127,8 +127,8 @@ struct WebsiteReloadSetting: View {
 
 	var body: some View {
 		Toggle(isOn: $overridesReloadInterval) {
-			Text("Reload on its own schedule")
-				.explained(String(localized: "How often a page goes stale is a property of the page; off follows the interval in Settings."))
+			Text("Use a custom reload schedule")
+				.explained(String(localized: "Use a separate reload interval for this page. When off, it follows the interval in Settings."))
 		}
 
 		if overridesReloadInterval {

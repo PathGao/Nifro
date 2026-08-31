@@ -47,12 +47,12 @@
         }
       }
     },
-    "A list of pages that work well as wallpapers, each with the settings that make it work.": {
+    "Wallpaper-ready pages with their recommended settings.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "一份适合当壁纸的网页清单，每条都带着让它好用的设置。"
+            "value": "适合做壁纸的网页，已附带推荐设置。"
           }
         }
       }
@@ -67,12 +67,12 @@
         }
       }
     },
-    "A page that reloads on a timer starts over; this puts back where it was scrolled or moved to.": {
+    "Scheduled reloads return a page to the start. Turn this on to restore its previous position.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "定时刷新会让页面从头开始，这个开关把它滚动或移动到的位置放回去。"
+            "value": "定时刷新会让页面回到开头。开启后，Nifro 会恢复刷新前的位置。"
           }
         }
       }
@@ -317,12 +317,12 @@
         }
       }
     },
-    "Browsing mode (hold to use, tap to toggle)": {
+    "Browsing Mode — hold to use, tap to toggle": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "浏览模式（按住操作，短按切换）"
+            "value": "浏览模式：按住时使用，轻按切换"
           }
         }
       }
@@ -507,12 +507,12 @@
         }
       }
     },
-    "Could not check": {
+    "Couldn't check for updates": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "无法检查"
+            "value": "无法检查更新"
           }
         }
       }
@@ -557,12 +557,12 @@
         }
       }
     },
-    "Deactivate while on battery": {
+    "Turn off wallpapers on battery": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "使用电池时停用"
+            "value": "使用电池时关闭壁纸"
           }
         }
       }
@@ -807,22 +807,22 @@
         }
       }
     },
-    "For websites that do not set their own; one that does, in its own settings, ignores this.": {
+    "Used by websites without their own reload schedule. A website-specific setting overrides this one.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "供没有自己设定的网站使用；在自己设置里设了节奏的网站不受这里影响。"
+            "value": "用于未设置自己刷新计划的网站；网站自己的设置会覆盖这里。"
           }
         }
       }
     },
-    "Force browsing mode to the front": {
+    "Keep Browsing Mode in front": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "浏览模式时强制最前"
+            "value": "浏览模式保持在最前"
           }
         }
       }
@@ -937,12 +937,12 @@
         }
       }
     },
-    "How often a page goes stale is a property of the page; off follows the interval in Settings.": {
+    "Use a separate reload interval for this page. When off, it follows the interval in Settings.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "一个页面多久过时是页面自己的性质；关闭则跟随「设置」里的间隔。"
+            "value": "为此页面设置单独的刷新间隔。关闭后，它会使用“设置”中的全局间隔。"
           }
         }
       }
@@ -1137,7 +1137,7 @@
         }
       }
     },
-    "Later": {
+    "Not Now": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
@@ -1177,12 +1177,12 @@
         }
       }
     },
-    "Loads the page even though macOS does not trust its certificate — normal for a device on your own network, unsafe for anything from the public internet.": {
+    "Load this page even if macOS does not trust its certificate. Use this only for devices on a trusted network.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "即使 macOS 不信任它的证书也照样加载——自己网络里的设备很正常，公网上的页面则不安全。"
+            "value": "即使 macOS 不信任该证书，也加载此页面。仅应对受信任网络中的设备启用此选项。"
           }
         }
       }
@@ -1237,7 +1237,7 @@
         }
       }
     },
-    "Menu bar colour interval": {
+    "Update menu bar colour every": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
@@ -1257,12 +1257,12 @@
         }
       }
     },
-    "More ideas": {
+    "Browse more wallpaper ideas": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "更多灵感"
+            "value": "浏览更多壁纸灵感"
           }
         }
       }
@@ -1317,12 +1317,12 @@
         }
       }
     },
-    "Nifro is in English until you pick a language here, and a half-translated language falls back to English rather than showing anything raw.": {
+    "Choose the language Nifro uses. Any untranslated text stays in English.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "在你从这里选之前 Nifro 都是英文；翻译不全的语言会退回英文，而不是显示原始标识。"
+            "value": "选择 Nifro 使用的语言。尚未翻译的文字会继续显示为英文。"
           }
         }
       }
@@ -1387,12 +1387,12 @@
         }
       }
     },
-    "No Website": {
+    "No page selected": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "无网站"
+            "value": "未选择网页"
           }
         }
       }
@@ -1567,12 +1567,12 @@
         }
       }
     },
-    "Pages that work well as wallpapers. Adding one brings its recommended settings with it.": {
+    "Find pages that work well as wallpapers. Adding one also applies its recommended settings.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "适合当壁纸的网页。添加时会一并带上它推荐的设置。"
+            "value": "这里收录适合做壁纸的网页。添加时会一并应用推荐设置。"
           }
         }
       }
@@ -1597,12 +1597,12 @@
         }
       }
     },
-    "Paused, it costs next to nothing beyond a little memory.": {
+    "When paused, Nifro stops active work but still uses some memory.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "暂停时，除少量内存外几乎没有开销。"
+            "value": "暂停时，Nifro 会停止活动任务，但仍会占用一些内存。"
           }
         }
       }
@@ -1727,12 +1727,12 @@
         }
       }
     },
-    "Reload on its own schedule": {
+    "Use a custom reload schedule": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "按自己的节奏刷新"
+            "value": "使用此页面自己的刷新计划"
           }
         }
       }
@@ -1827,22 +1827,22 @@
         }
       }
     },
-    "Reopen Nifro to change the language?": {
+    "Restart Nifro to apply the language change?": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "重新打开 Nifro 以切换语言？"
+            "value": "要重新启动 Nifro 以应用语言更改吗？"
           }
         }
       }
     },
-    "Reopen Now": {
+    "Restart Now": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "立即重新打开"
+            "value": "立即重新启动"
           }
         }
       }
@@ -1897,12 +1897,12 @@
         }
       }
     },
-    "Restore the page position after a reload": {
+    "Restore page position after reloading": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "自动刷新还原页面位置"
+            "value": "刷新后恢复页面位置"
           }
         }
       }
@@ -1947,7 +1947,7 @@
         }
       }
     },
-    "Rotating in order": {
+    "Rotate in order": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
@@ -1957,7 +1957,7 @@
         }
       }
     },
-    "Rotating in shuffled order": {
+    "Rotate randomly": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
@@ -2147,22 +2147,22 @@
         }
       }
     },
-    "Staying on this website": {
+    "Keep this page displayed": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "固定在这个网站"
+            "value": "固定显示此页面"
           }
         }
       }
     },
-    "Submit a Site…": {
+    "Suggest a site…": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "提交站点…"
+            "value": "推荐网站…"
           }
         }
       }
@@ -2237,22 +2237,22 @@
         }
       }
     },
-    "Takes every wallpaper down when you unplug, leaving the desktop picture underneath, and puts them back when you plug in again.": {
+    "When you unplug your Mac, Nifro hides every wallpaper and restores your desktop picture. It brings them back when you plug in again.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "拔掉电源后收起所有壁纸，露出下面的系统桌面图片，接上电源时再放回来。"
+            "value": "拔掉电源后，Nifro 会隐藏所有网页壁纸并恢复桌面图片；重新接通电源后会自动恢复。"
           }
         }
       }
     },
-    "The address of the player on its own, so the video fills the wallpaper without the navigation, recommendations and comments around it.": {
+    "Shows only the video, so it fills the wallpaper without navigation, recommendations or comments.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "播放器单独的地址，视频直接铺满壁纸，没有周围的导航、推荐和评论。"
+            "value": "只显示视频本身，让它铺满壁纸，不显示导航、推荐和评论。"
           }
         }
       }
@@ -2307,12 +2307,12 @@
         }
       }
     },
-    "The wallpaper comes back up on its own.": {
+    "Nifro restores your wallpapers after restarting.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "壁纸会自己回来。"
+            "value": "重新启动后，Nifro 会自动恢复网页壁纸。"
           }
         }
       }
@@ -2367,22 +2367,22 @@
         }
       }
     },
-    "Toggle enabled state": {
+    "Turn Nifro on or off": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "切换启用状态"
+            "value": "打开或关闭 Nifro"
           }
         }
       }
     },
-    "Toggle sound": {
+    "Turn sound on or off": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "切换声音"
+            "value": "打开或关闭声音"
           }
         }
       }
@@ -2467,22 +2467,22 @@
         }
       }
     },
-    "Use the panel's Crop button to move and zoom the wallpaper, and where you leave it is the region — remembered as a place and a magnification rather than a rectangle.": {
+    "Use Crop in the panel to choose which part of the page fills the wallpaper. Nifro remembers the position and zoom level.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "用面板上的 Crop 拖动和缩放壁纸，你停在哪里哪里就是区域——它记住的是位置和倍率，不是一个矩形。"
+            "value": "在面板中使用“裁切”选择网页的哪一部分铺满壁纸。Nifro 会记住位置和缩放级别。"
           }
         }
       }
     },
-    "Use the player-only page": {
+    "Use the video-only page": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "改用纯播放器页面"
+            "value": "使用纯视频页面"
           }
         }
       }
@@ -2557,22 +2557,22 @@
         }
       }
     },
-    "Where a link off this website goes — a site you sign in to wants “In Nifro”, because signing in navigates away from it and the page you come back to is the one you wanted.": {
+    "Choose where links from this page open. Select “In Nifro” when you need to sign in or keep navigating within the same site.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "从这个网站点出去的链接在哪里打开——需要登录的网站要选“在 Nifro 中”，因为登录本身就会跳离它，而你想回到的正是那个页面。"
+            "value": "选择此页面中的链接在哪里打开。需要登录或继续浏览同一网站时，请选择“在 Nifro 中打开”。"
           }
         }
       }
     },
-    "Whether this website may make noise, remembered per website; it mutes the page's audio and video elements, not sound made with the Web Audio API.": {
+    "Allow or mute this website's media. This controls audio and video elements, but not sound made with the Web Audio API.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "这个网站能不能出声，按网站分别记住；静音的是页面里的音频和视频元素，不包括用 Web Audio API 生成的声音。"
+            "value": "允许或静音此网站的媒体声音。它会控制页面中的音频和视频元素，但无法控制通过 Web Audio API 生成的声音。"
           }
         }
       }

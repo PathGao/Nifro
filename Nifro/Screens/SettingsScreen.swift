@@ -84,20 +84,20 @@ private struct BehaviorSettings: View {
 				IntervalSetting(
 					isOn: .updateMenuBarColorOnInterval,
 					seconds: .menuBarColorInterval,
-					label: "Menu bar colour interval",
+					label: "Update menu bar colour every",
 					help: String(localized: "With this off, the colour only changes when the website does."),
-					accessibilityLabel: "Menu bar colour interval"
+					accessibilityLabel: "Update menu bar colour every"
 				)
 				IntervalSetting(
 					isOn: .reloadOnInterval,
 					seconds: .reloadInterval,
 					label: "Page reload interval",
-					help: String(localized: "For websites that do not set their own; one that does, in its own settings, ignores this."),
+					help: String(localized: "Used by websites without their own reload schedule. A website-specific setting overrides this one."),
 					accessibilityLabel: "Reload interval"
 				)
 				Defaults.Toggle(key: .restoreScrollPosition) {
-					Text("Restore the page position after a reload")
-						.explained(String(localized: "A page that reloads on a timer starts over; this puts back where it was scrolled or moved to."))
+					Text("Restore page position after reloading")
+						.explained(String(localized: "Scheduled reloads return a page to the start. Turn this on to restore its previous position."))
 				}
 				Defaults.Toggle(String(localized: "Reload the page when the Mac wakes"), key: .reloadOnWake)
 			}
@@ -152,7 +152,7 @@ private struct LanguageSetting: View {
 			}
 		} label: {
 			Text("Language")
-				.explained(String(localized: "Nifro is in English until you pick a language here, and a half-translated language falls back to English rather than showing anything raw."))
+				.explained(String(localized: "Choose the language Nifro uses. Any untranslated text stays in English."))
 		}
 		.onChange(of: language) { previous, new in
 			guard previous != new else {
@@ -163,16 +163,16 @@ private struct LanguageSetting: View {
 			isConfirmingRelaunch = true
 		}
 		.confirmationDialog(
-			String(localized: "Reopen Nifro to change the language?"),
+			String(localized: "Restart Nifro to apply the language change?"),
 			isPresented: $isConfirmingRelaunch
 		) {
-			Button(String(localized: "Reopen Now")) {
+			Button(String(localized: "Restart Now")) {
 				Localization.relaunch()
 			}
 
-			Button(String(localized: "Later"), role: .cancel) {}
+			Button(String(localized: "Not Now"), role: .cancel) {}
 		} message: {
-			Text("The wallpaper comes back up on its own.")
+			Text("Nifro restores your wallpapers after restarting.")
 		}
 	}
 }
@@ -222,8 +222,8 @@ private struct AdvancedSettings: View {
 			Section {
 				ContentRulesSetting()
 				Defaults.Toggle(key: .deactivateOnBattery) {
-					Text("Deactivate while on battery")
-						.explained(String(localized: "Takes every wallpaper down when you unplug, leaving the desktop picture underneath, and puts them back when you plug in again."))
+					Text("Turn off wallpapers on battery")
+						.explained(String(localized: "When you unplug your Mac, Nifro hides every wallpaper and restores your desktop picture. It brings them back when you plug in again."))
 				}
 			}
 			Section {} // Padding
@@ -536,7 +536,7 @@ private struct BringBrowsingModeToFrontSetting: View {
 	var body: some View {
 		// TODO: Find a better title for this.
 		Defaults.Toggle(key: .bringBrowsingModeToFront) {
-			Text("Force browsing mode to the front")
+			Text("Keep Browsing Mode in front")
 				.explained(String(localized: "Keep the website above all other windows while browsing mode is active."))
   }
 	}

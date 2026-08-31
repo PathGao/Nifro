@@ -110,8 +110,8 @@ struct SiteGalleryScreen: View {
 
 			Spacer()
 
-			Link("More ideas", destination: Constants.candidateSitesURL)
-			Link("Submit a Site…", destination: Constants.siteSubmissionURL)
+			Link("Browse more wallpaper ideas", destination: Constants.candidateSitesURL)
+			Link("Suggest a site…", destination: Constants.siteSubmissionURL)
 		}
 		.padding(.horizontal)
 		.padding(.vertical, 10)
@@ -119,7 +119,7 @@ struct SiteGalleryScreen: View {
 
 	private var header: some View {
 		VStack(alignment: .leading, spacing: 8) {
-			Text("Pages that work well as wallpapers. Adding one brings its recommended settings with it.")
+			Text("Find pages that work well as wallpapers. Adding one also applies its recommended settings.")
 				.font(.callout)
 				.foregroundStyle(.secondary)
 

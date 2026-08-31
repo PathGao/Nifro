@@ -60,7 +60,7 @@ struct AboutSection: View {
 			// resident because the process and WebKit's three helpers are still alive and the emptied
 			// WebContent processes are not reaped, and two further minutes of idling did not move it.
 			Section {
-				Text("Paused, it costs next to nothing beyond a little memory.")
+				Text("When paused, Nifro stops active work but still uses some memory.")
 					.font(.callout)
 					.foregroundStyle(.secondary)
 			}
@@ -79,7 +79,7 @@ struct AboutSection: View {
 					.controlSize(.large)
 					.fixedSize()
 
-					Text("A list of pages that work well as wallpapers, each with the settings that make it work.")
+					Text("Wallpaper-ready pages with their recommended settings.")
 						.font(.callout)
 						.foregroundStyle(.secondary)
 				}
@@ -118,7 +118,7 @@ Ask for the latest version now, and say what came back.
 It says what it found. A check whose only outcome is silence cannot be told apart from one that
 failed — the same reason the clear-data button reports how much it freed. The answer sits above the
 button rather than beside it: this row already carries the icon, the name and the version, and
-"Could not check" next to "Check Now" is what pushes it past the 400pt window.
+The update-check failure text next to "Check Now" is what pushes it past the 400pt window.
 */
 private struct UpdateCheckButton: View {
 	private enum Progress: Equatable {
@@ -148,7 +148,7 @@ private struct UpdateCheckButton: View {
 					Constants.latestReleaseURL.open()
 				}
 			case .failed:
-				Text("Could not check")
+			Text("Couldn't check for updates")
 					.font(.callout)
 					.foregroundStyle(.secondary)
 			}
