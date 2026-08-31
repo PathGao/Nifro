@@ -154,33 +154,44 @@ private struct DisplayColumn: View {
 
 			failureLine
 
+			// A load is reported and no longer disables anything. The argument for disabling the column
+			// was that every control in it would be aimed at a display already on its way somewhere,
+			// and that this "lasts a few seconds and lets go by itself, so nothing has to be exempt
+			// from it". The second half is what was wrong. A page that never answers holds the column
+			// for the whole of `WallpaperScene.loadTimeout` — thirty seconds — and the control that
+			// would take the display somewhere else is the website chooser, which was disabled along
+			// with everything else. The one page you most want to leave was the one page you could not
+			// leave from here. Picking another site in the gallery still worked, because that window
+			// is not this column, so the way out of a stuck load was a different window entirely.
+			//
+			// Nothing was relying on the blanket disable. The controls that must not act while the
+			// page and the website disagree already say so themselves and are the reason `hasPage`
+			// exists: Crop and Mute both ask it, and it is false for the whole of a swap, because
+			// `hasLoadedItsWebsite` compares the page against the website the display is heading for.
+			// Browsing Mode deliberately does not ask it, and its own comment argues for exactly this
+			// change — a failed load is the moment a user most wants to reach the page by hand. The
+			// arrows and the mode ask `canRotate`. What is left is the two choosers and the power
+			// switch, and all three are requests to go somewhere else, which is the thing a stuck load
+			// makes urgent rather than premature.
+			//
+			// Choosing during a load is not a special case underneath either: `loadBySwapping`
+			// cancels `pendingLoad`, replaces `pendingWebView`, and its `defer` clears that only if it
+			// is still the same object, so the abandoned load cannot report over the new one. The
+			// plain path re-enters `WKWebView` and WebKit drops the previous navigation itself.
 			VStack(spacing: 9) {
-				VStack(spacing: 9) {
-					preview
+				preview
 
-					rotationControls
-				}
-				.opacity(inertOpacity)
+				rotationControls
 
-				// Above the website chooser, not instead of it: the two say what to show at different
-				// grains, and a display picks a list before it picks a page out of it. Inside the
-				// dimming, unlike the chooser below, because it is not the control reporting the load.
+				// Above the website chooser: the two say what to show at different grains, and a
+				// display picks a list before it picks a page out of it.
 				playlistChooser
-					.opacity(inertOpacity)
 
-				// Outside the dimming, and only that. It is disabled with the rest of the column, but
-				// while a page is on its way it is also the thing reporting that — and a pulse under a
-				// 0.45 veil is not one.
+				// The one control that reports the load, through the spinner beside it.
 				picker
 
 				modeButtons
-					.opacity(inertOpacity)
 			}
-			// A load is the one reason a column cannot be used: the page being asked for has not
-			// arrived, so every control here would be aimed at a display that is already on its way
-			// somewhere. It lasts a few seconds and lets go by itself, so nothing has to be exempt from
-			// it — the whole column comes back at once.
-			.disabled(column.isLoading)
 		}
 		.frame(width: PanelMetrics.columnWidth)
 		.padding(9)
@@ -207,16 +218,6 @@ private struct DisplayColumn: View {
 	}
 
 	/**
-	How dim a control looks while the column cannot be used.
-
-	Named rather than written out at each of its two call sites, because it is one statement — nothing
-	here will answer right now — and two literals are two chances for half of the column to say it.
-	*/
-	private var inertOpacity: Double {
-		column.isLoading ? 0.45 : 1
-	}
-
-	/**
 	Whether a control that writes to this display's website may act.
 
 	Crop and Mute both do: Crop stores the region and Mute stores the audio setting, in both cases onto
@@ -236,8 +237,8 @@ private struct DisplayColumn: View {
 	nothing and cost the user the one moment they most want to reach a page by hand: the load has just
 	failed, the last good page is still up, and the button to interact with it would be dark.
 
-	Named rather than written out at both call sites, for `inertOpacity`'s reason above: two copies are
-	two chances for half of the row to answer differently.
+	Named rather than written out at both call sites: two copies are two chances for half of the row
+	to answer differently.
 
 	This is not the guard. `beginCropSelection` and `WallpaperScene.toggleSound` each refuse the case
 	themselves, because the keyboard shortcuts reach both without going near a button that can be drawn
