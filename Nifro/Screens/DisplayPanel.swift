@@ -542,7 +542,7 @@ reading(String(localized: "No page selected"))
 	*/
 	private var picker: some View {
 		chooser(
-title: column.websiteName ?? String(localized: "No page selected"),
+			title: column.websiteName ?? String(localized: "No page selected"),
 			width: PanelMetrics.websiteChooserWidth,
 			isEnabled: !column.choices.isEmpty,
 			isLoading: column.isLoading
