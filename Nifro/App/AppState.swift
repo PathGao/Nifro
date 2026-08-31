@@ -741,7 +741,7 @@ final class AppState: ObservableObject {
 
 	`Display.all` instead. The screen claims the content rather than the content claiming the screen, so
 	a display no website names still gets a scene — `scheduled(for:)` hands it no website, and the panel
-	draws the "No Website" state it already has for that. An empty column the user can pick from is a
+draws the "No page selected" state it already has for that. An empty column the user can pick from is a
 	different thing from a screen that is missing.
 
 	One scene survives the empty case, with no display of its own. `Display.all` is empty while the

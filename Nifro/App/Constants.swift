@@ -105,7 +105,7 @@ extension Defaults.Keys {
 	// now, so a display the user has never picked for still has to show something, and the mechanism
 	// that used to answer that — the Nth shipped website pinned to the Nth screen — was deleted by the
 	// same change that built the scenes from the displays. Without the fallback a second monitor on a
-	// fresh install draws "No Website" and waits to be told. It is also why the default playlist
+// fresh install draws "No page selected" and waits to be told. It is also why the default playlist
 	// refuses a binding: it is the one every picker offers and every display falls back to.
 	//
 	// Class 2 above, with `currentWebsites`: the list a user chose for a screen is a choice about that

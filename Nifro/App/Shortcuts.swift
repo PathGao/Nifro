@@ -58,11 +58,11 @@ enum Shortcut: String, CaseIterable {
 	var title: String {
 		switch self {
 		case .toggleEnabled:
-			String(localized: "Toggle enabled state")
+			String(localized: "Turn Nifro on or off")
 		case .browsingMode:
-			String(localized: "Browsing mode (hold to use, tap to toggle)")
+			String(localized: "Browsing Mode — hold to use, tap to toggle")
 		case .toggleSound:
-			String(localized: "Toggle sound")
+			String(localized: "Turn sound on or off")
 		case .chooseRegion:
 			String(localized: "Choose region")
 		case .reload:

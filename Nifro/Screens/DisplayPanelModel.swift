@@ -99,7 +99,7 @@ final class DisplayPanelModel: ObservableObject {
 		so every column read "Switched off" — the power button's own phrase, on screens nobody had
 		switched off — and pressing that button then recorded the display as off for real, so turning
 		the app back on brought back a screen the user had never chosen to lose. Unplugging a laptop
-		with "Deactivate while on battery" set is the case with nothing at all to press: every wallpaper
+with "Turn off wallpapers on battery" set is the case with nothing at all to press: every wallpaper
 		goes, and until this the panel's whole account of it was four columns each blaming their own
 		screen.
 
