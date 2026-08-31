@@ -13,7 +13,24 @@ final class AppState: ObservableObject {
 
 	private(set) lazy var statusItem = with(NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)) {
 		$0.isVisible = true
-		$0.behavior = [.removalAllowed, .terminationOnRemoval]
+
+		// No behavior at all, where this used to be `[.removalAllowed, .terminationOnRemoval]`.
+		//
+		// `.terminationOnRemoval` reads as "dragging the icon out quits the app", and that is one of the
+		// two things it does. The other is that *macOS refusing to draw the icon* is delivered as the
+		// same removal, and the app then quits itself roughly 180ms into launch — before any window,
+		// with no crash and nothing said. It is refused for reasons that have nothing to do with the
+		// user: macOS 26 files a menu bar item under the app that launched the process, so a build
+		// started once by another app inherits that app's menu bar permission for good, and a denied
+		// one leaves Nifro unlaunchable by double-click with no way to find out why.
+		//
+		// A menu bar icon that will not appear is a bad state either way. Quitting is the wrong answer
+		// to it: the app is the icon, so the icon going is the whole of what the user can see, and the
+		// process staying up is what leaves Settings and the Shortcuts intents reachable to say so.
+		// `.removalAllowed` goes with it — an icon the user can drag away from an app that no longer
+		// quits is an app with no interface and no way back. Quit is in the panel's footer, and the
+		// setting for an icon somebody does not want is Hide menu bar icon.
+		$0.behavior = []
 
 		// A status item with a `menu` opens it on any click and never sends its action, so it has none:
 		// the button handles the click itself and shows the panel.
