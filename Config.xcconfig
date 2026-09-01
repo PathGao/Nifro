@@ -1,4 +1,4 @@
-MARKETING_VERSION = 8.8.8
+MARKETING_VERSION = 0.9.0
 CURRENT_PROJECT_VERSION = 1
 
 // Xcode adds `get-task-allow` to whatever the .entitlements file says, which lets any
