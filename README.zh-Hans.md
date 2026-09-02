@@ -82,6 +82,11 @@ brew install --cask nifro
 > Apple 把这条路去掉了。用 brew 装则完全遇不到这一步 —— 这正是推荐 brew 的原因。详见
 > [docs/RELEASE.md](docs/RELEASE.md)。
 
+> [!WARNING]
+> **原本固定显示的 Dock 开始自动隐藏了？** 视频全屏等 macOS 状态切换后，原本固定显示的 Dock 有时会
+> 错误地变成自动隐藏，只在鼠标移到屏幕边缘时出现。打开终端，运行 `killall Dock` 即可恢复。这是已知的
+> macOS bug；Nifro 已尽力规避，也已向 Apple 报告。
+
 要求 macOS 15 或更新版本。
 
 ### 卸载
