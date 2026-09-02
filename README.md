@@ -84,6 +84,12 @@ at the newest build.
 > works: Apple removed that route in macOS 15. Installing with brew skips all of it, which is what
 > makes brew the recommended one. See [docs/RELEASE.md](docs/RELEASE.md).
 
+> [!WARNING]
+> **A fixed Dock has started hiding?** Full-screen video and other macOS transitions can sometimes
+> make a Dock configured to stay visible behave as though it were set to auto-hide. Open Terminal and
+> run `killall Dock` to restore it. This is a known macOS bug; Nifro works around it as far as it can,
+> and the issue has been reported to Apple.
+
 Requires macOS 15 or later.
 
 ### Uninstalling
