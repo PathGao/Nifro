@@ -137,24 +137,6 @@ struct VideoEmbedTests {
 		}
 	}
 
-	@Test("The framed player is asked to start muted, because that is the only way it starts")
-	func framedPlayerStartsMuted() throws {
-		// Not a decision about sound: YouTube's player will not autoplay unless it is muted, and the
-		// audio script unmutes it afterwards. Without this the video sits paused on its first frame.
-		let watch = try #require(URL(string: "https://www.youtube.com/watch?v=jNQXAC9IVRw"))
-		let player = try #require(VideoEmbed.playerURL(for: watch))
-		let host = try #require(VideoEmbed.hostPage(for: player))
-
-		#expect(host.html.contains("mute=1"))
-	}
-
-	@Test("A player address stored before that was known still gets it")
-	func olderAddressesAreFixedOnTheWayIn() throws {
-		let stored = try #require(URL(string: "https://www.youtube.com/embed/jNQXAC9IVRw?autoplay=1&playsinline=1"))
-		let host = try #require(VideoEmbed.hostPage(for: stored))
-
-		#expect(host.html.contains("mute=1"))
-	}
 
 	@Test("Short links and shorts work too")
 	func youTubeShortForms() throws {
@@ -203,6 +185,17 @@ struct VideoEmbedTests {
 		// The id goes straight into a URL we build, so it has to be an id and nothing else.
 		let url = try #require(URL(string: "https://www.youtube.com/watch?v=abc%26evil%3D1"))
 		#expect(VideoEmbed.playerURL(for: url) == nil)
+	}
+
+	@Test("Fullscreen controls follow Nifro's running mode, not the saved address")
+	func fullscreenPresentationIsDerivedAtLoadTime() throws {
+		let oldPlayer = try #require(URL(string: "https://www.youtube.com/embed/jNQXAC9IVRw?autoplay=1&fs=0&fs=1&playsinline=1"))
+		let wallpaper = VideoEmbed.presentationURL(for: oldPlayer, fullscreenCompatibility: .wallpaper)
+		let compatibility = VideoEmbed.presentationURL(for: oldPlayer, fullscreenCompatibility: .compatibility)
+
+		#expect(URLComponents(url: wallpaper, resolvingAgainstBaseURL: false)?.queryItems?.filter { $0.name == "fs" }.map(\.value) == ["0"])
+		#expect(URLComponents(url: compatibility, resolvingAgainstBaseURL: false)?.queryItems?.contains { $0.name == "fs" } == false)
+		#expect(VideoEmbed.presentationURL(for: try #require(URL(string: "https://player.bilibili.com/player.html?bvid=BV1xx411c7mD&autoplay=1")), fullscreenCompatibility: .wallpaper).absoluteString == "https://player.bilibili.com/player.html?bvid=BV1xx411c7mD&autoplay=1")
 	}
 }
 
@@ -309,16 +302,11 @@ struct ZoomTests {
 }
 
 extension VideoEmbedTests {
-	@Test("A YouTube player address gets a page to be framed by")
-	func youTubeNeedsAHost() throws {
+	@Test("A YouTube player is loaded directly with Nifro's Referer")
+	func youTubeNeedsAReferer() throws {
 		let watch = try #require(URL(string: "https://www.youtube.com/watch?v=jNQXAC9IVRw"))
 		let url = try #require(VideoEmbed.playerURL(for: watch))
-		let host = try #require(VideoEmbed.hostPage(for: url))
-
-		#expect(host.html.contains("<iframe"))
-		#expect(host.html.contains("/embed/jNQXAC9IVRw"))
-		// Framed by youtube.com it fails the same way as not being framed at all.
-		#expect(host.baseURL.host()?.hasSuffix("youtube.com") != true)
+		#expect(VideoEmbed.referrer(for: url) == "https://github.com/PathGao/Nifro")
 	}
 
 	@Test("Anything that can be opened on its own is left alone")
@@ -329,28 +317,10 @@ extension VideoEmbedTests {
 			"https://example.com"
 		] {
 			let url = try #require(URL(string: source))
-			#expect(VideoEmbed.hostPage(for: url) == nil, "\(source) should not be wrapped")
+			#expect(VideoEmbed.referrer(for: url) == nil, "\(source) should not need a Referer")
 		}
 	}
 
-	@Test("The framed address cannot break out of the attribute it sits in")
-	func hostEscapesTheAddress() throws {
-		let url = try #require(URL(string: #"https://www.youtube.com/embed/x?a="><script>alert(1)</script>"#))
-		let host = try #require(VideoEmbed.hostPage(for: url))
-
-		#expect(!host.html.contains("<script"))
-	}
-}
-
-extension VideoEmbedTests {
-	@Test("A website shown through a host page has no address worth saving")
-	func hostPagesHaveNothingToOffer() throws {
-		// "Update Website to Current" asks whether the page has ended up somewhere the user found.
-		// For a framed player the document is scaffolding this app built, so the answer is no — and
-		// answering yes replaced the website with the scaffolding's address.
-		let embed = try #require(URL(string: "https://www.youtube.com/embed/jNQXAC9IVRw?autoplay=1"))
-		#expect(VideoEmbed.hostPage(for: embed) != nil)
-	}
 }
 
 /**
