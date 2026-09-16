@@ -3,17 +3,7 @@
 # Each architecture gets its own build, and there is no universal binary: one arm64, one x86_64.
 # A universal package means every user downloads the half they can never run.
 #
-# Signing hangs off one secret, MACOS_CERTIFICATE_P12, and whichever certificate it holds picks the path:
-#   Developer ID certificate → hardened runtime + notarization + staple (users just double-click)
-#   self-signed certificate  → stable signing identity, no notarization, cask postflight strips the quarantine attribute
-#   no secret                → ad-hoc, only so a fork without a certificate can still produce builds
-#
-# Gatekeeper turns away self-signed and ad-hoc builds alike; the difference is whether the signing
-# identity stays put. Nifro is a sandboxed app, so a local file picked as a wallpaper is stored as a
-# security-scoped bookmark, and that bookmark is tied to the signature. Ad-hoc signs differently on
-# every build, so users lose the files they had authorised on every update. A self-signed
-# certificate keeps the designated requirement the same across versions.
-# See docs/RELEASE.md.
+# Official releases require Developer ID signing and notarization. See docs/RELEASE.md.
 
 name: release
 
@@ -51,6 +41,7 @@ jobs:
     # green on macos-26 the whole time. Two workflows building the same project on two toolchains is
     # not a difference worth having.
     runs-on: macos-26
+    environment: release-signing
     permissions:
       contents: write
       # The cask bump arrives as a pull request rather than a push, because `main` requires one.
@@ -99,21 +90,35 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "Releasing $tag from $GITHUB_REF_NAME @ ${GITHUB_SHA:0:7}"
 
-      # secrets cannot be tested inside an if:, so map them to env first and emit an output
-      - name: Work out whether signing and notarization credentials exist
-        id: caps
+      - name: Require official signing and notarization credentials
         env:
-          CERT: ${{ secrets.MACOS_CERTIFICATE_P12 }}
-          NOTARY_KEY: ${{ secrets.NOTARY_KEY_P8 }}
+          CERT_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
+          CERT_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+          SIGNING_IDENTITY: ${{ vars.APPLE_SIGNING_IDENTITY }}
+          TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          NOTARY_KEY_P8: ${{ secrets.NOTARY_KEY_P8 }}
+          NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
+          NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
         run: |
           set -euo pipefail
-          if [ -n "${CERT:-}" ]; then echo "sign=true" >> "$GITHUB_OUTPUT"; else echo "sign=false" >> "$GITHUB_OUTPUT"; fi
-          if [ -n "${NOTARY_KEY:-}" ]; then echo "notarize=true" >> "$GITHUB_OUTPUT"; else echo "notarize=false" >> "$GITHUB_OUTPUT"; fi
+          for name in CERT_P12 CERT_PASSWORD SIGNING_IDENTITY TEAM_ID; do
+            test -n "${!name}" || { echo "::error::Missing release-signing credential: $name"; exit 1; }
+          done
+          if [[ -n "$NOTARY_KEY_P8" ]]; then
+            test -n "$NOTARY_KEY_ID" && test -n "$NOTARY_ISSUER_ID" || { echo "::error::Incomplete notarization API key credentials"; exit 1; }
+          else
+            test -n "$APPLE_ID" && test -n "$APPLE_APP_SPECIFIC_PASSWORD" || { echo "::error::Provide notarization API credentials or APPLE_ID and APPLE_APP_SPECIFIC_PASSWORD"; exit 1; }
+          fi
+          [[ "$SIGNING_IDENTITY" =~ ^[0-9A-F]{40}$ ]] || { echo "::error::APPLE_SIGNING_IDENTITY must be a certificate SHA-1"; exit 1; }
+          [[ "$TEAM_ID" =~ ^[A-Z0-9]{10}$ ]] || { echo "::error::Invalid APPLE_TEAM_ID"; exit 1; }
 
       - name: Import the signing certificate into a temporary keychain
         id: identity
-        if: steps.caps.outputs.sign == 'true'
         env:
+          SIGNING_IDENTITY: ${{ vars.APPLE_SIGNING_IDENTITY }}
+          TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
           CERT_P12: ${{ secrets.MACOS_CERTIFICATE_P12 }}
           CERT_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
         run: |
@@ -126,14 +131,9 @@ jobs:
           security create-keychain -p "$kc_pass" "$keychain"
           security set-keychain-settings -lut 21600 "$keychain"
           security unlock-keychain -p "$kc_pass" "$keychain"
-          # The one failure that has actually happened here: the two secrets came from different runs
-          # of Tools/setup-signing.sh, so the password did not open the certificate. `security` reports
-          # that as "MAC verification failed during PKCS12 import (wrong password?)", which reads like
-          # a typo and is usually a mismatched pair. `--upload` on that script sets both at once and
-          # is the only way they cannot drift apart.
           if ! security import "$RUNNER_TEMP/cert.p12" -k "$keychain" -P "$CERT_PASSWORD" \
             -T /usr/bin/codesign -T /usr/bin/security; then
-            echo "::error::could not import MACOS_CERTIFICATE_P12 with MACOS_CERTIFICATE_PASSWORD. Set both together: ./Tools/setup-signing.sh --export <path> --upload"
+            echo "::error::could not import MACOS_CERTIFICATE_P12 with MACOS_CERTIFICATE_PASSWORD. Replace both environment secrets with the matching Developer ID export and password"
             exit 1
           fi
           security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$kc_pass" "$keychain" > /dev/null
@@ -141,64 +141,42 @@ jobs:
 
           rm -f "$RUNNER_TEMP/cert.p12"
 
-          # Without `-v`. A self-signed certificate is never "valid" in the sense that flag means —
-          # nothing trusts the root, so it is listed as CSSMERR_TP_NOT_TRUSTED and `-v` reports zero
-          # identities even though the import succeeded. codesign does not care: trust is the
-          # verifier's problem, and signing needs the private key and nothing else. The local build
-          # script has always signed with a certificate this same check calls invalid.
-          listing="$(security find-identity -p codesigning "$keychain")"
-          echo "$listing"
-
-          # By SHA-1 rather than by name: unambiguous, and it does not have to survive being quoted
-          # through an xcodebuild argument.
-          identity="$(printf '%s\n' "$listing" | sed -n 's/^ *[0-9]*) \([0-9A-F]\{40\}\) "\([^"]*\)".*/\1 \2/p' | head -1)"
-          test -n "$identity" || { echo "::error::no code-signing identity in the keychain"; exit 1; }
-          hash="${identity%% *}"
-          name="${identity#* }"
-
-          echo "name=$hash" >> "$GITHUB_OUTPUT"
-          # The certificate itself says which path to take, so no second secret has to declare it.
-          case "$name" in
-            "Developer ID Application"*) echo "kind=developer-id" >> "$GITHUB_OUTPUT" ;;
-            *)                           echo "kind=self-signed"  >> "$GITHUB_OUTPUT" ;;
-          esac
-          echo "Signing identity: $name ($hash)"
+          listing="$(security find-identity -v -p codesigning "$keychain")"
+          if ! printf '%s\n' "$listing" | grep -E "^[[:space:]]*[0-9]+\) $SIGNING_IDENTITY \"Developer ID Application: .* \($TEAM_ID\)\"$"; then
+            echo "::error::The expected Developer ID certificate and private key are not valid in the release keychain"
+            exit 1
+          fi
+          echo "name=$SIGNING_IDENTITY" >> "$GITHUB_OUTPUT"
 
       - name: Build, notarize and package, one architecture at a time
         id: package
         env:
-          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          TEAM_ID: ${{ vars.APPLE_TEAM_ID }}
           NOTARY_KEY_ID: ${{ secrets.NOTARY_KEY_ID }}
           NOTARY_ISSUER_ID: ${{ secrets.NOTARY_ISSUER_ID }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
           NOTARY_KEY_P8: ${{ secrets.NOTARY_KEY_P8 }}
         run: |
           set -euo pipefail
           version="${{ steps.version.outputs.version }}"
           mkdir -p .release
 
-          # The project hard-codes CODE_SIGN_STYLE=Automatic / "Apple Development" / the upstream
-          # DEVELOPMENT_TEAM, none of which works on CI, so Manual overrides all of it here.
-          # ENABLE_HARDENED_RUNTIME is already YES in the project, and notarization needs it.
-          # With no secret it falls back to ad-hoc: "-" means signed locally, with no identity.
           identity="${{ steps.identity.outputs.name }}"
           signing_args=(
             CODE_SIGN_STYLE=Manual
-            CODE_SIGN_IDENTITY="${identity:--}"
-            DEVELOPMENT_TEAM=""
+            CODE_SIGN_IDENTITY="$identity"
+            DEVELOPMENT_TEAM="$TEAM_ID"
             PROVISIONING_PROFILE_SPECIFIER=""
+            ENABLE_HARDENED_RUNTIME=YES
+            OTHER_CODE_SIGN_FLAGS="--timestamp --options=runtime --keychain $RUNNER_TEMP/build.keychain-db"
           )
-
-          # The hardened runtime and the timestamp only mean anything for Developer ID: they are
-          # preconditions for notarization, and self-signed and ad-hoc builds can never be notarized.
-          if [ "${{ steps.identity.outputs.kind }}" = "developer-id" ]; then
-            signing_args+=(
-              DEVELOPMENT_TEAM="$TEAM_ID"
-              OTHER_CODE_SIGN_FLAGS="--timestamp --options=runtime"
-            )
-          fi
-
-          if [ "${{ steps.caps.outputs.notarize }}" = "true" ]; then
+          if [[ -n "$NOTARY_KEY_P8" ]]; then
             printf '%s' "$NOTARY_KEY_P8" | base64 --decode > "$RUNNER_TEMP/notary.p8"
+            chmod 600 "$RUNNER_TEMP/notary.p8"
+            notary_args=(--key "$RUNNER_TEMP/notary.p8" --key-id "$NOTARY_KEY_ID" --issuer "$NOTARY_ISSUER_ID")
+          else
+            notary_args=(--apple-id "$APPLE_ID" --password "$APPLE_APP_SPECIFIC_PASSWORD" --team-id "$TEAM_ID")
           fi
 
           xcodebuild -version
@@ -217,7 +195,7 @@ jobs:
               ARCHS="$arch" \
               ONLY_ACTIVE_ARCH=NO \
               "${signing_args[@]}" \
-              | tee ".release/xcodebuild-$arch.log" | grep -E '(^\*\*|^CodeSign|error:)' || true
+              | tee ".release/xcodebuild-$arch.log" | awk '/^\*\*|^CodeSign|error:/'
 
             src=".xcode-build/Build/Products/Release/$BUILT_APP_NAME"
             test -d "$src" || { echo "::error::$arch: $src not found"; exit 1; }
@@ -234,18 +212,16 @@ jobs:
               exit 1
             fi
 
-            if [ "${{ steps.caps.outputs.notarize }}" = "true" ] && [ "${{ steps.identity.outputs.kind }}" = "developer-id" ]; then
-              # notarytool only takes zip/pkg/dmg, and ditto is what keeps symlinks and extended attributes
-              ditto -c -k --keepParent "$staged" "$RUNNER_TEMP/notarize-$arch.zip"
-              xcrun notarytool submit "$RUNNER_TEMP/notarize-$arch.zip" \
-                --key "$RUNNER_TEMP/notary.p8" \
-                --key-id "$NOTARY_KEY_ID" \
-                --issuer "$NOTARY_ISSUER_ID" \
-                --wait
-              xcrun stapler staple "$staged"
-            else
-              echo "::warning::$arch is not notarized (signing identity ${identity:-ad-hoc}). For brew users the cask postflight strips the quarantine attribute; anyone downloading the disk image directly has to allow it by hand."
-            fi
+            codesign --verify --deep --strict --verbose=2 "$staged"
+            codesign -d --extract-certificates="$RUNNER_TEMP/signed-" "$staged"
+            actual_identity="$(shasum -a 1 "$RUNNER_TEMP/signed-0" | awk '{print toupper($1)}')"
+            test "$actual_identity" = "$identity" || { echo "::error::Unexpected signing certificate"; exit 1; }
+            ditto -c -k --keepParent "$staged" "$RUNNER_TEMP/notarize-$arch.zip"
+            xcrun notarytool submit "$RUNNER_TEMP/notarize-$arch.zip" \
+              "${notary_args[@]}" --wait
+            xcrun stapler staple "$staged"
+            xcrun stapler validate "$staged"
+            spctl --assess --type execute --verbose=2 "$staged"
 
             # A disk image rather than a zip. A zip expands to a bare .app sitting in Downloads with
             # nothing to say it belongs in /Applications; a disk image with a symlink to Applications
@@ -327,11 +303,7 @@ jobs:
           # notes below name the version. Under `set -u` an unset one aborts the step.
           version="${{ steps.version.outputs.version }}"
 
-          if [ "${{ steps.caps.outputs.notarize }}" = "true" ] && [ "${{ steps.identity.outputs.kind }}" = "developer-id" ]; then
-            note="This build is signed with a Developer ID certificate and notarized by Apple, so it opens on a double-click."
-          else
-            note=$'This build is self-signed and **not notarized by Apple**, so a disk image you download and open yourself will be turned away the first time with "Apple could not verify Nifro is free of malware". That dialog offers only Move to Trash and Cancel — the way through is somewhere else:\n\n1. Press **Cancel**. Do not move it to the trash.\n2. Open **System Settings → Privacy & Security** and scroll to the bottom.\n3. There is a line naming Nifro, with an **Open Anyway** button. Press it, and confirm with your password or Touch ID.\n4. Press **Open** in the last dialog. macOS remembers, and never asks again.\n\nInstalling with Homebrew skips all of that — the cask clears the mark for you.'
-          fi
+          note="This build is signed with a Developer ID certificate and notarized by Apple. Users upgrading from a self-signed release may need to select their local wallpaper files again."
 
           cat > "$RUNNER_TEMP/notes.md" <<EOF
           $note
@@ -344,10 +316,7 @@ jobs:
           brew install --cask nifro
           \`\`\`
 
-          The middle line is not optional. Homebrew refuses to load a cask from outside its own
-          repositories until you say you trust it, because a cask can run code after installing.
-          This one runs a single command — it clears the "downloaded from the internet" mark macOS
-          puts on the app. Read it first: https://github.com/PathGao/Nifro/blob/main/Casks/nifro.rb
+          Review the third-party cask before trusting it: https://github.com/PathGao/Nifro/blob/main/Casks/nifro.rb
 
           \`\`\`
           Apple silicon  Nifro-arm64.dmg   sha256 ${{ steps.package.outputs.sha_arm64 }}
@@ -431,3 +400,9 @@ jobs:
               echo "To have this opened automatically, turn on Settings → Actions → General → Workflow permissions → **Allow GitHub Actions to create and approve pull requests**."
             } >> "$GITHUB_STEP_SUMMARY"
           fi
+
+      - name: Remove signing material
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/build.keychain-db" 2>/dev/null || true
+          rm -f "$RUNNER_TEMP/cert.p12" "$RUNNER_TEMP/notary.p8" "$RUNNER_TEMP"/signed-* "$RUNNER_TEMP"/notarize-*.zip

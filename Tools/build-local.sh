@@ -1,37 +1,46 @@
 #!/bin/zsh
-# Builds Nifro the way a release is built, and puts it on the Desktop to test.
-#
-# The point of going through a script is the signing. Signing the app by hand
-# with `codesign --sign -` after the fact replaces the signature Xcode wrote and
-# drops the entitlements with it, which silently un-sandboxes the build: it then
-# reads and writes a different preferences file than a real install, so anything
-# tested against it is testing the wrong app. Here Xcode signs once, with the
-# entitlements, using the fixed identity from Tools/setup-signing.sh.
+# Builds a sandboxed local test copy. Set APPLE_SIGNING_IDENTITY (SHA-1) and
+# APPLE_TEAM_ID to use Developer ID; otherwise use the local self-signed identity.
 set -euo pipefail
 
-IDENTITY="Nifro Signing"
+IDENTITY="${APPLE_SIGNING_IDENTITY:-Nifro Signing}"
+TEAM_ID="${APPLE_TEAM_ID:-}"
 DESTINATION="${1:-$HOME/Desktop/Nifro-test.app}"
-DERIVED_DATA="${TMPDIR:-/tmp}/nifro-local-build"
+DERIVED_DATA=".xcode-build"
 
 cd "$(dirname "$0")/.."
 
-if ! security find-identity -p codesigning 2>/dev/null | grep -q "$IDENTITY"; then
-	echo "→ Signing identity missing, creating it."
-	./Tools/setup-signing.sh
-fi
+signing_args=()
+if [[ -n "${APPLE_SIGNING_IDENTITY:-}" ]]; then
+	[[ "$IDENTITY" =~ ^[0-9A-F]{40}$ && "$TEAM_ID" =~ ^[A-Z0-9]{10}$ ]] || {
+		echo "APPLE_SIGNING_IDENTITY must be a SHA-1 and APPLE_TEAM_ID must be set." >&2
+		exit 1
+	}
+	security find-identity -v -p codesigning | grep -E "^[[:space:]]*[0-9]+\) $IDENTITY \"Developer ID Application: .* \($TEAM_ID\)\"$" >/dev/null || {
+		echo "The specified Developer ID identity is unavailable." >&2
+		exit 1
+	}
+	signing_args+=(ENABLE_HARDENED_RUNTIME=YES OTHER_CODE_SIGN_FLAGS="--timestamp --options=runtime")
+else
+	TEAM_ID=""
+	if ! security find-identity -p codesigning 2>/dev/null | grep -q "$IDENTITY"; then
+		echo "→ Signing identity missing, creating it."
+		./Tools/setup-signing.sh
+	fi
 
-# A locked signing keychain still lists its identity, so the check above passes and codesign then
-# fails halfway through with `errSecInternalComponent` after putting a keychain prompt on screen.
-# Unlocking here is what keeps a build from ever asking for a password. If the passphrase no longer
-# matches — an older script wrote a different one — the keychain is rebuilt, since all it holds is a
-# self-signed local certificate that setup-signing.sh makes from scratch anyway.
-KEYCHAIN="$HOME/Library/Keychains/nifro-signing.keychain-db"
-if [[ -f "$KEYCHAIN" ]] && ! security unlock-keychain -p "nifro-signing" "$KEYCHAIN" 2>/dev/null; then
-	echo "→ Signing keychain will not unlock, rebuilding it."
-	security delete-keychain "$KEYCHAIN"
-	./Tools/setup-signing.sh
+	# A locked signing keychain still lists its identity, so the check above passes and codesign then
+	# fails halfway through with `errSecInternalComponent` after putting a keychain prompt on screen.
+	# Unlocking here is what keeps a build from ever asking for a password. If the passphrase no longer
+	# matches — an older script wrote a different one — the keychain is rebuilt, since all it holds is a
+	# self-signed local certificate that setup-signing.sh makes from scratch anyway.
+	KEYCHAIN="$HOME/Library/Keychains/nifro-signing.keychain-db"
+	if [[ -f "$KEYCHAIN" ]] && ! security unlock-keychain -p "nifro-signing" "$KEYCHAIN" 2>/dev/null; then
+		echo "→ Signing keychain will not unlock, rebuilding it."
+		security delete-keychain "$KEYCHAIN"
+		./Tools/setup-signing.sh
+	fi
+	security set-keychain-settings "$KEYCHAIN"  # No auto-lock, so the next build does not prompt either.
 fi
-security set-keychain-settings "$KEYCHAIN"  # No auto-lock, so the next build does not prompt either.
 
 xcodebuild \
 	-project Nifro.xcodeproj \
@@ -40,11 +49,14 @@ xcodebuild \
 	-derivedDataPath "$DERIVED_DATA" \
 	CODE_SIGN_STYLE=Manual \
 	CODE_SIGN_IDENTITY="$IDENTITY" \
-	DEVELOPMENT_TEAM="" \
+	DEVELOPMENT_TEAM="$TEAM_ID" \
 	PROVISIONING_PROFILE_SPECIFIER="" \
-	build | grep -E "error:|warning: .*(deprecat|unused)|BUILD" || true
+	"${signing_args[@]}" \
+	build | awk '/error:|warning: .*(deprecat|unused)|BUILD/'
 
 BUILT="$DERIVED_DATA/Build/Products/Release/Nifro.app"
+
+codesign --verify --deep --strict "$BUILT"
 
 # The sandbox is the whole reason this script exists. A build that lost it looks
 # fine and behaves differently, so fail here rather than let it get tested.

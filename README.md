@@ -50,14 +50,7 @@ brew trust --cask PathGao/tap/nifro
 brew install --cask nifro
 ```
 
-> [!NOTE]
-> Homebrew will not load a cask from outside its own repositories until you say you trust it, because
-> a cask can run code after installing. This one runs a single command — it clears the "downloaded
-> from the internet" mark macOS puts on the app, which is what lets it open without being turned
-> away. Read the whole thing in [Casks/nifro.rb](Casks/nifro.rb) before you trust it.
->
-> Plain `brew install --cask nifro`, with no tap and nothing to trust, needs Nifro to be in
-> Homebrew's own cask repository, which has a popularity threshold this project has not reached.
+Review [Casks/nifro.rb](Casks/nifro.rb) before trusting this third-party cask.
 
 ### Or download a disk image
 
@@ -69,20 +62,7 @@ brew install --cask nifro
 There is no universal binary, so nobody downloads the half they cannot run. Both links always point
 at the newest build.
 
-> [!IMPORTANT]
-> **The first launch will be refused.** Builds are signed with the project's own certificate rather
-> than an Apple Developer ID one, so they are not notarized, and macOS answers a downloaded copy with
-> *"Apple could not verify Nifro is free of malware"* — a dialog offering only **Move to Trash** and
-> **Cancel**. Neither is the way through. It is:
->
-> 1. Press **Cancel**. Not Move to Trash.
-> 2. Open **System Settings → Privacy & Security** and scroll to the bottom.
-> 3. Press **Open Anyway** on the line naming Nifro, and confirm with your password or Touch ID.
-> 4. Press **Open** in the last dialog.
->
-> Once, for good — macOS remembers. Control-click → Open, which used to be the shortcut, no longer
-> works: Apple removed that route in macOS 15. Installing with brew skips all of it, which is what
-> makes brew the recommended one. See [docs/RELEASE.md](docs/RELEASE.md).
+Releases from v0.9.1 require Apple Developer ID signing and notarization before publication.
 
 > [!WARNING]
 > **A fixed Dock has started hiding?** Full-screen video and other macOS transitions can sometimes
