@@ -4,10 +4,6 @@
 #   brew trust --cask PathGao/tap/nifro
 #   brew install --cask nifro
 #
-# The `brew trust` line is needed because of the postflight block below: Homebrew will not load a
-# cask from outside its own repositories until the user says they trust it, since a cask can run
-# code after installing. Leave it out and `brew install` refuses.
-#
 # version and sha256 are written back by .github/workflows/release.yml after every release, as a
 # pull request somebody still has to merge. Do not edit them by hand.
 #
@@ -35,15 +31,6 @@ cask "nifro" do
   depends_on macos: :sequoia
 
   app "Nifro.app"
-
-  # ⚠️ This block is only needed for builds that are not notarized.
-  # Once the release pipeline has a Developer ID certificate and starts notarizing (path A in
-  # docs/RELEASE.md), delete the whole postflight block.
-  postflight do
-    system_command "/usr/bin/xattr",
-                   args:         ["-dr", "com.apple.quarantine", "#{appdir}/Nifro.app"],
-                   must_succeed: false
-  end
 
   # Sandboxed app, so user data lives in the container. The last entry is only insurance: a proper
   # sandboxed build never writes there, but a build that lost its entitlements while being signed
