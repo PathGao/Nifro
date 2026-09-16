@@ -106,35 +106,20 @@ adding the file on disk alone compiles nothing and reports no error.
 
 ## Pull requests
 
-Write the description as prose about the change, not a log of your afternoon.
-The three things a reviewer needs:
+Use the [PR template](PULL_REQUEST_TEMPLATE.md): a short summary, verification
+and issue links. Explain the cause and tradeoff when they help review; do not
+repeat the diff. Keep each PR focused on one reviewable change.
 
-1. **What changed**, in a sentence or two.
-2. **Why this way** — the mechanism behind the old behaviour, and what makes
-   this the right place to fix it. `WKWebView`, AppKit window levels and
-   Spaces all have defaults that surprise people; naming the one you hit is
-   usually the most useful sentence in the whole description.
-3. **What you traded away** — what you left alone on purpose, what you're
-   unsure about, which macOS versions or display setups you couldn't test.
+Record the commands and results, relevant macOS/hardware and any untested paths.
+For site submissions, describe the site and settings; app-specific checks are
+only relevant when app code changes.
 
-Stating the gaps is worth more than a description with no gaps in it. Nobody
-has every display configuration.
+Use `Closes #123` or `Fixes #123` when the PR completes an issue. For partial
+work, use `Related to #123` and state what remains. Completed issues close on
+merge; there is no release-confirmation or inactivity-close bot.
 
-The pull request template has these as headings. Delete the ones that don't
-apply.
-
-Small and focused beats large and complete. If you find a second problem while
-fixing the first, mention it in the description or open an issue — a pull
-request that does one thing gets reviewed; one that does four gets postponed.
-
-**Write commit messages, pull requests and issues in English.** Not because
-English is better, but because it is the one language everyone reading this
-repository has in common, and a commit message is read by whoever runs
-`git blame` on the line they are about to change — years later, by someone the
-author will never meet. The message is where the reasoning lives; a reader who
-cannot read it gets the diff and nothing else.
-
-Say why, not what. The diff already says what changed.
+Write commit messages, pull requests and issues in English. Repository settings
+and label conventions are documented in [Governance](GOVERNANCE.md).
 
 ## Relationship to Plash
 
