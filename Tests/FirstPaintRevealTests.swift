@@ -25,7 +25,7 @@ struct FirstPaintRevealTests {
 		let file = URL(filePath: #filePath)
 			.deletingLastPathComponent()
 			.deletingLastPathComponent()
-			.appending(path: "Nifro/Wallpaper/\(name)")
+			.appending(path: "Sources/Nifro/Wallpaper/\(name)")
 
 		let block = try Regex("/\\*.*?\\*/", as: AnyRegexOutput.self).dotMatchesNewlines()
 		let line = try Regex("//[^\\n]*")

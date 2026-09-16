@@ -41,7 +41,7 @@ struct UnreadSettingsTests {
 		let line = try Regex("//[^\\n]*")
 
 		return try FileManager.default
-			.enumerator(at: root.appending(path: "Nifro"), includingPropertiesForKeys: nil)?
+			.enumerator(at: root.appending(path: "Sources/Nifro"), includingPropertiesForKeys: nil)?
 			.compactMap { $0 as? URL }
 			.filter { $0.pathExtension == "swift" }
 			.map {
@@ -58,7 +58,7 @@ struct UnreadSettingsTests {
 	typed into this file would be the same kind of list that lost the update check its surface.
 	*/
 	private static func declaredKeys() throws -> [String] {
-		let text = try String(contentsOf: root.appending(path: "Nifro/App/Constants.swift"), encoding: .utf8)
+		let text = try String(contentsOf: root.appending(path: "Sources/Nifro/App/Constants.swift"), encoding: .utf8)
 		let declaration = try Regex("static let (\\w+) = Key<")
 
 		return text.matches(of: declaration).map { String($0.output[1].substring!) }
@@ -149,7 +149,7 @@ struct UnreadSettingsTests {
 	*/
 	@Test("The panel's footer is what reads the update check's answer")
 	func theUpdateAnswerIsDrawn() throws {
-		let panel = try String(contentsOf: Self.root.appending(path: "Nifro/Screens/DisplayPanel.swift"), encoding: .utf8)
+		let panel = try String(contentsOf: Self.root.appending(path: "Sources/Nifro/Screens/DisplayPanel.swift"), encoding: .utf8)
 
 		#expect(
 			panel.contains("@Default(.latestKnownVersion)"),

@@ -31,7 +31,7 @@
   ·
   <a href="docs/ROADMAP.md">Roadmap</a>
   ·
-  <a href="CONTRIBUTING.md">Contributing</a>
+  <a href=".github/CONTRIBUTING.md">Contributing</a>
   ·
   <a href="README.zh-Hans.md">简体中文</a>
 </p>
@@ -155,26 +155,25 @@ at them.
 - macOS 15 or later
 - Xcode 26 or later
 
-### Open and run in Xcode
+### Build a local development app
 
 ```sh
 git clone https://github.com/PathGao/Nifro.git
 cd Nifro
-open Nifro.xcodeproj
+./build.sh
 ```
 
-In Xcode, select the `Nifro` scheme and **My Mac**, then press **Run** (⌘R).
+Full Xcode is required for icon compilation and Shortcuts metadata, but the IDE
+can stay closed. The app is written to
+`.xcode-build/Build/Products/Release/Nifro.app` with an ad-hoc signature and sandbox
+entitlements. Its `com.pathgao.nifro.dev` identity and `nifro-dev:` URL scheme keep
+development data separate from the installed release. The script does not install,
+launch, or modify keychains.
 
-### Build a local test copy
-
-```sh
-./Tools/build-local.sh
-```
-
-The script creates the local signing identity when needed, builds with the app's sandbox entitlement,
-and installs `Nifro-test.app` on the Desktop. Use it instead of re-signing an Xcode build by hand:
-re-signing an already signed bundle can remove its entitlements and make it use a different preferences
-container from the released app.
+`./build.sh ci` builds unsigned Debug code. `./build.sh release` builds with the
+production identity and an existing Developer ID certificate. See
+[the release guide](docs/RELEASE.md) for signing and notarization.
+For interactive debugging, open `Tools/Nifro.xcodeproj` and use the `Nifro` scheme.
 
 ### Run tests
 
@@ -186,9 +185,16 @@ The suite covers both app behaviour and project guardrails: display-specific sta
 crop and zoom behaviour, URL handling, settings compatibility, and source-level rules that types alone
 cannot enforce.
 
+## Repository layout
+
+`Sources/` contains the app and share extension, `Tests/` contains tests, and
+`Tools/` contains the Xcode project, build configuration, and maintenance scripts.
+`assets/` holds design assets, `docs/` holds design and release notes, `sites/`
+holds the published site catalog, and `Casks/` is the Homebrew entry point.
+
 ## Contributing
 
-Start with [CONTRIBUTING.md](CONTRIBUTING.md). The lowest-effort useful contribution is a site
+Start with [CONTRIBUTING.md](.github/CONTRIBUTING.md). The lowest-effort useful contribution is a site
 entry. If you have a page that works well as a wallpaper, that is worth more to this project than
 most code.
 

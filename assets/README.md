@@ -5,10 +5,10 @@ Images and editable design sources for the repository. Nothing here ships inside
 
 | File | Where it is used | How it gets there |
 | --- | --- | --- |
-| `Nifro.icon/` | Preserved editable icon design; not wired into the app target | Imported from the local design package with its original SVG asset |
+| `Nifro.icon/` | Editable icon source used by the app target | Imported from the local design package with its original SVG asset |
 | `icon.png` | Nothing references it. Kept as the full-size original, for anywhere 256px is too small | Exported from `Nifro/Assets.xcassets/AppIcon.appiconset/icon_512x512@2x.png` |
 | `icon-256.png` | The heading of both READMEs | Downscaled from `icon.png` |
-| `nifro-icon-256.png` | The heading of both READMEs | Rendered from the checked-in `Nifro/Nifro.icon` source |
+| `nifro-icon-256.png` | The heading of both READMEs | Rendered from the checked-in `assets/Nifro.icon` source |
 | `menu-bar-icon-legacy-2026-08-30.svg` | Nothing references it. Kept as Nifro's original menu bar acorn icon | Restored from the revision immediately before the menu bar icon was first redrawn for Nifro |
 
 There is no social preview here any more. Several uploads through Settings → General were accepted

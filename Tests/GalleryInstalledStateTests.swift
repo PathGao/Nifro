@@ -24,7 +24,7 @@ struct GalleryInstalledStateTests {
 	private static let screen = URL(filePath: #filePath)
 		.deletingLastPathComponent()
 		.deletingLastPathComponent()
-		.appending(path: "Nifro/Screens/SiteGalleryScreen.swift")
+		.appending(path: "Sources/Nifro/Screens/SiteGalleryScreen.swift")
 
 	/**
 	The file with its prose taken out, which here argues for the very thing being looked for.

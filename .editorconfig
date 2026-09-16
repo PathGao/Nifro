@@ -6,12 +6,11 @@ charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
 
-# Swift is written with tabs here, which is what Xcode does by default and what SwiftLint checks.
+# Match the Swift source style.
 [*.swift]
 indent_style = tab
 
-# YAML forbids tabs outright, and adding a site entry — the contribution this project asks for most —
-# is editing a YAML file. An editor told to indent with tabs turns that into a syntax error.
+# YAML requires spaces.
 [*.{yml,yaml,json}]
 indent_style = space
 indent_size = 2

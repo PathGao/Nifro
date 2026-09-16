@@ -1,0 +1,20 @@
+# Run periphery scan --config Tools/Config/Periphery.yml --strict before adding a retention.
+project: Tools/Nifro.xcodeproj
+schemes:
+  - Nifro
+targets:
+  - Nifro
+retain_objc_accessible: false
+retain_public: false
+
+report_exclude:
+  # Shortcuts discovers these declarations through bundle metadata.
+  # Keep ordinary helpers elsewhere: this exclusion covers the whole file.
+  - "**/Intents.swift"
+retain_files: []
+
+# Inline retentions:
+# - KeyedDecodingContainer.decode: called by synthesized Decodable implementations.
+# - AppMain.appState: StateObject controls initialization timing.
+# - RowView.disabledDisplays and appState: SwiftUI DynamicProperty subscriptions.
+# This scan does not detect unused localization keys or writes with no reads.

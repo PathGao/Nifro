@@ -82,7 +82,7 @@ struct RestoreDefaultsTests {
 	private static func declaredKeyNames() throws -> [String] {
 		let pattern = try Regex("\\bKey<.+\\(\"(\\w+)\"")
 
-		return try source("Nifro/App/Constants.swift")
+		return try source("Sources/Nifro/App/Constants.swift")
 			.matches(of: pattern)
 			.map { String($0[1].substring ?? "") }
 	}
@@ -108,7 +108,7 @@ struct RestoreDefaultsTests {
 
 	@Test("The reset wipes the whole domain rather than a list of keys")
 	func theResetIsAWipe() throws {
-		let code = try Self.stripComments(Self.source("Nifro/App/RestoreDefaults.swift"))
+		let code = try Self.stripComments(Self.source("Sources/Nifro/App/RestoreDefaults.swift"))
 
 		#expect(code.contains("Defaults.removeAll()"), "Restore no longer wipes the domain")
 		#expect(!code.contains("Defaults.reset"), "Restore now resets named keys, which is a list that will rot")
@@ -127,7 +127,7 @@ struct RestoreDefaultsTests {
 	*/
 	@Test("No preference is reached through its declaration, so none can be left out")
 	func noKeyIsNamed() throws {
-		let code = try Self.stripComments(Self.source("Nifro/App/RestoreDefaults.swift"))
+		let code = try Self.stripComments(Self.source("Sources/Nifro/App/RestoreDefaults.swift"))
 
 		for name in try Self.declaredKeyNames() {
 			#expect(!code.contains(".\(name)"), "Restore reaches the “\(name)” preference through `Defaults.Keys`. Reaching one that way means reaching all of them, and the next one added will be missed.")
@@ -136,11 +136,11 @@ struct RestoreDefaultsTests {
 
 	@Test("Every keyboard shortcut is reset through the table rather than one at a time")
 	func shortcutsResetThroughTheTable() throws {
-		let code = try Self.stripComments(Self.source("Nifro/App/RestoreDefaults.swift"))
+		let code = try Self.stripComments(Self.source("Sources/Nifro/App/RestoreDefaults.swift"))
 
 		#expect(code.contains("KeyboardShortcuts.reset(Shortcut.allNames)"), "Shortcuts are no longer reset through the CaseIterable table")
 
-		let cases = try Self.stripComments(Self.source("Nifro/App/Shortcuts.swift"))
+		let cases = try Self.stripComments(Self.source("Sources/Nifro/App/Shortcuts.swift"))
 			// The optional tail is an explicit raw value. `browsingMode` carries one — its stored key is
 			// the older `toggleBrowsingMode` — and without this the parser silently skipped it, which is
 			// the shortcut this test would then let Restore name one at a time.
@@ -183,7 +183,7 @@ struct RestoreDefaultsTests {
 	*/
 	@Test("The wipe has exactly six exceptions, put back after it and argued for")
 	func onlyTheseSurviveTheWipe() throws {
-		let source = try Self.source("Nifro/App/RestoreDefaults.swift")
+		let source = try Self.source("Sources/Nifro/App/RestoreDefaults.swift")
 		let code = try Self.stripComments(source)
 
 		#expect(
@@ -248,7 +248,7 @@ struct RestoreDefaultsTests {
 	*/
 	@Test("Restoring never touches website data")
 	func websiteDataIsLeftAlone() throws {
-		let code = try Self.stripComments(Self.source("Nifro/App/RestoreDefaults.swift"))
+		let code = try Self.stripComments(Self.source("Sources/Nifro/App/RestoreDefaults.swift"))
 
 		#expect(!code.contains("WKWebsiteDataStore"))
 		#expect(!code.contains("DiskBudget"))

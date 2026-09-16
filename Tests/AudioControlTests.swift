@@ -39,7 +39,7 @@ struct AudioControlTests {
 		let line = try Regex("//[^\\n]*")
 
 		return try String(
-			contentsOf: root.appending(path: "Nifro/Support/Extensions.swift"),
+			contentsOf: root.appending(path: "Sources/Nifro/Support/Extensions.swift"),
 			encoding: .utf8
 		)
 		.replacing(block, with: "")

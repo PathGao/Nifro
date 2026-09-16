@@ -41,17 +41,25 @@ the first one is being discussed.
 
 ## Building it
 
-You need Xcode 26 or later — CI fails outright below that, so a change built
-on an older one is a red run rather than a review. Nothing else is required to
-build: dependencies come in through Swift Package Manager and Xcode resolves
-them on first open.
+Install Xcode 26 or later. The build uses its resource and App Intents tools;
+Command Line Tools alone are insufficient. You do not need to open the IDE.
 
-```
+```sh
 git clone https://github.com/PathGao/Nifro.git
-open Nifro/Nifro.xcodeproj
+cd Nifro
+./build.sh
 ```
 
-Then build and run the `Nifro` scheme.
+The app is written to `.xcode-build/Build/Products/Release/Nifro.app`. Development
+builds use `com.pathgao.nifro.dev` and `nifro-dev:` so they have separate preferences
+and sandbox storage from the installed release. They are ad-hoc signed; macOS may
+ask again for permissions after a rebuild. Nothing is installed or launched.
+
+`./build.sh ci` builds unsigned Debug code. `./build.sh release` uses the production
+identity and requires `APPLE_SIGNING_IDENTITY` and `APPLE_TEAM_ID`. For notarization
+and publishing, see [the release guide](../docs/RELEASE.md).
+Use `./build.sh --help` for options. Xcode remains available for debugging with
+the `Nifro` scheme.
 
 - **Swift 6 language mode.** Concurrency errors are errors, not warnings. If
   you hit one, the fix is almost always to move the work onto the actor that
@@ -60,7 +68,7 @@ Then build and run the `Nifro` scheme.
   it. There is no back-compatibility to preserve.
 - **SwiftLint** runs as a build phase, so a clean build means a clean lint.
   Install it with `brew install swiftlint`; without it the build phase warns
-  and continues. The rules live in `.swiftlint.yml`, which uses `only_rules`
+  and continues. The rules live in `Tools/Config/SwiftLint.yml`, which uses `only_rules`
   — the enabled set is exactly what is listed there. If a rule is genuinely
   wrong for your code, say so in the pull request rather than adding a
   `swiftlint:disable` in silence.
@@ -82,7 +90,7 @@ falls on the description of what you ran. See below.
 ## Where things live
 
 ```
-Nifro/
+Sources/Nifro/
 ├── App/          entry point, state, events, menus, Shortcuts, URL commands
 ├── Wallpaper/    the window, the web view, loading, content rules, scroll restoration
 ├── Visibility/   the menu bar colour band, and dimming when another app is in front
@@ -160,3 +168,6 @@ What follows from that:
 
 Contributions are made under the repository's MIT licence, the same one Nifro
 inherited. There is no CLA and no bot to sign.
+
+The share extension lives in `Sources/ShareExtension/`. The Xcode project and build
+configuration live under `Tools/`; tests remain in `Tests/`.

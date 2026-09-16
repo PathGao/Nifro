@@ -12,7 +12,7 @@ final class ShareController: ExtensionController {
 		var components = URLComponents()
 		// This target cannot read the app's Info.plist, so the scheme is repeated here. It is the one
 		// copy, and Tools/check-url-scheme.py fails the build if it drifts from the declaration.
-		components.scheme = "nifro"
+		components.scheme = Bundle.main.object(forInfoDictionaryKey: "NifroURLScheme") as? String
 		components.path = "add"
 
 		components.queryItems = [

@@ -83,7 +83,7 @@ struct WebsiteDecodingTests {
 	Computed properties are skipped by the brace on their own line, which is what makes them computed.
 	*/
 	private static func storedProperties() throws -> [(name: String, declaration: String)] {
-		let text = try source("Nifro/Sites/Website.swift")
+		let text = try source("Sources/Nifro/Sites/Website.swift")
 
 		guard
 			let start = text.range(of: "struct Website"),
@@ -215,7 +215,7 @@ struct WebsiteDecodingTests {
 	*/
 	@Test("A website with no answer of its own follows Settings")
 	func theGlobalSwitchIsStillTheDefault() throws {
-		let website = try Self.source("Nifro/Sites/Website.swift")
+		let website = try Self.source("Sources/Nifro/Sites/Website.swift")
 
 		#expect(
 			website.contains("static let defaultValue = followSettings"),
@@ -227,7 +227,7 @@ struct WebsiteDecodingTests {
 			"Nothing falls back to the app-wide switch any more, so everybody who set it loses it."
 		)
 
-		let webView = try Self.source("Nifro/Wallpaper/WebViewController.swift")
+		let webView = try Self.source("Sources/Nifro/Wallpaper/WebViewController.swift")
 
 		#expect(
 			webView.contains("opensExternalLinksInBrowser"),
@@ -245,7 +245,7 @@ struct WebsiteDecodingTests {
 	*/
 	@Test("A @DecodableDefault field survives a payload written before it existed")
 	func decodableDefaultToleratesAnAbsentKey() throws {
-		let source = try String(contentsOf: Self.root.appending(path: "Nifro/Support/Extensions.swift"), encoding: .utf8)
+		let source = try String(contentsOf: Self.root.appending(path: "Sources/Nifro/Support/Extensions.swift"), encoding: .utf8)
 
 		#expect(
 			source.contains("DecodableDefault.Wrapper<T>.Type"),

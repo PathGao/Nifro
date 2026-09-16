@@ -44,7 +44,7 @@ struct PlaceholderTests {
 		let token = try Regex("\\[\\[[A-Za-z][A-Za-z0-9]*\\]\\]")
 
 		let sources = FileManager.default
-			.enumerator(at: root.appending(path: "Nifro"), includingPropertiesForKeys: nil)?
+			.enumerator(at: root.appending(path: "Sources/Nifro"), includingPropertiesForKeys: nil)?
 			.compactMap { $0 as? URL }
 			.filter { $0.pathExtension == "swift" } ?? []
 
@@ -75,7 +75,7 @@ struct PlaceholderTests {
 		)
 
 		let catalogue = try String(
-			contentsOf: Self.root.appending(path: "Nifro/Localizable.xcstrings"),
+			contentsOf: Self.root.appending(path: "Sources/Nifro/Localizable.xcstrings"),
 			encoding: .utf8
 		)
 

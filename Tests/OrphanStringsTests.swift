@@ -48,11 +48,11 @@ struct OrphanStringsTests {
 		let readable: Set<String> = ["swift", "plist", "strings", "json"]
 
 		let sources = FileManager.default
-			.enumerator(at: root.appending(path: "Nifro"), includingPropertiesForKeys: nil)?
+			.enumerator(at: root.appending(path: "Sources/Nifro"), includingPropertiesForKeys: nil)?
 			.compactMap { $0 as? URL } ?? []
 
 		let extensionSources = FileManager.default
-			.enumerator(at: root.appending(path: "ShareExtension"), includingPropertiesForKeys: nil)?
+			.enumerator(at: root.appending(path: "Sources/ShareExtension"), includingPropertiesForKeys: nil)?
 			.compactMap { $0 as? URL } ?? []
 
 		let block = try Regex("/\\*.*?\\*/", as: AnyRegexOutput.self).dotMatchesNewlines()
@@ -75,7 +75,7 @@ struct OrphanStringsTests {
 	}
 
 	private static func catalogueKeys() throws -> [String] {
-		let data = try Data(contentsOf: root.appending(path: "Nifro/Localizable.xcstrings"))
+		let data = try Data(contentsOf: root.appending(path: "Sources/Nifro/Localizable.xcstrings"))
 
 		// Only the keys are wanted; the values are three levels of nesting this test has no use for.
 		let raw = try JSONSerialization.jsonObject(with: data) as? [String: Any]

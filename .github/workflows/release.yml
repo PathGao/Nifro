@@ -28,8 +28,6 @@ on:
         default: false
 
 env:
-  XCODE_PROJECT: Nifro.xcodeproj
-  XCODE_SCHEME: Nifro
   BUILT_APP_NAME: Nifro.app
   APP_NAME: Nifro
   BUNDLE_ID: com.pathgao.nifro
@@ -61,7 +59,7 @@ jobs:
           major="$(xcodebuild -version | sed -n '1s/Xcode \([0-9]*\).*/\1/p')"
           [ "$major" -ge 26 ] || { echo "::error::Xcode $major is too old; this project needs 26 or newer"; exit 1; }
 
-      # `Config.xcconfig` is the only place a version is written. The tag is derived from it rather
+      # `Tools/Config/App.xcconfig` is the only place a version is written. The tag is derived from it rather
       # than typed alongside it, so the two cannot disagree -- which they used to be able to, and the
       # workflow's answer was to fail after being dispatched.
       - name: Work out the version, and refuse to reuse one
@@ -69,7 +67,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          version="$(sed -n 's/^MARKETING_VERSION *= *//p' Config.xcconfig | tr -d ' \r')"
+          version="$(sed -n 's/^MARKETING_VERSION *= *//p' Tools/Config/App.xcconfig | tr -d ' \r')"
           tag="v$version"
 
           case "$version" in
@@ -82,7 +80,7 @@ jobs:
           # A `v*` tag cannot be moved or deleted, so a second release of one is not something to
           # recover from afterwards. Refused here, before anything is built.
           if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
-            echo "::error::$tag already exists. Bump MARKETING_VERSION in Config.xcconfig first."
+            echo "::error::$tag already exists. Bump MARKETING_VERSION in Tools/Config/App.xcconfig first."
             exit 1
           fi
 
@@ -186,12 +184,7 @@ jobs:
             rm -rf .xcode-build/Build/Products
 
             # ONLY_ACTIVE_ARCH=NO with a single ARCHS: a thin binary holding only this architecture.
-            xcodebuild clean build \
-              -project "$XCODE_PROJECT" \
-              -scheme "$XCODE_SCHEME" \
-              -configuration Release \
-              -destination "generic/platform=macOS" \
-              -derivedDataPath .xcode-build \
+            APPLE_SIGNING_IDENTITY="$identity" APPLE_TEAM_ID="$TEAM_ID" ./build.sh release \
               ARCHS="$arch" \
               ONLY_ACTIVE_ARCH=NO \
               "${signing_args[@]}" \

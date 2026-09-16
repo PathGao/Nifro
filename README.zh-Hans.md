@@ -31,7 +31,7 @@
   ·
   <a href="docs/ROADMAP.zh-Hans.md">路线图</a>
   ·
-  <a href="CONTRIBUTING.md">参与贡献</a>
+  <a href=".github/CONTRIBUTING.md">参与贡献</a>
   ·
   <a href="README.md">English</a>
 </p>
@@ -147,25 +147,22 @@ Nifro 最适合那些可以一直留在屏幕上、偶尔瞥一眼又确实有�
 - macOS 15 或更新版本
 - Xcode 26 或更高版本
 
-### 在 Xcode 中运行
+### 构建本地开发版
 
 ```sh
 git clone https://github.com/PathGao/Nifro.git
 cd Nifro
-open Nifro.xcodeproj
+./build.sh
 ```
 
-在 Xcode 中选择 `Nifro` scheme 和**我的 Mac**，然后按 **Run**（⌘R）。
+图标编译和快捷指令元数据生成需要完整 Xcode，但构建时不用打开 Xcode 界面。
+产物位于 `.xcode-build/Build/Products/Release/Nifro.app`，使用临时签名并保留沙盒权限。
+开发版的应用标识为 `com.pathgao.nifro.dev`，URL 协议为 `nifro-dev:`，数据与已安装的正式版隔离。
+脚本不会安装、启动应用或修改钥匙串。
 
-### 构建本地测试包
-
-```sh
-./Tools/build-local.sh
-```
-
-脚本会在需要时创建本地签名身份，带着 App 的沙盒 entitlement 构建，并把 `Nifro-test.app` 安装到桌面。
-请用它，不要手动对 Xcode 构建产物重新签名：重新签名可能会删掉 entitlement，让它使用与正式版不同的
-偏好设置容器。
+`./build.sh ci` 构建不签名的 Debug 版本。`./build.sh release` 使用正式版标识和已有的
+Developer ID 证书构建，签名及公证步骤见[发布说明](docs/RELEASE.md)。
+需要交互调试时，仍可打开 `Tools/Nifro.xcodeproj`，使用 `Nifro` scheme。
 
 ### 运行测试
 
@@ -176,9 +173,14 @@ swift test
 测试既覆盖 App 行为，也覆盖项目护栏：每显示器的状态、播放列表迁移、裁切和缩放、URL 处理、设置兼容性，
 以及类型系统本身守不住的源码级规则。
 
+## 仓库目录
+
+`Sources/` 放主应用和分享扩展，`Tests/` 放测试，`Tools/` 放 Xcode 工程、构建配置和维护脚本。
+`assets/` 放设计资源，`docs/` 放设计与发布文档，`sites/` 放线上站点目录，`Casks/` 是 Homebrew 入口。
+
 ## 参与贡献
 
-先看 [CONTRIBUTING.md](CONTRIBUTING.md)。最省力又最有用的贡献是加一条站点。如果你有一个当壁纸
+先看 [CONTRIBUTING.md](.github/CONTRIBUTING.md)。最省力又最有用的贡献是加一条站点。如果你有一个当壁纸
 很好看的页面，那对这个项目的价值超过大部分代码。
 
 提交信息、PR 和 issue 请用英文——不是因为英文更好，而是因为它是所有读这个仓库的人唯一共有的

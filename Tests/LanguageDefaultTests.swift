@@ -54,7 +54,7 @@ struct LanguageDefaultTests {
 
 	@Test("The chosen language is read from Nifro's own domain, never through the search list")
 	func theLanguageIsReadFromTheAppsOwnDomain() throws {
-		let code = try Self.stripComments(Self.source("Nifro/Support/Language.swift"))
+		let code = try Self.stripComments(Self.source("Sources/Nifro/Support/Language.swift"))
 
 		#expect(
 			code.contains("UserDefaults.standard.persistentDomain(forName: SSApp.idString)?[key]"),
@@ -74,8 +74,8 @@ struct LanguageDefaultTests {
 
 	@Test("There is no way back to following the Mac")
 	func nothingClearsTheChoice() throws {
-		let language = try Self.stripComments(Self.source("Nifro/Support/Language.swift"))
-		let settings = try Self.stripComments(Self.source("Nifro/Screens/SettingsScreen.swift"))
+		let language = try Self.stripComments(Self.source("Sources/Nifro/Support/Language.swift"))
+		let settings = try Self.stripComments(Self.source("Sources/Nifro/Screens/SettingsScreen.swift"))
 
 		#expect(
 			language.contains("static let fallback = Self.english"),
@@ -98,7 +98,7 @@ struct LanguageDefaultTests {
 
 	@Test("The default is written before anything in the app can ask for a string")
 	func theDefaultIsAppliedFirst() throws {
-		let code = try Self.stripComments(Self.source("Nifro/App/App.swift"))
+		let code = try Self.stripComments(Self.source("Sources/Nifro/App/App.swift"))
 
 		// Inside `init()`, by way of the one thing `init()` calls. Anything later — the delegate's
 		// `applicationWillFinishLaunching`, `applicationDidFinishLaunching` — is after windows, menus

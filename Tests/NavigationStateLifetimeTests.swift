@@ -93,7 +93,7 @@ struct NavigationStateLifetimeTests {
 	@Test("The page's MIME type is kept on the web view that was told it")
 	func theMIMETypeBelongsToOneWebView() throws {
 		#expect(
-			try Self.source("Nifro/Wallpaper/SSWebView.swift").contains("var responseMIMEType"),
+			try Self.source("Sources/Nifro/Wallpaper/SSWebView.swift").contains("var responseMIMEType"),
 			"The response's MIME type is not stored on the web view any more, so the two views a swap keeps alive share one answer and whichever finishes last decides it for both."
 		)
 
@@ -101,14 +101,14 @@ struct NavigationStateLifetimeTests {
 		// it, and neither would a differently named slot — which is the point: what has to stay true
 		// is that this controller holds no response of its own, whatever it would be called.
 		#expect(
-			try !Self.source("Nifro/Wallpaper/WebViewController.swift").contains("HTTPURLResponse?"),
+			try !Self.source("Sources/Nifro/Wallpaper/WebViewController.swift").contains("HTTPURLResponse?"),
 			"`WebViewController` holds a response again. It is one per display and outlives every page it shows, so a slot on it belongs to no navigation in particular."
 		)
 	}
 
 	@Test("A navigation does not inherit the last one's MIME type")
 	func eachNavigationStartsWithNoAnswer() throws {
-		let source = try Self.source("Nifro/Wallpaper/WebViewController.swift")
+		let source = try Self.source("Sources/Nifro/Wallpaper/WebViewController.swift")
 
 		// Anchored on WebKit's selector rather than on a helper this repository could rename, and on
 		// this one rather than on the policy callback: it is the main frame only, and it runs for the
@@ -123,7 +123,7 @@ struct NavigationStateLifetimeTests {
 
 	@Test("Every download's destination is filed and taken back under its own download")
 	func eachDownloadKeepsItsOwnDestination() throws {
-		let source = try Self.source("Nifro/Wallpaper/WebViewController.swift")
+		let source = try Self.source("Sources/Nifro/Wallpaper/WebViewController.swift")
 
 		#expect(
 			try Self.body(of: "decideDestinationUsing response: URLResponse, suggestedFilename: String", in: source)
@@ -164,7 +164,7 @@ struct NavigationStateLifetimeTests {
 	*/
 	@Test("A stored failure does not outlive the load it describes")
 	func theFailureEndsWithItsLoad() throws {
-		let scene = try Self.source("Nifro/Wallpaper/WallpaperScene.swift")
+		let scene = try Self.source("Sources/Nifro/Wallpaper/WallpaperScene.swift")
 
 		for (declaration, when) in [
 			("func load(_ url: URL?)", "A load starting"),
@@ -180,7 +180,7 @@ struct NavigationStateLifetimeTests {
 		// callers wrote it: a reload finishing on one display replaced another display's failure with
 		// its own page title, and the failure was simply gone.
 		#expect(
-			try Self.source("Nifro/App/AppState.swift").contains("storedWebViewErrors: [String: Error]"),
+			try Self.source("Sources/Nifro/App/AppState.swift").contains("storedWebViewErrors: [String: Error]"),
 			"The failure store is not keyed per display any more, so clearing one display's entry clears or misses every other display's."
 		)
 	}

@@ -941,7 +941,7 @@ The file is served from `main` and fetched at runtime, so it ships without a bui
 anything on the way out that compiles it. `SiteCatalog` used to need SwiftUI, `Defaults` and the
 websites controller to compile, which kept it out of this target and left the published file with no
 reader in the repository at all; the parts of it that turn an entry into a website now live in
-`Nifro/Sites/WebsitesController.swift` so that the decoding can be listed in `Package.swift` and
+`Sources/Nifro/Sites/WebsitesController.swift` so that the decoding can be listed in `Package.swift` and
 tested here. That is the whole point of the split — see the note on `SiteCatalog`.
 */
 @Suite("Published site catalogue")
