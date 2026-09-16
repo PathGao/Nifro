@@ -18,7 +18,7 @@
                BlueprintIdentifier = "E32AD6A826D2718B0008D900"
                BuildableName = "Share Extension.appex"
                BlueprintName = "Share Extension"
-               ReferencedContainer = "container:Tools/Nifro.xcodeproj">
+               ReferencedContainer = "container:Nifro.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -32,7 +32,7 @@
                BlueprintIdentifier = "E324212F2384E9D700D28A91"
                BuildableName = "Nifro.app"
                BlueprintName = "Nifro"
-               ReferencedContainer = "container:Tools/Nifro.xcodeproj">
+               ReferencedContainer = "container:Nifro.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -64,7 +64,7 @@
             BlueprintIdentifier = "E324212F2384E9D700D28A91"
             BuildableName = "Nifro.app"
             BlueprintName = "Nifro"
-            ReferencedContainer = "container:Tools/Nifro.xcodeproj">
+            ReferencedContainer = "container:Nifro.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -83,7 +83,7 @@
             BlueprintIdentifier = "E324212F2384E9D700D28A91"
             BuildableName = "Nifro.app"
             BlueprintName = "Nifro"
-            ReferencedContainer = "container:Tools/Nifro.xcodeproj">
+            ReferencedContainer = "container:Nifro.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
