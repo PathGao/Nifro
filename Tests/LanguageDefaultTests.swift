@@ -126,4 +126,27 @@ struct LanguageDefaultTests {
 			"Something runs before the language is written (“\(before.prefix(80))”). CFBundle caches the language on the first string anything asks for, and there is no second chance."
 		)
 	}
+
+	@Test("Fullscreen activation policy waits for AppKit's launch callback")
+	func activationPolicyIsNotChangedFromSwiftUIAppInitialization() throws {
+		let code = try Self.stripComments(Self.source("Nifro/App/App.swift"))
+		let configuration = try #require(
+			code.range(of: "private func setUpConfig() {")?.lowerBound,
+			"App.swift no longer has the startup configuration function"
+		)
+		let delegate = try #require(
+			code.range(of: "private final class AppDelegate").map { String(code[$0.lowerBound...]) },
+			"App.swift no longer has an application delegate"
+		)
+
+		#expect(
+			!code[configuration...].prefix(code.distance(from: configuration, to: code.endIndex) - delegate.count).contains("setActivationPolicy"),
+			"Changing activation policy while SwiftUI constructs AppMain crashes this app before its first window or menu item exists"
+		)
+		#expect(
+			delegate.contains("func applicationWillFinishLaunching") && delegate.contains("NSApp.setActivationPolicy"),
+			"Fullscreen mode no longer selects its activation policy from AppKit's launch callback"
+		)
+	}
+
 }

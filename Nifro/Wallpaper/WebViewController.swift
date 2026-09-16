@@ -91,12 +91,11 @@ final class WebViewController: NSObject {
 
 		let preferences = WKPreferences()
 		preferences.javaScriptCanOpenWindowsAutomatically = false
-		// A wallpaper is already the size of the screen, so a page's fullscreen button has nothing to
-		// offer, and taking it breaks the wallpaper: WebKit moves the web view into a window of its
-		// own, while the visibility policy carries on reinstalling the content view every couple of
-		// seconds. Coming back out then finds nowhere to come back to, and the wallpaper is black
-		// with no way to fix it from inside the app.
-		preferences.isElementFullscreenEnabled = false
+		// This must agree with the process activation policy selected during app launch. In wallpaper
+		// mode WebKit element fullscreen creates a Space while Nifro deliberately has no Dock tile;
+		// macOS then fails to restore the Dock. Compatibility mode launches as a regular app before
+		// this web view exists, so the two macOS subsystems have a consistent owner for fullscreen.
+		preferences.isElementFullscreenEnabled = Defaults.fullscreenCompatibility.isElementFullscreenEnabled
 		configuration.preferences = preferences
 
 		let webView = SSWebView(frame: .zero, configuration: configuration)
@@ -216,15 +215,14 @@ final class WebViewController: NSObject {
 
 extension WebViewController: WKNavigationDelegate {
 	func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction) async -> WKNavigationActionPolicy {
-		// An address that has to be framed by a page must never become the page. YouTube's player
-		// answers "error 153, player configuration error" when it is the document rather than a frame
-		// in one, and there are several ways to end up there by accident: a link that opens in a new
-		// window, a script setting `top.location`, a reload of something that was already wrong. One
-		// guard here covers all of them, because they all arrive as a main-frame navigation.
+		// YouTube's direct player needs the same Referer on script redirects, new-window navigations
+		// and reloads as it receives on the first load. Reissue a header-less main-frame navigation
+		// through `loadWallpaper`; the header-bearing request passes this guard on the second visit.
 		if
 			navigationAction.targetFrame?.isMainFrame == true,
 			let url = navigationAction.request.url,
-			VideoEmbed.hostPage(for: url) != nil
+			let referrer = VideoEmbed.referrer(for: url),
+			navigationAction.request.value(forHTTPHeaderField: "Referer") != referrer
 		{
 			webView.loadWallpaper(url)
 			return .cancel

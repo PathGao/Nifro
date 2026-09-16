@@ -118,6 +118,7 @@ extension Defaults.Keys {
 	static let browsingDisplays = Key<Set<String>>("browsingDisplays", default: [])
 
 	// Settings
+	static let fullscreenCompatibilityMode = Key<Bool>("fullscreenCompatibilityMode", default: false)
 	static let hideMenuBarIcon = Key<Bool>("hideMenuBarIcon", default: false)
 	static let opacity = Key<Double>("opacity", default: 1)
 	// **A switch and a number, not a number that goes missing.** This was `Key<Double?>` with `nil`
@@ -205,6 +206,12 @@ extension Defaults.Keys {
 	// On by default, off in one click. An app that checks on its own has to be an app that can be told
 	// not to.
 	static let checksForUpdatesAutomatically = Key<Bool>("checksForUpdatesAutomatically", default: true)
+}
+
+extension Defaults {
+	static var fullscreenCompatibility: FullscreenCompatibility {
+		FullscreenCompatibility(isEnabled: Defaults[.fullscreenCompatibilityMode])
+	}
 }
 
 extension Notification.Name {

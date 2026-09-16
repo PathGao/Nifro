@@ -837,6 +837,16 @@
         }
       }
     },
+    "Fullscreen compatibility mode": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "全屏兼容模式"
+          }
+        }
+      }
+    },
     "Freed %@": {
       "localizations": {
         "zh-Hans": {
@@ -1177,7 +1187,17 @@
         }
       }
     },
-    "Load this page even if macOS does not trust its certificate. Use this only for devices on a trusted network.": {
+    "Lets web pages and video players use macOS fullscreen. Nifro appears in the Dock while this mode is on. Reopen Nifro after changing this setting.": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "允许网页和视频播放器使用 macOS 全屏。启用后，Nifro 会显示在程序坞中。更改此设置后，请重新打开 Nifro。"
+          }
+        }
+      }
+    },
+	"Load this page even if macOS does not trust its certificate. Use this only for devices on a trusted network.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {

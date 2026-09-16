@@ -1,4 +1,5 @@
 import AppKit
+import Defaults
 import WebKit
 
 /**
@@ -312,8 +313,8 @@ extension WKWebView {
 	Start loading `url` the way that address has to be loaded.
 
 	Three addresses, three ways in. A local folder needs the sandbox opened for it first, or the read
-	is refused and a local website silently stops updating. A YouTube player has to be framed by a
-	page rather than be one. Everything else is a request.
+	is refused and a local website silently stops updating. A YouTube player is a direct document
+	with the identifying header it requires. Everything else is a request.
 	*/
 	func loadWallpaper(_ url: URL) {
 		if url.isFileURL {
@@ -322,13 +323,12 @@ extension WKWebView {
 			return
 		}
 
-		if let host = VideoEmbed.hostPage(for: url) {
-			loadHTMLString(host.html, baseURL: host.baseURL)
-			return
-		}
-
-		var request = URLRequest(url: url)
+		let presentationURL = VideoEmbed.presentationURL(for: url, fullscreenCompatibility: Defaults.fullscreenCompatibility)
+		var request = URLRequest(url: presentationURL)
 		request.cachePolicy = .reloadIgnoringLocalCacheData
+		if let referrer = VideoEmbed.referrer(for: presentationURL) {
+			request.setValue(referrer, forHTTPHeaderField: "Referer")
+		}
 		load(request)
 	}
 }

@@ -220,6 +220,7 @@ private struct AdvancedSettings: View {
 	var body: some View {
 		Form {
 			Section {
+				FullscreenCompatibilitySetting()
 				ContentRulesSetting()
 				Defaults.Toggle(key: .deactivateOnBattery) {
 					Text("Turn off wallpapers on battery")
@@ -243,6 +244,15 @@ private struct AdvancedSettings: View {
 			Section {
 				RestoreDefaultsSetting()
 			}
+		}
+	}
+}
+
+private struct FullscreenCompatibilitySetting: View {
+	var body: some View {
+		Defaults.Toggle(key: .fullscreenCompatibilityMode) {
+			Text("Fullscreen compatibility mode")
+				.explained(String(localized: "Lets web pages and video players use macOS fullscreen. Nifro appears in the Dock while this mode is on. Reopen Nifro after changing this setting."))
 		}
 	}
 }

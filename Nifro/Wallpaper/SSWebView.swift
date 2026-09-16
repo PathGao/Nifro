@@ -203,12 +203,11 @@ extension WKWebView {
 	on screen, and a page that moves itself is the snapshot's business rather than an edit the user
 	should be asked to make.
 
-	A framed player is excluded. It is shown inside a page this app builds, and that page's address is
-	this app's, not anywhere anybody went.
+	A direct player is included: it is the document the user asked Nifro to show, and its playback
+	state is as useful to preserve as any other page's.
 	*/
 	func navigatedURL(for website: Website) -> URL? {
 		guard
-			VideoEmbed.hostPage(for: website.url) == nil,
 			let current = url?.normalized(),
 			website.url.normalized() != current
 		else {

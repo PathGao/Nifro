@@ -59,6 +59,21 @@ private struct AppMain: App {
 }
 
 private final class AppDelegate: NSObject, NSApplicationDelegate {
+
+	func applicationWillFinishLaunching(_ notification: Notification) {
+		// This is deliberately process-lifetime state. WebKit chooses its fullscreen host while it
+		// creates the view, and the Dock/Spaces workaround only holds when the app has been regular
+		// since launch; a Settings change is therefore stored for the next launch, not applied here.
+		// AppKit has created NSApplication by this callback; doing it from SwiftUI's App initializer
+		// traps before the first window or menu item can exist.
+		// `LSUIElement` already starts the normal wallpaper mode as accessory. Reapplying `.accessory`
+		// during AppKit launch can detach a status item from the menu-bar host, so only the opt-in
+		// compatibility mode changes the policy.
+		if Defaults.fullscreenCompatibility.isElementFullscreenEnabled {
+			NSApp.setActivationPolicy(.regular)
+		}
+	}
+
 	// Without this, Nifro quits when the screen is locked. (macOS 13.2)
 	func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
 

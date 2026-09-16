@@ -34,6 +34,7 @@
 		F7CEB84C882E8730A2C4B649 /* MenuBarBand.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB494D7D82CDA92E0D71731F /* MenuBarBand.swift */; };
 		2304ABCA5B85D50BF749039D /* Geometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A081BCFF6DF8B8B2FB4CB31B /* Geometry.swift */; };
 		D01E670AD9D65C111C3E3E3F /* VideoEmbed.swift in Sources */ = {isa = PBXBuildFile; fileRef = 47F1A73D88562E6E93A3A692 /* VideoEmbed.swift */; };
+		A1C0DE01B0074E01A0000B01 /* FullscreenCompatibility.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000B02 /* FullscreenCompatibility.swift */; };
 		3188AB74960C1A115F1F09B8 /* Schedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B4B73021E1104C03600DEFE /* Schedule.swift */; };
 		A1C0DE01B0074E01A0000021 /* URLCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000022 /* URLCommand.swift */; };
 		A1C0DE01B0074E01A0000015 /* ImageCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C0DE01B0074E01A0000016 /* ImageCache.swift */; };
@@ -139,6 +140,7 @@
 		DB494D7D82CDA92E0D71731F /* MenuBarBand.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = MenuBarBand.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A081BCFF6DF8B8B2FB4CB31B /* Geometry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Geometry.swift; sourceTree = "<group>"; usesTabs = 1; };
 		47F1A73D88562E6E93A3A692 /* VideoEmbed.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = VideoEmbed.swift; sourceTree = "<group>"; usesTabs = 1; };
+		A1C0DE01B0074E01A0000B02 /* FullscreenCompatibility.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FullscreenCompatibility.swift; sourceTree = "<group>"; };
 		0B4B73021E1104C03600DEFE /* Schedule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = Schedule.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A1C0DE01B0074E01A0000022 /* URLCommand.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = URLCommand.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A1C0DE01B0074E01A0000016 /* ImageCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = ImageCache.swift; sourceTree = "<group>"; usesTabs = 1; };
@@ -368,6 +370,7 @@
 			children = (
 				A081BCFF6DF8B8B2FB4CB31B /* Geometry.swift */,
 				47F1A73D88562E6E93A3A692 /* VideoEmbed.swift */,
+				A1C0DE01B0074E01A0000B02 /* FullscreenCompatibility.swift */,
 				A1C0DE01B0074E01A0000002 /* Rotation.swift */,
 				A1C0DE01B0074E01A0000004 /* RotationInterval.swift */,
 				A1C0DE01B0074E01A0000012 /* ScrollableTextView.swift */,
@@ -549,6 +552,7 @@
 				F7CEB84C882E8730A2C4B649 /* MenuBarBand.swift in Sources */,
 				2304ABCA5B85D50BF749039D /* Geometry.swift in Sources */,
 				D01E670AD9D65C111C3E3E3F /* VideoEmbed.swift in Sources */,
+				A1C0DE01B0074E01A0000B01 /* FullscreenCompatibility.swift in Sources */,
 				A1C0DE01B0074E01A0000001 /* Rotation.swift in Sources */,
 				A1C0DE01B0074E01A0000003 /* RotationInterval.swift in Sources */,
 				A1C0DE01B0074E01A0000011 /* ScrollableTextView.swift in Sources */,

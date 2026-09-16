@@ -99,8 +99,8 @@ struct RestoreDefaultsTests {
 		// that turns out to be the user's data is deleted by a restore and nobody finds out from the
 		// app. Whoever adds the key is the one person who can say which it is.
 		#expect(
-			names.count == 25,
-			"Constants.swift declares \(names.count) preferences and this test was written against 25. If the parser still works, a key has been added or removed — open `RestoreDefaults` and say whether it is one of the app's settings, which the wipe takes, or one of the user's websites, which `websiteKeys` has to name. Then correct this number."
+			names.count == 26,
+			"Constants.swift declares \(names.count) preferences and this test was written against 26. If the parser still works, a key has been added or removed — open `RestoreDefaults` and say whether it is one of the app's settings, which the wipe takes, or one of the user's websites, which `websiteKeys` has to name. Then correct this number."
 		)
 
 		#expect(names.contains("hasInstalledFeaturedWebsites"))

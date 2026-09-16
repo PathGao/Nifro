@@ -24,8 +24,8 @@ enum VideoEmbed {
 	Says nothing about sound. Whether a website is muted is a setting on that website, changed long
 	after this URL was stored, so an answer baked in here would be the one the user cannot change.
 
-	YouTube does need one condition to start at all, but that belongs to loading the player rather
-	than to its address, so it lives in `hostPage(for:)`.
+	Fullscreen policy does not belong in the stored address. `presentationURL(for:fullscreenCompatibility:)`
+	adds it only to the request the current process makes.
 	*/
 	static func playerURL(for url: URL) -> URL? {
 		guard let host = url.host?.lowercased() else {
@@ -46,62 +46,49 @@ enum VideoEmbed {
 	}
 
 	/**
-	The page that has to host `url` for it to work, or `nil` when the address can be opened on its own.
+	The player URL this process should load, without mutating the website URL it was derived from.
 
-	YouTube's embed address is built to be framed by somebody else's page and refuses to be one:
-	opened directly it answers "error 153, player configuration error", which is what a Nifro
-	wallpaper pointed straight at it used to show. So it gets a page to be framed by.
-
-	Which address that page is loaded as matters, and not in the way you would guess: YouTube rejects
-	being framed by `youtube.com` too. This is the project's own page, which is also an honest answer
-	to who is asking.
-
-	The framed address is made to say `mute=1`, which reads like a decision about sound and is not
-	one: YouTube's player refuses to start at all unless it is muted, whatever the web view allows.
-	It is the price of autoplay. The website's own sound setting is applied to the player afterwards
-	by the audio script, which unmutes it and starts it playing. Measured: with `mute=1` the player
-	runs, without it the video sits paused on its first frame, which looks identical to a still until
-	you wait for it. Added here rather than in the address above so that a player address stored
-	before this was known still starts.
+	`fs=0` is Nifro's safe-wallpaper presentation policy, not part of a video's identity. A saved
+	address from a build that wrote it is therefore normalized in both directions: wallpaper mode
+	keeps exactly one disabling value; compatibility mode removes every old value and gets YouTube's
+	normal fullscreen control.
 	*/
-	static func hostPage(for url: URL) -> (html: String, baseURL: URL)? {
+	static func presentationURL(for url: URL, fullscreenCompatibility: FullscreenCompatibility) -> URL {
 		guard
 			url.host?.lowercased().hasSuffix("youtube.com") == true,
 			url.path.hasPrefix("/embed/"),
-			let baseURL = URL(string: "https://github.com/PathGao/Nifro"),
 			var components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+		else {
+			return url
+		}
+
+		var items = (components.queryItems ?? []).filter { $0.name != "fs" }
+
+		if fullscreenCompatibility.hidesYouTubeFullscreenControl {
+			items.append(URLQueryItem(name: "fs", value: "0"))
+		}
+
+		components.queryItems = items
+		return components.url ?? url
+	}
+
+	/**
+	The browser identification that lets a direct YouTube embed create a player.
+
+	Keeping the player as the main document matters for element fullscreen: an iframe's fullscreen
+	request belongs to the iframe host rather than to the `WKWebView` document that receives the
+	request. This header replaces the old app-built iframe page while preserving YouTube's required
+	identification.
+	*/
+	static func referrer(for url: URL) -> String? {
+		guard
+			url.host?.lowercased().hasSuffix("youtube.com") == true,
+			url.path.hasPrefix("/embed/")
 		else {
 			return nil
 		}
 
-		var items = components.queryItems ?? []
-
-		if !items.contains(where: { $0.name == "mute" }) {
-			items.append(URLQueryItem(name: "mute", value: "1"))
-			components.queryItems = items
-		}
-
-		let url = components.url ?? url
-
-		// The address is either one this file built out of a checked identifier or one the user
-		// typed. Escaped anyway, because the difference is not visible from here.
-		let source = url.absoluteString
-			.replacingOccurrences(of: "&", with: "&amp;")
-			.replacingOccurrences(of: "\"", with: "&quot;")
-			.replacingOccurrences(of: "<", with: "&lt;")
-
-		return (
-			"""
-			<!doctype html>
-			<meta name="viewport" content="width=device-width, initial-scale=1">
-			<style>
-				html, body { margin: 0; height: 100%; background: #000 }
-				iframe { border: 0; width: 100%; height: 100% }
-			</style>
-			<iframe src="\(source)" allow="autoplay; encrypted-media"></iframe>
-			""",
-			baseURL
-		)
+		return "https://github.com/PathGao/Nifro"
 	}
 
 	/**
