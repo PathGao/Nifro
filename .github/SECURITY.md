@@ -8,9 +8,9 @@ rather than as a public issue. That form is the only channel — there is one
 maintainer and no security mailing list, and a public issue for a live
 vulnerability is the one thing that cannot be undone.
 
-Expect a first reply within a week. If a report holds up, the fix ships in the
-next release and the advisory is published with it, crediting you unless you
-ask otherwise.
+Security fixes target the latest release. Give the maintainer time to investigate
+and ship a fix before public disclosure; reporters can request credit. This
+community project does not promise a response time.
 
 ## What is in scope
 
@@ -35,9 +35,12 @@ their windows. The interesting boundary is between that page and the machine:
   app runs pages the user chose, with the JavaScript the user pasted; that is
   the feature.
 - Anything that requires the attacker to already have the user's account.
-- Gatekeeper warnings on directly downloaded builds. That is expected and
-  documented in [docs/RELEASE.md](../docs/RELEASE.md) — builds are self-signed and
-  not notarized. Homebrew is the supported route.
+
+## Release integrity
+
+Official releases from v0.9.1 use Apple Developer ID signing and notarization.
+Report unexpected signature, notarization or artifact-integrity failures with
+the download source and exact system message. See [the release guide](../docs/RELEASE.md).
 
 ## Supported versions
 

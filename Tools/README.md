@@ -6,7 +6,7 @@ Development and maintenance helpers. The main build entry point is [`../build.sh
 | --- | --- |
 | `setup-signing.sh` | Creates a stable self-signed identity for local development only |
 | `build-local.sh` | Calls `../build.sh dev`; optionally copies to a new destination without overwriting |
-| `sync-labels.sh` | Makes the repository's labels match `.github/labels.yml` |
+| `sync-labels.sh` | Previews label changes from `.github/labels.json`; pass `OWNER/REPO --apply` to apply |
 | `validate-sites.py` | Checks every `sites/*.yml` against `sites/schema.json`. CI runs this |
 | `generate-site-catalog.py` | Writes `sites/index.json` and the bundled Swift copy from the YAML. CI fails if they disagree |
 | `check-strings.py` | Reconciles `Localizable.xcstrings` with the strings the compiler says the app displays, in both directions. CI runs this after the build |
