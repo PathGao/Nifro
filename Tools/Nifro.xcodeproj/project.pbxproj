@@ -113,7 +113,7 @@
 		E32421332384E9D700D28A91 /* AppState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = AppState.swift; sourceTree = "<group>"; usesTabs = 1; };
 		E32421352384E9D700D28A91 /* AddWebsiteScreen.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = AddWebsiteScreen.swift; sourceTree = "<group>"; usesTabs = 1; };
 		E32421372384E9D900D28A91 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		A1C0DE01B0074E01A00000F2 /* Nifro.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.icon; path = Nifro.icon; sourceTree = "<group>"; };
+		A1C0DE01B0074E01A00000F2 /* Nifro.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.icon; path = assets/Nifro.icon; sourceTree = SOURCE_ROOT; };
 		E324213A2384E9D900D28A91 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		E324213F2384E9D900D28A91 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2BA31C0FAF40DE6D9B93FFA1 /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
@@ -166,7 +166,7 @@
 		E32AD6BC26D275070008D900 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		E32AD6B226D2718B0008D900 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E32AD6B326D2718B0008D900 /* ShareExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ShareExtension.entitlements; sourceTree = "<group>"; };
-		E32AD6BB26D271C00008D900 /* Config.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
+		E32AD6BB26D271C00008D900 /* Tools/Config/App.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Tools/Config/App.xcconfig; sourceTree = "<group>"; };
 		E333EB1A2385244E005FCE44 /* SettingsScreen.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = SettingsScreen.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A1C0DE01B0074E01A0000076 /* DisplayPanelController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = DisplayPanelController.swift; sourceTree = "<group>"; usesTabs = 1; };
 		A1C0DE01B0074E01A0000074 /* DisplayPanelModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = DisplayPanelModel.swift; sourceTree = "<group>"; usesTabs = 1; };
@@ -211,7 +211,7 @@
 		E32421272384E9D700D28A91 = {
 			isa = PBXGroup;
 			children = (
-				E32AD6BB26D271C00008D900 /* Config.xcconfig */,
+				E32AD6BB26D271C00008D900 /* Tools/Config/App.xcconfig */,
 				E32421322384E9D700D28A91 /* Nifro */,
 				E32AD6AA26D2718B0008D900 /* ShareExtension */,
 				E32421312384E9D700D28A91 /* Products */,
@@ -244,7 +244,7 @@
 				E3EF205F24C0D1A100A5F802 /* Other */,
 				E32421392384E9D900D28A91 /* Preview Content */,
 			);
-			path = Nifro;
+			path = Sources/Nifro;
 			sourceTree = "<group>";
 		};
 		E32421392384E9D900D28A91 /* Preview Content */ = {
@@ -263,7 +263,7 @@
 				E32AD6B226D2718B0008D900 /* Info.plist */,
 				E32AD6B326D2718B0008D900 /* ShareExtension.entitlements */,
 			);
-			path = ShareExtension;
+			path = Sources/ShareExtension;
 			sourceTree = "<group>";
 		};
 		E3EF205F24C0D1A100A5F802 /* Other */ = {
@@ -470,7 +470,7 @@
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = E32421312384E9D700D28A91 /* Products */;
-			projectDirPath = "";
+			projectDirPath = "..";
 			projectRoot = "";
 			targets = (
 				E324212F2384E9D700D28A91 /* Nifro */,
@@ -519,7 +519,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "PATH=\"/opt/homebrew/bin/:${PATH}\"\n# Skipped rather than failed when it is not installed. Style is checked on CI, and a\n# contributor who has not installed SwiftLint should still be able to build and run the app.\nif command -v swiftlint >/dev/null; then\n  swiftlint\nelse\n  echo \"warning: SwiftLint is not installed, skipping. brew install swiftlint\"\nfi\n";
+			shellScript = "PATH=\"/opt/homebrew/bin/:${PATH}\"\n# Skipped rather than failed when it is not installed. Style is checked on CI, and a\n# contributor who has not installed SwiftLint should still be able to build and run the app.\nif command -v swiftlint >/dev/null; then\n  swiftlint lint --config Tools/Config/SwiftLint.yml\nelse\n  echo \"warning: SwiftLint is not installed, skipping. brew install swiftlint\"\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -617,7 +617,7 @@
 /* Begin XCBuildConfiguration section */
 		E32421412384E9D900D28A91 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E32AD6BB26D271C00008D900 /* Config.xcconfig */;
+			baseConfigurationReference = E32AD6BB26D271C00008D900 /* Tools/Config/App.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -683,7 +683,7 @@
 		};
 		E32421422384E9D900D28A91 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E32AD6BB26D271C00008D900 /* Config.xcconfig */;
+			baseConfigurationReference = E32AD6BB26D271C00008D900 /* Tools/Config/App.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -744,16 +744,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = Nifro;
-				CODE_SIGN_ENTITLEMENTS = Nifro/Nifro.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Sources/Nifro/Nifro.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_ASSET_PATHS = "\"Nifro/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Sources/Nifro/Preview Content\"";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Nifro/Info.plist;
+				INFOPLIST_FILE = Sources/Nifro/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License. See the license file in the source repository.";
@@ -761,7 +761,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.pathgao.nifro;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(NIFRO_BUNDLE_ID)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
@@ -771,16 +771,16 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = Nifro;
-				CODE_SIGN_ENTITLEMENTS = Nifro/Nifro.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Sources/Nifro/Nifro.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_ASSET_PATHS = "\"Nifro/Preview Content\"";
+				DEVELOPMENT_ASSET_PATHS = "\"Sources/Nifro/Preview Content\"";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Nifro/Info.plist;
+				INFOPLIST_FILE = Sources/Nifro/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_LSUIElement = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "MIT License. See the license file in the source repository.";
@@ -788,7 +788,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.pathgao.nifro;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(NIFRO_BUNDLE_ID)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
@@ -797,21 +797,21 @@
 		E32AD6B826D2718B0008D900 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Sources/ShareExtension/ShareExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = ShareExtension/Info.plist;
+				INFOPLIST_FILE = Sources/ShareExtension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Nifro;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.pathgao.nifro.ShareExtension;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(NIFRO_BUNDLE_ID).ShareExtension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};
@@ -820,21 +820,21 @@
 		E32AD6B926D2718B0008D900 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_ENTITLEMENTS = ShareExtension/ShareExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Sources/ShareExtension/ShareExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEAD_CODE_STRIPPING = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = ShareExtension/Info.plist;
+				INFOPLIST_FILE = Sources/ShareExtension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Nifro;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.pathgao.nifro.ShareExtension;
+				PRODUCT_BUNDLE_IDENTIFIER = "$(NIFRO_BUNDLE_ID).ShareExtension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 			};

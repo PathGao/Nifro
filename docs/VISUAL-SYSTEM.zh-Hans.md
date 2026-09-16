@@ -50,7 +50,7 @@ done
 **哪些值是重复的。** 让字面量变成缺陷的是重数；只用一次的数字就只是个数字。
 
 ```sh
-grep -rhoE --include='*.swift' "(cornerRadius|xRadius|yRadius): *[0-9]+" Nifro/Screens Nifro/Zoom |
+grep -rhoE --include='*.swift' "(cornerRadius|xRadius|yRadius): *[0-9]+" Sources/Nifro/Screens Sources/Nifro/Zoom |
   grep -oE "[0-9]+$" | sort -n | uniq -c
 ```
 
@@ -85,7 +85,7 @@ grep -rhoE --include='*.swift' "(cornerRadius|xRadius|yRadius): *[0-9]+" Nifro/S
 - **`PanelMetrics` 有六个成员，`PanelMetrics.` 出现 16 次**，两个面板文件各 8 次：
 
   ```sh
-  grep -rc "PanelMetrics\." Nifro/Screens/*.swift   # DisplayPanel 8, PanelControls 8
+  grep -rc "PanelMetrics\." Sources/Nifro/Screens/*.swift   # DisplayPanel 8, PanelControls 8
   ```
 
   而这两个文件里有 39 个视觉字面量。这套机制覆盖了它存在理由的大约五分之一。
@@ -165,7 +165,7 @@ grep -rhoE --include='*.swift' "(cornerRadius|xRadius|yRadius): *[0-9]+" Nifro/S
 视图放在一起、只覆盖了其中五分之一。所以这是一次重命名、几个新增（每个都有至少两个既有使用者），加一个共享
 modifier——不是一套新框架。
 
-### 5.1 一个文件：`Nifro/Screens/Appearance.swift`
+### 5.1 一个文件：`Sources/Nifro/Screens/Appearance.swift`
 
 `PanelMetrics` 搬过来，改名 `Appearance`，保留它的文档。它要有自己的文件，是为了让 5.3 的 lint 规则能豁免
 一条稳定路径；留在 `PanelControls.swift` 里会连带豁免 `PanelButton` 和 `PanelWideButton`——而那正是这件事
@@ -218,24 +218,24 @@ padding，它们留在调用点，因为那才是真正的差别。
 ### 5.3 护栏：三条 SwiftLint 自定义规则
 
 SwiftLint 已经 pin 在 0.65.1，CI 里已经跑 `--strict`（`ci.yml:99`），所以不引入新工具、不新增 job。
-加进 `.swiftlint.yml`：
+加进 `Tools/Config/SwiftLint.yml`：
 
 ```yaml
 custom_rules:
   hardcoded_corner_radius:
-    included: 'Nifro/(Screens|Zoom|Visibility)/.*\.swift'
+    included: 'Sources/Nifro/(Screens|Zoom|Visibility)/.*\.swift'
     excluded: 'Nifro/(Screens/Appearance|Zoom/CropSelectionView)\.swift'
     regex: '(cornerRadius|xRadius|yRadius): *[0-9]'
     message: '圆角属于 Appearance。在那里给它一个名字，或者用 disable 注明这一次为什么不是共享的。'
 
   hardcoded_font_size:
-    included: 'Nifro/(Screens|Zoom|Visibility)/.*\.swift'
+    included: 'Sources/Nifro/(Screens|Zoom|Visibility)/.*\.swift'
     excluded: 'Nifro/(Screens/Appearance|Zoom/CropSelectionView)\.swift'
     regex: '\.(system|systemFont|monospacedSystemFont|monospacedDigitSystemFont)\((of)?[Ss]ize: *[1-9]'
     message: '字号属于 Appearance。'
 
   hardcoded_ui_colour:
-    included: 'Nifro/(Screens|Zoom|Visibility)/.*\.swift'
+    included: 'Sources/Nifro/(Screens|Zoom|Visibility)/.*\.swift'
     excluded: 'Nifro/(Screens/Appearance|Zoom/CropSelectionView)\.swift'
     regex: 'Color\(red:|(NS)?Color\.(white|black)\b|AnyShapeStyle\(\.white\)'
     message: '字面颜色既不跟随主题也不跟随用户 accent。用 Appearance，或者用语义样式。'
@@ -256,7 +256,7 @@ swiftlint lint --quiet --config /path/to/probe.yml | grep -c 'warning:'
 - 三条规则在 `dead3a6` 上触发 **32 次**。第 6 节逐条列出。
 - 按规则的 `excluded:` 生效：把它指向 `PanelControls.swift`，计数 32 → 24，正好是那个文件的 8 条。
 - `// swiftlint:disable:next hardcoded_corner_radius - <理由>` 能消掉一行；而
-  `superfluous_disable_command`——`.swiftlint.yml` 里**已经**开着——会在下面那行不再违规时把这条 disable
+  `superfluous_disable_command`——`Tools/Config/SwiftLint.yml` 里**已经**开着——会在下面那行不再违规时把这条 disable
   本身报成违规。也就是说，**理由过期的允许清单条目会失败**，这正是 `WORKSPACE_GUIDE.md` 要求允许清单具备
   的性质，也是这件事做成 lint 规则而不是源码形状测试的原因。
 
@@ -277,7 +277,7 @@ diff 里指到出问题的那一列。测试要把这些全部重写一遍，而
 
 ## 6. 迁移顺序，以及那 32 条
 
-**没有「先只告警」这个阶段。** CI 已经跑 `swiftlint lint --strict`，所以一条默认严重度的自定义规则落地
+**没有「先只告警」这个阶段。** CI 已经跑 `swiftlint lint --config Tools/Config/SwiftLint.yml --strict`，所以一条默认严重度的自定义规则落地
 当天就是红的。下面这个顺序的作用是在规则加进去之前把计数降到零，不是让它慢慢过渡。
 
 | 步骤 | 做什么 | 验证判据 |
@@ -285,7 +285,7 @@ diff 里指到出问题的那一列。测试要把这些全部重写一遍，而
 | 1 | `Appearance.swift`：搬 `PanelMetrics`、改名、加 5.1 里那八个名字 | `git grep -c PanelMetrics` → 0；app 能构建；`swift test` 不变（package target 不编译这些文件，所以这一步不可能弄坏它） |
 | 2 | `panelChrome`，同步链接按钮采用它 | `DisplayPanel.swift` 的字面量数从 31 降到约 20。可见变化：同步按钮变成 26×22 并获得 hover 状态 |
 | 3 | 第 7 节的 Q1 和 Q2 —— 是决定，不是改名 | 没有可量的东西。需要你 |
-| 4 | 加那三条规则。剩三条违规，每条一行 `disable:next` 附理由 | `swiftlint lint --strict` 退出码 0。从此之后，写下一个硬编码字面量的那个 PR 当场变红 |
+| 4 | 加那三条规则。剩三条违规，每条一行 `disable:next` 附理由 | `swiftlint lint --config Tools/Config/SwiftLint.yml --strict` 退出码 0。从此之后，写下一个硬编码字面量的那个 PR 当场变红 |
 
 ### 那 32 条，逐条给出处置
 

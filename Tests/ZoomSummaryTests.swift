@@ -46,7 +46,7 @@ struct ZoomSummaryTests {
 			.deletingLastPathComponent()
 			.deletingLastPathComponent()
 
-		for path in ["Nifro/Sites/WebsiteReport.swift", "Nifro/Zoom/WebsiteSettings.swift"] {
+		for path in ["Sources/Nifro/Sites/WebsiteReport.swift", "Sources/Nifro/Zoom/WebsiteSettings.swift"] {
 			let source = try String(contentsOf: root.appending(path: path), encoding: .utf8)
 
 			#expect(!source.contains("fractionLength"), "\(path) rounds a scale of its own")

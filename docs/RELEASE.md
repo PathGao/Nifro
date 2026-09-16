@@ -3,7 +3,7 @@
 Nifro distributes through GitHub Releases and the Homebrew cask in this repository.
 Official releases now require Developer ID signing, Apple notarization, ticket stapling,
 and Gatekeeper verification. Missing credentials or a failed build stop the workflow
-before it creates a tag. Self-signed development builds remain available locally.
+before it creates a tag. Ad-hoc signed development builds remain available locally.
 
 ## Signing environment
 
@@ -38,23 +38,26 @@ certificate and stapled-ticket verification; Gatekeeper accepted both apps as `N
 
 ## Local builds
 
-`./Tools/build-local.sh` keeps the stable self-signed development identity and installs a test
-copy on the Desktop. To build with Nifro's exact Developer ID certificate already in the local
-keychain, without modifying the default development identity:
+`./build.sh` builds an isolated, ad-hoc signed development app. It does not create
+certificates, change keychains, install the app, or quit a running copy.
+
+For a production-identity build with an existing Developer ID certificate:
 
 ```sh
 APPLE_SIGNING_IDENTITY=57E90D936910FD25342D56B3D8E35E1CC6DF201C \
 APPLE_TEAM_ID=GN56VLVTJ6 \
-./Tools/build-local.sh .release/Nifro-test.app
+./build.sh release
 ```
 
-Build products live in `.xcode-build`. The script preserves sandbox entitlements and verifies
-the signature before copying the app. A local Developer ID build is **not notarized** by this
-script. Use the release workflow's dry run to exercise notarization and packaging.
+The app is `.xcode-build/Build/Products/Release/Nifro.app`. The script verifies the
+signature and sandbox entitlements of both the app and share extension. A local
+Developer ID build is **not notarized**. Use the release workflow's dry run to
+exercise notarization and packaging. Production-identity builds use the installed
+release's data, so use the default development mode for isolated testing.
 
 ## Release sequence
 
-1. Update `MARKETING_VERSION` in `Config.xcconfig` and land the reviewed changes on `main`.
+1. Update `MARKETING_VERSION` in `Tools/Config/App.xcconfig` and land the reviewed changes on `main`.
 2. Dispatch `gh workflow run release.yml --ref main -f dry_run=true` and approve the environment.
    Both architectures must build, sign, notarize, staple and pass Gatekeeper. Disk images are
    retained as the `dry-run-disk-images` artifact; no tag or release is created.

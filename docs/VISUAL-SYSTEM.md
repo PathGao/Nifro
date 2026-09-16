@@ -55,7 +55,7 @@ could give it. It is exempt on the strongest ground available, not by concession
 just a number.
 
 ```sh
-grep -rhoE --include='*.swift' "(cornerRadius|xRadius|yRadius): *[0-9]+" Nifro/Screens Nifro/Zoom |
+grep -rhoE --include='*.swift' "(cornerRadius|xRadius|yRadius): *[0-9]+" Sources/Nifro/Screens Sources/Nifro/Zoom |
   grep -oE "[0-9]+$" | sort -n | uniq -c
 ```
 
@@ -95,7 +95,7 @@ Against `WORKSPACE_GUIDE.md` § "缺陷的三个形状".
   panel files:
 
   ```sh
-  grep -rc "PanelMetrics\." Nifro/Screens/*.swift   # DisplayPanel 8, PanelControls 8
+  grep -rc "PanelMetrics\." Sources/Nifro/Screens/*.swift   # DisplayPanel 8, PanelControls 8
   ```
 
   Against 39 visual literals in those same two files. The mechanism covers roughly a fifth of what
@@ -192,7 +192,7 @@ missing but that it is named for one screen, lives beside the views it serves, a
 them. So this is a rename, a handful of additions each of which has at least two existing users, and
 one shared modifier — not a new framework.
 
-### 5.1 One file: `Nifro/Screens/Appearance.swift`
+### 5.1 One file: `Sources/Nifro/Screens/Appearance.swift`
 
 `PanelMetrics` moves here and becomes `Appearance`, keeping its documentation. It gets its own file
 so that the lint rule in § 5.3 can exempt one stable path; leaving it in `PanelControls.swift` would
@@ -246,24 +246,24 @@ No protocol, no style registry, no `ButtonStyle` hierarchy. There is one panel.
 ### 5.3 The guardrail: three SwiftLint custom rules
 
 SwiftLint is already pinned at 0.65.1 and already runs `--strict` in CI (`ci.yml:99`), so no new tool
-and no new job. Added to `.swiftlint.yml`:
+and no new job. Added to `Tools/Config/SwiftLint.yml`:
 
 ```yaml
 custom_rules:
   hardcoded_corner_radius:
-    included: 'Nifro/(Screens|Zoom|Visibility)/.*\.swift'
+    included: 'Sources/Nifro/(Screens|Zoom|Visibility)/.*\.swift'
     excluded: 'Nifro/(Screens/Appearance|Zoom/CropSelectionView)\.swift'
     regex: '(cornerRadius|xRadius|yRadius): *[0-9]'
     message: 'Corner radii belong in Appearance. Name it there, or disable this line with the reason it is not shared.'
 
   hardcoded_font_size:
-    included: 'Nifro/(Screens|Zoom|Visibility)/.*\.swift'
+    included: 'Sources/Nifro/(Screens|Zoom|Visibility)/.*\.swift'
     excluded: 'Nifro/(Screens/Appearance|Zoom/CropSelectionView)\.swift'
     regex: '\.(system|systemFont|monospacedSystemFont|monospacedDigitSystemFont)\((of)?[Ss]ize: *[1-9]'
     message: 'Point sizes belong in Appearance.'
 
   hardcoded_ui_colour:
-    included: 'Nifro/(Screens|Zoom|Visibility)/.*\.swift'
+    included: 'Sources/Nifro/(Screens|Zoom|Visibility)/.*\.swift'
     excluded: 'Nifro/(Screens/Appearance|Zoom/CropSelectionView)\.swift'
     regex: 'Color\(red:|(NS)?Color\.(white|black)\b|AnyShapeStyle\(\.white\)'
     message: 'A literal colour follows neither the theme nor the user accent. Use Appearance, or a semantic style.'
@@ -287,7 +287,7 @@ swiftlint lint --quiet --config /path/to/probe.yml | grep -c 'warning:'
 - Per-rule `excluded:` works: pointing it at `PanelControls.swift` drops the count 32 → 24, exactly
   that file's eight.
 - `// swiftlint:disable:next hardcoded_corner_radius - <reason>` silences one line, and
-  `superfluous_disable_command` — already enabled in `.swiftlint.yml` — reports the disable as a
+  `superfluous_disable_command` — already enabled in `Tools/Config/SwiftLint.yml` — reports the disable as a
   violation once the line under it stops violating. So an allowlist entry whose reason has expired
   fails, which is the property `WORKSPACE_GUIDE.md` asks allowlists to have and the reason this is a
   lint rule rather than a source-shape test.
@@ -313,7 +313,7 @@ number has a name to be given, and today it does not.
 
 ## 6. Migration, and the 32 violations
 
-**There is no "warn first" phase.** CI already runs `swiftlint lint --strict`, so a custom rule at
+**There is no "warn first" phase.** CI already runs `swiftlint lint --config Tools/Config/SwiftLint.yml --strict`, so a custom rule at
 default severity is red the moment it lands. The order below exists to bring the count to zero before
 the rule is added, not to ease it in.
 
@@ -322,7 +322,7 @@ the rule is added, not to ease it in.
 | 1 | `Appearance.swift`: move `PanelMetrics`, rename, add the eight names from § 5.1 | `git grep -c PanelMetrics` → 0; the app builds; `swift test` unchanged (the package target does not compile these files, so this step cannot break it) |
 | 2 | `panelChrome`, and the sync-link button adopts it | The literal count in `DisplayPanel.swift` falls from 31 to ~20. Visible change: the sync button becomes 26×22 and gains a hover state |
 | 3 | Q1 and Q2 in § 7 — decisions, not renames | Nothing to measure. Needs you |
-| 4 | Add the three rules. Three violations remain and each takes a `disable:next` with its reason | `swiftlint lint --strict` exits 0. From here, a hardcoded literal is red on the pull request that writes it |
+| 4 | Add the three rules. Three violations remain and each takes a `disable:next` with its reason | `swiftlint lint --config Tools/Config/SwiftLint.yml --strict` exits 0. From here, a hardcoded literal is red on the pull request that writes it |
 
 ### The 32, each with its disposition
 

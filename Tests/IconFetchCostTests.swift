@@ -22,7 +22,7 @@ struct IconFetchCostTests {
 	private static let sources = URL(filePath: #filePath)
 		.deletingLastPathComponent()
 		.deletingLastPathComponent()
-		.appending(path: "Nifro")
+		.appending(path: "Sources/Nifro")
 
 	/**
 	One of the app's Swift files with its prose taken out.

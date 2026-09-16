@@ -42,7 +42,7 @@ struct PanelControlStateTests {
 
 	private static func controls(between start: String, and end: String) throws -> Substring {
 		let source = try String(
-			contentsOf: repository.appending(path: "Nifro/Screens/DisplayPanel.swift"),
+			contentsOf: repository.appending(path: "Sources/Nifro/Screens/DisplayPanel.swift"),
 			encoding: .utf8
 		)
 

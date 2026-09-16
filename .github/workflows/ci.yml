@@ -37,19 +37,13 @@ jobs:
         uses: actions/cache@v6
         with:
           path: .xcode-build/SourcePackages
-          key: spm-${{ hashFiles('Nifro.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+          key: spm-${{ hashFiles('Tools/Nifro.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
           restore-keys: spm-
 
       # Signing needs a certificate we deliberately do not put in CI. Release signing lives in release.yml.
       - name: Build
         run: |
-          xcodebuild build \
-            -project Nifro.xcodeproj \
-            -scheme Nifro \
-            -configuration Debug \
-            -destination 'platform=macOS' \
-            -derivedDataPath .xcode-build \
-            CODE_SIGNING_ALLOWED=NO \
+          ./build.sh ci \
             | xcbeautify --renderer github-actions
         env:
           NSUnbufferedIO: YES
@@ -102,7 +96,7 @@ jobs:
 
       # The Xcode build runs SwiftLint too, but only after compiling. Running it separately puts style feedback on a PR in under a minute.
       - name: Lint
-        run: swiftlint lint --strict --reporter github-actions-logging
+        run: swiftlint lint --config Tools/Config/SwiftLint.yml --strict --reporter github-actions-logging
 
   unused:
     name: Unused code
@@ -132,11 +126,11 @@ jobs:
         env:
           PERIPHERY_VERSION: "2.21.2"
 
-      # Config, retentions and the reasoning behind each one live in .periphery.yml.
+      # Config, retentions and the reasoning behind each one live in Tools/Config/Periphery.yml.
       # This inherited a 5,700-line utilities file copied wholesale from another
       # project; without a gate it grows back.
       - name: Scan
-        run: periphery scan --strict
+        run: periphery scan --config Tools/Config/Periphery.yml --strict
 
   sites:
     name: Site registry
@@ -209,7 +203,7 @@ jobs:
           python3 - <<'CHECK'
           import json, pathlib, sys
 
-          catalogue = json.loads(pathlib.Path("Nifro/Localizable.xcstrings").read_text())
+          catalogue = json.loads(pathlib.Path("Sources/Nifro/Localizable.xcstrings").read_text())
           missing = [
               key
               for key, entry in catalogue["strings"].items()
@@ -228,8 +222,8 @@ jobs:
       - name: Check the generated catalogue is current
         run: |
           python3 Tools/generate-site-catalog.py
-          if ! git diff --quiet -- sites/index.json Nifro/Sites/SiteCatalog.generated.swift; then
+          if ! git diff --quiet -- sites/index.json Sources/Nifro/Sites/SiteCatalog.generated.swift; then
             echo "::error::sites/ changed without regenerating. Run Tools/generate-site-catalog.py and commit the result."
-            git diff --stat -- sites/index.json Nifro/Sites/SiteCatalog.generated.swift
+            git diff --stat -- sites/index.json Sources/Nifro/Sites/SiteCatalog.generated.swift
             exit 1
           fi

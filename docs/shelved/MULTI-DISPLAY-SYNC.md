@@ -14,7 +14,7 @@ Why the file is here and not in `docs/` proper: `docs/shelved/` participates in 
 target lists it, `Package.swift` does not name it, `swiftlint` and `periphery` never read a markdown
 file, and the release disk image contains the built `.app` and an Applications symlink and nothing
 else from the repository. It is markdown rather than an unbuilt `.swift` file for one reason:
-`.swiftlint.yml` has no `included:` key, so SwiftLint walks the whole working tree and a stray
+`Tools/Config/SwiftLint.yml` has no `included:` key, so SwiftLint walks the whole working tree and a stray
 `.swift` file anywhere in it would be linted — the feature would still be in the build, just quietly.
 
 Removed on the maintainer's decision after three audits on real two-display hardware found the
@@ -55,7 +55,7 @@ The arrangement survived quitting and relaunching the app.
 
 ## 2. The UI, preserved
 
-Verbatim from `Nifro/Screens/DisplayPanel.swift` and `Nifro/Screens/DisplayPanelModel.swift` as they
+Verbatim from `Sources/Nifro/Screens/DisplayPanel.swift` and `Sources/Nifro/Screens/DisplayPanelModel.swift` as they
 stood at removal. Nothing here compiles any more — `SyncGroup` and `Display.settingsKey`'s sync use
 are gone — and it is not meant to. Read the doc comments; they are the design.
 
@@ -280,7 +280,7 @@ follower is offered one entry and a leader is offered the rest.
 
 ### 2.6 The strings
 
-Four entries in `Nifro/Localizable.xcstrings`, with their translations.
+Four entries in `Sources/Nifro/Localizable.xcstrings`, with their translations.
 
 | Key | zh-Hans |
 |---|---|

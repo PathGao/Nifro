@@ -33,7 +33,7 @@ struct InflectionTests {
 		let call = try Regex("String\\(localized: \"((?:[^\"\\\\]|\\\\.)*)\"")
 
 		let sources = FileManager.default
-			.enumerator(at: Self.root.appending(path: "Nifro"), includingPropertiesForKeys: nil)?
+			.enumerator(at: Self.root.appending(path: "Sources/Nifro"), includingPropertiesForKeys: nil)?
 			.compactMap { $0 as? URL }
 			.filter { $0.pathExtension == "swift" } ?? []
 

@@ -47,7 +47,7 @@ struct LoadingIndicatorTests {
 	}
 
 	private static func scene() throws -> String {
-		try stripComments(source("Nifro/Wallpaper/WallpaperScene.swift"))
+		try stripComments(source("Sources/Nifro/Wallpaper/WallpaperScene.swift"))
 	}
 
 	/**
@@ -125,7 +125,7 @@ struct LoadingIndicatorTests {
 
 	@Test("The counter that pulsed forever has not come back")
 	func noTally() throws {
-		let source = try Self.stripComments(Self.source("Nifro/App/AppState.swift"))
+		let source = try Self.stripComments(Self.source("Sources/Nifro/App/AppState.swift"))
 
 		#expect(!source.contains("loadingScenes"))
 		#expect(!source.contains("beginLoadingIndicator"))
@@ -149,8 +149,8 @@ struct LoadingIndicatorTests {
 	*/
 	@Test("The menu bar paces its own pulse, and the panel paces nothing")
 	func oneCadence() throws {
-		let menuBar = try Self.stripComments(Self.source("Nifro/Support/MenuSupport.swift"))
-		let panel = try Self.stripComments(Self.source("Nifro/Screens/DisplayPanel.swift"))
+		let menuBar = try Self.stripComments(Self.source("Sources/Nifro/Support/MenuSupport.swift"))
+		let panel = try Self.stripComments(Self.source("Sources/Nifro/Screens/DisplayPanel.swift"))
 
 		#expect(menuBar.contains("pulse.duration = WallpaperScene.loadingPulseDuration"))
 
@@ -174,7 +174,7 @@ struct LoadingIndicatorTests {
 	*/
 	@Test("A swapped-in page is revealed by the swap")
 	func adoptingRevealsThePage() throws {
-		let source = try Self.source("Nifro/Wallpaper/SwapLoading.swift")
+		let source = try Self.source("Sources/Nifro/Wallpaper/SwapLoading.swift")
 
 		// Sliced rather than brace-matched: `adopt` is the last method in its extension, so the next
 		// declaration is the end of it, and a slice that is too long can only make this pass by
@@ -219,7 +219,7 @@ struct LoadingIndicatorTests {
 	*/
 	@Test("A load is reported to the panel and does not disable it")
 	func aLoadDoesNotTrapTheColumn() throws {
-		let source = try Self.stripComments(Self.source("Nifro/Screens/DisplayPanel.swift"))
+		let source = try Self.stripComments(Self.source("Sources/Nifro/Screens/DisplayPanel.swift"))
 
 		#expect(
 			source.components(separatedBy: "column.isLoading").count == 2,

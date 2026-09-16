@@ -42,7 +42,7 @@ struct PlaylistRulesTests {
 
 		guard
 			let url = FileManager.default
-				.enumerator(at: root.appending(path: "Nifro"), includingPropertiesForKeys: nil)?
+				.enumerator(at: root.appending(path: "Sources/Nifro"), includingPropertiesForKeys: nil)?
 				.compactMap({ $0 as? URL })
 				.first(where: { $0.lastPathComponent == name })
 		else {

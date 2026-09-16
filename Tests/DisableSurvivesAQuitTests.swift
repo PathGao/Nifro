@@ -26,7 +26,7 @@ struct DisableSurvivesAQuitTests {
 		let file = URL(filePath: #filePath)
 			.deletingLastPathComponent()
 			.deletingLastPathComponent()
-			.appending(path: "Nifro/App/\(name)")
+			.appending(path: "Sources/Nifro/App/\(name)")
 
 		let block = try Regex("/\\*.*?\\*/", as: AnyRegexOutput.self).dotMatchesNewlines()
 		let line = try Regex("//[^\\n]*")

@@ -29,7 +29,7 @@ struct CropLifetimeTests {
 	private static let overlay = URL(filePath: #filePath)
 		.deletingLastPathComponent()
 		.deletingLastPathComponent()
-		.appending(path: "Nifro/Zoom/CropSelectionView.swift")
+		.appending(path: "Sources/Nifro/Zoom/CropSelectionView.swift")
 
 	/**
 	The file with its prose taken out. It argues for itself at length and the argument names the very

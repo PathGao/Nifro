@@ -23,7 +23,7 @@ struct IconFetchLifetimeTests {
 	private static let fetcher = URL(filePath: #filePath)
 		.deletingLastPathComponent()
 		.deletingLastPathComponent()
-		.appending(path: "Nifro/Sites/WebsiteIconFetcher.swift")
+		.appending(path: "Sources/Nifro/Sites/WebsiteIconFetcher.swift")
 
 	/**
 	The file with its prose taken out. It argues for itself at length and the argument names the very

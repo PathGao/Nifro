@@ -82,7 +82,7 @@ struct ClearWebsiteDataTests {
 	private static func keysNamingContent() throws -> [String] {
 		let pattern = try Regex("Key<\\[String: (?:Website|Playlist)\\.ID\\]>\\(\"(\\w+)\"")
 
-		return try source("Nifro/App/Constants.swift")
+		return try source("Sources/Nifro/App/Constants.swift")
 			.matches(of: pattern)
 			.map { String($0[1].substring ?? "") }
 	}
@@ -110,7 +110,7 @@ struct ClearWebsiteDataTests {
 	*/
 	@Test("Clearing empties every key that names a website or a playlist, in the function the button calls")
 	func clearingEmptiesEveryKeyNamingContent() throws {
-		let controller = try Self.source("Nifro/Sites/WebsitesController.swift")
+		let controller = try Self.source("Sources/Nifro/Sites/WebsitesController.swift")
 		let clearing = try Self.body(of: "func removeEverything()", in: controller)
 
 		#expect(
@@ -129,7 +129,7 @@ struct ClearWebsiteDataTests {
 			)
 		}
 
-		let pane = try Self.source("Nifro/Screens/SettingsScreen.swift")
+		let pane = try Self.source("Sources/Nifro/Screens/SettingsScreen.swift")
 
 		#expect(
 			try Self.body(of: "private func clear()", in: pane).contains("removeEverything()"),

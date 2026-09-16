@@ -32,7 +32,7 @@ import pathlib
 import subprocess
 import sys
 
-CATALOGUE = pathlib.Path("Nifro/Localizable.xcstrings")
+CATALOGUE = pathlib.Path("Sources/Nifro/Localizable.xcstrings")
 
 # A view with `.labelsHidden()` still writes an empty label, and an App Intents parameter summary is
 # stored as a bare specifier. Neither is text anybody reads.

@@ -17,7 +17,7 @@
                BlueprintIdentifier = "E324212F2384E9D700D28A91"
                BuildableName = "Nifro.app"
                BlueprintName = "Nifro"
-               ReferencedContainer = "container:Nifro.xcodeproj">
+               ReferencedContainer = "container:Tools/Nifro.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -47,7 +47,7 @@
             BlueprintIdentifier = "E324212F2384E9D700D28A91"
             BuildableName = "Nifro.app"
             BlueprintName = "Nifro"
-            ReferencedContainer = "container:Nifro.xcodeproj">
+            ReferencedContainer = "container:Tools/Nifro.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -64,7 +64,7 @@
             BlueprintIdentifier = "E324212F2384E9D700D28A91"
             BuildableName = "Nifro.app"
             BlueprintName = "Nifro"
-            ReferencedContainer = "container:Nifro.xcodeproj">
+            ReferencedContainer = "container:Tools/Nifro.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

@@ -42,7 +42,7 @@ struct TimerToleranceTests {
 		let line = try Regex("//[^\\n]*")
 
 		return try FileManager.default
-			.enumerator(at: root.appending(path: "Nifro"), includingPropertiesForKeys: nil)?
+			.enumerator(at: root.appending(path: "Sources/Nifro"), includingPropertiesForKeys: nil)?
 			.compactMap { $0 as? URL }
 			.filter { $0.pathExtension == "swift" }
 			.sorted { $0.path < $1.path }

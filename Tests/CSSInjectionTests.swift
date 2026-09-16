@@ -26,7 +26,7 @@ struct CSSInjectionTests {
 		.deletingLastPathComponent()
 
 	private static func extensions() throws -> String {
-		try String(contentsOf: root.appending(path: "Nifro/Support/Extensions.swift"), encoding: .utf8)
+		try String(contentsOf: root.appending(path: "Sources/Nifro/Support/Extensions.swift"), encoding: .utf8)
 	}
 
 	/**

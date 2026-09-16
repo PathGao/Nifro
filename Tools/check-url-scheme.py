@@ -1,44 +1,23 @@
 #!/usr/bin/env python3
-"""Fail if the share extension's URL scheme has drifted from the app's declaration.
-
-`Info.plist` is what makes the system route a URL to the app, so it is the authority. The app reads
-it at runtime. The share extension is a separate target and cannot, so it carries a literal, and a
-mismatch shows up as the extension doing nothing at all with nothing going red. Hence this check.
-"""
-
+"""Check both targets use the shared, overridable URL scheme build setting."""
 import pathlib
 import plistlib
-import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 
 def main() -> int:
-    plist = plistlib.loads((ROOT / "Nifro/Info.plist").read_bytes())
-
-    try:
-        declared = plist["CFBundleURLTypes"][0]["CFBundleURLSchemes"][0]
-    except (KeyError, IndexError):
-        print("Info.plist declares no URL scheme", file=sys.stderr)
+    app = plistlib.loads((ROOT / "Sources/Nifro/Info.plist").read_bytes())
+    extension = plistlib.loads((ROOT / "Sources/ShareExtension/Info.plist").read_bytes())
+    declared = app["CFBundleURLTypes"][0]["CFBundleURLSchemes"][0]
+    source = (ROOT / "Sources/ShareExtension/ShareController.swift").read_text()
+    if (declared != "$(NIFRO_URL_SCHEME)"
+            or extension.get("NifroURLScheme") != declared
+            or 'Bundle.main.object(forInfoDictionaryKey: "NifroURLScheme")' not in source):
+        print("Both targets must read NIFRO_URL_SCHEME through their bundle metadata", file=sys.stderr)
         return 1
-
-    source = (ROOT / "ShareExtension/ShareController.swift").read_text()
-    match = re.search(r'components\.scheme = "([^"]+)"', source)
-
-    if not match:
-        print("ShareController.swift no longer sets components.scheme as a literal; update this check", file=sys.stderr)
-        return 1
-
-    if match.group(1) != declared:
-        print(
-            f"URL scheme mismatch: Info.plist says {declared!r}, "
-            f"ShareController.swift says {match.group(1)!r}",
-            file=sys.stderr,
-        )
-        return 1
-
-    print(f"URL scheme {declared!r} matches in both places")
+    print("Both targets use NIFRO_URL_SCHEME")
     return 0
 
 

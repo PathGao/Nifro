@@ -82,7 +82,7 @@ struct PlaylistStorageTests {
 	*/
 	@Test("The shared ordering does not carry the flag reset")
 	func theFlagResetStaysWithItsOwnCallers() throws {
-		let controller = try Self.source("Nifro/Sites/WebsitesController.swift")
+		let controller = try Self.source("Sources/Nifro/Sites/WebsitesController.swift")
 		let shared = try Self.body(of: "func prepareWebsiteStorage()", in: controller)
 		let install = try Self.body(of: "func installDefaultPlaylist()", in: controller)
 
@@ -111,7 +111,7 @@ struct PlaylistStorageTests {
 	*/
 	@Test("A binding cannot be written onto the default playlist")
 	func theDefaultPlaylistIsUnbindable() throws {
-		let playlist = try Self.source("Nifro/Sites/Playlist.swift")
+		let playlist = try Self.source("Sources/Nifro/Sites/Playlist.swift")
 
 		#expect(
 			playlist.contains("private(set) var boundDisplay"),

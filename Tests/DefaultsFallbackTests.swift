@@ -38,7 +38,7 @@ struct DefaultsFallbackTests {
 		let line = try Regex("//[^\\n]*")
 
 		return try FileManager.default
-			.enumerator(at: root.appending(path: "Nifro"), includingPropertiesForKeys: nil)?
+			.enumerator(at: root.appending(path: "Sources/Nifro"), includingPropertiesForKeys: nil)?
 			.compactMap { $0 as? URL }
 			.filter { $0.pathExtension == "swift" }
 			.sorted { $0.path < $1.path }
@@ -61,7 +61,7 @@ struct DefaultsFallbackTests {
 	*/
 	private static func optionalKeyNames() throws -> [String] {
 		let declaration = try Regex("static let (\\w+) = Key<(.+)>\\(\"", as: AnyRegexOutput.self)
-		let text = try String(contentsOf: root.appending(path: "Nifro/App/Constants.swift"), encoding: .utf8)
+		let text = try String(contentsOf: root.appending(path: "Sources/Nifro/App/Constants.swift"), encoding: .utf8)
 
 		return text.matches(of: declaration).compactMap { match in
 			guard

@@ -53,7 +53,7 @@ struct SceneTimerLifetimeTests {
 		let line = try Regex("//[^\\n]*")
 
 		return try String(
-			contentsOf: root.appending(path: "Nifro/Wallpaper/WallpaperScene.swift"),
+			contentsOf: root.appending(path: "Sources/Nifro/Wallpaper/WallpaperScene.swift"),
 			encoding: .utf8
 		)
 		.replacing(block, with: "")
