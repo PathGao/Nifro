@@ -1,29 +1,15 @@
 #!/bin/zsh
-# Creates the self-signed code-signing identity that Nifro builds are signed with.
-#
-#   ./Tools/setup-signing.sh                  install a local identity for your own builds
-#   ./Tools/setup-signing.sh --export <path>  write a .p12 for CI to sign releases with
-#   ./Tools/setup-signing.sh --export <path> --upload
-#                                             …and set both repository secrets with `gh`, so
-#                                             neither value is ever copied by hand
-#
-# Nifro is sandboxed and keeps security-scoped bookmarks for local files a user picks as a
-# wallpaper. Those bookmarks are tied to the app's code signature, so ad-hoc signing — a fresh
-# signature every build — drops them on every update and re-opens the file picker. A fixed
-# certificate keeps the designated requirement the same across versions, so the grants survive.
-#
-# Free, offline, idempotent. It is not a substitute for Apple notarization: a downloaded build
-# still shows Gatekeeper's "unverified developer" prompt on first launch. Only a paid Developer
-# ID certificate can remove that, and the release workflow switches to notarizing on its own if
-# it finds one in the same secret.
+# Creates a stable self-signed identity for local development and legacy builds.
+# Usage: no arguments installs locally; --export <path.p12> exports a fresh identity;
+# --export <path.p12> --upload also replaces the legacy repository signing secrets.
+# Do not use these exports for the release-signing environment: official releases
+# require the project's Apple-issued Developer ID certificate.
 set -euo pipefail
 
 IDENTITY="Nifro Signing"
 KEYCHAIN="$HOME/Library/Keychains/nifro-signing.keychain-db"
 KEYCHAIN_PASSWORD="nifro-signing"
 
-# One definition of what the certificate is. The export and the local install have to produce the
-# same kind of certificate, or a release would be signed by something the maintainer never tested.
 make_certificate() {
 	local directory="$1" password="$2"
 	openssl req -x509 -newkey rsa:2048 -keyout "$directory/key.pem" -out "$directory/cert.pem" \
@@ -45,10 +31,7 @@ if [[ "${1:-}" == "--export" ]]; then
 	make_certificate "$WORK" "$password"
 	cp "$WORK/identity.p12" "$destination"
 
-	# Prove the pair works before handing it over. The release workflow imports the certificate with
-	# this password and nothing else; if that fails there, the failure arrives ten minutes into a
-	# release with "MAC verification failed during PKCS12 import (wrong password?)" and no way to tell
-	# a bad export from a mistyped secret. It costs nothing to find out here.
+	# Verify the exported certificate and password are a usable pair before handing them over.
 	probe="$WORK/probe.keychain-db"
 	security create-keychain -p probe "$probe"
 	if ! security import "$destination" -k "$probe" -P "$password" -T /usr/bin/codesign >/dev/null 2>&1; then
@@ -62,8 +45,8 @@ if [[ "${1:-}" == "--export" ]]; then
 
 	echo "✓ Wrote $destination"
 	echo
-	echo "  This is the identity every official release is signed with. Losing it means later"
-	echo "  releases get a different designated requirement, and every user's saved local-file"
+	echo "  This is a self-signed development identity. Losing it means later"
+	echo "  builds get a different designated requirement, and saved local-file"
 	echo "  wallpaper stops being readable. Keep a copy somewhere you will still have in a year."
 	echo
 
@@ -75,7 +58,7 @@ if [[ "${1:-}" == "--export" ]]; then
 		gh secret set MACOS_CERTIFICATE_P12 < "$WORK/certificate.b64"
 		printf '%s' "$password" | gh secret set MACOS_CERTIFICATE_PASSWORD
 		echo "✓ Set MACOS_CERTIFICATE_P12 and MACOS_CERTIFICATE_PASSWORD on the repository."
-		echo "  Nothing was printed, so nothing can be mispasted. Tag a release when ready."
+		echo "  These legacy self-signed secrets cannot satisfy the official release workflow."
 		exit 0
 	fi
 

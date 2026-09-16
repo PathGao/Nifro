@@ -4,8 +4,8 @@ Everything the repository is maintained with. Nothing here ships in the app.
 
 | | What it does |
 | --- | --- |
-| `setup-signing.sh` | Creates the self-signed certificate builds are signed with. `--export` writes the `.p12` for CI |
-| `build-local.sh` | Builds a test copy signed the way releases are, and refuses to install one that lost its sandbox |
+| `setup-signing.sh` | Creates a stable self-signed identity for local development only |
+| `build-local.sh` | Builds a sandboxed test copy, optionally using an explicit Developer ID SHA-1 |
 | `sync-labels.sh` | Makes the repository's labels match `.github/labels.yml` |
 | `validate-sites.py` | Checks every `sites/*.yml` against `sites/schema.json`. CI runs this |
 | `generate-site-catalog.py` | Writes `sites/index.json` and the bundled Swift copy from the YAML. CI fails if they disagree |

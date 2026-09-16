@@ -50,13 +50,7 @@ brew trust --cask PathGao/tap/nifro
 brew install --cask nifro
 ```
 
-> [!NOTE]
-> Homebrew 不会加载它自己仓库之外的 cask，除非你明说信任 —— 因为 cask 可以在安装后执行代码。这
-> 一个执行的是一条命令：清掉 macOS 给下载文件打的「来自互联网」标记，正是它让 app 能直接打开而
-> 不被拦。信任之前可以先把 [Casks/nifro.rb](Casks/nifro.rb) 整个读一遍。
->
-> 想要不加 tap、不用信任、直接 `brew install --cask nifro`，得先进 Homebrew 官方的 cask 仓库，那
-> 有一道本项目还没够到的热度门槛。
+信任这个第三方 cask 之前，可以先查看 [Casks/nifro.rb](Casks/nifro.rb)。
 
 ### 或者下载磁盘映像
 
@@ -67,20 +61,7 @@ brew install --cask nifro
 
 不做通用二进制，免得每个人都下载一份自己永远用不到的另一半。两个链接永远指向最新版。
 
-> [!IMPORTANT]
-> **第一次打开一定会被拒绝。** 构建包用的是本项目自己的证书而不是 Apple Developer ID，所以没有
-> 经过公证，macOS 对下载来的副本只会回一句*「Apple 无法验证「Nifro」是否包含可能危害 Mac 安全或
-> 泄漏隐私的恶意软件」*，而那个弹窗只给**移到废纸篓**和**取消**两个按钮。**两个都不是出路**，出
-> 路是：
->
-> 1. 按**取消**。不是移到废纸篓。
-> 2. 打开**系统设置 → 隐私与安全性**，滚到最下面。
-> 3. 在写着 Nifro 的那一行按**仍要打开**，用密码或触控 ID 确认。
-> 4. 在最后一个弹窗按**打开**。
->
-> 一次就够，macOS 会记住。过去那个「按住 Control 点一下 → 打开」的捷径已经没用了：macOS 15 里
-> Apple 把这条路去掉了。用 brew 装则完全遇不到这一步 —— 这正是推荐 brew 的原因。详见
-> [docs/RELEASE.md](docs/RELEASE.md)。
+从 v0.9.1 起，正式版本须完成 Apple Developer ID 签名和公证后才能发布。
 
 > [!WARNING]
 > **原本固定显示的 Dock 开始自动隐藏了？** 视频全屏等 macOS 状态切换后，原本固定显示的 Dock 有时会
