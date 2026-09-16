@@ -33,8 +33,8 @@ Provide either notarization credential set as environment secrets:
 
 An API key takes precedence when `NOTARY_KEY_P8` is set; an incomplete API key configuration
 fails instead of silently switching methods. Do not put credentials in chat, source files or logs.
-As of the 2026-09-16 setup, the signing certificate is configured but notarization credentials
-are still required. No notarized release has been verified by this configuration change.
+Version 0.9.1 was published on 2026-09-16. Both downloaded DMGs passed checksum, signing
+certificate and stapled-ticket verification; Gatekeeper accepted both apps as `Notarized Developer ID`.
 
 ## Local builds
 
