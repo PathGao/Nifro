@@ -16,8 +16,8 @@
 cask "nifro" do
   arch arm: "arm64", intel: "x86_64"
 
-  version "0.9.0"
-  sha256 arm: "35c69372ab268208d38eaf1ac679cd9e951d56d2e9b69be00cd05c64c1a27039", intel: "c4d391242093d452622af262210284decdb251f207acffd2dfbd3408850fc5a2"
+  version "0.9.1"
+  sha256 arm: "91797aa3cab650dd3c30471e1ab25e8bd744d54a253369b26ba0b1aa91fec9ec", intel: "253ea83eb526eba95340bdb76a33f2b92297ffcede156f7833cc87e98c8c6255"
 
   url "https://github.com/PathGao/Nifro/releases/download/v#{version}/Nifro-#{arch}.dmg",
       verified: "github.com/PathGao/Nifro/"
