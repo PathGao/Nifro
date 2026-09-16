@@ -1,10 +1,11 @@
 # assets
 
-Images the repository itself uses. Nothing here ships inside the app — the app's own icons live in
+Images and editable design sources for the repository. Nothing here ships inside the app — the app's own icons live in
 `Nifro/Assets.xcassets`.
 
 | File | Where it is used | How it gets there |
 | --- | --- | --- |
+| `Nifro.icon/` | Preserved editable icon design; not wired into the app target | Imported from the local design package with its original SVG asset |
 | `icon.png` | Nothing references it. Kept as the full-size original, for anywhere 256px is too small | Exported from `Nifro/Assets.xcassets/AppIcon.appiconset/icon_512x512@2x.png` |
 | `icon-256.png` | The heading of both READMEs | Downscaled from `icon.png` |
 | `nifro-icon-256.png` | The heading of both READMEs | Rendered from the checked-in `Nifro/Nifro.icon` source |
