@@ -537,7 +537,7 @@ private struct BringBrowsingModeToFrontSetting: View {
 		// TODO: Find a better title for this.
 		Defaults.Toggle(key: .bringBrowsingModeToFront) {
 			Text("Keep Browsing Mode in front")
-				.explained(String(localized: "Keep the website above all other windows while browsing mode is active."))
+				.explained(String(localized: "Keep the website above all other windows while Browsing Mode is active."))
   }
 	}
 }
