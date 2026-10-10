@@ -9,7 +9,7 @@ This document records the names, behaviour and visual rules that have been decid
 | ID | Concept | English | 简体中文 | Do not use | Why |
 |---|---|---|---|---|---|
 | G1 | An ordered list of websites that a display selects | Playlist | 播放列表 | “Playlist” for the mechanism that moves a display between websites; that is rotation | The word named two things; the list is what a user calls a playlist (#62, #64) |
-| G2 | A saved entry with its address and settings | Website | 网站 | — | Saved websites are kept distinct from the page currently shown (#123) |
+| G2 | A saved entry with its address and settings | Website | 网站 | — | Saved websites are kept distinct from the page currently shown (#123). The list keeps “网站” as its collective name even though it can hold local HTML files (G15, 2026-10-10 user decision) |
 | G3 | What a display is showing now | Page | 网页 | “No Website” / 无网站 for a display with nothing selected | Same distinction; the empty state reads “No page selected” / 未选择网页 (#123) |
 | G4 | Choosing which part of a page fills the wallpaper | Crop | 裁切 | Choose Region | Help text names the panel's Crop button (#40, #123) |
 | G5 | Using the wallpaper page with the pointer and keyboard | Browsing Mode | 浏览模式 | browsing mode | Capitalised as a name (#123) |
@@ -22,6 +22,7 @@ This document records the names, behaviour and visual rules that have been decid
 | G14 | Loading a page again | Reload | 刷新 | 重新加载 | 2026-10-10 user decision |
 | G10 | The display that holds the menu bar | Main Display | 主显示器 | — | The label and the behaviour mean the menu-bar display, never the screen with keyboard focus (#17) |
 | G11 | The app | Nifro | Nifro | Plash as the app's own name, icon or artwork; the credit in About is the one mention | Nifro is an independent fork ([CONTRIBUTING](../.github/CONTRIBUTING.md)) |
+| G15 | A local HTML file added to the list | Local Website… | 本地网页 | 本地网站 | 2026-10-10 user decision: 网页 can be a plain HTML file, 网站 has a live service behind it |
 
 ## 2. Product decisions
 
