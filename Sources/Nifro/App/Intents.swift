@@ -72,7 +72,10 @@ struct SetEnabledStateIntent: AppIntent {
 	)
 	var shouldToggle: Bool
 
-	@Parameter(title: "Is Enabled")
+	@Parameter(
+		title: "Is Enabled",
+		displayName: .init(true: "On", false: "Off")
+	)
 	var isEnabled: Bool
 
 	static var parameterSummary: some ParameterSummary {

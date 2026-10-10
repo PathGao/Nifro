@@ -345,7 +345,7 @@ struct AddWebsiteScreen: View {
 			// TODO: Find a better way to inform the user about this.
 			Task {
 				await NSAlert.show(
-					title: "Double-click a website in the list to edit it, toggle dark mode, add custom CSS/JavaScript, and more."
+					title: "Double-click a website in the list to edit it, turn dark mode on or off, add custom CSS/JavaScript, and more."
 				)
 			}
 		}

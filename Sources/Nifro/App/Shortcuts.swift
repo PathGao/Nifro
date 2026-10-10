@@ -60,7 +60,7 @@ enum Shortcut: String, CaseIterable {
 		case .toggleEnabled:
 			String(localized: "Turn Nifro on or off")
 		case .browsingMode:
-			String(localized: "Browsing Mode — hold to use, tap to toggle")
+			String(localized: "Browsing Mode — hold to use, tap to turn on or off")
 		case .toggleSound:
 			String(localized: "Turn sound on or off")
 		case .chooseRegion:

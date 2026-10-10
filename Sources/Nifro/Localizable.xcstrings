@@ -16,7 +16,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "${shouldToggle} Nifro ${isEnabled}"
+            "value": "将 Nifro ${shouldToggle}${isEnabled}"
           }
         }
       }
@@ -317,12 +317,12 @@
         }
       }
     },
-    "Browsing Mode — hold to use, tap to toggle": {
+    "Browsing Mode — hold to use, tap to turn on or off": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "浏览模式：按住时使用，轻按切换"
+            "value": "浏览模式：按住时使用，轻按打开或关闭"
           }
         }
       }
@@ -657,12 +657,12 @@
         }
       }
     },
-    "Double-click a website in the list to edit it, toggle dark mode, add custom CSS/JavaScript, and more.": {
+    "Double-click a website in the list to edit it, turn dark mode on or off, add custom CSS/JavaScript, and more.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "在列表里双击一个网站即可编辑：切换深色模式、加自定义 CSS/JavaScript，等等。"
+            "value": "在列表里双击一个网站即可编辑：打开或关闭深色模式、加自定义 CSS/JavaScript，等等。"
           }
         }
       }
@@ -1073,6 +1073,26 @@
           "stringUnit": {
             "state": "translated",
             "value": "已启用"
+          }
+        }
+      }
+    },
+    "Off": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "关闭"
+          }
+        }
+      }
+    },
+    "On": {
+      "localizations": {
+        "zh-Hans": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "打开"
           }
         }
       }
@@ -2402,7 +2422,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "切换"
+            "value": "设为"
           }
         }
       }
