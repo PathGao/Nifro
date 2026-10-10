@@ -68,7 +68,7 @@ struct SetEnabledStateIntent: AppIntent {
 
 	@Parameter(
 		title: "Action",
-		displayName: .init(true: "Toggle", false: "Turn")
+		displayName: .init(true: "Turn On or Off", false: "Turn")
 	)
 	var shouldToggle: Bool
 
@@ -227,9 +227,9 @@ struct RandomWebsiteIntent: AppIntent {
 }
 
 struct ToggleBrowsingModeIntent: AppIntent {
-	static let title: LocalizedStringResource = "Toggle Browsing Mode"
+	static let title: LocalizedStringResource = "Turn Browsing Mode On or Off"
 
-	static let description = IntentDescription("Toggles “Browsing Mode” for Nifro.")
+	static let description = IntentDescription("Turns “Browsing Mode” on or off in Nifro.")
 
 	@MainActor
 	func perform() async throws -> some IntentResult {

@@ -1117,7 +1117,7 @@
         }
       }
     },
-    "Keep the website above all other windows while browsing mode is active.": {
+    "Keep the website above all other windows while Browsing Mode is active.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
@@ -1362,7 +1362,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nifro 待在菜单栏靠右的位置。点它的图标，选“添加网站…”就可以开始了。\n\n需要登录网站或者和它交互时，用“浏览模式”。在那里做的一切都会记住，所以只需登录一次。\n\n不知道该放什么？同一个菜单里的“推荐站点…”列出了适合当壁纸的网页，每条都附带让它好用的设置。"
+            "value": "Nifro 待在菜单栏靠右的位置。点它的图标，选“添加网站…”就可以开始了。\n\n需要登录网站或者和它交互时，用“浏览模式”。在那里做的一切都会记住，所以只需登录一次。\n\n不知道该放什么？同一个菜单里的“网站库…”列出了适合当壁纸的网页，每条都附带让它好用的设置。"
           }
         }
       }
@@ -1712,7 +1712,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "重新加载网站"
+            "value": "刷新网站"
           }
         }
       }
@@ -1752,7 +1752,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "重新加载网站"
+            "value": "刷新网站"
           }
         }
       }
@@ -1762,7 +1762,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "重新加载 Nifro 当前的网站。"
+            "value": "刷新 Nifro 当前的网站。"
           }
         }
       }
@@ -2122,7 +2122,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "推荐站点"
+            "value": "网站库"
           }
         }
       }
@@ -2132,7 +2132,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "推荐站点…"
+            "value": "网站库…"
           }
         }
       }
@@ -2347,22 +2347,22 @@
         }
       }
     },
-    "Toggle": {
+    "Turn On or Off": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "切换"
+            "value": "打开或关闭"
           }
         }
       }
     },
-    "Toggle Browsing Mode": {
+    "Turn Browsing Mode On or Off": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "切换浏览模式"
+            "value": "打开或关闭浏览模式"
           }
         }
       }
@@ -2387,12 +2387,12 @@
         }
       }
     },
-    "Toggles “Browsing Mode” for Nifro.": {
+    "Turns “Browsing Mode” on or off in Nifro.": {
       "localizations": {
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "切换 Nifro 的「浏览模式」。"
+            "value": "打开或关闭 Nifro 的「浏览模式」。"
           }
         }
       }
@@ -2642,7 +2642,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld 个站点 · 内置副本，连不上 GitHub"
+            "value": "%lld 个网站 · 内置副本，连不上 GitHub"
           }
         }
       }
@@ -2652,7 +2652,7 @@
         "zh-Hans": {
           "stringUnit": {
             "state": "translated",
-            "value": "%lld 个站点 · 已与 GitHub 同步"
+            "value": "%lld 个网站 · 已与 GitHub 同步"
           }
         }
       }
