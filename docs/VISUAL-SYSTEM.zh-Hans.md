@@ -1,5 +1,7 @@
 # 这个 app 的视觉词汇
 
+> 已定的规则以 [DESIGN.zh-Hans.md](DESIGN.zh-Hans.md) 为准。本文因 §7 Q5 尚未决定而保留。
+
 [English](VISUAL-SYSTEM.md)
 
 > 2026-08-27 对着 `dead3a6`（v0.1.3）写。下面每个数字旁边都附了产生它的命令，可以重跑，不必相信。

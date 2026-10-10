@@ -4,7 +4,7 @@
 
 Nifro makes a web page part of the desktop. This roadmap separates hypotheses needing evidence from work ready to build, records the decisions that shape the current app, and keeps rejected directions from returning as new proposals. Legacy labels such as `P`, `L1`, and `K7` remain as indexes for code comments and older design notes.
 
-## Trying
+## Doing
 
 ### Lower idle-wallpaper cost (`P`)
 

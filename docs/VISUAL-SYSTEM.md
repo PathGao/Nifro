@@ -1,5 +1,7 @@
 # The App's Visual Vocabulary
 
+> Decided rules are in [DESIGN.md](DESIGN.md). This audit is kept because §7 Q5 is still open.
+
 [简体中文](VISUAL-SYSTEM.zh-Hans.md)
 
 > Written 2026-08-27 against `dead3a6` (v0.1.3). Every number below was produced by a command that is
