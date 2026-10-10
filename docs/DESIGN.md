@@ -14,9 +14,12 @@ This document records the names, behaviour and visual rules that have been decid
 | G4 | Choosing which part of a page fills the wallpaper | Crop | 裁切 | Choose Region | Help text names the panel's Crop button (#40, #123) |
 | G5 | Using the wallpaper page with the pointer and keyboard | Browsing Mode | 浏览模式 | browsing mode | Capitalised as a name (#123) |
 | G6 | How a display moves between websites | Rotate in order; Rotate randomly; Keep this page displayed | 按顺序轮播；随机轮播；固定显示此页面 | Rotating in order; Rotating in shuffled order; Staying on this website / 固定在这个网站 | #123 |
-| G7 | Switching a state | Turn … on or off | 打开或关闭… | Toggle … / 切换… | #123 |
+| G7 | Switching a state | Turn … on or off | 打开或关闭… | Toggle … / 切换… | #123; Shortcuts follow it too (2026-10-10, decided by agent at the user's request) |
 | G8 | Relaunching the app to apply a change | Restart | 重新启动 | Reopen / 重新打开 | #123 |
 | G9 | Proposing a site for the gallery | Suggest a site… | 推荐网站… | Submit a Site… / 提交站点… | #123 |
+| G12 | A website, in any wording that says “site” | Site | 网站 | 站点 | 2026-10-10 user decision |
+| G13 | The curated list of wallpaper-ready sites | Site Gallery | 网站库 | 推荐站点 | 2026-10-10 user decision; 推荐 is kept for Suggest a site… (G9) |
+| G14 | Loading a page again | Reload | 刷新 | 重新加载 | 2026-10-10 user decision |
 | G10 | The display that holds the menu bar | Main Display | 主显示器 | — | The label and the behaviour mean the menu-bar display, never the screen with keyboard focus (#17) |
 | G11 | The app | Nifro | Nifro | Plash as the app's own name, icon or artwork; the credit in About is the one mention | Nifro is an independent fork ([CONTRIBUTING](../.github/CONTRIBUTING.md)) |
 
@@ -34,12 +37,12 @@ This document records the names, behaviour and visual rules that have been decid
 
 ## 3. Visual design
 
-- **A1 System and custom surfaces.** Settings, Websites, Add Website and Site Gallery use stock controls in grouped forms, which follow the accent colour, Increase Contrast, Reduce Transparency and VoiceOver ([Visual vocabulary](VISUAL-SYSTEM.md) §3–4).
+- **A1 System and custom surfaces.** Settings, Websites, Add Website and Site Gallery use stock controls in grouped forms, which follow the accent colour, Increase Contrast, Reduce Transparency and VoiceOver (#73).
 - **A2 Panel controls.** Stock bordered controls at the large control size. A control with a lit state is a toggle and lights in the user's accent colour; the app icon's orange is no longer a lit state. `accessoryBar` is not used, because it draws no bezel at rest over an arbitrary page (#73, #121).
 - **A3 Panel surface.** The panel sits on the regular material and always draws its controls in the active appearance, including while Browsing Mode holds the keyboard (#73).
 - **A4 Column metrics.** A column is 260 pt wide. The card behind it has a 12 pt radius and the picture inside it 8 pt; they are nested, so the radii differ on purpose. Controls in a row are 4 pt apart. Choosers size to their label up to a ceiling: three quarters of the column for the playlist chooser, seven eighths for the website chooser ([`PanelMetrics`](../Sources/Nifro/Screens/PanelControls.swift)).
 - **A5 Column hover.** A quaternary fill and a 2 pt accent border, in both light and dark appearance (#29).
 - **A6 Colour.** Captions and the panel's failure line use the secondary style, not red or the accent ([`DisplayPanel`](../Sources/Nifro/Screens/DisplayPanel.swift)). The confirming button of a destructive dialog is marked destructive (#30, [`RestoreDefaults`](../Sources/Nifro/App/RestoreDefaults.swift)).
-- **A7 Crop overlay.** Black and white are contrast decisions against an arbitrary page; theme colours are the wrong answer there (#29, [Visual vocabulary](VISUAL-SYSTEM.md) §3).
+- **A7 Crop overlay.** Black and white are contrast decisions against an arbitrary page; theme colours are the wrong answer there (#29, #73).
 - **A8 Menu bar.** The colour band has no palette; its colour is sampled from the wallpaper. The icon is drawn dim when no wallpaper is showing and pulses while a page loads ([`AppState`](../Sources/Nifro/App/AppState.swift), #73).
 - **A9 Symbols.** SF Symbols throughout ([`PanelControls`](../Sources/Nifro/Screens/PanelControls.swift)).

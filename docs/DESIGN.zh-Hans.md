@@ -14,9 +14,12 @@
 | G4 | 选择网页的哪一部分铺满壁纸 | Crop | 裁切 | Choose Region | 帮助文案指向面板上的裁切按钮（#40、#123） |
 | G5 | 用指针和键盘操作壁纸网页 | Browsing Mode | 浏览模式 | browsing mode | 作为名称首字母大写（#123） |
 | G6 | 显示器在网站间切换的方式 | Rotate in order; Rotate randomly; Keep this page displayed | 按顺序轮播；随机轮播；固定显示此页面 | Rotating in order; Rotating in shuffled order; Staying on this website / 固定在这个网站 | #123 |
-| G7 | 切换某个状态 | Turn … on or off | 打开或关闭… | Toggle … / 切换… | #123 |
+| G7 | 切换某个状态 | Turn … on or off | 打开或关闭… | Toggle … / 切换… | #123；快捷指令同样适用（2026-10-10，受用户委托由 agent 决定） |
 | G8 | 重新启动 App 以应用更改 | Restart | 重新启动 | Reopen / 重新打开 | #123 |
-| G9 | 向推荐站点提议一个网站 | Suggest a site… | 推荐网站… | Submit a Site… / 提交站点… | #123 |
+| G9 | 向网站库提议一个网站 | Suggest a site… | 推荐网站… | Submit a Site… / 提交站点… | #123 |
+| G12 | 文案中说到 site 时的网站 | Site | 网站 | 站点 | 2026-10-10 用户决定 |
+| G13 | 精选的适合做壁纸的网站列表 | Site Gallery | 网站库 | 推荐站点 | 2026-10-10 用户决定；「推荐」留给推荐网站…（G9） |
+| G14 | 重新载入页面 | Reload | 刷新 | 重新加载 | 2026-10-10 用户决定 |
 | G10 | 有菜单栏的那块显示器 | Main Display | 主显示器 | — | 文案和行为都指菜单栏所在的显示器，不是键盘焦点所在的屏幕（#17） |
 | G11 | 本 App | Nifro | Nifro | 把 Plash 当作本 App 的名称、图标或图像；关于页的致谢是唯一提及 | Nifro 是独立分支（[CONTRIBUTING](../.github/CONTRIBUTING.md)） |
 
@@ -34,12 +37,12 @@
 
 ## 3. 视觉设计
 
-- **A1 系统界面与自绘界面。** 设置、Websites、添加网站和推荐站点使用分组表单中的系统控件，它们跟随强调色、增强对比度、降低透明度和 VoiceOver（[视觉词汇](VISUAL-SYSTEM.zh-Hans.md) §3–4）。
+- **A1 系统界面与自绘界面。** 设置、Websites、添加网站和网站库使用分组表单中的系统控件，它们跟随强调色、增强对比度、降低透明度和 VoiceOver（#73）。
 - **A2 面板控件。** 大尺寸的系统 bordered 控件。有点亮状态的控件是开关，点亮时使用用户的强调色；App 图标的橙色不再表示点亮。不用 `accessoryBar`，因为它静止时不画边框，放在任意网页上会看不见（#73、#121）。
 - **A3 面板底板。** 面板使用 regular material，并始终以活跃外观绘制控件，浏览模式占用键盘时也一样（#73）。
 - **A4 列的尺寸。** 每列宽 260 pt。列背后的卡片圆角 12 pt，列内图片圆角 8 pt；两者嵌套，所以圆角有意不同。同一行控件间距 4 pt。选择器按标签宽度伸缩，有上限：播放列表选择器为列宽的四分之三，网站选择器为八分之七（[`PanelMetrics`](../Sources/Nifro/Screens/PanelControls.swift)）。
 - **A5 列的悬停。** quaternary 填充加 2 pt 强调色描边，浅色和深色外观相同（#29）。
 - **A6 颜色。** 说明文字和面板的加载失败行使用 secondary 样式，不用红色或强调色（[`DisplayPanel`](../Sources/Nifro/Screens/DisplayPanel.swift)）。破坏性对话框的确认按钮标为 destructive（#30，[`RestoreDefaults`](../Sources/Nifro/App/RestoreDefaults.swift)）。
-- **A7 裁切遮罩。** 黑白两色是针对任意网页的对比度选择；这里用随主题变化的颜色是错的（#29，[视觉词汇](VISUAL-SYSTEM.zh-Hans.md) §3）。
+- **A7 裁切遮罩。** 黑白两色是针对任意网页的对比度选择；这里用随主题变化的颜色是错的（#29、#73）。
 - **A8 菜单栏。** 颜色带没有调色板，颜色取自壁纸。没有壁纸在显示时图标变暗，网页加载时图标闪动（[`AppState`](../Sources/Nifro/App/AppState.swift)，#73）。
 - **A9 图标。** 全部使用 SF Symbols（[`PanelControls`](../Sources/Nifro/Screens/PanelControls.swift)）。
